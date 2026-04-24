@@ -1,5 +1,9 @@
+import DistanceSelector from "@/components/distance-select";
+
 export default function ShowsPage() {
     return (
-        <h1>Shows Page</h1>
+        <>
+            <DistanceSelector label="Shows" />
+        </>
     )
 }
