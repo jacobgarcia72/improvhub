@@ -30,15 +30,12 @@ export default function DistanceSelect({ onUpdate, label }: DistanceSelectProps)
                     } catch (error) {
                         console.error('Error getting ZIP code:', error);
                     }
-                },
-                (error) => {
-                    console.error('Geolocation error:', error);
                 }
             );
         }
     }, []);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = (e: React.SubmitEvent) => {
         e.preventDefault();
         if (zipcode.trim() && onUpdate) {
             onUpdate(zipcode, miles);
