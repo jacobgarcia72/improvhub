@@ -6,7 +6,7 @@ import { Suspense } from "react";
 async function ShowList() {
     const shows = await getShows();
     return (
-        <div className="flex flex-col">
+        <div className="flex flex-col px-4 pb-4">
             {shows.map(show => (
                 <EventCard key={show.id} event={show} />
             ))}

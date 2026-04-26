@@ -28,7 +28,7 @@ body {
 header {
   background-color: #417F86;
   color: #ffffff;
-  position: absolute;
+  position: fixed;
 }
 
 header a {
