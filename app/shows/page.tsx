@@ -2,6 +2,14 @@ import DistanceSelector from "@/components/distance-select";
 import EventCard from "@/components/event-card";
 import { getShows } from "@/lib/shows";
 import { Suspense } from "react";
+import { appName } from "@/lib/app-info";
+import { Metadata } from "next";
+
+
+export const metadata: Metadata = {
+    title: `${appName} | Shows`,
+    description: "Find improv shows near you!",
+};
 
 async function ShowList() {
     const shows = await getShows();
