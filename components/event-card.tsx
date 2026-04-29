@@ -3,9 +3,9 @@ import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react';
 
-const ShowCard: React.FC<{ event: Event }> = ({ event }) => {
+const ShowCard: React.FC<{ event: Event, href?: string }> = ({ event, href }) => {
   return (
-    <Link href={event.id} className="mb-4">
+    <Link href={href || event.id} className="mb-4">
       <div className="h-40 border rounded border-gray-300 shadow-md">
         <div className="flex flex-row h-full">
           <div className="w-48 h-full">

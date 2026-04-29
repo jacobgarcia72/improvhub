@@ -16,7 +16,7 @@ async function ShowList() {
     return (
         <div className="flex flex-col px-4 pb-4">
             {shows.map(show => (
-                <EventCard key={show.id} event={show} />
+                <EventCard key={show.id} event={show} href={`/shows/${show.id}`} />
             ))}
         </div>
     )
