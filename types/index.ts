@@ -1,11 +1,15 @@
 export interface Event {
-    id: string;
+    id?: string;
     title: string;
+    type: 'show' | 'jam' | 'class';
     date: string;
     time: string;
-    description: string;
-    theatre: string;
+    description?: string;
+    theatre?: string;
     address: string;
+    price?: number;
+    doorPrice?: number;
+    webpage?: string;
     imageUrl?: string;
     teams?: Team[];
     performers?: Performer[];

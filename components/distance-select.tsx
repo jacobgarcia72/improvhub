@@ -43,7 +43,7 @@ export default function DistanceSelect({ onUpdate, label }: DistanceSelectProps)
     };
 
     return (
-        <form onSubmit={handleSubmit} className="flex items-center justify-center gap-2 p-4 w-full">
+        <form onSubmit={handleSubmit} className="flex items-center justify-center gap-2">
             <span className="text-gray-700 font-medium">{label || 'Search'} within</span>
             
             <input
@@ -70,7 +70,7 @@ export default function DistanceSelect({ onUpdate, label }: DistanceSelectProps)
             <button
                 type="submit"
                 disabled={zipcode.trim().length !== 5}
-                className="bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 text-white font-semibold py-1 px-4 rounded transition-colors"
+                className="bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 text-white py-1 px-4 rounded transition-colors"
             >
                 Update
             </button>
