@@ -1,55 +1,36 @@
-'use client';
-
-import ImagePicker from '@/components/image-picker';
+import Form from '@/components/form/form';
+import Input from '@/components/form/input';
+import ImagePicker from '@/components/form/image-picker';
 import { postShow } from '@/lib/actions';
-import { useActionState } from 'react';
-
-const initialState = {
-    message: '',
-}
+import Text from '@/components/form/text';
 
 export default function NewShowPage() {
-    const [formState, formAction] = useActionState(postShow, initialState);
-
     return (
         <main className="px-4 py-6">
-            <form action={formAction} className="flex flex-col gap-4 max-w-md mx-auto">
-                <label htmlFor="title">Title</label>
-                <input type="text" name="title" />
+            <Form onSubmit={postShow} buttonCaption="Create Show">
+                <Input label="Title" name="title" required />
                 <ImagePicker />
-                <label htmlFor="theatre">Theatre</label>
-                <input type="text" name="theatre" />
-                <label htmlFor="address">Address</label>
-                <input type="text" name="address" />
-                <label htmlFor="description">Description</label>
-                <textarea name="description" rows={3} />
+                <Input label="Theatre" name="theatre" />
+                <Input label="Address" name="address" required />
+                <Text label="Description" name="description" />
                 <div className="flex flex-row gap-4">
                     <div>
-                        <label htmlFor="date">Day</label>
-                        <input type="date" name="date" />
+                        <Input label="Day" name="date" type="date" required />
                     </div>
                     <div>
-                        <label htmlFor="time">Time</label>
-                        <input type="time" name="time" />
+                        <Input label="Time" name="time" type="time" required />
                     </div>
                 </div>
                 <div className="flex flex-row gap-4">
                     <div>
-                        <label htmlFor="price">Ticket Price</label>
-                        <input type="number" name="price" />
+                        <Input label="Ticket Price" name="price" type="number" />
                     </div>
                     <div>
-                        <label htmlFor="door">Price at Door</label>
-                        <input type="number" name="door" />
+                        <Input label="Price at Door" name="door" type="number" />
                     </div>
                 </div>
-                <label htmlFor="webpage">Webpage</label>
-                <input type="url" name="webpage" />
-                {formState.message && <p>{formState.message}</p>}
-                <button type="submit">
-                    Create Show
-                </button>
-            </form>
+                <Input label="Webpage" name="webpage" type="url" />
+            </Form>
         </main>
     )
 }

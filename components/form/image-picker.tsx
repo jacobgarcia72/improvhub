@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react';
 import Image from 'next/image';
+import Button from './button';
 
 export default function ImagePicker({ label = 'Image', name = 'image' }: {
     label?: string;
@@ -33,11 +34,9 @@ export default function ImagePicker({ label = 'Image', name = 'image' }: {
     return (
         <>
             <label htmlFor={name}>{label}</label>
-            <div>
-                {!selectedImage && <p>No image picked yet.</p>}
-                {selectedImage && <Image src={selectedImage} alt="Selected image" width={100} height={100} />}
-            </div>
+            {selectedImage && <Image src={selectedImage} alt="Selected image" width={100} height={100} />}
             <input
+                className='hidden'
                 type='file'
                 id={name}
                 accept='image/png, image/jpeg'
@@ -46,11 +45,7 @@ export default function ImagePicker({ label = 'Image', name = 'image' }: {
                 onChange={handleImageChange}
                 required
             />
-            <button
-                type='button'
-                onClick={handlePickImage}>
-                Pick Image
-            </button>
+            <Button type="button" caption="Pick Image" onClick={handlePickImage} />
         </>
     )
 }

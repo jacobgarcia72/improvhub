@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Button from './button';
 
 interface DistanceSelectProps {
     onUpdate?: (zipcode: string, miles: number) => void;
@@ -66,14 +67,7 @@ export default function DistanceSelect({ onUpdate, label }: DistanceSelectProps)
                 inputMode="numeric"
                 className="w-28 border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-            
-            <button
-                type="submit"
-                disabled={zipcode.trim().length !== 5}
-                className="bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 text-white py-1 px-4 rounded transition-colors"
-            >
-                Update
-            </button>
+            <Button caption="Update" disabled={zipcode.trim().length !== 5} />
         </form>
     );
 }

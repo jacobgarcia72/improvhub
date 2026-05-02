@@ -5,7 +5,7 @@ import { saveShow } from "./shows";
 import { revalidatePath } from "next/cache";
 import { EventFormData } from "@/types";
 
-export async function postShow(prevState: { message?: string }, formData: FormData) {
+export async function postShow(prevState: void | { message?: string }, formData: FormData) {
     const show: EventFormData = {
         title: formData.get('title') as string,
         type: 'show',

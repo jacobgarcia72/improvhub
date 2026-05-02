@@ -1,4 +1,4 @@
-import DistanceSelector from "@/components/distance-select";
+import DistanceSelector from "@/components/form/distance-select";
 import EventCard from "@/components/event-card";
 import { getShows } from "@/lib/shows";
 import { Suspense } from "react";
