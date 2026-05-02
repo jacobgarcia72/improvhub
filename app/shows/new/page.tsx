@@ -1,4 +1,6 @@
 'use client';
+
+import ImagePicker from '@/components/image-picker';
 import { postShow } from '@/lib/actions';
 import { useActionState } from 'react';
 
@@ -14,6 +16,7 @@ export default function NewShowPage() {
             <form action={formAction} className="flex flex-col gap-4 max-w-md mx-auto">
                 <label htmlFor="title">Title</label>
                 <input type="text" name="title" />
+                <ImagePicker />
                 <label htmlFor="theatre">Theatre</label>
                 <input type="text" name="theatre" />
                 <label htmlFor="address">Address</label>

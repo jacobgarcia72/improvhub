@@ -1,9 +1,13 @@
+'use server';
+
+import fs from 'node:fs';
+
 import slugify from 'slugify';
 
-import { Event } from "@/types";
+import { Event, EventFormData } from "@/types";
 import { dummyShows } from "./dummy-data";
 
-export function getShow(id: string): Event | null {
+export async function getShow(id: string): Promise<Event | null> {
     const show = dummyShows.find((s) => s.id === id);
     return show || null;
 }
@@ -16,23 +20,26 @@ export async function getShows(): Promise<Event[]> {
     return dummyShows;
 }
 
-export async function saveShow(show: Event) {
-    show.id = slugify(`${show.theatre} ${show.title}`, { lower: true });
+export async function saveShow(show: EventFormData): Promise<string> {
+    const showId = slugify(`${show.theatre} ${show.title}`, { lower: true });
     // show.description = xss(meal.description);
 
-    // const extension = show.image.name.split('.').pop();
-    // const fileName = `${show.slug}.${extension}`;
+    if (show.image) {
+        const extension = show.image.name.split('.').pop();
+        const fileName = `${showId}.${extension}`;
 
-    // const stream = fs.createWriteStream(`public/images/${fileName}`);
-    // const bufferedImage = await show.image.arrayBuffer();
+        const stream = fs.createWriteStream(`public/temp-images/${fileName}`);
+        const bufferedImage = await show.image.arrayBuffer();
+        console.log(fileName)
+        stream.write(Buffer.from(bufferedImage), (error) => {
+            console.log('Finished writing image');
+            if (error) {
+                throw new Error('Failed to save image');
+            }
+        });
 
-    // stream.write(Buffer.from(bufferedImage), (error) => {
-    //     if (error) {
-    //         throw new Error('Failed to save image');
-    //     }
-    // });
-
-    // show.image = `/images/${fileName}`;
+        show.imageUrl = `/temp-images/${fileName}`;
+    }
 
     // db.prepare(`
     //     INSERT INTO shows
@@ -40,5 +47,5 @@ export async function saveShow(show: Event) {
     //     VALUES
     //         (@title, @summary, @instructions, @creator, @creator_email, @image, @slug)
     // `).run(show);
-    return show.id;
+    return showId;
 }

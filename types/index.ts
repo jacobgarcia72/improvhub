@@ -1,5 +1,4 @@
-export interface Event {
-    id?: string;
+export interface EventFormData {
     title: string;
     type: 'show' | 'jam' | 'class';
     date: string;
@@ -10,9 +9,14 @@ export interface Event {
     price?: number;
     doorPrice?: number;
     webpage?: string;
+    image?: File;
     imageUrl?: string;
     teams?: Team[];
     performers?: Performer[];
+}
+
+export interface Event extends EventFormData {
+    id: string;
 }
 
 interface Team {

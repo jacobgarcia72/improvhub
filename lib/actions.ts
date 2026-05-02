@@ -3,12 +3,13 @@
 import { redirect } from "next/navigation";
 import { saveShow } from "./shows";
 import { revalidatePath } from "next/cache";
-import { Event } from "@/types";
+import { EventFormData } from "@/types";
 
 export async function postShow(prevState: { message?: string }, formData: FormData) {
-    const show: Event = {
+    const show: EventFormData = {
         title: formData.get('title') as string,
         type: 'show',
+        image: formData.get('image') as File,
         theatre: formData.get('theatre') as string,
         address: formData.get('address') as string,
         description: formData.get('description') as string,
@@ -25,7 +26,6 @@ export async function postShow(prevState: { message?: string }, formData: FormDa
     if (!show.time) return { message: 'Time is required' };
 
     const showId = await saveShow(show);
-    console.log('Saved show with ID:', showId);
     revalidatePath(`/shows/${showId}`);
     redirect(`/shows/${showId}`);
 }
