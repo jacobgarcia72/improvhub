@@ -3,6 +3,7 @@ import Input from '@/components/form/input';
 import ImagePicker from '@/components/form/image-picker';
 import { postShow } from '@/lib/actions';
 import Text from '@/components/form/text';
+import PriceInputs from './price-inputs';
 
 export default function NewShowPage() {
     return (
@@ -21,14 +22,7 @@ export default function NewShowPage() {
                         <Input label="Time" name="time" type="time" required />
                     </div>
                 </div>
-                <div className="flex flex-row gap-4">
-                    <div>
-                        <Input label="Ticket Price" name="price" type="number" />
-                    </div>
-                    <div>
-                        <Input label="Price at Door" name="door" type="number" />
-                    </div>
-                </div>
+                <PriceInputs />
                 <Input label="Webpage" name="webpage" type="url" />
             </Form>
         </main>
