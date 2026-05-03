@@ -47,13 +47,16 @@ function ClientSideInput({ label, name, type = 'text', required = false, placeho
 }
 
 export default function Input({ label, name, type = 'text', required = false, placeholder, onChange, isCurrency }: InputProps) {
+    let inputLabel = label;
+    if (label && required) inputLabel += ' *';
+
     if (onChange) {
-        return <ClientSideInput label={label} name={name} type={type} required={required} placeholder={placeholder} onChange={onChange} isCurrency={isCurrency} />
+        return <ClientSideInput label={inputLabel} name={name} type={type} required={required} placeholder={placeholder} onChange={onChange} isCurrency={isCurrency} />
     }
 
     return (
         <div className={divClass}>
-            {label && <label htmlFor={name}>{label}</label>}
+            {label && <label htmlFor={name}>{inputLabel}</label>}
             <input className={inputClass}
                 onBlur={isCurrency ? () => enforceDecimalPlaces(name) : undefined}
                 type={type}

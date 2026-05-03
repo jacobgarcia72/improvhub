@@ -9,7 +9,7 @@ export default function NewShowPage() {
     return (
         <main className="px-4 py-6">
             <Form onSubmit={postShow} buttonCaption="Create Show">
-                <Input label="Title" name="title" required />
+                <Input label="Show Name" name="title" required />
                 <ImagePicker />
                 <Input label="Theatre" name="theatre" />
                 <Input label="Address" name="address" required />
