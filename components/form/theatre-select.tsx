@@ -1,15 +1,15 @@
 'use client';
-import theatres from "@/lib/theatres";
+import { getTheatreByName, getTheatreNames } from "@/lib/theatres";
 import Autocomplete from "./autocomplete";
 import Input from "./input";
 import { useState } from "react";
 
 export default function TheatreSelect() {
     const [zipcode, setZipcode] = useState('');
-    const theatreNames = theatres.map((theatre) => theatre.name);
+    const theatreNames = getTheatreNames();
 
     const autofillZipcode = (theatreName: string) => {
-        const theatre = theatres.find((t) => t.name === theatreName);
+        const theatre = getTheatreByName(theatreName);
         if (theatre) {
             setZipcode(theatre.zipcode);
         }

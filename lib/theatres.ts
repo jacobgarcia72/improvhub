@@ -1041,4 +1041,19 @@ const theatres = [
   }
 ]
 
-export default theatres;
+export const getTheatreNames = () => {
+    const nameCounts = theatres.reduce((acc, theatre) => {
+        acc[theatre.name] = (acc[theatre.name] || 0) + 1;
+        return acc;
+    }, {} as Record<string, number>);
+    
+    return theatres.map(theatre => {
+        const name = theatre.name;
+        if (nameCounts[name] > 1) {
+            return `${name} (${theatre.city})`;
+        }
+        return name;
+    });
+}
+
+export const getTheatreByName = (name: string) => theatres.find((t) => t.name === name) || theatres.find((t) => `${t.name} (${t.city})` === name);
