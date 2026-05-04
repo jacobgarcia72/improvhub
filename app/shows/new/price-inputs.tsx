@@ -9,12 +9,12 @@ export default function PriceInputs() {
     return (
         <div className="flex flex-row gap-4">
             <div>
-                <Input label="Ticket Price" name="price" type="number" isCurrency
+                <Input label="Ticket Price" name="price" type="price"
                 onChange={(value) => setTicketPrice(value || value === '0' ? value : undefined)}
             />
             </div>
             <div>
-                <Input label="Price at Door" name="door" type="number" isCurrency placeholder={ticketPrice} />
+                <Input label="Price at Door" name="door" type="price" placeholder={ticketPrice} />
             </div>
         </div>
     )

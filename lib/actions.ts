@@ -11,7 +11,7 @@ export async function postShow(prevState: void | { message?: string }, formData:
         type: 'show',
         image: formData.get('image') as File,
         theatre: formData.get('theatre') as string,
-        address: formData.get('address') as string,
+        zipcode: Number(formData.get('zipcode')),
         description: formData.get('description') as string,
         date: formData.get('date') as string,
         time: formData.get('time') as string,
@@ -21,7 +21,7 @@ export async function postShow(prevState: void | { message?: string }, formData:
     }
 
     if (!show.title) return { message: 'Title is required' };
-    if (!show.address) return { message: 'Address is required' };
+    if (!(show.zipcode && `${show.zipcode}`.length === 5)) return { message: 'ZIP Code is required' };
     if (!show.date) return { message: 'Date is required' };
     if (!show.time) return { message: 'Time is required' };
 

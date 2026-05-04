@@ -5,7 +5,7 @@ export interface EventFormData {
     time: string;
     description?: string;
     theatre?: string;
-    address: string;
+    zipcode: number;
     price?: number;
     doorPrice?: number;
     webpage?: string;

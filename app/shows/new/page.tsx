@@ -11,8 +11,14 @@ export default function NewShowPage() {
             <Form onSubmit={postShow} buttonCaption="Create Show">
                 <Input label="Show Name" name="title" required />
                 <ImagePicker />
-                <Input label="Theatre" name="theatre" />
-                <Input label="Address" name="address" required />
+                <div className="flex flex-row gap-4">
+                    <div>
+                        <Input label="Theatre" name="theatre" />
+                    </div>
+                    <div>
+                        <Input label="ZIP Code" name="zipcode" required type='zipcode' />
+                    </div>
+                </div>
                 <Text label="Description" name="description" />
                 <div className="flex flex-row gap-4">
                     <div>

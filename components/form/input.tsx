@@ -1,3 +1,7 @@
+'use client';
+
+import { useState } from "react";
+
 interface InputProps {
     label?: string,
     name: string,
@@ -5,66 +9,60 @@ interface InputProps {
     required?: boolean,
     placeholder?: string,
     onChange?: (value: string) => void,
-    isCurrency?: boolean,
-}
-const divClass = "flex flex-col gap-1";
-const inputClass = "border border-gray-300 rounded px-3 py-2";
-
-function enforceDecimalPlaces(name: string): string {
-    const input = document.getElementById(name) as HTMLInputElement | null;
-    if (input) {
-        let value: string | number = parseFloat(input.value);
-        if (!isNaN(value)) {
-            value = value.toFixed(2).toString();
-            input.value = value;
-            return value;
-        }
-    }
-    return '';
 }
 
-function ClientSideInput({ label, name, type = 'text', required = false, placeholder, onChange, isCurrency }: InputProps) {
-    'use client';
+export default function Input({ label, name, type = 'text', required = false, placeholder, onChange }: InputProps) {
+    const [value, setValue] = useState<string>('');
 
-    return (
-        <div className={divClass}>
-            {label && <label htmlFor={name}>{label}</label>}
-            <input className={inputClass}
-                onChange={onChange ? (e) => onChange(e.target.value) : undefined}
-                onBlur={isCurrency ? () => {
-                    const newValue = enforceDecimalPlaces(name);
-                    if (onChange) onChange(newValue);
-                } : undefined}
-                type={type}
-                name={name}
-                id={name}
-                required={required}
-                placeholder={placeholder}
-                step={isCurrency ? 0.01 : undefined}
-            />
-        </div>
-    )
-}
+    const customTypes = ['price', 'zipcode'];
 
-export default function Input({ label, name, type = 'text', required = false, placeholder, onChange, isCurrency }: InputProps) {
     let inputLabel = label;
     if (label && required) inputLabel += ' *';
 
-    if (onChange) {
-        return <ClientSideInput label={inputLabel} name={name} type={type} required={required} placeholder={placeholder} onChange={onChange} isCurrency={isCurrency} />
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newValue = e.target.value;
+        if (type === 'price') {
+            // Allow only numbers and a single decimal point
+            if (/^\d*\.?\d?\d?$/.test(newValue)) {
+                setValue(newValue);
+                if (onChange) onChange(newValue);
+            }
+        } else if (type === 'zipcode') {
+            // Allow only numbers, max 5 characters
+            if (/^\d{0,5}$/.test(newValue)) {
+                setValue(newValue);
+                if (onChange) onChange(newValue);
+            } 
+        } else {
+            setValue(newValue);
+            if (onChange) onChange(newValue);
+        }
+    }
+
+    const getInputMode = (type: string): React.HTMLAttributes<HTMLInputElement>['inputMode'] => {
+        if (type === 'price') {
+            return 'decimal';
+        } else if (type === 'zipcode') {
+            return 'numeric';
+        } else if (type === 'url') {
+            return 'url';
+        }
+        return;
     }
 
     return (
-        <div className={divClass}>
+        <div className="flex flex-col gap-1">
             {label && <label htmlFor={name}>{inputLabel}</label>}
-            <input className={inputClass}
-                onBlur={isCurrency ? () => enforceDecimalPlaces(name) : undefined}
-                type={type}
+            <input className="border border-gray-300 rounded px-3 py-2"
+                value={value}
+                onChange={handleChange}
+                type={customTypes.includes(type) ? 'text' : type}
                 name={name}
                 id={name}
                 required={required}
                 placeholder={placeholder}
-                step={isCurrency ? 0.01 : undefined}
+                inputMode={getInputMode(type)}
+                maxLength={type === 'zipcode' ? 5 : undefined}
             />
         </div>
     )
