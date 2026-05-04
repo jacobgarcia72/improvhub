@@ -403,7 +403,7 @@ const theatres: Theatre[] = [
     state: "WA",
     zipcode: "98103",
     website: "https://jetcityimprov.org",
-    logo: "https://jetcityimprov.org/wp-content/uploads/2019/04/jet-city-logo.png"
+    logo: "https://www.jetcityimprov.org/uploads/2/5/5/3/25533883/editor/jet-city-improv-seattle-nonprofit-white-icon-2022.png?1653951500"
   },
   {
     name: "Bandit Theater",
@@ -411,7 +411,7 @@ const theatres: Theatre[] = [
     state: "WA",
     zipcode: "98121",
     website: "https://www.bandittheater.org",
-    logo: "https://www.bandittheater.org/wp-content/uploads/2020/02/bandit-logo.png"
+    logo: "https://images.squarespace-cdn.com/content/v1/5b9180c15b409bcdde476068/1550474985669-0GSYSD01N0PPZTY0OLBD/BanditTheater_Full_Logo-white-textonly.png?format=1500w"
   },
   {
     name: "ComedySportz Portland",
@@ -419,7 +419,7 @@ const theatres: Theatre[] = [
     state: "OR",
     zipcode: "97205",
     website: "https://www.portlandcomedy.com",
-    logo: "https://www.portlandcomedy.com/wp-content/uploads/2019/03/csz-portland-logo.png"
+    logo: "https://images.squarespace-cdn.com/content/v1/5548051de4b0837d04043ff7/81bee875-27ff-4561-b474-0a11c0d5e502/portland+comedy+theater+logo.png?format=1500w"
   },
   {
     name: "ComedySportz Seattle",
@@ -427,15 +427,7 @@ const theatres: Theatre[] = [
     state: "WA",
     zipcode: "98104",
     website: "https://www.cszseattle.com",
-    logo: "https://www.cszseattle.com/wp-content/uploads/2018/07/csz-seattle-logo.png"
-  },
-  {
-    name: "The New Movement",
-    city: "New Orleans",
-    state: "LA",
-    zipcode: "70119",
-    website: "https://www.thenewmovement.com",
-    logo: "https://www.thenewmovement.com/wp-content/uploads/2019/01/tnm-logo.png"
+    logo: "https://www.cszseattle.com/gallery_gen/70f6ed71dd119c469e426ab5d091993d_fit.png?ts=1773189467"
   },
   {
     name: "Big Couch",
@@ -443,7 +435,7 @@ const theatres: Theatre[] = [
     state: "LA",
     zipcode: "70119",
     website: "https://www.bigcouchnola.com",
-    logo: "https://www.bigcouchnola.com/wp-content/uploads/2018/05/big-couch-logo.png"
+    logo: "https://bigcouchnola.com/wp-content/uploads/2019/10/Big-Couch-Logo-Horizontal.png"
   },
   {
     name: "Anubis Improv",
@@ -451,15 +443,15 @@ const theatres: Theatre[] = [
     state: "LA",
     zipcode: "70130",
     website: "https://www.anubisimprov.com",
-    logo: "https://www.anubisimprov.com/wp-content/uploads/2019/06/anubis-logo.png"
+    logo: "data:image/png;base64,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"
   },
   {
     name: "Crowdsource Comedy",
     city: "Salt Lake City",
     state: "UT",
     zipcode: "84101",
-    website: "https://crowdsourcecomedy.com",
-    logo: "https://crowdsourcecomedy.com/wp-content/uploads/2019/02/crowdsource-logo.png"
+    website: "https://www.crowdsourcedlive.com/",
+    logo: "https://static.wixstatic.com/media/b3f514_93cd19774bea4dcb8efdecfb622995a5~mv2.png/v1/fill/w_227,h_48,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/CSD_Text-01_edited.png"
   },
   {
     name: "Baltimore Improv Group",
@@ -467,7 +459,7 @@ const theatres: Theatre[] = [
     state: "MD",
     zipcode: "21202",
     website: "https://www.bigimprov.org",
-    logo: "https://www.bigimprov.org/wp-content/uploads/2019/03/big-logo.png"
+    logo: "https://static.wixstatic.com/media/b871fe_1b1e843c429d4232be5975c8141db38b~mv2.png/v1/fill/w_68,h_30,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/b871fe_1b1e843c429d4232be5975c8141db38b~mv2.png"
   },
   {
     name: "Improv Asylum",
@@ -475,7 +467,7 @@ const theatres: Theatre[] = [
     state: "MA",
     zipcode: "02109",
     website: "https://www.improvasylum.com",
-    logo: "https://www.improvasylum.com/wp-content/uploads/2018/04/improv-asylum-logo.png"
+    logo: "data:image/png;base64,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"
   },
   {
     name: "ComedySportz Philadelphia",
@@ -483,15 +475,15 @@ const theatres: Theatre[] = [
     state: "PA",
     zipcode: "19107",
     website: "https://www.comedysportzphilly.com",
-    logo: "https://www.comedysportzphilly.com/wp-content/uploads/2019/05/csz-philly-logo.png"
+    logo: "https://images.squarespace-cdn.com/content/v1/54d8361fe4b0340f2fbb33d1/1423455899664-EZP1G0SJCEKRYXQ5U0N2/CSz_Philadelphia_STACKED_COLOR_flat.jpg?format=1500w"
   },
   {
     name: "Lancaster Improv Players",
     city: "Lancaster",
     state: "PA",
     zipcode: "17603",
-    website: "https://www.lancasterimprov.com",
-    logo: "https://www.lancasterimprov.com/wp-content/uploads/2019/01/lip-logo.png"
+    website: "https://www.lancasterimprovplayers.org/",
+    logo: "https://www.lancasterimprovplayers.org/wp-content/uploads/2025/10/cropped-LIP-Logo-color-web-1536x864.png"
   },
   {
     name: "Happy Valley Improv",
@@ -499,15 +491,15 @@ const theatres: Theatre[] = [
     state: "PA",
     zipcode: "16801",
     website: "https://www.happyvalleyimprov.com",
-    logo: "https://www.happyvalleyimprov.com/wp-content/uploads/2018/06/hvi-logo.png"
+    logo: "https://www.happyvalleyimprov.com/uploads/1/1/1/0/111032231/published/hvi-300.png?1731353652"
   },
   {
     name: "Providence Improv Guild",
     city: "Providence",
     state: "RI",
     zipcode: "02903",
-    website: "https://www.providenceimprovguild.com",
-    logo: "https://www.providenceimprovguild.com/wp-content/uploads/2019/02/pig-logo.png"
+    website: "https://improvpig.com/",
+    logo: "https://cdn.shopify.com/s/files/1/1044/5764/files/2019_PIGlogo_2color_large_9c53cfb6-e9d4-4027-9393-6826646bfd01_480x480.png?v=1641880254"
   },
   {
     name: "Kismet Improv",
@@ -755,7 +747,7 @@ const theatres: Theatre[] = [
     state: "FL",
     zipcode: "32801",
     website: "https://www.sakcomedylab.com",
-    logo: "http://sakcomedylab.s3.amazonaws.com/sak_comedy_lab.jpg"
+    logo: ""
   },
   {
     name: "AdLib Theater",
