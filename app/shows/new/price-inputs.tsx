@@ -14,7 +14,7 @@ export default function PriceInputs() {
             />
             </div>
             <div>
-                <Input label="Price at Door" name="door" type="price" placeholder={ticketPrice} />
+                <Input label="Price at Door (if different)" name="door" type="price" placeholder={ticketPrice} />
             </div>
         </div>
     )

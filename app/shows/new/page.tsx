@@ -4,6 +4,7 @@ import ImagePicker from '@/components/form/image-picker';
 import { postShow } from '@/lib/actions';
 import Text from '@/components/form/text';
 import PriceInputs from './price-inputs';
+import TheatreSelect from '@/components/form/theatre-select';
 
 export default function NewShowPage() {
     return (
@@ -11,14 +12,7 @@ export default function NewShowPage() {
             <Form onSubmit={postShow} buttonCaption="Create Show">
                 <Input label="Show Name" name="title" required />
                 <ImagePicker />
-                <div className="flex flex-row gap-4">
-                    <div>
-                        <Input label="Theatre" name="theatre" />
-                    </div>
-                    <div>
-                        <Input label="ZIP Code" name="zipcode" required type='zipcode' />
-                    </div>
-                </div>
+                <TheatreSelect />
                 <Text label="Description" name="description" />
                 <div className="flex flex-row gap-4">
                     <div>
