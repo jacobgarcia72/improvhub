@@ -1,3 +1,12 @@
+export interface Theatre {
+    name: string;
+    city: string;
+    state: string;
+    zipcode: string;
+    website: string;
+    logo?: string;
+}
+
 export interface EventFormData {
     title: string;
     type: 'show' | 'jam' | 'class';

@@ -1,11 +1,13 @@
-const theatres = [
+import { Theatre } from "@/types";
+
+const theatres: Theatre[] = [
   {
     name: "Arcade Comedy Theater",
     city: "Pittsburgh",
     state: "PA",
     zipcode: "15222",
     website: "https://www.arcadecomedytheater.com",
-    logo: "https://www.arcadecomedytheater.com/wp-content/uploads/2019/05/arcade-logo.png"
+    logo: "https://www.arcadecomedytheater.com/wp-content/uploads/2014/05/ArcadeFinalLogo.png"
   },
   {
     name: "Steel City Improv Theater",
@@ -13,7 +15,7 @@ const theatres = [
     state: "PA",
     zipcode: "15203",
     website: "https://www.steelcityimprov.com",
-    logo: "https://www.steelcityimprov.com/wp-content/uploads/2021/06/steel-city-improv-logo.png"
+    logo: "https://i0.wp.com/steelcityimprov.com/wp-content/uploads/2025/07/SCIT-Logo-2025_512.jpg?w=512&ssl=1"
   },
   {
     name: "The Second City",
@@ -21,23 +23,21 @@ const theatres = [
     state: "IL",
     zipcode: "60614",
     website: "https://www.secondcity.com",
-    logo: "https://www.secondcity.com/wp-content/themes/secondcity/assets/images/logo.svg"
-  },
+    logo: "data:image/png;base64,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"  },
   {
     name: "iO Theater",
     city: "Chicago",
     state: "IL",
     zipcode: "60614",
     website: "https://ioimprov.com",
-    logo: "https://ioimprov.com/wp-content/uploads/2022/03/io-logo.png"
-  },
+    logo: "https://ioimprov.com/wp-content/uploads/2023/12/iO-Horizontal-Lockup_dark.svg"  },
   {
     name: "The Annoyance Theatre",
     city: "Chicago",
     state: "IL",
     zipcode: "60614",
     website: "https://www.theannoyance.com",
-    logo: "https://www.theannoyance.com/wp-content/uploads/2018/05/annoyance-logo.png"
+    logo: "https://static.wixstatic.com/media/895f45_920fe9fd56804aeb99fd40fe95999157~mv2_d_2279_1396_s_2.png/v1/fill/w_154,h_94,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/895f45_920fe9fd56804aeb99fd40fe95999157~mv2_d_2279_1396_s_2.png"
   },
   {
     name: "The Groundlings",
@@ -45,7 +45,7 @@ const theatres = [
     state: "CA",
     zipcode: "90046",
     website: "https://www.groundlings.com",
-    logo: "https://www.groundlings.com/assets/images/logo.png"
+    logo: "https://groundlings.com/img/containers/main/cropuntitled-%282000-x-2000-px%29.png/0078b3a9815080870c9bb13edffa04c6/cropuntitled-%282000-x-2000-px%29.png"
   },
   {
     name: "Upright Citizens Brigade (UCB) Theatre",
@@ -53,7 +53,7 @@ const theatres = [
     state: "CA",
     zipcode: "90028",
     website: "https://ucbcomedy.com",
-    logo: "https://ucbcomedy.com/wp-content/uploads/2021/05/ucb-logo.png"
+    logo: "https://ucbcomedy.com/wp-content/uploads/2025/10/UCB_COMEDY_LOGO_MAINFLAT.jpg"
   },
   {
     name: "The PIT",
@@ -61,7 +61,7 @@ const theatres = [
     state: "NY",
     zipcode: "10018",
     website: "https://thepit-nyc.com",
-    logo: "https://thepit-nyc.com/wp-content/uploads/2020/03/pit-logo.png"
+    logo: "https://media.thepit-nyc.com/app/uploads/20241031161322/PIT-logo-est2002-WhiteLogo_RedStars.png"
   },
   {
     name: "Magnet Theater",
@@ -69,15 +69,7 @@ const theatres = [
     state: "NY",
     zipcode: "10018",
     website: "https://magnettheater.com",
-    logo: "https://magnettheater.com/wp-content/uploads/2019/03/magnet-logo.png"
-  },
-  {
-    name: "ImprovBoston",
-    city: "Cambridge",
-    state: "MA",
-    zipcode: "02139",
-    website: "https://www.improvboston.com",
-    logo: "https://www.improvboston.com/wp-content/uploads/2017/01/logo.png"
+    logo: "https://magnettheater.com/wp-content/themes/magnettheater/imgs/logo-primary.png"
   },
   {
     name: "Upright Citizens Brigade (UCB) Theatre",
@@ -85,7 +77,7 @@ const theatres = [
     state: "NY",
     zipcode: "10003",
     website: "https://ucbcomedy.com",
-    logo: "https://ucbcomedy.com/wp-content/uploads/2021/05/ucb-logo.png"
+    logo: "https://ucbcomedy.com/wp-content/uploads/2025/10/UCB_COMEDY_LOGO_MAINFLAT.jpg"
   },
   {
     name: "Chicago City Limits",
@@ -93,7 +85,7 @@ const theatres = [
     state: "NY",
     zipcode: "10021",
     website: "https://www.chicagocitylimits.com",
-    logo: "https://www.chicagocitylimits.com/uploads/1/2/3/9/123909886/published/ccl-logo.png"
+    logo: "https://www.chicagocitylimits.com/"
   },
   {
     name: "BATS Improv",
@@ -101,7 +93,7 @@ const theatres = [
     state: "CA",
     zipcode: "94123",
     website: "https://www.improv.org",
-    logo: "https://www.improv.org/wp-content/uploads/2021/08/bats-logo.png"
+    logo: "https://www.improv.org/wp-content/uploads/2024/10/logo.svg"
   },
   {
     name: "Endgames Improv",
@@ -109,7 +101,7 @@ const theatres = [
     state: "CA",
     zipcode: "94110",
     website: "https://www.endgamesimprov.com",
-    logo: "https://www.endgamesimprov.com/wp-content/uploads/2018/03/endgames-logo.png"
+    logo: "https://endgamesimprov.com/wp-content/uploads/2021/05/logo.png"
   },
   {
     name: "Leela Improv Theatre",
@@ -133,7 +125,7 @@ const theatres = [
     state: "CA",
     zipcode: "92109",
     website: "https://www.finestcityimprov.com",
-    logo: "https://www.finestcityimprov.com/wp-content/uploads/2019/06/fci-logo.png"
+    logo: "https://www.finestcityimprov.com/wp-content/uploads/2024/09/241762951_4563029353763448_859376555201247906_n.jpg"
   },
   {
     name: "Sacramento Comedy Spot",
@@ -189,7 +181,7 @@ const theatres = [
     state: "CT",
     zipcode: "06103",
     website: "https://seateaimprov.com",
-    logo: "https://seateaimprov.com/wp-content/uploads/2019/01/sea-tea-logo.png"
+    logo: "https://seateaimprov.com/wp-content/uploads/2b8adc3e-19d5-46fe-bf8b-89a8e643b3cd.jpg"
   },
   {
     name: "Bovine Metropolis Theater",
@@ -205,7 +197,7 @@ const theatres = [
     state: "CO",
     zipcode: "80205",
     website: "https://risecomedy.com",
-    logo: "https://risecomedy.com/wp-content/uploads/2020/03/rise-logo.png"
+    logo: "https://risecomedy.com/wp-content/uploads/2019/03/outside-voodoo_courtesy-voodoo-comedy-playhouse.jpg"
   },
   {
     name: "What If Theatre",
@@ -221,7 +213,7 @@ const theatres = [
     state: "VA",
     zipcode: "23510",
     website: "https://pushcomedytheater.com",
-    logo: "https://pushcomedytheater.com/wp-content/uploads/2019/03/push-logo.png"
+    logo: "https://pushcomedytheater.com/wp-content/uploads/2021/05/Push-Mural.jpg"
   },
   {
     name: "The Coalition Theater",
@@ -229,7 +221,7 @@ const theatres = [
     state: "VA",
     zipcode: "23220",
     website: "https://rvacomedy.com",
-    logo: "https://rvacomedy.com/wp-content/uploads/2018/05/coalition-logo.png"
+    logo: "https://rvacomedy.com/wp-content/uploads/2019/02/ct_classes_boosted_new_2019.png"
   },
   {
     name: "The Nest Theatre",
@@ -341,7 +333,7 @@ const theatres = [
     state: "TX",
     zipcode: "78701",
     website: "https://falloutcomedy.com",
-    logo: "https://falloutcomedy.com/wp-content/uploads/2018/07/fallout-logo.png"
+    logo: "https://falloutcomedy.com/wp-content/uploads/2023/03/fallout-theater2.jpeg"
   },
   {
     name: "Station Theater",
@@ -405,7 +397,7 @@ const theatres = [
     state: "OR",
     zipcode: "97214",
     website: "https://www.kickstandcomedy.org",
-    logo: "https://www.kickstandcomedy.org/wp-content/uploads/2019/05/kickstand-logo.png"
+    logo: "https://images.squarespace-cdn.com/content/v1/60ed03ab2477d23d838c509e/a1e91014-82bd-4b00-b4d8-cf151c085b36/Logo%2BLarge%2BWhite.png"
   },
   {
     name: "Unexpected Productions",
@@ -621,7 +613,7 @@ const theatres = [
     state: "IN",
     zipcode: "46802",
     website: "https://www.brokenpencilimprov.com",
-    logo: "https://www.brokenpencilimprov.com/wp-content/uploads/2019/03/bpi-logo.png"
+    logo: "https://www.brokenpencilimprov.com/wp-content/uploads/2025/12/BPI_Oz_Nov_2025.png"
   },
   {
     name: "Recycled Minds Comedy",
@@ -749,7 +741,7 @@ const theatres = [
     state: "CA",
     zipcode: "92101",
     website: "https://nationalcomedy.com",
-    logo: "https://nationalcomedy.com/wp-content/uploads/2018/05/nct-logo.png"
+    logo: "https://nationalcomedy.com/wp-content/uploads/2019/09/cropped-NCT-logo.png"
   },
   {
     name: "Central Coast Comedy Theater",
@@ -773,7 +765,7 @@ const theatres = [
     state: "FL",
     zipcode: "32801",
     website: "https://www.sakcomedylab.com",
-    logo: "https://www.sakcomedylab.com/wp-content/uploads/2018/05/sak-logo.png"
+    logo: "http://sakcomedylab.s3.amazonaws.com/sak_comedy_lab.jpg"
   },
   {
     name: "AdLib Theater",
@@ -797,7 +789,7 @@ const theatres = [
     state: "GA",
     zipcode: "30307",
     website: "https://www.wholeworldtheatre.com",
-    logo: "https://www.wholeworldtheatre.com/wp-content/uploads/2018/06/whole-world-logo.png"
+    logo: "https://www.wholeworldtheatre.com/wp-content/uploads/2020/01/logo.png"
   },
   {
     name: "Village Theatre",
@@ -853,7 +845,7 @@ const theatres = [
     state: "CT",
     zipcode: "06103",
     website: "https://seateaimprov.com",
-    logo: "https://seateaimprov.com/wp-content/uploads/2019/01/sea-tea-logo.png"
+    logo: "https://seateaimprov.com/wp-content/uploads/2b8adc3e-19d5-46fe-bf8b-89a8e643b3cd.jpg"
   },
   {
     name: "The Bent Theatre",
@@ -1057,3 +1049,5 @@ export const getTheatreNames = () => {
 }
 
 export const getTheatreByName = (name: string) => theatres.find((t) => t.name === name) || theatres.find((t) => `${t.name} (${t.city})` === name);
+
+export const getTheatresByState = (state: string) => theatres.filter((t) => t.state === state);

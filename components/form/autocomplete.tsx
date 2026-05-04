@@ -7,11 +7,11 @@ type AutocompleteProps = {
   placeholder?: string;
   onChange?: (value: string) => void;
   label?: string;
-  name: string;
+  name?: string;
   required?: boolean;
 };
 
-const Autocomplete: React.FC<AutocompleteProps> = ({ options, placeholder = 'Type to search...', onChange, label, name, required }) => {
+const Autocomplete: React.FC<AutocompleteProps> = ({ options, placeholder = 'Type to search...', onChange, label, name = 'autocomplete', required }) => {
   const [value, setValue] = useState('');
   const [showOptions, setShowOptions] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);

@@ -1,6 +1,6 @@
 import { appName } from "@/lib/app-info";
 import { Metadata } from "next";
-
+import TheatreSearch from "./theatre-search";
 
 export const metadata: Metadata = {
     title: `${appName} | Theatres`,
@@ -9,6 +9,8 @@ export const metadata: Metadata = {
 
 export default function TheatresPage() {
     return (
-        <h1>Theatres Page</h1>
+        <main>
+            <TheatreSearch />
+        </main>
     )
 }

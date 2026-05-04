@@ -1,4 +1,4 @@
-import DistanceSelector from "@/components/form/distance-select";
+import DistanceSelect from "@/components/form/distance-select";
 import EventCard from "@/components/event-card";
 import { getShows } from "@/lib/shows";
 import { Suspense } from "react";
@@ -31,7 +31,7 @@ export default function ShowsPage() {
                 <Link href="/shows/new" className="text-center bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 text-white py-1 px-4 rounded transition-colors">
                     Post a Show
                 </Link>
-                <DistanceSelector label="Shows" />
+                <DistanceSelect label="Shows" />
             </section>
             <section>
                 <Suspense fallback={<p>Loading shows...</p>}>
