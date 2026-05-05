@@ -1,5 +1,6 @@
 'use client';
 
+import { filterArrayBySearchTerm } from '@/lib/helper-functions';
 import React, { useMemo, useState } from 'react';
 
 type AutocompleteProps = {
@@ -17,24 +18,7 @@ const Autocomplete: React.FC<AutocompleteProps> = ({ options, placeholder = 'Typ
   const [activeIndex, setActiveIndex] = useState(-1);
 
   const filteredOptions = useMemo(() => {
-    const normalized = value.trim().toLowerCase();
-    if (!normalized) {
-      return options;
-    }
-
-    return options
-        .filter((option) => option.toLowerCase().includes(normalized))
-        .sort((a, b) => {
-          const aStarts = a.toLowerCase().startsWith(normalized);
-          const bStarts = b.toLowerCase().startsWith(normalized);
-          const aIncludesWord = a.toLowerCase().includes(` ${normalized}`);
-          const bIncludesWord = b.toLowerCase().includes(` ${normalized}`);
-          if (aStarts && !bStarts) return -1;
-          if (!aStarts && bStarts) return 1;
-          if (aIncludesWord && !bIncludesWord) return -1;
-          if (!aIncludesWord && bIncludesWord) return 1;
-          return a.localeCompare(b);
-        });
+    return filterArrayBySearchTerm(options, value);
   }, [options, value]);
 
   const updateValue = (newValue: string) => {

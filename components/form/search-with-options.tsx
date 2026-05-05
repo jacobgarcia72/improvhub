@@ -2,16 +2,26 @@
 
 import { useState } from "react";
 import DistanceSelect from "./distance-select";
-import Autocomplete from "./autocomplete";
-import { getTheatreNames, getTheatresByState } from "@/lib/theatres";
 import StateSelect from "./state-select";
-import { Theatre } from "@/types";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import Input from "./input";
 
-export default function SearchWithOptions({ onSearch }: { onSearch: (results: Theatre[]) => void }) {
+export default function SearchWithOptions() {
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const { replace } = useRouter();
+  const params = new URLSearchParams(searchParams);
+
+
     const [sortBy, setSortBy] = useState('name');
 
-    const handleStateSearch = (state: string) => {
-        onSearch(getTheatresByState(state));
+    const handleSearch = (type: string, term: string) => {
+        if (term) {
+            params.set(type, term);
+        } else {
+            params.delete(type);
+        }
+        replace(`${pathname}?${params.toString()}`);
     }
     
     return (
@@ -21,7 +31,10 @@ export default function SearchWithOptions({ onSearch }: { onSearch: (results: Th
                     Search by &nbsp;
                     <select
                         className="border border-gray-300 rounded px-3 py-2"
-                        onChange={(e) => setSortBy(e.currentTarget.value)}
+                        onChange={(e) => {
+                            setSortBy(e.currentTarget.value);
+                            replace(pathname)
+                        }}
                     >
                         <option value="name">Name</option>
                         <option value="state">State</option>
@@ -30,9 +43,12 @@ export default function SearchWithOptions({ onSearch }: { onSearch: (results: Th
                 </p>
             </div>
             <div className="w-2/3">
-                {sortBy === 'state' && <StateSelect onChange={handleStateSearch} />}
-                {sortBy === 'zipcode' && <DistanceSelect label="Theatres" />}
-                {sortBy === 'name' && <Autocomplete options={getTheatreNames()} />}
+                {sortBy === 'state' && <StateSelect onChange={(value) => handleSearch('state', value)} />}
+                {sortBy === 'zipcode' && <DistanceSelect label="Theatres" onUpdate={(zipcode, miles) => {
+                    handleSearch('zipcode', zipcode);
+                    handleSearch('miles', miles.toString());
+                }} />}
+                {sortBy === 'name' && <Input onChange={(value) => handleSearch('name', value)} name="name" placeholder="Search by name..." />}
             </div>
         </section>
     )

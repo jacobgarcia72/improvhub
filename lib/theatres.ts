@@ -1032,4 +1032,4 @@ export const getTheatreNames = () => {
 
 export const getTheatreByName = (name: string) => theatres.find((t) => t.name === name) || theatres.find((t) => `${t.name} (${t.city})` === name);
 
-export const getTheatresByState = (state: string) => theatres.filter((t) => t.state === state);
+export const getTheatresByState = (state: string) => theatres.filter((t) => t.state.toLocaleLowerCase() === state.toLocaleLowerCase());
