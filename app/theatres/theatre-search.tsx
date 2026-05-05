@@ -19,11 +19,17 @@ export default function TheatreSearch() {
         if (zipcodeQuery) return getTheatresByDistance(zipcodeQuery, Number(milesQuery));
         return null;
     }
+
+    const hasActiveQuery = nameQuery || stateQuery || zipcodeQuery;
+    const results = handleSearchParams();
+    const hasNoResults = hasActiveQuery && results?.length === 0;
+
     return (
         <>
             <SearchWithOptions />
             <section className="flex flex-col px-4 pb-4">
-                {handleSearchParams()?.map((theatre, index) => (
+                {hasNoResults && <p className="text-gray-500 mt-4">No results found.</p>}
+                {results?.map((theatre, index) => (
                     <div key={index} className="border border-gray-300 rounded p-4 mb-4">
                         {theatre?.logo && <Image src={theatre.logo} alt={`${theatre.name} logo`} width={100} height={100} className="mb-2" />}
                         <h2 className="text-xl font-bold">{theatre?.name}</h2>
