@@ -14,7 +14,7 @@ export default function TheatreSearch() {
     const theatreNames = getTheatreNames();
 
     const handleSearchParams = () => {
-        if (nameQuery) return filterArrayBySearchTerm(theatreNames, nameQuery).map(getTheatreByName);
+        if (nameQuery) return filterArrayBySearchTerm(theatreNames, nameQuery, 20).map(getTheatreByName);
         if (stateQuery) return getTheatresByState(stateQuery);
         if (zipcodeQuery) return getTheatresByDistance(zipcodeQuery, Number(milesQuery));
         return null;
