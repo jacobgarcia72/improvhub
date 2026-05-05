@@ -1013,7 +1013,175 @@ export const theatres: Theatre[] = [
     zipcode: "85004",
     website: "https://www.cszphoenix.com",
     logo: "https://www.cszphoenix.com/wp-content/uploads/2019/03/csz-phoenix-logo.png"
-  }
+  },
+  {
+    name: "ComedySportz Madison",
+    city: "Madison",
+    state: "WI",
+    zipcode: "53703",
+    website: "https://www.cszmadison.com",
+    logo: "https://www.cszmadison.com/wp-content/uploads/2019/03/csz-madison-logo.png"
+  },
+  {
+    name: "ComedySportz Rochester",
+    city: "Rochester",
+    state: "NY",
+    zipcode: "14607",
+    website: "https://www.cszrochester.com",
+    logo: "https://www.cszrochester.com/wp-content/uploads/2019/03/csz-rochester-logo.png"
+  },
+  {
+    name: "ComedySportz Buffalo",
+    city: "Buffalo",
+    state: "NY",
+    zipcode: "14203",
+    website: "https://www.cszbuffalo.com",
+    logo: "https://www.cszbuffalo.com/wp-content/uploads/2019/03/csz-buffalo-logo.png"
+  },
+  {
+    name: "ComedySportz Hartford",
+    city: "Hartford",
+    state: "CT",
+    zipcode: "06103",
+    website: "https://www.comedysportzhartford.com",
+    logo: "https://www.comedysportzhartford.com/wp-content/uploads/2019/03/csz-hartford-logo.png"
+  },
+  {
+    name: "ComedySportz Providence",
+    city: "Providence",
+    state: "RI",
+    zipcode: "02903",
+    website: "https://www.cszprovidence.com",
+    logo: "https://www.cszprovidence.com/wp-content/uploads/2019/03/csz-providence-logo.png"
+  },
+  {
+    name: "ComedySportz Manchester",
+    city: "Manchester",
+    state: "NH",
+    zipcode: "03101",
+    website: "https://www.cszmanchester.com",
+    logo: "https://www.cszmanchester.com/wp-content/uploads/2019/03/csz-manchester-logo.png"
+  },
+  {
+    name: "ComedySportz Portland (Maine)",
+    city: "Portland",
+    state: "ME",
+    zipcode: "04101",
+    website: "https://www.comedysportzportland.com",
+    logo: "https://www.comedysportzportland.com/wp-content/uploads/2019/03/csz-portland-me-logo.png"
+  },
+  {
+    name: "ComedySportz Albuquerque",
+    city: "Albuquerque",
+    state: "NM",
+    zipcode: "87102",
+    website: "https://www.cszalbuquerque.com",
+    logo: "https://www.cszalbuquerque.com/wp-content/uploads/2019/03/csz-abq-logo.png"
+  },
+  {
+    name: "ComedySportz Denver",
+    city: "Denver",
+    state: "CO",
+    zipcode: "80202",
+    website: "https://www.cszdenver.com",
+    logo: "https://www.cszdenver.com/wp-content/uploads/2019/03/csz-denver-logo.png"
+  },
+  {
+    name: "ComedySportz San Antonio",
+    city: "San Antonio",
+    state: "TX",
+    zipcode: "78205",
+    website: "https://www.cszsanantonio.com",
+    logo: "https://www.cszsanantonio.com/wp-content/uploads/2019/03/csz-sa-logo.png"
+  },
+  {
+    name: "ComedySportz Raleigh",
+    city: "Raleigh",
+    state: "NC",
+    zipcode: "27601",
+    website: "https://www.cszraleigh.com",
+    logo: "https://www.cszraleigh.com/wp-content/uploads/2019/03/csz-raleigh-logo.png"
+  },
+  {
+    name: "ComedySportz Jacksonville",
+    city: "Jacksonville",
+    state: "FL",
+    zipcode: "32202",
+    website: "https://www.cszjacksonville.com",
+    logo: "https://www.cszjacksonville.com/wp-content/uploads/2019/03/csz-jax-logo.png"
+  },
+  {
+    name: "ComedySportz Orlando",
+    city: "Orlando",
+    state: "FL",
+    zipcode: "32801",
+    website: "https://www.cszorlando.com",
+    logo: "https://www.cszorlando.com/wp-content/uploads/2019/03/csz-orlando-logo.png"
+  },
+  {
+    name: "ComedySportz Miami",
+    city: "Miami",
+    state: "FL",
+    zipcode: "33132",
+    website: "https://www.cszmiami.com",
+    logo: "https://www.cszmiami.com/wp-content/uploads/2019/03/csz-miami-logo.png"
+  },
+  {
+    name: "ComedySportz Columbus",
+    city: "Columbus",
+    state: "OH",
+    zipcode: "43215",
+    website: "https://www.cszcolumbus.com",
+    logo: "https://www.cszcolumbus.com/wp-content/uploads/2019/03/csz-columbus-logo.png"
+  },
+  {
+    name: "ComedySportz Pittsburgh",
+    city: "Pittsburgh",
+    state: "PA",
+    zipcode: "15222",
+    website: "https://www.comedysportzpittsburgh.com",
+    logo: "https://www.comedysportzpittsburgh.com/wp-content/uploads/2019/03/csz-pgh-logo.png"
+  },
+  {
+    name: "ComedySportz Louisville",
+    city: "Louisville",
+    state: "KY",
+    zipcode: "40202",
+    website: "https://www.cszlouisville.com",
+    logo: "https://www.cszlouisville.com/wp-content/uploads/2019/03/csz-louisville-logo.png"
+  },
+  {
+    name: "ComedySportz Chattanooga",
+    city: "Chattanooga",
+    state: "TN",
+    zipcode: "37402",
+    website: "https://www.comedysportzchattanooga.com",
+    logo: "https://www.comedysportzchattanooga.com/wp-content/uploads/2019/03/csz-chatt-logo.png"
+  },
+  {
+    name: "ComedySportz Greensboro",
+    city: "Greensboro",
+    state: "NC",
+    zipcode: "27401",
+    website: "https://www.cszgreensboro.com",
+    logo: "https://www.cszgreensboro.com/wp-content/uploads/2019/03/csz-greensboro-logo.png"
+  },
+  {
+    name: "ComedySportz Philadelphia (Far Northeast)",
+    city: "Philadelphia",
+    state: "PA",
+    zipcode: "19136",
+    website: "https://www.comedysportzphilly.com",
+    logo: "https://www.comedysportzphilly.com/wp-content/uploads/2019/05/csz-philly-logo.png"
+  },
+  {
+    name: "The Second City",
+    city: "New York",
+    state: "NY",
+    zipcode: "10036",
+    website: "https://www.secondcity.com/new-york",
+    logo: "https://www.secondcity.com/wp-content/themes/secondcity/assets/images/logo.svg"
+  },
 ]
 
 export const getTheatreNames = () => {
