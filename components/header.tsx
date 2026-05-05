@@ -1,7 +1,7 @@
 import Link from "next/link";
 import NavLink from "./nav-link";
 
-const links = ['Shows', 'Auditions', 'Jams', 'Theatres', 'Teams', 'Discussion'];
+const links = ['Shows', 'Auditions', 'Jams', 'Teams', 'Discussion', 'Search'];
 
 export default function Header() {
     return (

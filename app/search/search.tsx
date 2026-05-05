@@ -1,32 +1,38 @@
 'use client';
+
 import { useSearchParams } from 'next/navigation'
-import SearchWithOptions from "@/components/form/search-with-options";
 import Image from "next/image";
 import { getTheatreByName, getTheatreNames, getTheatresByDistance, getTheatresByState } from '@/lib/theatres';
 import { filterArrayBySearchTerm } from '@/lib/helper-functions';
+import SearchBar from './search-bar';
 
-export default function TheatreSearch() {
+export default function Search() {
     const searchParams = useSearchParams();
-    const nameQuery = searchParams.get('name');
+    const theatreNameQuery = searchParams.get('theatre');
     const stateQuery = searchParams.get('state');
     const zipcodeQuery = searchParams.get('zipcode');
     const milesQuery = searchParams.get('miles');
+    const searchFor = searchParams.get('for');
     const theatreNames = getTheatreNames();
 
     const handleSearchParams = () => {
-        if (nameQuery) return filterArrayBySearchTerm(theatreNames, nameQuery, 20).map(getTheatreByName);
-        if (stateQuery) return getTheatresByState(stateQuery);
-        if (zipcodeQuery) return getTheatresByDistance(zipcodeQuery, Number(milesQuery));
-        return null;
+        switch (searchFor) {
+            case 'theatres':
+                if (theatreNameQuery) return filterArrayBySearchTerm(theatreNames, theatreNameQuery, 20).map(getTheatreByName);
+                if (stateQuery) return getTheatresByState(stateQuery);
+                if (zipcodeQuery) return getTheatresByDistance(zipcodeQuery, Number(milesQuery));
+            default:
+                return null;
+        }
     }
 
-    const hasActiveQuery = nameQuery || stateQuery || zipcodeQuery;
+    const hasActiveQuery = theatreNameQuery || stateQuery || zipcodeQuery;
     const results = handleSearchParams();
     const hasNoResults = hasActiveQuery && results?.length === 0;
 
     return (
         <>
-            <SearchWithOptions />
+            <SearchBar />
             <section className="flex flex-col px-4 pb-4">
                 {hasNoResults && <p className="text-gray-500 mt-4">No results found.</p>}
                 {results?.map((theatre, index) => (
