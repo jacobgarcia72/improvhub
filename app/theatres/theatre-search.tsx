@@ -2,7 +2,7 @@
 import { useSearchParams } from 'next/navigation'
 import SearchWithOptions from "@/components/form/search-with-options";
 import Image from "next/image";
-import { getTheatreByName, getTheatreNames, getTheatresByState } from '@/lib/theatres';
+import { getTheatreByName, getTheatreNames, getTheatresByDistance, getTheatresByState } from '@/lib/theatres';
 import { filterArrayBySearchTerm } from '@/lib/helper-functions';
 
 export default function TheatreSearch() {
@@ -16,7 +16,7 @@ export default function TheatreSearch() {
     const handleSearchParams = () => {
         if (nameQuery) return filterArrayBySearchTerm(theatreNames, nameQuery).map(getTheatreByName);
         if (stateQuery) return getTheatresByState(stateQuery);
-        if (zipcodeQuery) return // TODO: search by miles from zipcode
+        if (zipcodeQuery) return getTheatresByDistance(zipcodeQuery, Number(milesQuery));
         return null;
     }
     return (

@@ -1,6 +1,7 @@
 import { Theatre } from "@/types";
+import zipcodes from 'zipcodes';
 
-const theatres: Theatre[] = [
+export const theatres: Theatre[] = [
   {
     name: "Arcade Comedy Theater",
     city: "Pittsburgh",
@@ -1033,3 +1034,8 @@ export const getTheatreNames = () => {
 export const getTheatreByName = (name: string) => theatres.find((t) => t.name === name) || theatres.find((t) => `${t.name} (${t.city})` === name);
 
 export const getTheatresByState = (state: string) => theatres.filter((t) => t.state.toLocaleLowerCase() === state.toLocaleLowerCase());
+
+export const getTheatresByDistance = (zipcode: string, miles: number) => {
+    const zipcodesInRange = zipcodes.radius(zipcode, miles, false).map((z) => typeof z === 'string' ? z : z.zip);
+    return theatres.filter((theatre) => zipcodesInRange.includes(theatre.zipcode))
+}
