@@ -20,6 +20,9 @@ export default function Input({ label, name, type = 'text', required = false, pl
     let inputLabel = label;
     if (label && required) inputLabel += ' *';
 
+    let inputPlaceholder = placeholder;
+    if (!placeholder && type === 'url') inputPlaceholder = 'https://';
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (value) {
             if (onChange) onChange(value);
@@ -65,7 +68,7 @@ export default function Input({ label, name, type = 'text', required = false, pl
                 name={name}
                 id={name}
                 required={required}
-                placeholder={placeholder}
+                placeholder={inputPlaceholder}
                 inputMode={getInputMode(type)}
                 maxLength={type === 'zipcode' ? 5 : undefined}
             />

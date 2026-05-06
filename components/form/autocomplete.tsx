@@ -12,7 +12,7 @@ type AutocompleteProps = {
   required?: boolean;
 };
 
-const Autocomplete: React.FC<AutocompleteProps> = ({ options, placeholder = 'Type to search...', onChange, label, name = 'autocomplete', required }) => {
+const Autocomplete: React.FC<AutocompleteProps> = ({ options, placeholder, onChange, label, name = 'autocomplete', required }) => {
   const [value, setValue] = useState('');
   const [showOptions, setShowOptions] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
@@ -39,7 +39,7 @@ const Autocomplete: React.FC<AutocompleteProps> = ({ options, placeholder = 'Typ
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (!showOptions || filteredOptions.length === 0) {
+    if (!showOptions || filteredOptions.length === 0 || (event.key === 'Tab' && activeIndex === -1)) {
       return;
     }
 
@@ -53,7 +53,7 @@ const Autocomplete: React.FC<AutocompleteProps> = ({ options, placeholder = 'Typ
       event.preventDefault();
       if (activeIndex >= 0 && activeIndex < filteredOptions.length) {
         handleOptionSelect(filteredOptions[activeIndex]);
-      } else if (filteredOptions.length === 1) {
+      } else if (filteredOptions.length === 1 && event.key === 'Enter') {
         handleOptionSelect(filteredOptions[0]);
       }
     } else if (event.key === 'Escape') {

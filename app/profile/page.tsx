@@ -1,5 +1,6 @@
 import { appName } from "@/lib/app-info";
 import { Metadata } from "next";
+import CreateProfileForm from './create-profile';
 
 
 export const metadata: Metadata = {
@@ -9,6 +10,6 @@ export const metadata: Metadata = {
 
 export default function ProfilePage() {
     return (
-        <h1>Profile Page</h1>
+        <CreateProfileForm />
     )
 }
