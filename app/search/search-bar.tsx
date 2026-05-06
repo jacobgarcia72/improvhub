@@ -56,6 +56,7 @@ export default function SearchBar() {
             <div className="w-1/4">
                 <div className="flex flex-col gap-2">
                     <select
+                        value={searchFor || ''}
                         className="w-full border border-gray-300 rounded px-3 py-2"
                         onChange={(e) => {
                             handleSearchFor(e.currentTarget.value);
