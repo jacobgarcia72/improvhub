@@ -1,10 +1,10 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation'
-import Image from "next/image";
 import { getTheatreByName, getTheatreNames, getTheatresByDistance, getTheatresByState } from '@/lib/theatres';
 import { filterArrayBySearchTerm } from '@/lib/helper-functions';
 import SearchBar from './search-bar';
+import TheatreCard from './theatre-card';
 
 export default function Search() {
     const searchParams = useSearchParams();
@@ -33,14 +33,13 @@ export default function Search() {
     return (
         <>
             <SearchBar />
-            <section className="flex flex-col px-4 pb-4">
+            <section className="flex flex-row flex-wrap gap-4 px-4 pb-4 justify-center">
                 {hasNoResults && <p className="text-gray-500 mt-4">No results found.</p>}
-                {results?.map((theatre, index) => (
-                    <div key={index} className="border border-gray-300 rounded p-4 mb-4">
-                        {theatre?.logo && <Image src={theatre.logo} alt={`${theatre.name} logo`} width={100} height={100} className="mb-2" />}
-                        <h2 className="text-xl font-bold">{theatre?.name}</h2>
-                    </div>
-                ))}
+                {results?.map((result, i) => {
+                    if (!result) return;
+                    if (searchFor === 'theatres') return <TheatreCard key={i} theatre={result} />
+                    return;
+                })}
             </section>
         </>
     )

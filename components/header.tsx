@@ -5,7 +5,7 @@ const links = ['Shows', 'Auditions', 'Jams', 'Teams', 'Discussion', 'Search'];
 
 export default function Header() {
     return (
-        <header className="h-12 w-full flex flex-row justify-between items-stretch">
+        <header className="relative z-50 h-12 w-full flex flex-row justify-between items-stretch">
             <Link href="/">
                 <div>Improv Hub</div>
             </Link>

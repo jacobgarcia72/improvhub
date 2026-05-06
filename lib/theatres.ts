@@ -86,7 +86,7 @@ export const theatres: Theatre[] = [
     state: "NY",
     zipcode: "10021",
     website: "https://www.chicagocitylimits.com",
-    logo: "https://www.chicagocitylimits.com/"
+    logo: "https://www.chicagocitylimits.com/uploads/8/0/0/7/80072300/published/final-logo1.png?1502984670"
   },
   {
     name: "BATS Improv",

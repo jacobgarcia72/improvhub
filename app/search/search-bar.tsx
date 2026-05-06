@@ -12,9 +12,10 @@ export default function SearchBar() {
     const pathname = usePathname();
     const { replace } = useRouter();
     const params = new URLSearchParams(searchParams);
+    const searchFor = searchParams.get('for');
 
 
-    const [sortBy, setSortBy] = useState('theatre');
+    const [searchBy, setSearchBy] = useState('');
 
     const handleSearchFor = (searchFor: string) => {
         replace(pathname);
@@ -32,13 +33,30 @@ export default function SearchBar() {
         }
         replace(`${pathname}?${params.toString()}`);
     }
+
+    function SearchParams() {
+        if (!searchBy || !searchFor) return null;
+        switch (searchBy) {
+            case 'state':
+                return <StateSelect onChange={(value) => handleSearch('state', value)} />
+            case 'zipcode':
+                return <DistanceSelect label="Theatres" onUpdate={(zipcode, miles) => {
+                        handleSearch('zipcode', zipcode);
+                        handleSearch('miles', miles.toString());
+                    }} />
+            case 'theatre':
+                return <Input onChange={(value) => handleSearch('theatre', value)} name="theatre" placeholder="Search by theatre name..." />
+            default:
+                return null;
+        }
+    }
     
     return (
         <section className="w-full h-24 flex flex-row items-center justify-between px-6 py-3">
             <div className="w-1/4">
-                <div>
+                <div className="flex flex-col gap-2">
                     <select
-                        className="border border-gray-300 rounded px-3 py-2 mb-2"
+                        className="w-full border border-gray-300 rounded px-3 py-2"
                         onChange={(e) => {
                             handleSearchFor(e.currentTarget.value);
                         }}
@@ -53,9 +71,9 @@ export default function SearchBar() {
                         <option value="workshops">Workshops</option>
                     </select>
                     <select
-                        className="border border-gray-300 rounded px-3 py-2"
+                        className="w-full border border-gray-300 rounded px-3 py-2"
                         onChange={(e) => {
-                            setSortBy(e.currentTarget.value);
+                            setSearchBy(e.currentTarget.value);
                             searchTypes.forEach((type) => params.delete(type))
                             replace(`${pathname}?${params.toString()}`);
                         }}
@@ -68,12 +86,7 @@ export default function SearchBar() {
                 </div>
             </div>
             <div className="w-1/2">
-                {sortBy === 'state' && <StateSelect onChange={(value) => handleSearch('state', value)} />}
-                {sortBy === 'zipcode' && <DistanceSelect label="Theatres" onUpdate={(zipcode, miles) => {
-                    handleSearch('zipcode', zipcode);
-                    handleSearch('miles', miles.toString());
-                }} />}
-                {sortBy === 'theatre' && <Input onChange={(value) => handleSearch('theatre', value)} name="theatre" placeholder="Search by theatre name..." />}
+                {SearchParams()}
             </div>
         </section>
     )
