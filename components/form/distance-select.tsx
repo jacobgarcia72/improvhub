@@ -9,10 +9,14 @@ interface DistanceSelectProps {
 }
 
 export default function DistanceSelect({ onUpdate, label }: DistanceSelectProps) {
-    const [zipcode, setZipcode] = useState('');
+    const [zipcode, setZipcode] = useState(() => {
+        const stored = localStorage.getItem('zipcode');
+        return stored || '';
+    });
     const [miles, setMiles] = useState(25);
 
     useEffect(() => {
+        if (zipcode) return;
         // Get user's location and reverse geocode to ZIP code
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
@@ -38,8 +42,10 @@ export default function DistanceSelect({ onUpdate, label }: DistanceSelectProps)
 
     const handleSubmit = (e: React.SubmitEvent) => {
         e.preventDefault();
-        if (zipcode.trim() && onUpdate) {
-            onUpdate(zipcode, miles);
+        const zip = zipcode.trim();
+        if (zip && onUpdate) {
+            localStorage.setItem('zipcode', zip);
+            onUpdate(zip, miles);
         }
     };
 
