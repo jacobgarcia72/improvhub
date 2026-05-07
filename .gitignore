@@ -14,7 +14,8 @@
 /public/temp-images
 
 # test databases
-users.db
+/users.db
+/content.db
 
 # testing
 /coverage
