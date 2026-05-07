@@ -10,11 +10,11 @@ export interface Theatre {
 export interface EventFormData {
     title: string;
     type: 'show' | 'jam' | 'class';
-    date: string;
-    time: string;
+    date?: string;
+    time?: string;
     description?: string;
     theatre?: string;
-    zipcode: number;
+    zipcode?: string;
     price?: number;
     doorPrice?: number;
     webpage?: string;
