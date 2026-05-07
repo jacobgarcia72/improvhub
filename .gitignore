@@ -13,6 +13,9 @@
 # images
 /public/temp-images
 
+# test databases
+users.db
+
 # testing
 /coverage
 

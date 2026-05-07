@@ -7,13 +7,13 @@ export default async function UserProfilePage({ params }: { params: Promise<{use
 
     const { username } = await params;
     const user = await getUser(username) as User | undefined;
-    console.log('username', username)
 
-    console.log('user', user)
     if (!user) notFound();
+    let displayName = user.firstName;
+    if (user.lastName) displayName += ` ${user.lastName.slice(0, 1)}.`
     return (
         <Suspense fallback={<p>Loading</p>}>
-            <h1>`${user.first_name}${user.last_name ? ' ' + user.last_name?.slice(0, 1) + '.' : ''}`</h1>
+            <h1>{displayName}</h1>
         </Suspense>
     )
 }
