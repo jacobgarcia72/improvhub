@@ -10,12 +10,13 @@ interface InputProps {
     placeholder?: string,
     value?: string,
     onChange?: (value: string) => void,
+    maxLength?: number
 }
 
-export default function Input({ label, name, type = 'text', required = false, placeholder, value = '', onChange }: InputProps) {
+export default function Input({ label, name, type = 'text', required = false, placeholder, value = '', onChange, maxLength = 50 }: InputProps) {
     const [inputValue, setInputValue] = useState(value);
 
-    const customTypes = ['price', 'zipcode'];
+    const customTypes = ['price', 'zipcode', 'username'];
 
     let inputLabel = label;
     if (label && required) inputLabel += ' *';
@@ -38,6 +39,12 @@ export default function Input({ label, name, type = 'text', required = false, pl
         } else if (type === 'zipcode') {
             // Allow only numbers, max 5 characters
             if (/^\d{0,5}$/.test(newValue)) {
+                setInputValue(newValue);
+                if (onChange) onChange(newValue);
+            } 
+        } else if (type === 'username') {
+            // Allow no special characters, max 20 characters
+            if (/^[a-zA-Z0-9]{0,20}$/.test(newValue)) {
                 setInputValue(newValue);
                 if (onChange) onChange(newValue);
             } 
@@ -70,7 +77,7 @@ export default function Input({ label, name, type = 'text', required = false, pl
                 required={required}
                 placeholder={inputPlaceholder}
                 inputMode={getInputMode(type)}
-                maxLength={type === 'zipcode' ? 5 : undefined}
+                maxLength={type === 'zipcode' ? 5 : maxLength}
             />
         </div>
     )

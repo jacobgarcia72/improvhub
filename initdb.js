@@ -1,10 +1,11 @@
 import sql from 'better-sqlite3';
-const db = sql('database.db');
+const usersdb = sql('users.db');
+const contentdb = sql('content.db');
 
-db.prepare(`
+usersdb.prepare(`
    CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      slug TEXT NOT NULL UNIQUE,
+      username TEXT NOT NULL UNIQUE,
       first_name TEXT NOT NULL,
       last_name TEXT NOT NULL,
       pronouns TEXT,
@@ -18,6 +19,11 @@ db.prepare(`
       website TEXT,
       experience TEXT,
       image TEXT,
+      teams: TEXT,
+   )
+`).run();
+
+contentdb.prepare(`
    CREATE TABLE IF NOT EXISTS shows (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       slug TEXT NOT NULL UNIQUE,

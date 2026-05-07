@@ -21,7 +21,7 @@ export interface EventFormData {
     image?: File;
     imageUrl?: string;
     teams?: Team[];
-    performers?: Performer[];
+    performers?: User[];
 }
 
 export interface Event extends EventFormData {
@@ -35,8 +35,21 @@ interface Team {
     description: string;
 }
 
-interface Performer {
+export interface User {
     id: string;
-    name: string;
-    teams: string[];
+    username: string;
+    firstName: string;
+    lastName?: string;
+    pronouns?: string;
+    headline?: string;
+    bio?: string;
+    theatre?: string;
+    secondaryTheatre?: string;
+    gender?: string;
+    orientation?: string;
+    ethnicity?: string;
+    website?: string;
+    experience?: string;
+    image?: string;
+    teams?: number[] | string;
 }

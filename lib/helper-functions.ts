@@ -22,3 +22,8 @@ export const filterArrayBySearchTerm = (options: string[], searchTerm: string, l
         return results;
     }
 }
+
+export const getRandomNumberString = (digits: number): string => {
+    return Array.from({ length: digits }, () => Math.floor(Math.random() * 10)).join('');
+};
+

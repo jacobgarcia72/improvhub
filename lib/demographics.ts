@@ -15,19 +15,17 @@ export const pronouns = [
 ];
 
 export const genderIdentities = [
-    'Man',
-    'Woman',
+    'Male',
+    'Female',
     'Non-binary',
     'Transgender',
-    'Transgender Man',
-    'Transgender Woman',
     'Genderqueer',
     'Genderfluid',
     'Agender',
 ];
 
 export const orientations = [
-    'Straight / Heterosexual',
+    'Straight',
     'Gay',
     'Lesbian',
     'Bisexual',
