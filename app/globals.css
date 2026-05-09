@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
+  --background: #e9eff0;
   --foreground: #171717;
 }
 
@@ -25,8 +25,12 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+image {
+  object-fit: cover;
+}
+
 header {
-  background-color: #417F86;
+  background-color: #253bb6;
   color: #ffffff;
   position: fixed;
 }
@@ -40,10 +44,15 @@ header a {
 
 header a.active {
     background-color: #dceaec;
-    color: #417F86;
+    color: #253bb6;
 }
 
 button {
   cursor: pointer;
 }
 
+section {
+  margin: auto;
+  padding: 10px;
+  max-width: 900px;
+}

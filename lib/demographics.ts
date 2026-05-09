@@ -1,17 +1,16 @@
 export const pronouns = [
-    'She/Her',
-    'He/Him',
-    'They/Them',
-    'She/They',
-    'He/They',
-    'Ze/Zir',
-    'Xe/Xem',
-    'Ey/Em',
-    'Ve/Ver',
-    'Ne/Nem',
-    'Fae/Faer',
-    'Any',
-    'No preference'
+    'she/her',
+    'he/him',
+    'they/them',
+    'she/they',
+    'he/they',
+    'ze/zir',
+    'xe/xem',
+    'ey/em',
+    've/ver',
+    'ne/nem',
+    'fae/faer',
+    'any pronouns'
 ];
 
 export const genderIdentities = [
