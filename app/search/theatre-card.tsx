@@ -4,8 +4,8 @@ import Link from "next/link";
 
 export default function TheatreCard({ theatre }: { theatre: Theatre }) {
     return (
-        <div className="w-64 overflow-hidden rounded-3xl border border-slate-200 bg-slate-50/80 shadow-sm shadow-slate-300/20 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
-            <div className="h-36 w-full bg-white/90">
+        <div className="w-60 overflow-hidden rounded-3xl border border-slate-200 bg-slate-50/80 shadow-sm shadow-slate-300/20 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
+            <div className="h-36 w-full bg-gray-300">
                 <div className="flex h-full w-full items-center justify-center">
                     {theatre.logo ? (
                         <Image src={theatre.logo} alt={theatre.name} width={120} height={120} className="h-24 w-auto object-contain" />
@@ -16,10 +16,10 @@ export default function TheatreCard({ theatre }: { theatre: Theatre }) {
                     )}
                 </div>
             </div>
-            <div className="space-y-3 px-5 pb-5 pt-6">
+            <div className="px-5 pb-5 pt-3">
                 <h2 className="text-lg font-semibold text-slate-900">{theatre.name}</h2>
                 <p className="text-sm text-slate-500">{`${theatre.city}, ${theatre.state} ${theatre.zipcode}`}</p>
-                <div className="flex flex-wrap gap-3 pt-2">
+                <div className="flex flex-wrap gap-2 pt-2">
                     <a
                         href={theatre.website}
                         target="_blank"

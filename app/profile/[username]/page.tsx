@@ -11,10 +11,10 @@ function LayoutCard({
 }>) {
     if (!children) return null;
     return (
-        <div className={`rounded mb-2 py-3 px-5 border border-gray-300 bg-white shadow-sm shadow-slate-300/20 ${className}`}>
+        <section className={className}>
             {header && <h2 className="text-slate-700 font-semibold">{header}</h2>}
             {children}
-        </div>
+        </section>
     )
 }
 
@@ -38,7 +38,7 @@ export default async function UserProfilePage({ params }: { params: Promise<{use
     theatres = 'The Hideout Theatre'
     return (
         <Suspense fallback={<p>Loading</p>}>
-            <section>
+            <main>
                 <LayoutCard className="flex flex-row">
                     <div>
                         {user.image ? (
@@ -65,7 +65,7 @@ export default async function UserProfilePage({ params }: { params: Promise<{use
                 <LayoutCard header="Website">
                     {user.website && <a href={user.website}>{user.website}</a>}
                 </LayoutCard>
-            </section>
+            </main>
         </Suspense>
     )
 }

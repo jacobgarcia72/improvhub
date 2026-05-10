@@ -30,7 +30,7 @@ image {
 }
 
 header {
-  background-color: #253bb6;
+  background-color: var(--color-blue-500);
   color: #ffffff;
   position: fixed;
 }
@@ -44,15 +44,27 @@ header a {
 
 header a.active {
     background-color: #dceaec;
-    color: #253bb6;
+    color: black;
 }
 
 button {
   cursor: pointer;
 }
 
+main {
+  padding: 5px;
+}
+
 section {
   margin: auto;
-  padding: 10px;
-  max-width: 900px;
+  margin-bottom: 10px;
+  padding: 16px 10px 20px;
+  max-width: 800px;
+  background-color: white;
+  --tw-shadow: 0 1px 3px 0 var(--tw-shadow-color, #0000001a), 0 1px 2px -1px var(--tw-shadow-color, #0000001a);
+  box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+  border-style: var(--tw-border-style);
+  border-width: 1px;
+  border-color: var(--color-gray-300);
+  border-radius: .5rem;
 }
