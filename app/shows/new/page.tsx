@@ -3,8 +3,8 @@ import Input from '@/components/form/input';
 import ImagePicker from '@/components/form/image-picker';
 import { postShow } from '@/lib/actions';
 import Text from '@/components/form/text';
-import PriceInputs from './price-inputs';
 import TheatreSelect from '@/components/form/theatre-select';
+import DateInputs from './date-inputs';
 
 export default function NewShowPage() {
     return (
@@ -15,15 +15,15 @@ export default function NewShowPage() {
                     <ImagePicker />
                     <TheatreSelect />
                     <Text label="Description" name="description" />
-                    <div className="flex flex-row gap-4">
+                    <DateInputs />
+                    <div className="flex flex-row gap-4 flex-wrap">
                         <div>
-                            <Input label="Day" name="date" type="date" required />
+                            <Input label="Ticket Price" name="price" type="price"/>
                         </div>
                         <div>
-                            <Input label="Time" name="time" type="time" required />
+                            <Input label="Price at Door (if different)" name="door" type="price" />
                         </div>
                     </div>
-                    <PriceInputs />
                     <Input label="Webpage" name="webpage" type="url" />
                 </Form>
             </section>

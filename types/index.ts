@@ -26,6 +26,7 @@ export interface EventFormData {
 
 export interface Event extends EventFormData {
     id: string;
+    creatorId: string;
 }
 
 interface Team {

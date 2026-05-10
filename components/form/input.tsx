@@ -10,10 +10,25 @@ interface InputProps {
     placeholder?: string,
     value?: string,
     onChange?: (value: string) => void,
-    maxLength?: number
+    maxLength?: number,
+    disabled?: boolean;
+    min?: number;
+    max?: number;
 }
 
-export default function Input({ label, name, type = 'text', required = false, placeholder, value = '', onChange, maxLength = 50 }: InputProps) {
+export default function Input({
+    label,
+    name,
+    type = 'text',
+    required = false,
+    placeholder,
+    value = '',
+    onChange,
+    maxLength = 50,
+    disabled = false,
+    min,
+    max,
+}: InputProps) {
     const [inputValue, setInputValue] = useState(value);
 
     const customTypes = ['price', 'zipcode', 'username'];
@@ -25,11 +40,11 @@ export default function Input({ label, name, type = 'text', required = false, pl
     if (!placeholder && type === 'url') inputPlaceholder = 'https://';
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newValue = e.target.value;
         if (value) {
-            if (onChange) onChange(value);
+            if (onChange) onChange(newValue);
             return;
         }
-        const newValue = e.target.value;
         if (type === 'price') {
             // Allow only numbers and a single decimal point
             if (/^\d*\.?\d?\d?$/.test(newValue)) {
@@ -78,6 +93,9 @@ export default function Input({ label, name, type = 'text', required = false, pl
                 placeholder={inputPlaceholder}
                 inputMode={getInputMode(type)}
                 maxLength={type === 'zipcode' ? 5 : maxLength}
+                disabled={disabled}
+                min={min}
+                max={max}
             />
         </div>
     )

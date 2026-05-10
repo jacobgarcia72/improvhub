@@ -15,7 +15,7 @@ export default function TheatreSelect() {
         }
     }
     return (
-        <div className="flex flex-row gap-4">
+        <div className="flex flex-row gap-4 flex-wrap">
             <div>
                 <Autocomplete label="Theatre" name="theatre" options={theatreNames} onChange={(value) => autofillZipcode(value)} />
             </div>
