@@ -77,20 +77,25 @@ export default function DateInputs() {
 
     const handleAutofill = () => {
         const newDates = dates.slice();
-        for (let index = 1; index < numberOfShowings; index++) {
-            switch (autofillSelection) {
-                case 0:
-                    newDates[index] = formatDate(addDays(newDates[index - 1], 7));
-                    break;
-                case 1:
-                    newDates[index] = formatDate(addDays(newDates[index - 1], 14));
-                    break;
-                case 2:
-                    newDates[index] = formatDate(findNextOrdinalWeekday(newDates[index - 1]));
-                default:
-                    break;
+        const ordinalOfBaseDate = getWeekdayOccurence(dates[0]);
+        let ordinals = [ordinalOfBaseDate];
+        if (autofillSelection === 3) {
+            if ([1, 3].includes(ordinalOfBaseDate)) {
+                ordinals = [1, 3];
+            } else {
+                ordinals = [2, 4];
             }
-            
+        }
+        for (let index = 1; index < numberOfShowings; index++) {
+            if (autofillSelection === 0) {
+                newDates[index] = formatDate(addDays(newDates[index - 1], 7));
+            } else if (autofillSelection === 1) {
+                newDates[index] = formatDate(addDays(newDates[index - 1], 14));
+            } else {
+                newDates[index] = formatDate(
+                    findNextOrdinalWeekday(newDates[index - 1], ordinals)
+                );
+            }
         }
         const newTimes = new Array(numberOfShowings).fill(times[0]);
         setDates(newDates);
