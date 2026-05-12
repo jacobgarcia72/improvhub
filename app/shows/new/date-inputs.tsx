@@ -1,10 +1,38 @@
 'use client'
 import Button from '@/components/form/button';
 import Input from '@/components/form/input';
-import { addDays, addOrdinal, findNextOrdinalWeekday, formatDate, getDayOfWeek, getWeekdayOccurence, newDate } from '@/lib/dates';
+import { addDays, addOrdinal, findNextOrdinalWeekday, formatDate, getDayOfWeek, getWeekdayOccurence, newDate, weekdays } from '@/lib/dates';
 import { useState } from 'react';
 
-
+function RecurringOptions() {
+    const [weekday, setWeekday] = useState<number>(0);
+    const [cadence, setCadence] = useState<number>(0);
+    return (
+        <div className="flex flex-row">
+            <div>
+                <label htmlFor='weekday'>Day of the Week</label>
+                <select id='weekday' value={weekday} onChange={(e) => setWeekday(Number(e.target.value))}>
+                    {weekdays.map((day, i) => <option key={i} value={i}>{day}</option>)}
+                </select>
+            </div>
+            <div>
+                <label htmlFor='cadence'>Cadence</label>
+                <select id='cadence' value={cadence} onChange={(e) => setCadence(Number(e.target.value))}>
+                    <option value={0}>{`Every ${weekdays[weekday]}`}</option>
+                    <option value={1}>{`1st ${weekdays[weekday]} of each month`}</option>
+                    <option value={2}>{`2nd ${weekdays[weekday]} of each month`}</option>
+                    <option value={3}>{`3rd ${weekdays[weekday]} of each month`}</option>
+                    <option value={4}>{`4th ${weekdays[weekday]} of each month`}</option>
+                    <option value={5}>{`Last ${weekdays[weekday]} of each month`}</option>
+                    <option value={4}>{`5th ${weekdays[weekday]}s`}</option>
+                    <option value={6}>{`1st and 3rd ${weekdays[weekday]}s`}</option>
+                    <option value={7}>{`Even ${weekdays[weekday]}s (2nd and 4th)`}</option>
+                    <option value={8}>{`Odd ${weekdays[weekday]}s (1st, 3rd and 5th)`}</option>
+                </select>
+            </div>
+        </div>
+    )
+}
 
 function DateAndTime({ label = 'Day', index = 0, date, time, onDateChange, onTimeChange }: {
     label: string;
@@ -34,8 +62,7 @@ function DateAndTime({ label = 'Day', index = 0, date, time, onDateChange, onTim
     )
 }
 
-export default function DateInputs() {
-    const [datesTBD, setDatesTBD] = useState<boolean>(false);
+function ScheduleOptions() {
     const [numberOfShowings, setNumberOfShowings] = useState<number>(1);
     const [autofillSelection, setAutofillSelection] = useState<number>(0);
     const [dates, setDates] = useState<string[]>([]);
@@ -101,6 +128,54 @@ export default function DateInputs() {
         setDates(newDates);
         setTimes(newTimes);
     }
+    return <>
+        <Input type='number'
+            name='showings'
+            label='Number of Showings'
+            value={`${numberOfShowings}`}
+            onChange={(value) => setNumberOfShowings(Number(value))}
+            min={1}
+            max={52}
+        />
+        <DateAndTime
+            index={0}
+            label={numberOfShowings > 1 ? 'Showing #1' : 'Date'}
+            date={dates[0]}
+            time={times[0]}
+            onDateChange={(date) => handleSetDate(date, 0)}
+            onTimeChange={(time) => handleSetTime(time, 0)}
+        />
+        {numberOfShowings > 2 && dates[0] && times[0] && (
+            <div className='flex flex-row'>
+                <p>Autofill:</p>
+                <select value={autofillSelection} onChange={(e) => setAutofillSelection(Number(e.target.value))}>
+                    {getAutofillOptions().map((option) => (
+                        <option key={option.value} value={option.value}>{option.text}</option>
+                    ))}
+                </select>
+                <Button caption='Go' onClick={handleAutofill} />
+            </div>
+        )}
+        {numberOfShowings > 1 && (
+            [...Array(Math.min(51, numberOfShowings - 1))].map((x, arrayIndex) => {
+                const index = arrayIndex + 1;
+                return <DateAndTime
+                    key={index}
+                    index={index}
+                    date={dates[index]}
+                    time={times[index]}
+                    onDateChange={(date) => handleSetDate(date, index)}
+                    onTimeChange={(time) => handleSetTime(time, index)}
+                    label={`Showing #${index + 1}`}
+                />
+            })
+        )}
+    </>
+}
+
+export default function DateInputs() {
+    const [datesTBD, setDatesTBD] = useState<boolean>(false);
+    const [isRecurring, setIsRecurring] = useState<boolean>(false);
 
     return (
         <>
@@ -114,49 +189,18 @@ export default function DateInputs() {
                 />
                 <label htmlFor='tbd'>Dates TBD</label>
             </div>
-            {!datesTBD && <>
-                <Input type='number'
-                    name='showings'
-                    label='Number of Showings'
-                    value={`${numberOfShowings}`}
-                    onChange={(value) => setNumberOfShowings(Number(value))}
-                    min={1}
-                    max={52}
+            {!datesTBD && <div>
+                <input
+                    name='recurring'
+                    type='checkbox'
+                    id='recurring'
+                    className='mr-1'
+                    onChange={(e) => setIsRecurring(e.target.checked)}
                 />
-                <DateAndTime
-                    index={0}
-                    label={numberOfShowings > 1 ? 'Showing #1' : 'Date'}
-                    date={dates[0]}
-                    time={times[0]}
-                    onDateChange={(date) => handleSetDate(date, 0)}
-                    onTimeChange={(time) => handleSetTime(time, 0)}
-                />
-                {numberOfShowings > 2 && dates[0] && times[0] && (
-                    <div className='flex flex-row'>
-                        <p>Autofill:</p>
-                        <select value={autofillSelection} onChange={(e) => setAutofillSelection(Number(e.target.value))}>
-                            {getAutofillOptions().map((option) => (
-                                <option key={option.value} value={option.value}>{option.text}</option>
-                            ))}
-                        </select>
-                        <Button caption='Go' onClick={handleAutofill} />
-                    </div>
-                )}
-                {numberOfShowings > 1 && (
-                    [...Array(Math.min(51, numberOfShowings - 1))].map((x, arrayIndex) => {
-                        const index = arrayIndex + 1;
-                        return <DateAndTime
-                            key={index}
-                            index={index}
-                            date={dates[index]}
-                            time={times[index]}
-                            onDateChange={(date) => handleSetDate(date, index)}
-                            onTimeChange={(time) => handleSetTime(time, index)}
-                            label={`Showing #${index + 1}`}
-                        />
-                    })
-                )}
-            </>}
+                <label htmlFor='recurring'>Ongoing show</label>
+            </div>}
+            {!datesTBD && isRecurring && <RecurringOptions />}
+            {!(datesTBD || isRecurring) && <ScheduleOptions />}
         </>
     )
 }
