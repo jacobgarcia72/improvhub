@@ -1,7 +1,7 @@
 'use client'
 import Button from '@/components/form/button';
 import Input from '@/components/form/input';
-import { addDays, addOrdinal, weekdays } from '@/lib/dates';
+import { addDays, addOrdinal, findNextOrdinalWeekday, formatDate, getDayOfWeek, getWeekdayOccurence, newDate } from '@/lib/dates';
 import { useState } from 'react';
 
 
@@ -55,10 +55,9 @@ export default function DateInputs() {
 
     const getAutofillOptions = (): { value: number, text: string }[] => {
         if (dates[0]) {
-            const date = new Date(`${dates[0]} 00:00`);
-            const dayOfWeek = weekdays[date.getDay()];
-            const dayOfMonth = date.getDate();
-            const weekdayOccurrence = Math.floor((dayOfMonth - 1) / 7) + 1;
+            const date = newDate(dates[0]);
+            const dayOfWeek = getDayOfWeek(date);
+            const weekdayOccurrence = getWeekdayOccurence(date);
             let complimentaryOccurences;
             if ([1, 3].includes(weekdayOccurrence)) complimentaryOccurences = '1st and 3rd';
             if ([2, 4].includes(weekdayOccurrence)) complimentaryOccurences = '2nd and 4th';
@@ -70,7 +69,6 @@ export default function DateInputs() {
             if (complimentaryOccurences) {
                 options.push({ value: 3, text: `Every ${complimentaryOccurences} ${dayOfWeek}` });
             }
-            options.push({ value: 4, text: `Every ${addOrdinal(dayOfMonth)} day of the Month` });
             return options;
         } else {
             return [];
@@ -79,15 +77,16 @@ export default function DateInputs() {
 
     const handleAutofill = () => {
         const newDates = dates.slice();
-        const baseDate = new Date(dates[0]);
         for (let index = 1; index < numberOfShowings; index++) {
             switch (autofillSelection) {
                 case 0:
-                    newDates[index] = addDays(baseDate, index * 7).toISOString().split('T')[0];
+                    newDates[index] = formatDate(addDays(newDates[index - 1], 7));
                     break;
                 case 1:
-                    newDates[index] = addDays(baseDate, index * 14).toISOString().split('T')[0];
+                    newDates[index] = formatDate(addDays(newDates[index - 1], 14));
                     break;
+                case 2:
+                    newDates[index] = formatDate(findNextOrdinalWeekday(newDates[index - 1]));
                 default:
                     break;
             }
