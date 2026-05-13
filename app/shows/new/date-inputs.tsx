@@ -6,7 +6,7 @@ import { useState } from 'react';
 
 function RecurringOptions() {
     const [weekday, setWeekday] = useState<number>(0);
-    const [cadence, setCadence] = useState<number>(0);
+    const [cadence, setCadence] = useState<string>('all');
     return (
         <div className="flex flex-row">
             <div>
@@ -17,19 +17,22 @@ function RecurringOptions() {
             </div>
             <div>
                 <label htmlFor='cadence'>Cadence</label>
-                <select id='cadence' value={cadence} onChange={(e) => setCadence(Number(e.target.value))}>
-                    <option value={0}>{`Every ${weekdays[weekday]}`}</option>
-                    <option value={1}>{`1st ${weekdays[weekday]} of each month`}</option>
-                    <option value={2}>{`2nd ${weekdays[weekday]} of each month`}</option>
-                    <option value={3}>{`3rd ${weekdays[weekday]} of each month`}</option>
-                    <option value={4}>{`4th ${weekdays[weekday]} of each month`}</option>
-                    <option value={5}>{`Last ${weekdays[weekday]} of each month`}</option>
-                    <option value={4}>{`5th ${weekdays[weekday]}s`}</option>
-                    <option value={6}>{`1st and 3rd ${weekdays[weekday]}s`}</option>
-                    <option value={7}>{`Even ${weekdays[weekday]}s (2nd and 4th)`}</option>
-                    <option value={8}>{`Odd ${weekdays[weekday]}s (1st, 3rd and 5th)`}</option>
+                <select id='cadence' value={cadence} onChange={(e) => setCadence(e.target.value)}>
+                    <option value="all">{`Every ${weekdays[weekday]}`}</option>
+                    <option value="1">{`1st ${weekdays[weekday]} of each month`}</option>
+                    <option value="2">{`2nd ${weekdays[weekday]} of each month`}</option>
+                    <option value="3">{`3rd ${weekdays[weekday]} of each month`}</option>
+                    <option value="4">{`4th ${weekdays[weekday]} of each month`}</option>
+                    <option value="last">{`Last ${weekdays[weekday]} of each month`}</option>
+                    <option value="5">{`5th ${weekdays[weekday]}s`}</option>
+                    <option value="13">{`1st and 3rd ${weekdays[weekday]}s`}</option>
+                    <option value="24">{`Even ${weekdays[weekday]}s (2nd and 4th)`}</option>
+                    <option value="135">{`Odd ${weekdays[weekday]}s (1st, 3rd and 5th)`}</option>
                 </select>
             </div>
+            <Input
+                label='Time' name='regularTime' type='time' required
+            />
         </div>
     )
 }

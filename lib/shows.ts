@@ -4,12 +4,36 @@ import fs from 'node:fs';
 
 import slugify from 'slugify';
 
-import { Event, EventFormData } from "@/types";
+import { Event } from "@/types";
 import { dummyShows } from "./dummy-data";
+import sql from 'better-sqlite3';
 
-export async function getShow(id: string): Promise<Event | null> {
-    const show = dummyShows.find((s) => s.id === id);
-    return show || null;
+const contentDB = sql('content.db');
+
+function initDb() {
+    contentDB.prepare(`
+        CREATE TABLE IF NOT EXISTS shows (
+            id STRING PRIMARY KEY,
+            creatorId TEXT NOT NULL,
+            title TEXT NOT NULL,
+            dates TEXT,
+            times TEXT,
+            description TEXT,
+            theatre TEXT,
+            zipcode TEXT,
+            price NUMERIC,
+            doorPrice NUMERIC,
+            webpage TEXT,
+            image TEXT,
+            teams TEXT,
+            performers TEXT,
+        )
+    `).run();
+}
+initDb();
+
+export async function getShow(id: string) {
+    return await contentDB.prepare('SELECT * FROM shows WHERE id = ?').get(id);
 }
 
 export async function getShows(): Promise<Event[]> {
@@ -20,32 +44,54 @@ export async function getShows(): Promise<Event[]> {
     return dummyShows;
 }
 
-export async function saveShow(show: EventFormData): Promise<string> {
-    const showId = slugify(`${show.theatre} ${show.title}`, { lower: true });
-    // show.description = xss(meal.description);
+export async function saveShow(show: Event, imageFile?: File): Promise<string> {
+    show.id = slugify(`${show.theatre} ${show.title}`, { lower: true });
+    // show.description = xss(show.description);
 
-    if (show.image) {
-        const extension = show.image.name.split('.').pop();
-        const fileName = `${showId}.${extension}`;
+    if (imageFile) {
+        const extension = imageFile.name.split('.').pop();
+        const fileName = `${show.id}.${extension}`;
 
         const stream = fs.createWriteStream(`public/temp-images/${fileName}`);
-        const bufferedImage = await show.image.arrayBuffer();
-        console.log(fileName)
+        const bufferedImage = await imageFile.arrayBuffer();
         stream.write(Buffer.from(bufferedImage), (error) => {
-            console.log('Finished writing image');
             if (error) {
                 throw new Error('Failed to save image');
             }
         });
 
-        show.imageUrl = `/temp-images/${fileName}`;
+        show.image = `/temp-images/${fileName}`;
     }
 
-    // db.prepare(`
-    //     INSERT INTO shows
-    //         (title, summary, instructions, creator, creator_email, image, slug)
-    //     VALUES
-    //         (@title, @summary, @instructions, @creator, @creator_email, @image, @slug)
-    // `).run(show);
-    return showId;
+    contentDB.prepare(`
+        INSERT INTO shows (
+            id,
+            creatorId,
+            title,
+            dates,
+            times,
+            description,
+            theatre,
+            zipcode,
+            price,
+            doorPrice,
+            webpage,
+            image,
+        )
+        VALUES (
+            $id,
+            $creatorId,
+            $title,
+            $dates,
+            $times,
+            $description,
+            $theatre,
+            $zipcode,
+            $price,
+            $doorPrice,
+            $webpage,
+            $image,
+        )
+    `).run(show);
+    return show.id;
 }

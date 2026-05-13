@@ -7,26 +7,21 @@ export interface Theatre {
     logo?: string;
 }
 
-export interface EventFormData {
+export interface Event {
+    id: string;
+    creatorId: string;
     title: string;
-    type: 'show' | 'jam' | 'class';
-    date?: string;
-    time?: string;
+    dates?: string;
+    times?: string;
     description?: string;
     theatre?: string;
     zipcode?: string;
     price?: number;
     doorPrice?: number;
     webpage?: string;
-    image?: File;
-    imageUrl?: string;
+    image?: string;
     teams?: Team[];
     performers?: User[];
-}
-
-export interface Event extends EventFormData {
-    id: string;
-    creatorId: string;
 }
 
 interface Team {

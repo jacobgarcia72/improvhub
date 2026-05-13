@@ -21,7 +21,7 @@ export default function NewShowPage() {
                             <Input label="Ticket Price" name="price" type="price"/>
                         </div>
                         <div>
-                            <Input label="Price at Door (if different)" name="door" type="price" />
+                            <Input label="Price at Door (if different)" name="doorPrice" type="price" />
                         </div>
                     </div>
                     <Input label="Webpage" name="webpage" type="url" />

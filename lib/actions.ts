@@ -3,30 +3,55 @@
 import { redirect } from "next/navigation";
 import { saveShow } from "./shows";
 import { revalidatePath } from "next/cache";
-import { EventFormData, User } from "@/types";
+import { Event, User } from "@/types";
 import { saveUser } from "./users";
+import { weekdayInitials } from "./dates";
+import { theatres } from "./theatres";
 
 export async function postShow(prevState: void | { message?: string }, formData: FormData) {
-    const show: EventFormData = {
+    let dates: string = '';
+    let times: string = '';
+    if (formData.get('tbd') === 'off') {
+        if (formData.get('recurring') === 'on') {
+            dates = `${weekdayInitials[Number(formData.get('weekday'))]}-${formData.get('cadence')}`;
+            times = formData.get('regularTime') as string;
+        } else {
+            const totalShowings = Number(formData.get('showings'));
+            for (let i = 0; i < totalShowings; i++) {
+                dates += formData.get(`date-${i}`);
+                times += formData.get(`time-${i}`);
+                if (i < totalShowings - 1) {
+                    dates += ','
+                    times += ','
+                }
+            }
+        }
+    }
+
+    let zipcode = formData.get('zipcode') as string;
+    const theatre = formData.get('theatre') as string;
+    if (theatre && !zipcode) zipcode = theatres.find((t) => t.name.toLowerCase() === theatre.toLowerCase())?.zipcode || '';
+
+
+    const show: Event = {
+        id: '',
+        creatorId: '1', // TODO: Use actual userId
         title: formData.get('title') as string,
-        type: 'show',
-        image: formData.get('image') as File,
-        theatre: formData.get('theatre') as string,
-        zipcode: formData.get('zipcode') as string,
+        theatre,
+        zipcode,
         description: formData.get('description') as string,
-        date: formData.get('date') as string,
-        time: formData.get('time') as string,
+        dates,
+        times,
         price: Number(formData.get('price')),
-        doorPrice: Number(formData.get('door')),
+        doorPrice: Number(formData.get('doorPrice')),
         webpage: formData.get('webpage') as string,
     }
 
     if (!show.title) return { message: 'Title is required' };
-    if (!(show.zipcode && `${show.zipcode}`.length === 5)) return { message: 'ZIP Code is required' };
-    if (!show.date) return { message: 'Date is required' };
-    if (!show.time) return { message: 'Time is required' };
 
-    const showId = await saveShow(show);
+    const imageFile = formData.get('image') as File;
+
+    const showId = await saveShow(show, imageFile);
     revalidatePath(`/shows/${showId}`);
     redirect(`/shows/${showId}`);
 }
