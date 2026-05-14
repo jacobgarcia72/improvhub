@@ -8,25 +8,23 @@ import DateInputs from './date-inputs';
 
 export default function NewShowPage() {
     return (
-        <main>
-            <section>
-                <Form onSubmit={postShow} buttonCaption="Create Show">
-                    <Input label="Show Name" name="title" required />
-                    <ImagePicker />
-                    <TheatreSelect />
-                    <Text label="Description" name="description" />
-                    <DateInputs />
-                    <div className="flex flex-row gap-4 flex-wrap">
-                        <div>
-                            <Input label="Ticket Price" name="price" type="price"/>
-                        </div>
-                        <div>
-                            <Input label="Price at Door (if different)" name="doorPrice" type="price" />
-                        </div>
+        <section>
+            <Form onSubmit={postShow} buttonCaption="Create Show">
+                <Input label="Show Name" name="title" required />
+                <ImagePicker />
+                <TheatreSelect />
+                <Text label="Description" name="description" />
+                <DateInputs />
+                <div className="flex flex-row gap-4 flex-wrap">
+                    <div>
+                        <Input label="Ticket Price" name="price" type="price"/>
                     </div>
-                    <Input label="Webpage" name="webpage" type="url" />
-                </Form>
-            </section>
-        </main>
+                    <div>
+                        <Input label="Price at Door (if different)" name="doorPrice" type="price" />
+                    </div>
+                </div>
+                <Input label="Webpage" name="webpage" type="url" />
+            </Form>
+        </section>
     )
 }

@@ -38,34 +38,32 @@ export default async function UserProfilePage({ params }: { params: Promise<{use
     theatres = 'The Hideout Theatre'
     return (
         <Suspense fallback={<p>Loading</p>}>
-            <main>
-                <LayoutCard className="flex flex-row">
-                    <div>
-                        {user.image ? (
-                            <Image className="object-cover rounded-xl w-32 h-32"
-                                src={user.image} alt={displayName} width={120} height={120} />
-                        ) : (
-                            <div className="h-full w-full">{initials}</div>
-                        )}
-                    </div>
-                    <div className="pl-2 flex items-end">
-                        <h1 className="text-xl">{displayName}{user.pronouns && <span className="text-sm">&nbsp;({user.pronouns})</span>}</h1>
-                        {user.headline && <h2>{user.headline}</h2>}
-                    </div>
-                </LayoutCard>
-                <LayoutCard header="Bio">
-                    {user.bio}
-                </LayoutCard>
-                <LayoutCard header="Theatres">
-                    {theatres}
-                </LayoutCard>
-                <LayoutCard header="Experience">
-                    {user.experience}
-                </LayoutCard>
-                <LayoutCard header="Website">
-                    {user.website && <a href={user.website}>{user.website}</a>}
-                </LayoutCard>
-            </main>
+            <LayoutCard className="flex flex-row">
+                <div>
+                    {user.image ? (
+                        <Image className="object-cover rounded-xl w-32 h-32"
+                            src={user.image} alt={displayName} width={120} height={120} />
+                    ) : (
+                        <div className="h-full w-full">{initials}</div>
+                    )}
+                </div>
+                <div className="pl-2 flex items-end">
+                    <h1 className="text-xl">{displayName}{user.pronouns && <span className="text-sm">&nbsp;({user.pronouns})</span>}</h1>
+                    {user.headline && <h2>{user.headline}</h2>}
+                </div>
+            </LayoutCard>
+            <LayoutCard header="Bio">
+                {user.bio}
+            </LayoutCard>
+            <LayoutCard header="Theatres">
+                {theatres}
+            </LayoutCard>
+            <LayoutCard header="Experience">
+                {user.experience}
+            </LayoutCard>
+            <LayoutCard header="Website">
+                {user.website && <a href={user.website}>{user.website}</a>}
+            </LayoutCard>
         </Suspense>
     )
 }
