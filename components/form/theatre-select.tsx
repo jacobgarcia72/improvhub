@@ -20,7 +20,7 @@ export default function TheatreSelect() {
                 <Autocomplete label="Theatre" name="theatre" options={theatreNames} onChange={(value) => autofillZipcode(value)} />
             </div>
             <div>
-                <Input label="ZIP Code" name="zipcode" required type='zipcode' value={zipcode} />
+                <Input label="ZIP Code" name="zipcode" type='zipcode' value={zipcode} />
             </div>
         </div>
     )

@@ -31,3 +31,10 @@ export const findNextOrdinalWeekday = (date: Date | string, ordinals: number[]):
 }
 
 export const formatDate = (date: Date): string => date.toISOString().split('T')[0];
+
+export const formatTime = (time: string): string => {
+    const [hour, minute] = time.split(':').map(Number);
+    const ampm = hour >= 12 ? 'pm' : 'am';
+    const formattedHour = hour % 12 === 0 ? 12 : hour % 12;
+    return `${formattedHour}:${minute.toString().padStart(2, '0')}${ampm}`;
+}

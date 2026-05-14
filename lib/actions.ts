@@ -13,12 +13,18 @@ export async function postShow(prevState: void | { message?: string }, formData:
     const title = (formData.get('title') as string)?.trim() || null;
     if (!title) return { message: 'Title is required' };
 
+    const webpage = (formData.get('webpage') as string)?.trim() || null;
+    if (webpage) {
+        const isValid = URL.canParse(webpage);
+        if (!isValid) return { message: 'Webpage must be a valid URL' };
+    }
+
     let dates: string | null = null;
     let times: string | null = null;
     let recurringDay: WeekdayInitial | null = null;
     let cadence: Candence | null = null;
-    if (formData.get('tbd') === 'off') {
-        if (formData.get('recurring') === 'on') {
+    if (!formData.get('tbd')) {
+        if (formData.get('recurring')) {
             recurringDay = weekdayInitials[Number(formData.get('weekday'))];
             cadence = formData.get('cadence') as Candence;
             times = formData.get('regularTime') as string;
@@ -47,21 +53,31 @@ export async function postShow(prevState: void | { message?: string }, formData:
     const price = formData.get('price');
     const doorPrice = formData.get('doorPrice');
 
+    const photoCredit = (formData.get('photoCredit') as string)?.trim() || null;
+    const runtime = (formData.get('runtime') as string)?.trim() || null;
+    const notes = (formData.get('notes') as string)?.trim() || null;
+
+    let description = formData.get('description') as string || null;
+    if (description) description = description.replace(/\r\n/g, '<br>').replace(/\n/g, '<br>').replace(/\r/g, '<br>');
+
     const show: Event = {
         id: '',
         creatorId: '1', // TODO: Use actual userId
         title,
         image: null,
+        photoCredit,
         theatre,
         zipcode,
-        description: formData.get('description') as string || null,
+        description,
         dates,
         times,
         recurringDay,
         cadence,
+        runtime,
         price: price === '' ? null : Number(price),
         doorPrice: doorPrice === '' ? null : Number(doorPrice),
-        webpage: (formData.get('webpage') as string)?.trim() || null,
+        webpage,
+        notes
     }
 
     const imageFile = formData.get('image') as File || null;

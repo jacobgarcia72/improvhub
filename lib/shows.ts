@@ -28,6 +28,9 @@ function initDb() {
             doorPrice NUMERIC,
             webpage TEXT,
             image TEXT,
+            photoCredit TEXT,
+            runtime TEXT,
+            notes TEXT,
             teams TEXT,
             performers TEXT
         )
@@ -92,7 +95,10 @@ export async function saveShow(show: Event, imageFile: File | null): Promise<str
             price,
             doorPrice,
             webpage,
-            image
+            image,
+            photoCredit,
+            runtime,
+            notes
         )
         VALUES (
             $id,
@@ -108,7 +114,10 @@ export async function saveShow(show: Event, imageFile: File | null): Promise<str
             $price,
             $doorPrice,
             $webpage,
-            $image
+            $image,
+            $photoCredit,
+            $runtime,
+            $notes
         )
     `).run(show);
 

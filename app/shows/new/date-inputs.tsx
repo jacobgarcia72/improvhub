@@ -9,16 +9,16 @@ function RecurringOptions() {
     const [weekday, setWeekday] = useState<number>(0);
     const [cadence, setCadence] = useState<Candence>('12345');
     return (
-        <div className="flex flex-row">
+        <div className="flex flex-row flex-wrap">
             <div>
                 <label htmlFor='weekday'>Day of the Week</label>
-                <select id='weekday' value={weekday} onChange={(e) => setWeekday(Number(e.target.value))}>
+                <select id='weekday' name='weekday' value={weekday} onChange={(e) => setWeekday(Number(e.target.value))}>
                     {weekdays.map((day, i) => <option key={i} value={i}>{day}</option>)}
                 </select>
             </div>
             <div>
                 <label htmlFor='cadence'>Cadence</label>
-                <select id='cadence' value={cadence} onChange={(e) => setCadence(e.target.value as Candence)}>
+                <select id='cadence' name='cadence' value={cadence} onChange={(e) => setCadence(e.target.value as Candence)}>
                     <option value="12345">{`Every ${weekdays[weekday]}`}</option>
                     <option value="1">{`1st ${weekdays[weekday]} of each month`}</option>
                     <option value="2">{`2nd ${weekdays[weekday]} of each month`}</option>
@@ -157,7 +157,7 @@ function ScheduleOptions() {
                         <option key={option.value} value={option.value}>{option.text}</option>
                     ))}
                 </select>
-                <Button caption='Go' onClick={handleAutofill} />
+                <Button type='button' caption='Go' onClick={handleAutofill} />
             </div>
         )}
         {numberOfShowings > 1 && (
@@ -189,6 +189,7 @@ export default function DateInputs() {
                     type='checkbox'
                     id='tbd'
                     className='mr-1'
+                    value={1}
                     onChange={(e) => setDatesTBD(e.target.checked)}
                 />
                 <label htmlFor='tbd'>Dates TBD</label>
@@ -199,6 +200,7 @@ export default function DateInputs() {
                     type='checkbox'
                     id='recurring'
                     className='mr-1'
+                    value={1}
                     onChange={(e) => setIsRecurring(e.target.checked)}
                 />
                 <label htmlFor='recurring'>Ongoing show</label>

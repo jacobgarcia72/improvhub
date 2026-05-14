@@ -11,8 +11,9 @@ export default function NewShowPage() {
         <section>
             <Form onSubmit={postShow} buttonCaption="Create Show">
                 <Input label="Show Name" name="title" required />
-                <ImagePicker />
                 <TheatreSelect />
+                <ImagePicker />
+                <Input label="Photo Credit" name="photoCredit" />
                 <Text label="Description" name="description" />
                 <DateInputs />
                 <div className="flex flex-row gap-4 flex-wrap">
@@ -23,7 +24,10 @@ export default function NewShowPage() {
                         <Input label="Price at Door (if different)" name="doorPrice" type="price" />
                     </div>
                 </div>
+                {/* TODO: make hours and minutes inputs */}
+                <Input label="Approximate Runtime" name="runtime" />
                 <Input label="Webpage" name="webpage" type="url" />
+                <Input label="Notes (Trademark info, etc.)" name="notes" maxLength={200} />
             </Form>
         </section>
     )
