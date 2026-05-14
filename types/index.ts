@@ -7,21 +7,27 @@ export interface Theatre {
     logo?: string;
 }
 
+export type Candence = '1' | '2' | '3' | '4' | '5' | '13' | '24' |'135' | '12345' | 'last';
+
+export type WeekdayInitial = 'u' | 'm' | 't' | 'w' | 'r' | 'f' | 's';
+
 export interface Event {
     id: string;
     creatorId: string;
     title: string;
-    dates?: string;
-    times?: string;
-    description?: string;
-    theatre?: string;
-    zipcode?: string;
-    price?: number;
-    doorPrice?: number;
-    webpage?: string;
-    image?: string;
-    teams?: Team[];
-    performers?: User[];
+    dates: string | null;
+    times: string | null;
+    recurringDay: WeekdayInitial | null;
+    cadence: Candence | null;
+    description: string | null;
+    theatre: string | null;
+    zipcode: string | null;
+    price: number | null;
+    doorPrice: number | null;
+    webpage: string | null;
+    image: string | null;
+    teams?: Team[] | null;
+    performers?: User[] | null;
 }
 
 interface Team {

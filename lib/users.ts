@@ -41,7 +41,7 @@ export async function saveUser(user: User, image?: File): Promise<string> {
         user.username = `${user.firstName.toLowerCase().trim()}-${getRandomNumberString(5)}`;
     }
 
-    if (image) {
+    if (image && image.size) {
         const extension = image.name.split('.').pop();
         const fileName = `${user.username}.${extension}`;
 

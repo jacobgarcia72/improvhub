@@ -10,7 +10,7 @@ interface DistanceSelectProps {
 
 export default function DistanceSelect({ onUpdate, label }: DistanceSelectProps) {
     const [zipcode, setZipcode] = useState(() => {
-        const stored = localStorage.getItem('zipcode');
+        const stored = window?.localStorage.getItem('zipcode');
         return stored || '';
     });
     const [miles, setMiles] = useState(25);

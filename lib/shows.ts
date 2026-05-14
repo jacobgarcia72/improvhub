@@ -7,6 +7,7 @@ import slugify from 'slugify';
 import { Event } from "@/types";
 import { dummyShows } from "./dummy-data";
 import sql from 'better-sqlite3';
+import { removeLeadingArticles } from './helper-functions';
 
 const contentDB = sql('content.db');
 
@@ -18,6 +19,8 @@ function initDb() {
             title TEXT NOT NULL,
             dates TEXT,
             times TEXT,
+            recurringDay TEXT,
+            cadence TEXT,
             description TEXT,
             theatre TEXT,
             zipcode TEXT,
@@ -26,7 +29,7 @@ function initDb() {
             webpage TEXT,
             image TEXT,
             teams TEXT,
-            performers TEXT,
+            performers TEXT
         )
     `).run();
 }
@@ -44,11 +47,22 @@ export async function getShows(): Promise<Event[]> {
     return dummyShows;
 }
 
-export async function saveShow(show: Event, imageFile?: File): Promise<string> {
-    show.id = slugify(`${show.theatre} ${show.title}`, { lower: true });
+export async function saveShow(show: Event, imageFile: File | null): Promise<string> {
+    const id = slugify(`${show.theatre ? removeLeadingArticles(show.theatre) + ' ' : ''}${removeLeadingArticles(show.title)}`, { lower: true, trim: true });
+    show.id = id;
+    let isUnique = false;
+    let counter = 1;
+
+    while (!isUnique) {
+        isUnique = !Boolean(await getShow(show.id));
+        if (!isUnique) {
+            counter++;
+            show.id = `${id}-${counter}`;
+        }
+    }
     // show.description = xss(show.description);
 
-    if (imageFile) {
+    if (imageFile && imageFile.size) {
         const extension = imageFile.name.split('.').pop();
         const fileName = `${show.id}.${extension}`;
 
@@ -70,13 +84,15 @@ export async function saveShow(show: Event, imageFile?: File): Promise<string> {
             title,
             dates,
             times,
+            recurringDay,
+            cadence,
             description,
             theatre,
             zipcode,
             price,
             doorPrice,
             webpage,
-            image,
+            image
         )
         VALUES (
             $id,
@@ -84,14 +100,17 @@ export async function saveShow(show: Event, imageFile?: File): Promise<string> {
             $title,
             $dates,
             $times,
+            $recurringDay,
+            $cadence,
             $description,
             $theatre,
             $zipcode,
             $price,
             $doorPrice,
             $webpage,
-            $image,
+            $image
         )
     `).run(show);
+
     return show.id;
 }

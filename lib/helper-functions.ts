@@ -27,3 +27,15 @@ export const getRandomNumberString = (digits: number): string => {
     return Array.from({ length: digits }, () => Math.floor(Math.random() * 10)).join('');
 };
 
+export const removeLeadingArticles = (text: string): string => {
+    let result = text;
+    const articles = ['a', 'an', 'the'];
+    for (let index = 0; index < articles.length; index++) {
+        const article = articles[index];
+        if (result.toLowerCase().startsWith(`${article} `)) {
+            result = result.slice(article.length + 1);
+            break;
+        }   
+    }
+    return result;
+}

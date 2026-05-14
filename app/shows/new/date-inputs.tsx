@@ -2,11 +2,12 @@
 import Button from '@/components/form/button';
 import Input from '@/components/form/input';
 import { addDays, addOrdinal, findNextOrdinalWeekday, formatDate, getDayOfWeek, getWeekdayOccurence, newDate, weekdays } from '@/lib/dates';
+import { Candence } from '@/types';
 import { useState } from 'react';
 
 function RecurringOptions() {
     const [weekday, setWeekday] = useState<number>(0);
-    const [cadence, setCadence] = useState<string>('all');
+    const [cadence, setCadence] = useState<Candence>('12345');
     return (
         <div className="flex flex-row">
             <div>
@@ -17,8 +18,8 @@ function RecurringOptions() {
             </div>
             <div>
                 <label htmlFor='cadence'>Cadence</label>
-                <select id='cadence' value={cadence} onChange={(e) => setCadence(e.target.value)}>
-                    <option value="all">{`Every ${weekdays[weekday]}`}</option>
+                <select id='cadence' value={cadence} onChange={(e) => setCadence(e.target.value as Candence)}>
+                    <option value="12345">{`Every ${weekdays[weekday]}`}</option>
                     <option value="1">{`1st ${weekdays[weekday]} of each month`}</option>
                     <option value="2">{`2nd ${weekdays[weekday]} of each month`}</option>
                     <option value="3">{`3rd ${weekdays[weekday]} of each month`}</option>
