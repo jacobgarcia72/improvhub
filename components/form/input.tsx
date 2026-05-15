@@ -81,9 +81,9 @@ export default function Input({
     }
 
     return (
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col">
             {label && <label htmlFor={name}>{inputLabel}</label>}
-            <input className="border border-gray-300 rounded px-3 py-2"
+            <input
                 value={value || inputValue}
                 onChange={handleChange}
                 type={customTypes.includes(type) ? 'text' : type}

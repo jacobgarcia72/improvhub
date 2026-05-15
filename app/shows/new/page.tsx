@@ -16,11 +16,11 @@ export default function NewShowPage() {
                 <Input label="Photo Credit" name="photoCredit" />
                 <Text label="Description" name="description" />
                 <DateInputs />
-                <div className="flex flex-row gap-4 flex-wrap">
-                    <div>
+                <div className="flex flex-row flex-wrap">
+                    <div className="w-1/2 pr-2">
                         <Input label="Ticket Price" name="price" type="price"/>
                     </div>
-                    <div>
+                    <div className="w-1/2">
                         <Input label="Price at Door (if different)" name="doorPrice" type="price" />
                     </div>
                 </div>

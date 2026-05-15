@@ -66,7 +66,7 @@ const Autocomplete: React.FC<AutocompleteProps> = ({ options, placeholder, onCha
     if (label && required) inputLabel += ' *';
 
   return (
-    <div style={{ position: 'relative', width: '100%' }}>
+    <div className="flex flex-col relative">
       {label && <label htmlFor={name}>{inputLabel}</label>}
       <input
         name={name}
@@ -79,12 +79,7 @@ const Autocomplete: React.FC<AutocompleteProps> = ({ options, placeholder, onCha
         onFocus={() => setShowOptions(value !== '')}
         onBlur={() => setTimeout(() => setShowOptions(false), 100)}
         onKeyDown={handleKeyDown}
-        style={{
-          width: '100%',
-          padding: '8px 12px',
-          border: '1px solid #ccc',
-          borderRadius: '4px',
-        }}
+        autoComplete="off"
       />
 
       {showOptions && filteredOptions.length > 0 && (

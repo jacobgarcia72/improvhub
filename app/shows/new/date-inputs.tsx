@@ -9,32 +9,34 @@ function RecurringOptions() {
     const [weekday, setWeekday] = useState<number>(0);
     const [cadence, setCadence] = useState<Candence>('12345');
     return (
-        <div className="flex flex-row flex-wrap">
-            <div>
-                <label htmlFor='weekday'>Day of the Week</label>
-                <select id='weekday' name='weekday' value={weekday} onChange={(e) => setWeekday(Number(e.target.value))}>
-                    {weekdays.map((day, i) => <option key={i} value={i}>{day}</option>)}
-                </select>
-            </div>
-            <div>
-                <label htmlFor='cadence'>Cadence</label>
-                <select id='cadence' name='cadence' value={cadence} onChange={(e) => setCadence(e.target.value as Candence)}>
-                    <option value="12345">{`Every ${weekdays[weekday]}`}</option>
-                    <option value="1">{`1st ${weekdays[weekday]} of each month`}</option>
-                    <option value="2">{`2nd ${weekdays[weekday]} of each month`}</option>
-                    <option value="3">{`3rd ${weekdays[weekday]} of each month`}</option>
-                    <option value="4">{`4th ${weekdays[weekday]} of each month`}</option>
-                    <option value="last">{`Last ${weekdays[weekday]} of each month`}</option>
-                    <option value="5">{`5th ${weekdays[weekday]}s`}</option>
-                    <option value="13">{`1st and 3rd ${weekdays[weekday]}s`}</option>
-                    <option value="24">{`Even ${weekdays[weekday]}s (2nd and 4th)`}</option>
-                    <option value="135">{`Odd ${weekdays[weekday]}s (1st, 3rd and 5th)`}</option>
-                </select>
+        <>
+            <div className="flex flex-row flex-wrap">
+                <div className="flex flex-col pr-2 w-2/5">
+                    <label htmlFor='weekday'>Day of the Week</label>
+                    <select id='weekday' name='weekday' value={weekday} onChange={(e) => setWeekday(Number(e.target.value))}>
+                        {weekdays.map((day, i) => <option key={i} value={i}>{day}</option>)}
+                    </select>
+                </div>
+                <div className="flex flex-col w-3/5">
+                    <label htmlFor='cadence'>Cadence</label>
+                    <select id='cadence' name='cadence' value={cadence} onChange={(e) => setCadence(e.target.value as Candence)}>
+                        <option value="12345">{`Every ${weekdays[weekday]}`}</option>
+                        <option value="1">{`1st ${weekdays[weekday]} of each month`}</option>
+                        <option value="2">{`2nd ${weekdays[weekday]} of each month`}</option>
+                        <option value="3">{`3rd ${weekdays[weekday]} of each month`}</option>
+                        <option value="4">{`4th ${weekdays[weekday]} of each month`}</option>
+                        <option value="last">{`Last ${weekdays[weekday]} of each month`}</option>
+                        <option value="5">{`5th ${weekdays[weekday]}s`}</option>
+                        <option value="13">{`1st and 3rd ${weekdays[weekday]}s`}</option>
+                        <option value="24">{`Even ${weekdays[weekday]}s (2nd and 4th)`}</option>
+                        <option value="135">{`Odd ${weekdays[weekday]}s (1st, 3rd and 5th)`}</option>
+                    </select>
+                </div>
             </div>
             <Input
                 label='Time' name='regularTime' type='time' required
             />
-        </div>
+        </>
     )
 }
 
@@ -47,15 +49,15 @@ function DateAndTime({ label = 'Day', index = 0, date, time, onDateChange, onTim
     onTimeChange?: (date: string) => void;
 }) {
     return (
-        <div className='flex flex-row flex-wrap gap-4'>
-            <div>
+        <div className='flex flex-row flex-wrap'>
+            <div className="w-1/2 pr-2">
                 <Input
                     onChange={onDateChange}
                     value={date}
                     label={label} name={`date-${index}`} type='date' required
                 />
             </div>
-            <div>
+            <div className="w-1/2">
                 <Input
                     onChange={onTimeChange}
                     value={time}
@@ -183,7 +185,8 @@ export default function DateInputs() {
 
     return (
         <>
-            <div>
+            <p className='-mb-1 label'>Show Dates</p>
+            <div className="checkbox-wrapper">
                 <input
                     name='tbd'
                     type='checkbox'
@@ -194,7 +197,7 @@ export default function DateInputs() {
                 />
                 <label htmlFor='tbd'>Dates TBD</label>
             </div>
-            {!datesTBD && <div>
+            {!datesTBD && <div className="checkbox-wrapper">
                 <input
                     name='recurring'
                     type='checkbox'
