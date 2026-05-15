@@ -6,7 +6,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import type { Metadata } from 'next'
 import { theatres } from "@/lib/theatres";
-import { formatTime, weekdayInitials, weekdays } from "@/lib/dates";
+import { formatDateTimeForDisplay, formatTime, removePastDates, weekdayInitials, weekdays } from "@/lib/dates";
 import Button from "@/components/form/button";
 
 type Props = {
@@ -32,6 +32,10 @@ function P({ children, className }: { children: React.ReactNode, className?: str
     return children ? <p className={`mb-4 mt-2 ${className}`}>{children}</p> : null;
 }
 
+function Header({ children }: { children: React.ReactNode }) {
+    return children ? <h3 className="mt-4 font-semibold text-sm">{children}</h3> : null;
+}
+
 export default async function ShowDetailsPage({ params }: Props) {
     const { id } = await params;
     const show = await getShow(id) as Event | undefined;
@@ -47,22 +51,31 @@ export default async function ShowDetailsPage({ params }: Props) {
     if (show.dates) dates = show.dates.split(',');
     if (show.times) times = show.times.split(',');
 
-    const getRecurringSchedule = (): string | null => {
-        if (show.recurringDay && show.cadence) {
-            const dayIndex = weekdayInitials.indexOf(show.recurringDay);
-            const day = weekdays[dayIndex];
-            let text = CadenceText[show.cadence].replace('X', day);
-            if (show.times) text += ` at ${formatTime(show.times)}`;
-            return `${text}!`;
-        }
-        return null;
+    let upcomingShows: string[] = [];
+    if (dates && times) {
+        upcomingShows = removePastDates(
+            dates.map((date, i) => {
+                const time = times?.[i] || times?.[0];
+                return `${date} ${time}`;
+            })
+        ).slice(0, 4);
     }
+
+    let recurringSchedule = null;
+    if (show.recurringDay && show.cadence) {
+        const dayIndex = weekdayInitials.indexOf(show.recurringDay);
+        const day = weekdays[dayIndex];
+        let text = CadenceText[show.cadence].replace('X', day);
+        if (show.times) text += ` at ${formatTime(show.times)}`;
+        recurringSchedule = `${text}!`;
+    }
+
 
     let ticketInfo = null;
     if (show.price !== null) {
-        ticketInfo = show.price ? `Tickets: $${show.price}` : 'Free show';
+        ticketInfo = `$${show.price}`;
         if (show.doorPrice !== null && show.doorPrice !== show.price) {
-            ticketInfo += ` (${show.doorPrice} at the door)`;
+            ticketInfo += ` ($${show.doorPrice} at the door)`;
         }
     }
 
@@ -85,16 +98,26 @@ export default async function ShowDetailsPage({ params }: Props) {
                     </div>
                     {imageUrl && <>
                         <Image src={imageUrl} alt={show.title} width={600} height={400} className="w-full h-72 object-cover rounded" />
-                        <P className="italic text-sm">{show.photoCredit && `Photo Credit: ${show.photoCredit}`}</P>
+                        <P className="italic text-sm">{show.image && show.photoCredit && `Photo Credit: ${show.photoCredit}`}</P>
                     </>}
                     {show.description?.split('<br>').map((line, i) => <P key={i}>{line}</P>)}
-                    <P>{getRecurringSchedule()}</P>
-                    {dates && <P>{`Show date${dates.length > 1 && 's'}:`}</P>}
-                    {dates?.map((date, i) => (
-                        <P key={i}>{date}{times?.[i] && ` at ${formatTime(times[i])}`}</P>
-                    ))}
-                    <P>{show.runtime && `Approximate runtime: ${show.runtime}`}</P>
-                    <P>{ticketInfo}</P>
+                    <div className="flex flex-row flex-wrap">
+                        <div className="w-1/2">
+                            {recurringSchedule && <Header>Show Schedule:</Header>}
+                            <P>{recurringSchedule}</P>
+                            {upcomingShows?.length > 1 && <Header>Upcoming Shows</Header>}
+                            {upcomingShows?.length === 1 && <Header>Show Date</Header>}
+                            {upcomingShows?.map((date, i) => (
+                                <P key={i}>{formatDateTimeForDisplay(date)}</P>
+                            ))}
+                        </div>
+                        <div className="w-1/2">
+                            {show.runtime && <Header>Approximate runtime:</Header>}
+                            <P>{show.runtime}</P>
+                            {ticketInfo && <Header>Ticket Price:</Header>}
+                            <P>{ticketInfo}</P>
+                        </div>
+                    </div>
                     {show.notes && <footer className="text-xs mt-4">{show.notes}</footer>}
                 </div>
             </section>

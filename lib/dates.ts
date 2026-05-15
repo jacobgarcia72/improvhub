@@ -38,3 +38,21 @@ export const formatTime = (time: string): string => {
     const formattedHour = hour % 12 === 0 ? 12 : hour % 12;
     return `${formattedHour}:${minute.toString().padStart(2, '0')}${ampm}`;
 }
+
+export const formatDateTimeForDisplay = (date: Date | string): string => {
+    const dateObject = typeof date === 'string' ? new Date(date) : date;
+    const month = dateObject.toLocaleString('default', { month: 'long' });
+    const day = dateObject.getDate();
+    const year = dateObject.getFullYear();
+    const time = dateObject.toLocaleTimeString([], { hour:'numeric', minute: '2-digit' });
+    return `${month} ${(day)}${year !== new Date().getFullYear() ? `, ${year}` : ''}, ${time}`;
+}
+
+export const removePastDates = (dates: string[]): string[] => {
+    const today = new Date();
+    return dates.filter(date => new Date(date) >= today);
+}
+
+export const sortDates = (dates: string[]): string[] => {
+    return dates.sort((a, b) => newDate(a).getTime() - newDate(b).getTime());
+}
