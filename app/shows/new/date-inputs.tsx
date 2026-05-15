@@ -1,6 +1,7 @@
 'use client'
 import Button from '@/components/form/button';
 import Input from '@/components/form/input';
+import XButton from '@/components/form/x';
 import { addDays, addOrdinal, findNextOrdinalWeekday, formatDate, getDayOfWeek, getWeekdayOccurence, newDate, weekdays } from '@/lib/dates';
 import { Candence } from '@/types';
 import { useState } from 'react';
@@ -40,30 +41,34 @@ function RecurringOptions() {
     )
 }
 
-function DateAndTime({ label = 'Day', index = 0, date, time, onDateChange, onTimeChange }: {
+function DateAndTime({ label = 'Day', index = 0, date, time, onDateChange, onTimeChange, removeDateTime }: {
     label: string;
     index: number;
     date: string;
     time: string;
     onDateChange?: (date: string) => void;
     onTimeChange?: (date: string) => void;
+    removeDateTime?: (index: number) => void;
 }) {
     return (
-        <div className='flex flex-row flex-wrap'>
-            <div className="w-1/2 pr-2">
+        <div className='flex flex-row flex-wrap items-end'>
+            <div className='pr-2 w-1/2'>
                 <Input
                     onChange={onDateChange}
                     value={date}
                     label={label} name={`date-${index}`} type='date' required
                 />
             </div>
-            <div className="w-1/2">
+            <div className={removeDateTime ? 'w-7/16' : 'w-1/2'}>
                 <Input
                     onChange={onTimeChange}
                     value={time}
                     label='Time' name={`time-${index}`} type='time' required
                 />
             </div>
+            {removeDateTime && <div className='w-1/16 pl-1 mb-1.5'>
+                <XButton onClick={() => removeDateTime(index)} />
+            </div>}
         </div>
     )
 }
@@ -84,6 +89,16 @@ function ScheduleOptions() {
         const newTimes = times.slice();
         newTimes[index] = time;
         setTimes(newTimes);
+    }
+
+    const handleRemoveDateTime = (index: number) => {
+        const newDates = dates.slice();
+        const newTimes = times.slice();
+        newDates.splice(index, 1);
+        newTimes.splice(index, 1);
+        setDates(newDates);
+        setTimes(newTimes);
+        setNumberOfShowings(numberOfShowings - 1);
     }
 
     const getAutofillOptions = (): { value: number, text: string }[] => {
@@ -173,6 +188,7 @@ function ScheduleOptions() {
                     onDateChange={(date) => handleSetDate(date, index)}
                     onTimeChange={(time) => handleSetTime(time, index)}
                     label={`Showing #${index + 1}`}
+                    removeDateTime={handleRemoveDateTime}
                 />
             })
         )}
