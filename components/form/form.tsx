@@ -15,9 +15,11 @@ export default function Form({ children, buttonCaption = 'Submit', onSubmit }: {
     const [formState, formAction] = useActionState(onSubmit, initialState);
 
     return (
-        <form action={formAction} className="flex flex-col gap-4 max-w-md mx-auto">
+        <form action={formAction} className="flex flex-col gap-4 max-w-md mx-auto mb-1">
             {children}
-            <Button caption={buttonCaption} />
+            <div className="my-2 w-full flex flex-col">
+                <Button caption={buttonCaption} />
+            </div>
             {formState?.message && <p>{formState.message}</p>}
         </form>
     )

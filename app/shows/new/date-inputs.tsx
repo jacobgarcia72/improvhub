@@ -34,9 +34,11 @@ function RecurringOptions() {
                     </select>
                 </div>
             </div>
-            <Input
-                label='Time' name='regularTime' type='time' required
-            />
+            <div className="w-1/2 pr-2">
+                <Input
+                    label='Time' name='regularTime' type='time' required
+                />
+            </div>
         </>
     )
 }
@@ -66,7 +68,7 @@ function DateAndTime({ label = 'Day', index = 0, date, time, onDateChange, onTim
                     label='Time' name={`time-${index}`} type='time' required
                 />
             </div>
-            {removeDateTime && <div className='w-1/16 pl-1 mb-1.5'>
+            {removeDateTime && <div className='w-1/16 pl-1.5 mb-1.5'>
                 <XButton onClick={() => removeDateTime(index)} />
             </div>}
         </div>
@@ -150,14 +152,16 @@ function ScheduleOptions() {
         setTimes(newTimes);
     }
     return <>
-        <Input type='number'
-            name='showings'
-            label='Number of Showings'
-            value={`${numberOfShowings}`}
-            onChange={(value) => setNumberOfShowings(Number(value))}
-            min={1}
-            max={52}
-        />
+        <div className="w-1/2 pr-2">
+            <Input type='number'
+                name='showings'
+                label='Number of Showings'
+                value={`${numberOfShowings}`}
+                onChange={(value) => setNumberOfShowings(Number(value))}
+                min={1}
+                max={52}
+            />
+        </div>
         <DateAndTime
             index={0}
             label={numberOfShowings > 1 ? 'Showing #1' : 'Date'}
@@ -166,15 +170,17 @@ function ScheduleOptions() {
             onDateChange={(date) => handleSetDate(date, 0)}
             onTimeChange={(time) => handleSetTime(time, 0)}
         />
-        {numberOfShowings > 2 && dates[0] && times[0] && (
-            <div className='flex flex-row'>
-                <p>Autofill:</p>
-                <select value={autofillSelection} onChange={(e) => setAutofillSelection(Number(e.target.value))}>
-                    {getAutofillOptions().map((option) => (
-                        <option key={option.value} value={option.value}>{option.text}</option>
-                    ))}
-                </select>
-                <Button type='button' caption='Go' onClick={handleAutofill} />
+        {numberOfShowings > 2 && dates[0] && (
+            <div className='flex flex-row items-end'>
+                <div className='flex flex-col mr-2'>
+                    <label htmlFor='autofill' className='pr-2'>Autofill:</label>
+                    <select value={autofillSelection} onChange={(e) => setAutofillSelection(Number(e.target.value))}>
+                        {getAutofillOptions().map((option) => (
+                            <option key={option.value} value={option.value}>{option.text}</option>
+                        ))}
+                    </select>
+                </div>
+                <Button type='button' caption='Autofill' onClick={handleAutofill} />
             </div>
         )}
         {numberOfShowings > 1 && (
@@ -209,7 +215,10 @@ export default function DateInputs() {
                     id='tbd'
                     className='mr-1'
                     value={1}
-                    onChange={(e) => setDatesTBD(e.target.checked)}
+                    onChange={(e) => {
+                        setDatesTBD(e.target.checked);
+                        if (e.target.checked) setIsRecurring(false);
+                    }}
                 />
                 <label htmlFor='tbd'>Dates TBD</label>
             </div>

@@ -32,9 +32,11 @@ export default function ImagePicker({ label = 'Image', name = 'image' }: {
     }
 
     return (
-        <>
+        <div className='flex flex-col'>
             <label htmlFor={name}>{label}</label>
-            {selectedImage && <Image src={selectedImage} alt="Selected image" width={100} height={100} />}
+            {selectedImage && <div className='mb-2'>
+                <Image src={selectedImage} alt="Selected image" width={500} height={500} />
+            </div>}
             <input
                 className='hidden'
                 type='file'
@@ -44,7 +46,7 @@ export default function ImagePicker({ label = 'Image', name = 'image' }: {
                 ref={imageInput}
                 onChange={handleImageChange}
             />
-            <Button type="button" caption="Pick Image" onClick={handlePickImage} />
-        </>
+            <Button type="button" caption={!selectedImage ?  "Pick Image" : "Change Image"} onClick={handlePickImage} />
+        </div>
     )
 }
