@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import { appName } from "@/lib/app-info";
 import { Metadata } from "next";
 import Link from "next/link";
+import Button from "@/components/form/button";
 
 
 export const metadata: Metadata = {
@@ -27,11 +28,11 @@ export default function ShowsPage() {
 
     return (
         <>
-            <section className="flex flex-row items-center justify-between px-6 py-3">
-                <Link href="/shows/new" className="text-center bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 text-white py-1 px-4 rounded transition-colors">
-                    Post a Show
+            <section className="flex flex-row items-center justify-between px-6 py-3 gap-2">
+                <Link href="/shows/new">
+                    <Button type="button" caption="Post a Show" />
                 </Link>
-                <DistanceSelect label="Shows" />
+                <DistanceSelect />
             </section>
             <section>
                 <Suspense fallback={<p>Loading shows...</p>}>

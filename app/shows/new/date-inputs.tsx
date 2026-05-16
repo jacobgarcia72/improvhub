@@ -172,7 +172,7 @@ function ScheduleOptions() {
         />
         {numberOfShowings > 2 && dates[0] && (
             <div className='flex flex-row items-end'>
-                <div className='flex flex-col mr-2'>
+                <div className='flex flex-col mr-2 w-3/4'>
                     <label htmlFor='autofill' className='pr-2'>Autofill:</label>
                     <select value={autofillSelection} onChange={(e) => setAutofillSelection(Number(e.target.value))}>
                         {getAutofillOptions().map((option) => (
@@ -180,7 +180,9 @@ function ScheduleOptions() {
                         ))}
                     </select>
                 </div>
-                <Button type='button' caption='Autofill' onClick={handleAutofill} />
+                <div className='flex flex-col w-1/4'>
+                    <Button type='button' caption='Autofill' onClick={handleAutofill} />
+                </div>
             </div>
         )}
         {numberOfShowings > 1 && (

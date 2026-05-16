@@ -4,7 +4,8 @@ import { useState } from "react";
 import DistanceSelect from "@/components/form/distance-select";
 import StateSelect from "@/components/form/state-select";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import Input from "@/components/form/input";
+import Autocomplete from "@/components/form/autocomplete";
+import { getTheatreNames } from "@/lib/theatres";
 
 export default function SearchBar() {
     const searchTypes = ['theatre', 'state', 'zipcode']
@@ -38,55 +39,57 @@ export default function SearchBar() {
         if (!searchBy || !searchFor) return null;
         switch (searchBy) {
             case 'state':
-                return <StateSelect onChange={(value) => handleSearch('state', value)} />
+                return <StateSelect label="State" onChange={(value) => handleSearch('state', value)} />
             case 'zipcode':
-                return <DistanceSelect label="Theatres" onUpdate={(zipcode, miles) => {
+                return <DistanceSelect onUpdate={(zipcode, miles) => {
                         handleSearch('zipcode', zipcode);
                         handleSearch('miles', miles.toString());
                     }} />
             case 'theatre':
-                return <Input onChange={(value) => handleSearch('theatre', value)} name="theatre" placeholder="Search by theatre name..." />
+                return <Autocomplete options={getTheatreNames()} label="Theatre Name" />
             default:
                 return null;
         }
     }
     
     return (
-        <section className="w-full h-24 flex flex-row items-center justify-between px-6 py-3">
-            <div className="w-1/4">
-                <div className="flex flex-col gap-2">
-                    <select
-                        value={searchFor || ''}
-                        className="w-full border border-gray-300 rounded px-3 py-2"
-                        onChange={(e) => {
-                            handleSearchFor(e.currentTarget.value);
-                        }}
-                    >
-                        <option value="">Search for...</option>
-                        <option value="auditions">Auditions</option>
-                        <option value="jams">Jams</option>
-                        <option value="shows">Shows</option>
-                        <option value="performers">Performers</option>
-                        <option value="teams">Teams</option>
-                        <option value="theatres">Theatres</option>
-                        <option value="workshops">Workshops</option>
-                    </select>
-                    <select
-                        className="w-full border border-gray-300 rounded px-3 py-2"
-                        onChange={(e) => {
-                            setSearchBy(e.currentTarget.value);
-                            searchTypes.forEach((type) => params.delete(type))
-                            replace(`${pathname}?${params.toString()}`);
-                        }}
-                    >
-                        <option value="">Search by...</option>
-                        <option value="theatre">Theatre Name</option>
-                        <option value="state">State</option>
-                        <option value="zipcode">ZIP Code</option>
-                    </select>
-                </div>
+        <section className="flex flex-wrap gap-2">
+            <div className="flex-1 min-w-[100px]">
+                <label htmlFor="searchFor">Find</label>
+                <select
+                    value={searchFor || ''}
+                    className="w-full border border-gray-300 rounded px-3 py-2"
+                    onChange={(e) => {
+                        handleSearchFor(e.currentTarget.value);
+                    }}
+                >
+                    <option value=""></option>
+                    <option value="auditions">Auditions</option>
+                    <option value="jams">Jams</option>
+                    <option value="shows">Shows</option>
+                    <option value="performers">Performers</option>
+                    <option value="teams">Teams</option>
+                    <option value="theatres">Theatres</option>
+                    <option value="workshops">Workshops</option>
+                </select>
             </div>
-            <div className="w-1/2">
+            <div className="flex-1 min-w-[100px]">
+                <label htmlFor="searchBy">Search By</label>
+                <select
+                    className="w-full border border-gray-300 rounded px-3 py-2"
+                    onChange={(e) => {
+                        setSearchBy(e.currentTarget.value);
+                        searchTypes.forEach((type) => params.delete(type))
+                        replace(`${pathname}?${params.toString()}`);
+                    }}
+                >
+                    <option value=""></option>
+                    <option value="theatre">Theatre Name</option>
+                    <option value="state">State</option>
+                    <option value="zipcode">ZIP Code</option>
+                </select>
+            </div>
+            <div className="flex-1 min-w-[280px] flex flex-row">
                 {SearchParams()}
             </div>
         </section>

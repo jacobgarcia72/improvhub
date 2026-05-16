@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 interface InputProps {
+    className?: string,
     label?: string,
     name: string,
     type?: string,
@@ -17,6 +18,7 @@ interface InputProps {
 }
 
 export default function Input({
+    className,
     label,
     name,
     type = 'text',
@@ -81,7 +83,7 @@ export default function Input({
     }
 
     return (
-        <div className="flex flex-col">
+        <div className={`flex flex-col ${className}`}>
             {label && <label htmlFor={name}>{inputLabel}</label>}
             <input
                 value={value || inputValue}

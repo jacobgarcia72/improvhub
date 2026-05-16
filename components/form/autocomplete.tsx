@@ -66,7 +66,7 @@ const Autocomplete: React.FC<AutocompleteProps> = ({ options, placeholder, onCha
     if (label && required) inputLabel += ' *';
 
   return (
-    <div className="flex flex-col relative">
+    <div className="flex flex-col relative w-full">
       {label && <label htmlFor={name}>{inputLabel}</label>}
       <input
         name={name}

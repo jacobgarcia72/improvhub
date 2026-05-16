@@ -70,7 +70,7 @@ const StateSelect = forwardRef<HTMLSelectElement, StateSelectProps>(function Sta
   };
 
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex flex-col w-full">
       {label && <label htmlFor={name}>{label}</label>}
       <select
         ref={ref}

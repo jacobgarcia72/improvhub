@@ -2,13 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import Button from './button';
+import Input from './input';
 
 interface DistanceSelectProps {
     onUpdate?: (zipcode: string, miles: number) => void;
-    label?: string;
 }
 
-export default function DistanceSelect({ onUpdate, label }: DistanceSelectProps) {
+export default function DistanceSelect({ onUpdate }: DistanceSelectProps) {
     const [zipcode, setZipcode] = useState(() => {
         const stored = window?.localStorage.getItem('zipcode');
         return stored || '';
@@ -51,28 +51,23 @@ export default function DistanceSelect({ onUpdate, label }: DistanceSelectProps)
     };
 
     return (
-        <form onSubmit={handleSubmit} className="flex items-center justify-center gap-2">
-            <span className="text-gray-700 font-medium">{label || 'Search'} within</span>
-            
-            <input
-                type="number"
-                min="1"
-                max="100"
-                value={miles}
-                onChange={(e) => setMiles(Number(e.target.value))}
-                className="w-16 border border-gray-300 rounded px-2 py-1 text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            
-            <span className="text-gray-700 font-medium">miles of</span>
-            
-            <input
+        <form onSubmit={handleSubmit} className="flex items-end justify-end gap-2">
+            <Input
+                name="zipcode"
                 type="text"
                 value={zipcode}
-                onChange={(e) => setZipcode(e.target.value.replace(/\D/g, ''))}
-                placeholder="ZIP Code"
-                maxLength={5}
-                inputMode="numeric"
-                className="w-28 border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                label="ZIP Code"
+                className="w-24"
+            />
+            <Input
+                name="miles"
+                label='Miles'
+                type="number"
+                min={1}
+                max={100}
+                value={`${miles}`}
+                onChange={(value) => setMiles(Number(value))}
+                className="w-20"
             />
             <Button caption="Update" disabled={zipcode.trim().length !== 5} />
         </form>
