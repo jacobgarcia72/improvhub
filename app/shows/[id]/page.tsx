@@ -6,7 +6,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import type { Metadata } from 'next'
 import { theatres } from "@/lib/theatres";
-import { formatDateTimeForDisplay, formatTime, removePastDates, weekdayInitials, weekdays } from "@/lib/dates";
+import { formatDateTimeForDisplay, formatTime, removePastDates, sortDates, weekdayInitials, weekdays } from "@/lib/dates";
 import Button from "@/components/form/button";
 
 type Props = {
@@ -33,7 +33,7 @@ function P({ children, className }: { children: React.ReactNode, className?: str
 }
 
 function Header({ children }: { children: React.ReactNode }) {
-    return children ? <h3 className="mt-4 font-semibold text-sm">{children}</h3> : null;
+    return children ? <h3 className="mt-3 font-semibold text-sm">{children}</h3> : null;
 }
 
 export default async function ShowDetailsPage({ params }: Props) {
@@ -53,11 +53,13 @@ export default async function ShowDetailsPage({ params }: Props) {
 
     let upcomingShows: string[] = [];
     if (dates && times) {
-        upcomingShows = removePastDates(
-            dates.map((date, i) => {
-                const time = times?.[i] || times?.[0];
-                return `${date} ${time}`;
-            })
+        upcomingShows = sortDates(
+            removePastDates(
+                dates.map((date, i) => {
+                    const time = times?.[i] || times?.[0];
+                    return `${date} ${time}`;
+                })
+            )
         ).slice(0, 4);
     }
 
@@ -67,7 +69,7 @@ export default async function ShowDetailsPage({ params }: Props) {
         const day = weekdays[dayIndex];
         let text = CadenceText[show.cadence].replace('X', day);
         if (show.times) text += ` at ${formatTime(show.times)}`;
-        recurringSchedule = `${text}!`;
+        recurringSchedule = text;
     }
 
 
@@ -107,9 +109,11 @@ export default async function ShowDetailsPage({ params }: Props) {
                             <P>{recurringSchedule}</P>
                             {upcomingShows?.length > 1 && <Header>Upcoming Shows</Header>}
                             {upcomingShows?.length === 1 && <Header>Show Date</Header>}
-                            {upcomingShows?.map((date, i) => (
-                                <P key={i}>{formatDateTimeForDisplay(date)}</P>
-                            ))}
+                            {upcomingShows && <ul className="mt-2">
+                                {upcomingShows.map((date, i) => (
+                                    <li key={i} className="no-bullets">{formatDateTimeForDisplay(date)}</li>
+                                ))}
+                            </ul>}
                         </div>
                         <div className="w-1/2">
                             {show.runtime && <Header>Approximate runtime:</Header>}
