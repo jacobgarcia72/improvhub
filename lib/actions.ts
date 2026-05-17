@@ -53,8 +53,14 @@ export async function postShow(prevState: void | { message?: string }, formData:
     const price = formData.get('price');
     const doorPrice = formData.get('doorPrice');
 
+    const runtimeHours = Number(formData.get('runtimeHours'));
+    const runtimeMinutes = Number(formData.get('runtimeMinutes'));
+    let runtime: string | null = null;
+    if (runtimeHours || runtimeMinutes) {
+        runtime = `${runtimeHours}h${runtimeMinutes}`;
+    }
+
     const photoCredit = (formData.get('photoCredit') as string)?.trim() || null;
-    const runtime = (formData.get('runtime') as string)?.trim() || null;
     const notes = (formData.get('notes') as string)?.trim() || null;
 
     let description = formData.get('description') as string || null;

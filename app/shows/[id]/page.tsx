@@ -81,6 +81,13 @@ export default async function ShowDetailsPage({ params }: Props) {
         }
     }
 
+    let runtime: string = '';
+    if (show.runtime) {
+        const [hours, minutes] = show.runtime.split('h');
+        if (hours && hours !== '0') runtime += `${hours} hour${hours !== '1' ? 's' : ''}`;
+        if (minutes && minutes !== '00') runtime += ` ${minutes} minute${minutes !== '1' ? 's' : ''}`;
+    }
+
     return (
         <Suspense fallback={<p>Loading</p>}>
             <section>
@@ -107,8 +114,8 @@ export default async function ShowDetailsPage({ params }: Props) {
                             </ul>}
                         </div>
                         <div className="w-1/2">
-                            {show.runtime && <Header>Approximate runtime:</Header>}
-                            <P>{show.runtime}</P>
+                            {runtime && <Header>Approximate runtime:</Header>}
+                            <P>{runtime}</P>
                             {ticketInfo && <Header>Ticket Price:</Header>}
                             <P>{ticketInfo}</P>
                             {show.ticketsUrl && (

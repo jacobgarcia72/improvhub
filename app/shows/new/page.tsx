@@ -24,8 +24,15 @@ export default function NewShowPage() {
                         <Input label="Price at Door (if different)" name="doorPrice" type="price" />
                     </div>
                 </div>
-                {/* TODO: make hours and minutes inputs */}
-                <Input label="Approximate Runtime" name="runtime" />
+                <div>
+                    <p className='label'>Approximate Runtime:</p>
+                    <div className='flex flex-row mt-1'>
+                        <Input className='w-1/5 min-w-[72px] pr-2' type='number'
+                            label="Hours" name="runtimeHours" min={0} />
+                        <Input className='w-1/5 min-w-[72px]' type='number'
+                            label="Minutes" name="runtimeMinutes" min={0} max={59} />
+                    </div>
+                </div>
                 <Input label="Link to Buy Tickets" name="ticketsUrl" type="url" />
                 <Input label="Notes (Trademark info, etc.)" name="notes" maxLength={200} />
             </Form>
