@@ -33,7 +33,7 @@ export default function Search() {
     return (
         <>
             <SearchBar />
-            <section className="flex flex-row flex-wrap gap-4 px-4 pb-4 justify-center">
+            <section className="flex flex-row flex-wrap gap-4 px-4 pb-4 justify-center min-h-[308px]">
                 {hasNoResults && <p className="text-gray-500 mt-4">No results found.</p>}
                 {results?.map((result, i) => {
                     if (!result) return;
