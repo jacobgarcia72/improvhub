@@ -26,7 +26,7 @@ export default function NewShowPage() {
                 </div>
                 {/* TODO: make hours and minutes inputs */}
                 <Input label="Approximate Runtime" name="runtime" />
-                <Input label="Webpage" name="webpage" type="url" />
+                <Input label="Link to Buy Tickets" name="ticketsUrl" type="url" />
                 <Input label="Notes (Trademark info, etc.)" name="notes" maxLength={200} />
             </Form>
         </section>

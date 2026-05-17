@@ -85,18 +85,9 @@ export default async function ShowDetailsPage({ params }: Props) {
         <Suspense fallback={<p>Loading</p>}>
             <section>
                 <div className="px-4">
-                    <div className="flex flex-row">
-                        <div className="w-full">
-                            <h1 className="text-2xl">{show.title}</h1>
-                            {show.theatre && <h2 className="mb-3">{show.theatre}</h2>}
-                        </div>
-                        <div className="w-50 flex items-center justify-end pr-2 pb-3">
-                            {show.webpage && (
-                                <a href={show.webpage} target="_blank" rel="noopener noreferrer">
-                                    <Button type="button" caption="Show Page" />
-                                </a>
-                            )}
-                        </div>
+                    <div className="w-full">
+                        <h1 className="text-2xl">{show.title}</h1>
+                        {show.theatre && <h2 className="mb-3">{show.theatre}</h2>}
                     </div>
                     {imageUrl && <>
                         <Image src={imageUrl} alt={show.title} width={600} height={400} className="w-full h-72 object-cover rounded" />
@@ -120,6 +111,11 @@ export default async function ShowDetailsPage({ params }: Props) {
                             <P>{show.runtime}</P>
                             {ticketInfo && <Header>Ticket Price:</Header>}
                             <P>{ticketInfo}</P>
+                            {show.ticketsUrl && (
+                                <a href={show.ticketsUrl} target="_blank" rel="noopener noreferrer">
+                                    <Button type="button" caption="Get Tickets" />
+                                </a>
+                            )}
                         </div>
                     </div>
                     {show.notes && <footer className="text-xs mt-4">{show.notes}</footer>}

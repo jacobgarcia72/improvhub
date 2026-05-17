@@ -37,7 +37,7 @@ export interface Event {
     zipcode: string | null;
     price: number | null;
     doorPrice: number | null;
-    webpage: string | null;
+    ticketsUrl: string | null;
     image: string | null;
     photoCredit: string | null;
     runtime: string | null;

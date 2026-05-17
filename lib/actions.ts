@@ -13,10 +13,10 @@ export async function postShow(prevState: void | { message?: string }, formData:
     const title = (formData.get('title') as string)?.trim() || null;
     if (!title) return { message: 'Title is required' };
 
-    const webpage = (formData.get('webpage') as string)?.trim() || null;
-    if (webpage) {
-        const isValid = URL.canParse(webpage);
-        if (!isValid) return { message: 'Webpage must be a valid URL' };
+    const ticketsUrl = (formData.get('ticketsUrl') as string)?.trim() || null;
+    if (ticketsUrl) {
+        const isValid = URL.canParse(ticketsUrl);
+        if (!isValid) return { message: 'Tickets link must be a valid URL' };
     }
 
     let dates: string | null = null;
@@ -76,7 +76,7 @@ export async function postShow(prevState: void | { message?: string }, formData:
         runtime,
         price: price === '' ? null : Number(price),
         doorPrice: doorPrice === '' ? null : Number(doorPrice),
-        webpage,
+        ticketsUrl,
         notes
     }
 

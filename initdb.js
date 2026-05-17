@@ -38,7 +38,7 @@ contentdb.prepare(`
       zipcode TEXT,
       price DECIMAL,
       door_price DECIMAL,
-      webpage TEXT,
+      ticketsUrl TEXT,
       image TEXT,
    )
 `).run();
