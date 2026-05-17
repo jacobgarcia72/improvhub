@@ -54,5 +54,5 @@ export const removePastDates = (dates: string[]): string[] => {
 }
 
 export const sortDates = (dates: string[]): string[] => {
-    return dates.sort((a, b) => newDate(a).getTime() - newDate(b).getTime());
+    return dates.sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
 }

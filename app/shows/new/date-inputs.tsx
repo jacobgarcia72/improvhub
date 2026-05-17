@@ -57,14 +57,14 @@ function DateAndTime({ label = 'Day', index = 0, date, time, onDateChange, onTim
             <div className='pr-2 w-1/2'>
                 <Input
                     onChange={onDateChange}
-                    value={date}
+                    value={date || ''}
                     label={label} name={`date-${index}`} type='date' required
                 />
             </div>
             <div className={removeDateTime ? 'w-7/16' : 'w-1/2'}>
                 <Input
                     onChange={onTimeChange}
-                    value={time}
+                    value={time || ''}
                     label='Time' name={`time-${index}`} type='time' required
                 />
             </div>

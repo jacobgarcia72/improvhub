@@ -19,26 +19,22 @@ export async function postShow(prevState: void | { message?: string }, formData:
         if (!isValid) return { message: 'Tickets link must be a valid URL' };
     }
 
-    let dates: string | null = null;
-    let times: string | null = null;
+    let dateTimes: string[] | null = null;
     let recurringDay: WeekdayInitial | null = null;
+    let recurringTime: string | null = null;
     let cadence: Candence | null = null;
     if (!formData.get('tbd')) {
         if (formData.get('recurring')) {
             recurringDay = weekdayInitials[Number(formData.get('weekday'))];
             cadence = formData.get('cadence') as Candence;
-            times = formData.get('regularTime') as string;
+            recurringTime = formData.get('regularTime') as string;
         } else {
             const totalShowings = Number(formData.get('showings'));
-            dates = '';
-            times = '';
+            dateTimes = [];
             for (let i = 0; i < totalShowings; i++) {
-                dates += formData.get(`date-${i}`);
-                times += formData.get(`time-${i}`);
-                if (i < totalShowings - 1) {
-                    dates += ','
-                    times += ','
-                }
+                dateTimes.push(
+                    `${formData.get(`date-${i}`)} ${formData.get(`time-${i}`)}`
+                );
             }
         }
     }
@@ -75,9 +71,9 @@ export async function postShow(prevState: void | { message?: string }, formData:
         theatre,
         zipcode,
         description,
-        dates,
-        times,
+        dateTimes: dateTimes ? dateTimes.join(',') : null,
         recurringDay,
+        recurringTime,
         cadence,
         runtime,
         price: price === '' ? null : Number(price),
