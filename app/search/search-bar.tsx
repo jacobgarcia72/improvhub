@@ -8,7 +8,7 @@ import Autocomplete from "@/components/form/autocomplete";
 import { getTheatreNames } from "@/lib/theatres";
 
 export default function SearchBar() {
-    const searchTypes = ['theatre', 'state', 'zipcode']
+    const searchTypes = ['theatre', 'state', 'zipcode'];
     const searchParams = useSearchParams();
     const pathname = usePathname();
     const { replace } = useRouter();
@@ -39,14 +39,23 @@ export default function SearchBar() {
         if (!searchBy || !searchFor) return null;
         switch (searchBy) {
             case 'state':
-                return <StateSelect label="State" onChange={(value) => handleSearch('state', value)} />
+                return <StateSelect
+                    label="State"
+                    onChange={(value) => handleSearch('state', value)} 
+                />
             case 'zipcode':
-                return <DistanceSelect onUpdate={(zipcode, miles) => {
+                return <DistanceSelect
+                    onUpdate={(zipcode, miles) => {
                         handleSearch('zipcode', zipcode);
                         handleSearch('miles', miles.toString());
-                    }} />
+                    }}
+                />
             case 'theatre':
-                return <Autocomplete options={getTheatreNames()} label="Theatre Name" />
+                return <Autocomplete
+                    onChange={(value) => handleSearch('theatre', value)}
+                    options={getTheatreNames()}
+                    label="Theatre Name"
+                />
             default:
                 return null;
         }
