@@ -651,7 +651,7 @@ export const theatres: Theatre[] = [
     state: "NY",
     zipcode: "12305",
     website: "https://www.mopco.org",
-    logo: "hhttps://images.squarespace-cdn.com/content/v1/687dd5a2debb112e440d3d83/1753077162987-8J25C6QJKZV9AB31A9BD/MopcoLogo_Black.png?format=1500w"
+    logo: "https://images.squarespace-cdn.com/content/v1/687dd5a2debb112e440d3d83/1753077162987-8J25C6QJKZV9AB31A9BD/MopcoLogo_Black.png?format=1500w"
   },
   {
     name: "National Comedy Theatre",

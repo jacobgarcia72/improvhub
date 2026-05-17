@@ -1,13 +1,18 @@
 import { appName } from "@/lib/app-info";
 import { Metadata } from "next";
-import Search from "./search";
+import SearchBar from "./search-bar";
+import SearchResults from "./search-results";
 
 export const metadata: Metadata = {
     title: `${appName} | Search`,
 };
 
-export default function SearchPage() {
+export default async function SearchPage({ searchParams }: { searchParams: Promise<{ [key: string]: string | undefined }> }) {
+    const params = await searchParams;
     return (
-        <Search />
+        <>
+            <SearchBar />
+            <SearchResults params={params} />
+        </>
     )
 }

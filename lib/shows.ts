@@ -5,7 +5,6 @@ import fs from 'node:fs';
 import slugify from 'slugify';
 
 import { Event } from "@/types";
-import { dummyShows } from "./dummy-data";
 import sql from 'better-sqlite3';
 import { removeLeadingArticles } from './helper-functions';
 
@@ -42,12 +41,14 @@ export async function getShow(id: string) {
     return await contentDB.prepare('SELECT * FROM shows WHERE id = ?').get(id);
 }
 
-export async function getShows(): Promise<Event[]> {
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    // throw new Error('Failed to fetch shows');
-
-    return dummyShows;
+export async function getShowsByTheatre(theatre: string) {
+    const query = 'SELECT * FROM shows WHERE theatre LIKE ?';
+    const params = [`%${theatre}%`];
+    // if (startDate) {
+    //     query += ' AND (recurringDay IS NOT NULL OR (dateTimes IS NOT NULL AND dateTimes > ?))';
+    //     params.push(startDate);
+    // }
+    return contentDB.prepare(query).all(...params);
 }
 
 export async function saveShow(show: Event, imageFile: File | null): Promise<string> {

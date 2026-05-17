@@ -1,7 +1,7 @@
 import DistanceSelect from "@/components/form/distance-select";
-import EventCard from "@/components/event-card";
-import { getShows } from "@/lib/shows";
-import { Suspense } from "react";
+// import EventCard from "@/components/event-card";
+// import { getShowsByTheatre } from "@/lib/shows";
+// import { Suspense } from "react";
 import { appName } from "@/lib/app-info";
 import { Metadata } from "next";
 import Link from "next/link";
@@ -13,16 +13,16 @@ export const metadata: Metadata = {
     description: "Find improv shows near you!",
 };
 
-async function ShowList() {
-    const shows = await getShows();
-    return (
-        <div className="flex flex-col px-4 pb-4">
-            {shows.map(show => (
-                <EventCard key={show.id} event={show} href={`/shows/${show.id}`} />
-            ))}
-        </div>
-    )
-}
+// async function ShowList() {
+//     const shows = await getShows();
+//     return (
+//         <div className="flex flex-col px-4 pb-4">
+//             {shows.map(show => (
+//                 <EventCard key={show.id} event={show} href={`/shows/${show.id}`} />
+//             ))}
+//         </div>
+//     )
+// }
 
 export default function ShowsPage() {
 
@@ -34,11 +34,11 @@ export default function ShowsPage() {
                 </Link>
                 <DistanceSelect />
             </section>
-            <section>
+            {/* <section>
                 <Suspense fallback={<p>Loading shows...</p>}>
                     <ShowList />
                 </Suspense>
-            </section>
+            </section> */}
         </>
     )
 }
