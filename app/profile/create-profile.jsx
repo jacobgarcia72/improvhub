@@ -1,5 +1,3 @@
-'use client';
-
 import Input from '@/components/form/input';
 import Text from '@/components/form/text';
 import ImagePicker from '@/components/form/image-picker';
@@ -8,6 +6,7 @@ import Form from '@/components/form/form';
 import Autocomplete from '@/components/form/autocomplete';
 import { getTheatreNames } from '@/lib/theatres';
 import { createUser } from '@/lib/actions';
+import UsernameInput from './username-input';
 
 export default function CreateProfileForm() {
 
@@ -22,7 +21,7 @@ export default function CreateProfileForm() {
                     <Input label="Last Name" name="lastName" maxLength={20} />
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2">
-                    <Input label="Username" name="username" maxLength={20} type='username' />
+                    <UsernameInput />
                     <Autocomplete options={pronouns} name="pronouns" maxLength={20} label="Pronouns" />
                 </div>
 

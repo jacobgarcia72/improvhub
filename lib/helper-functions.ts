@@ -1,3 +1,10 @@
+export function validateInputValue(value: string, type: 'price' | 'zipcode' | 'username'): boolean {
+        if (type === 'price') return /^\d*\.?\d?\d?$/.test(value);
+        if (type === 'zipcode') return /^\d{0,5}$/.test(value);
+        if (type === 'username') return /^[a-zA-Z0-9]{0,20}$/.test(value);
+        return true;
+}
+
 export const filterArrayBySearchTerm = (options: string[], searchTerm: string, limit?: number): string[] => {
     const normalized = searchTerm.trim().toLowerCase();
     if (!normalized) {

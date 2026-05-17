@@ -3,15 +3,18 @@
 import { useState, useEffect } from 'react';
 import Button from './button';
 import Input from './input';
+import { validateInputValue } from '@/lib/helper-functions';
 
 interface DistanceSelectProps {
     onUpdate?: (zipcode: string, miles: number) => void;
 }
 
 export default function DistanceSelect({ onUpdate }: DistanceSelectProps) {
-    const [zipcode, setZipcode] = useState(() => {
+    const validate = (value: string) => validateInputValue(value, 'zipcode');
+    const [zipcode, setZipcode] = useState<string>(() => {
         const stored = window?.localStorage.getItem('zipcode');
-        return stored || '';
+        if (stored && validate(stored)) return stored;
+        return '';
     });
     const [miles, setMiles] = useState(25);
 
@@ -54,8 +57,9 @@ export default function DistanceSelect({ onUpdate }: DistanceSelectProps) {
         <form onSubmit={handleSubmit} className="flex items-end justify-end gap-2">
             <Input
                 name="zipcode"
-                type="text"
+                inputMode='numeric'
                 value={zipcode}
+                onChange={(value) => validate(value) && setZipcode(value)}
                 label="ZIP Code"
                 className="w-24"
             />
@@ -69,7 +73,7 @@ export default function DistanceSelect({ onUpdate }: DistanceSelectProps) {
                 onChange={(value) => setMiles(Number(value))}
                 className="w-20"
             />
-            <Button caption="Update" disabled={zipcode.trim().length !== 5} />
+            <Button caption="Search" disabled={zipcode.trim().length !== 5} />
         </form>
     );
 }

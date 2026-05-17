@@ -3,6 +3,7 @@ import { getTheatreByName, getTheatreNames } from "@/lib/theatres";
 import Autocomplete from "./autocomplete";
 import Input from "./input";
 import { useState } from "react";
+import { validateInputValue } from "@/lib/helper-functions";
 
 export default function TheatreSelect() {
     const [zipcode, setZipcode] = useState('');
@@ -20,7 +21,12 @@ export default function TheatreSelect() {
                 <Autocomplete label="Theatre" name="theatre" options={theatreNames} onChange={(value) => autofillZipcode(value)} />
             </div>
             <div className="w-2/5">
-                <Input label="ZIP Code" name="zipcode" type='zipcode' value={zipcode} />
+                <Input label="ZIP Code"
+                    name="zipcode"
+                    inputMode="numeric"
+                    value={zipcode}
+                    onChange={(value) => validateInputValue(value, 'zipcode') && setZipcode(value)}
+                />
             </div>
         </div>
     )

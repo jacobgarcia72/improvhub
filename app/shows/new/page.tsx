@@ -5,6 +5,7 @@ import { postShow } from '@/lib/actions';
 import Text from '@/components/form/text';
 import TheatreSelect from '@/components/form/theatre-select';
 import DateInputs from './date-inputs';
+import PriceInputs from './price-inputs';
 
 export default function NewShowPage() {
     return (
@@ -16,14 +17,7 @@ export default function NewShowPage() {
                 <Input label="Photo Credit" name="photoCredit" />
                 <Text label="Description" name="description" />
                 <DateInputs />
-                <div className="flex flex-row flex-wrap">
-                    <div className="w-1/2 pr-2">
-                        <Input label="Ticket Price" name="price" type="price"/>
-                    </div>
-                    <div className="w-1/2">
-                        <Input label="Price at Door (if different)" name="doorPrice" type="price" />
-                    </div>
-                </div>
+                <PriceInputs />
                 <div>
                     <p className='label'>Approximate Runtime:</p>
                     <div className='flex flex-row mt-1'>
@@ -33,7 +27,7 @@ export default function NewShowPage() {
                             label="Minutes" name="runtimeMinutes" min={0} max={59} />
                     </div>
                 </div>
-                <Input label="Link to Buy Tickets" name="ticketsUrl" type="url" />
+                <Input label="Link to Buy Tickets" name="ticketsUrl" inputMode="url" />
                 <Input label="Notes (Trademark info, etc.)" name="notes" maxLength={200} />
             </Form>
         </section>
