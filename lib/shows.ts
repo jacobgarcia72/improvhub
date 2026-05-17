@@ -17,9 +17,9 @@ function initDb() {
             id STRING PRIMARY KEY,
             creatorId TEXT NOT NULL,
             title TEXT NOT NULL,
-            dates TEXT,
-            times TEXT,
+            dateTimes TEXT,
             recurringDay TEXT,
+            recurringTime TEXT,
             cadence TEXT,
             description TEXT,
             theatre TEXT,
@@ -63,7 +63,6 @@ export async function saveShow(show: Event, imageFile: File | null): Promise<str
             show.id = `${id}-${counter}`;
         }
     }
-    // show.description = xss(show.description);
 
     if (imageFile && imageFile.size) {
         const extension = imageFile.name.split('.').pop();
@@ -85,9 +84,9 @@ export async function saveShow(show: Event, imageFile: File | null): Promise<str
             id,
             creatorId,
             title,
-            dates,
-            times,
+            dateTimes,
             recurringDay,
+            recurringTime,
             cadence,
             description,
             theatre,
@@ -104,9 +103,9 @@ export async function saveShow(show: Event, imageFile: File | null): Promise<str
             $id,
             $creatorId,
             $title,
-            $dates,
-            $times,
+            $dateTimes,
             $recurringDay,
+            $recurringTime,
             $cadence,
             $description,
             $theatre,

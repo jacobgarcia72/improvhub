@@ -45,20 +45,12 @@ export default async function ShowDetailsPage({ params }: Props) {
     const theatre = theatres.find(t => t.name === show.theatre);
     const imageUrl = show.image || theatre?.logo;
 
-    let dates: string[] | null = null;
-    let times: string[] | null = null;
-
-    if (show.dates) dates = show.dates.split(',');
-    if (show.times) times = show.times.split(',');
 
     let upcomingShows: string[] = [];
-    if (dates && times) {
-        upcomingShows = sortDates(
-            removePastDates(
-                dates.map((date, i) => {
-                    const time = times?.[i] || times?.[0];
-                    return `${date} ${time}`;
-                })
+    if (show.dateTimes) {
+        upcomingShows = removePastDates(
+            sortDates(
+                show.dateTimes.split(',')
             )
         ).slice(0, 4);
     }
@@ -68,7 +60,7 @@ export default async function ShowDetailsPage({ params }: Props) {
         const dayIndex = weekdayInitials.indexOf(show.recurringDay);
         const day = weekdays[dayIndex];
         let text = CadenceText[show.cadence].replace('X', day);
-        if (show.times) text += ` at ${formatTime(show.times)}`;
+        if (show.recurringTime) text += ` at ${formatTime(show.recurringTime)}`;
         recurringSchedule = text;
     }
 
