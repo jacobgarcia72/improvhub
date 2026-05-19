@@ -89,7 +89,12 @@ export default async function ShowDetailsPage({ params }: Props) {
                         {show.theatre && <h2 className="mb-3">{show.theatre}</h2>}
                     </div>
                     {imageUrl && <>
-                        <Image src={imageUrl} alt={show.title} width={600} height={400} className="w-full h-72 object-cover rounded" />
+                        <Image src={imageUrl}
+                            alt={show.title}
+                            width={600}
+                            height={400}
+                            className="w-full h-auto min-h-18 max-h-[90vh] h-72 object-cover rounded"
+                        />
                         <P className="italic text-sm">{show.image && show.photoCredit && `Photo Credit: ${show.photoCredit}`}</P>
                     </>}
                     {show.description?.split('<br>').map((line, i) => <P key={i}>{line}</P>)}
