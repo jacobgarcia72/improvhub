@@ -45,6 +45,10 @@ export async function saveUser(user: User, image?: File): Promise<string> {
         const extension = image.name.split('.').pop();
         const fileName = `${user.username}.${extension}`;
 
+        if (image.size > 5 * 1024 * 1024) { // 5MB limit
+            throw new Error('Image file size exceeds 5MB limit');
+        }
+
         const stream = fs.createWriteStream(`public/temp-images/${fileName}`);
         const bufferedImage = await image.arrayBuffer();
         stream.write(Buffer.from(bufferedImage), (error) => {

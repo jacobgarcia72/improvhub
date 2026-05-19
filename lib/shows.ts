@@ -69,6 +69,10 @@ export async function saveShow(show: Event, imageFile: File | null): Promise<str
         const extension = imageFile.name.split('.').pop();
         const fileName = `${show.id}.${extension}`;
 
+        if (imageFile.size > 5 * 1024 * 1024) { // 5MB limit
+            throw new Error('Image file size exceeds 5MB limit');
+        }
+
         const stream = fs.createWriteStream(`public/temp-images/${fileName}`);
         const bufferedImage = await imageFile.arrayBuffer();
         stream.write(Buffer.from(bufferedImage), (error) => {
