@@ -14,7 +14,6 @@ export default function Form({ children, buttonCaption = 'Submit', onSubmit }: {
 }) {
     const [formState, formAction] = useActionState(onSubmit, initialState);
     const [ pending, setPending ] = useState(false);
-    console.log(pending, formState)
 
     return (
         <form action={formAction} onSubmit={() => setPending(true)} className="flex flex-col gap-4 max-w-md mx-auto mb-1">
