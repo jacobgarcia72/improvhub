@@ -85,7 +85,6 @@ export async function postShow(prevState: void | { message?: string }, formData:
     const imageFile = formData.get('image') as File || null;
 
     const showId = await saveShow(show, imageFile);
-    revalidatePath(`/shows/${showId}`);
     redirect(`/shows/${showId}`);
 }
 
