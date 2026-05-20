@@ -1,12 +1,11 @@
 'use server';
 
-import fs from 'node:fs';
-
 import slugify from 'slugify';
 
 import { Event } from "@/types";
 import sql from 'better-sqlite3';
 import { removeLeadingArticles } from './helper-functions';
+import { uploadImage } from './cloudinary';
 
 const contentDB = sql('content.db');
 
@@ -66,22 +65,16 @@ export async function saveShow(show: Event, imageFile: File | null): Promise<str
     }
 
     if (imageFile && imageFile.size) {
-        const extension = imageFile.name.split('.').pop();
-        const fileName = `${show.id}.${extension}`;
-
         if (imageFile.size > 5 * 1024 * 1024) { // 5MB limit
             throw new Error('Image file size exceeds 5MB limit');
         }
-
-        const stream = fs.createWriteStream(`public/temp-images/${fileName}`);
-        const bufferedImage = await imageFile.arrayBuffer();
-        stream.write(Buffer.from(bufferedImage), (error) => {
-            if (error) {
-                throw new Error('Failed to save image');
-            }
-        });
-
-        show.image = `/temp-images/${fileName}`;
+        let imageUrl = '';
+        try {
+            imageUrl = await uploadImage(imageFile, 'shows');
+        } catch {
+            throw new Error('Image upload failed');
+        }
+        show.image = imageUrl || null;
     }
 
     contentDB.prepare(`

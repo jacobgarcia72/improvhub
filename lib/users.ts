@@ -6,6 +6,7 @@ import { User } from "@/types";
 import { getRandomNumberString } from './helper-functions';
 
 import sql from 'better-sqlite3';
+import { uploadImage } from './cloudinary';
 const usersDb = sql('users.db');
 
 function initDb() {
@@ -42,21 +43,16 @@ export async function saveUser(user: User, image?: File): Promise<string> {
     }
 
     if (image && image.size) {
-        const extension = image.name.split('.').pop();
-        const fileName = `${user.username}.${extension}`;
-
         if (image.size > 5 * 1024 * 1024) { // 5MB limit
             throw new Error('Image file size exceeds 5MB limit');
         }
-
-        const stream = fs.createWriteStream(`public/temp-images/${fileName}`);
-        const bufferedImage = await image.arrayBuffer();
-        stream.write(Buffer.from(bufferedImage), (error) => {
-            if (error) {
-                throw new Error('Failed to save image');
-            }
-        });
-        user.image = `/temp-images/${fileName}`;
+        let imageUrl = '';
+        try {
+            imageUrl = await uploadImage(image, 'users');
+        } catch {
+            throw new Error('Image upload failed');
+        }
+        user.image = imageUrl;
     }
 
     usersDb.prepare(`
