@@ -10,7 +10,7 @@ export default function EventCard({ event, type }: { event: Event, type: string 
     )?.logo;
     return (
         <Link href={`${type}/${event.id}`}>
-            <div className="w-58 overflow-hidden rounded-3xl border border-slate-300 bg-slate-50/80 shadow-sm shadow-slate-800/10 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
+            <div className="m-2 w-64 overflow-hidden rounded-3xl border border-slate-300 bg-slate-50/80 shadow-sm shadow-slate-800/10 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
                 <div className="h-30 w-full bg-gray-300">
                     <div className="flex h-full w-full items-center justify-center">
                         {image ? (
@@ -23,9 +23,9 @@ export default function EventCard({ event, type }: { event: Event, type: string 
                     </div>
                 </div>
                 <div className="px-5 pb-1 pt-1">
-                    <h2 className="text-lg font-semibold text-slate-900">{event.title}</h2>
+                    <h2 className="h-7 text-lg text-slate-900 overflow-hidden text-ellipsis">{event.title}</h2>
                     <p className="text-sm text-slate-500">{event.theatre}</p>
-                    <div className="fade-out text-sm text-slate-900 overflow-hidden text-ellipsis flex flex-wrap gap-2 pt-1 h-30">
+                    <div className="fade-out text-sm text-slate-900 overflow-hidden text-ellipsis flex flex-wrap gap-2 pt-1 h-32">
                         {event.description || '(No description available)'}
                     </div>
                 </div>
