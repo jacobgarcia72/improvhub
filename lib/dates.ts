@@ -1,6 +1,6 @@
 import { WeekdayInitial } from "@/types";
 
-// use to get new dates to avoid time zone issues
+// use to get new dates when there is no time to avoid time zone issues
 export const newDate = (dateAsString: string): Date => new Date(`${dateAsString} 00:00`);
 
 export const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -47,11 +47,12 @@ export const formatTime = (time: string): string => {
 }
 
 export const formatDateForDisplay = (date: Date | string): string => {
-    const dateObject = typeof date === 'string' ? new Date(date) : date;
+    const dateObject = typeof date === 'string' ? newDate(date) : date;
     const month = dateObject.toLocaleString('default', { month: 'long' });
     const day = dateObject.getDate();
     const year = dateObject.getFullYear();
-    return `${month} ${(day)}${year !== new Date().getFullYear() ? `, ${year}` : ''}`;
+    const weekday = weekdays[dateObject.getDay()];
+    return `${weekday}, ${month} ${(day)}${year !== new Date().getFullYear() ? `, ${year}` : ''}`;
 }
 
 export const formatDateTimeForDisplay = (date: Date | string): string => {

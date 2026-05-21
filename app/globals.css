@@ -125,3 +125,12 @@ input[type="checkbox"]:checked {
 li.no-bullets {
   list-style-type: none;
 }
+
+
+.fade-out {
+  /* Standard property */
+  mask-image: linear-gradient(to bottom, black 55%, transparent 100%);
+  
+  /* Webkit prefix for Safari and older Chrome versions */
+  -webkit-mask-image: linear-gradient(to bottom, black 55%, transparent 100%);
+}

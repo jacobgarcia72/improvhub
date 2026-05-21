@@ -27,16 +27,18 @@ export default async function EventResults({ eventType, theatre, zipcode, miles 
     const hasNoResults = hasActiveQuery && !results;
 
     return (
-        <section className="flex flex-row flex-wrap gap-4 px-4 pb-4 justify-center min-h-[308px]">
-            {hasNoResults && <p className="text-gray-500 mt-4">No results found.</p>}
+        <>
+            {hasNoResults && <p className="text-slate-700 mt-4">No results found.</p>}
             {results && Object.keys(results).map((date, i) => (
-                <div key={i} className='flex flex-col w-full'>
-                    <h2>{date === formatDate(new Date()) ? 'Today' : formatDateForDisplay(date)}</h2>
+                <div key={i} className='flex flex-col w-full px-4'>
+                    <div className='mx-3 my-2 px-2 border-b border-slate-300'>
+                        <h2 className='text-slate-900 font-semibold '>{date === formatDate(new Date()) ? 'Today' : formatDateForDisplay(date)}</h2>
+                    </div>
                     <div className='flex flex-row'>
                         {results[date].map((event, i) => <EventCard key={i} event={event} type={eventType} />)}
                     </div>
                 </div>
             ))}
-        </section>
+        </>
     )
 }
