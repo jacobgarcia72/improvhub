@@ -41,13 +41,7 @@ export async function getShow(id: string) {
 }
 
 export async function getShowsByTheatre(theatre: string) {
-    const query = 'SELECT * FROM shows WHERE theatre LIKE ?';
-    const params = [`%${theatre}%`];
-    // if (startDate) {
-    //     query += ' AND (recurringDay IS NOT NULL OR (dateTimes IS NOT NULL AND dateTimes > ?))';
-    //     params.push(startDate);
-    // }
-    return contentDB.prepare(query).all(...params);
+    return contentDB.prepare('SELECT * FROM shows WHERE theatre LIKE ?').all(theatre);
 }
 
 export async function saveShow(show: Event, imageFile: File | null): Promise<string> {
