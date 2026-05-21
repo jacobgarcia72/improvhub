@@ -1,6 +1,6 @@
 import { formatDate, formatDateForDisplay } from '@/lib/dates';
 import { arrangeEventsByDate } from '@/lib/helper-functions';
-import { getShowsByTheatre } from '@/lib/shows';
+import { getShowsByTheatre, getShowsByZipcode } from '@/lib/shows';
 import { Event } from '@/types';
 import EventCard from './event-card';
 
@@ -15,6 +15,9 @@ export default async function EventResults({ eventType, theatre, zipcode, miles 
             case 'shows':
                 if (theatre) {
                     const shows = await getShowsByTheatre(theatre) as Event[];
+                    return arrangeEventsByDate(shows);
+                } else if (zipcode) {
+                    const shows = await getShowsByZipcode(zipcode, miles || 1) as Event[];
                     return arrangeEventsByDate(shows);
                 }
             default:

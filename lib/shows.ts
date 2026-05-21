@@ -7,6 +7,8 @@ import sql from 'better-sqlite3';
 import { removeLeadingArticles } from './helper-functions';
 import { uploadImage } from './cloudinary';
 
+import zipcodes from 'zipcodes';
+
 const contentDB = sql('content.db');
 
 function initDb() {
@@ -42,6 +44,11 @@ export async function getShow(id: string) {
 
 export async function getShowsByTheatre(theatre: string) {
     return contentDB.prepare('SELECT * FROM shows WHERE theatre LIKE ?').all(theatre);
+}
+
+export async function getShowsByZipcode(zipcode: string, miles: number) {
+    const zipcodesInRange = zipcodes.radius(zipcode, miles, false).map((z) => typeof z === 'string' ? z : z.zip);
+    return contentDB.prepare(`SELECT * FROM shows WHERE zipcode IN (${zipcodesInRange.map(() => '?').join(', ')})`).all(...zipcodesInRange);
 }
 
 export async function saveShow(show: Event, imageFile: File | null): Promise<string> {
