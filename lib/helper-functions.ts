@@ -1,3 +1,6 @@
+import { Event } from "@/types";
+import { addDays, formatDate, getWeekdayOccurence, isLastOfMonth, weekdayInitials } from "./dates";
+
 export function validateInputValue(value: string, type: 'price' | 'zipcode' | 'username'): boolean {
         if (type === 'price') return /^\d*\.?\d?\d?$/.test(value);
         if (type === 'zipcode') return /^\d{0,5}$/.test(value);
@@ -45,4 +48,26 @@ export const removeLeadingArticles = (text: string): string => {
         }   
     }
     return result;
+}
+
+export const arrangeEventsByDate = (events: Event[], startingDate?: string, limit: number = 30, maxDaysSearched = 365): { [date: string]: Event[] } => {
+    const date = startingDate ? new Date(startingDate) : new Date();
+    const res: { [date: string]: Event[] } = { };
+    let daysSearched = 0;
+    while (Object.keys(res).length < limit && daysSearched < maxDaysSearched) {
+        const dateString = formatDate(date);
+        const dayOfWeek = weekdayInitials[date.getDay()];
+        const eventsOnDate = events.filter((event) => event.dateTimes?.includes(dateString) || (
+            event.recurringDay === dayOfWeek && (
+                event.cadence?.includes(`${getWeekdayOccurence(dateString)}`) ||
+                event.cadence === 'last' && (
+                    isLastOfMonth(dateString)
+                )
+            )
+        ));
+        if (eventsOnDate.length) res[dateString] = eventsOnDate;
+        addDays(date, 1);
+        daysSearched++;
+    }
+    return res;
 }

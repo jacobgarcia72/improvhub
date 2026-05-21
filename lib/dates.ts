@@ -22,6 +22,13 @@ export const getWeekdayOccurence = (date: Date | string) => {
     return Math.floor((dateObject.getDate() - 1) / 7) + 1;
 }
 
+export const isLastOfMonth = (date: Date | string): boolean => {
+    const dateObject = typeof date === 'string' ? newDate(date) : date;
+    const currentMonth = dateObject.getMonth();
+    const nextMonth = addDays(new Date(dateObject), 7).getMonth();
+    return currentMonth !== nextMonth;
+}
+
 export const findNextOrdinalWeekday = (date: Date | string, ordinals: number[]): Date => {
     const dateObject = typeof date === 'string' ? newDate(date) : date;
     do {
@@ -37,6 +44,14 @@ export const formatTime = (time: string): string => {
     const ampm = hour >= 12 ? 'pm' : 'am';
     const formattedHour = hour % 12 === 0 ? 12 : hour % 12;
     return `${formattedHour}:${minute.toString().padStart(2, '0')}${ampm}`;
+}
+
+export const formatDateForDisplay = (date: Date | string): string => {
+    const dateObject = typeof date === 'string' ? new Date(date) : date;
+    const month = dateObject.toLocaleString('default', { month: 'long' });
+    const day = dateObject.getDate();
+    const year = dateObject.getFullYear();
+    return `${month} ${(day)}${year !== new Date().getFullYear() ? `, ${year}` : ''}`;
 }
 
 export const formatDateTimeForDisplay = (date: Date | string): string => {
