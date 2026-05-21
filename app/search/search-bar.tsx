@@ -52,7 +52,7 @@ export default function SearchBar() {
                 />
             case 'theatre':
                 return <Autocomplete
-                    onChange={(value) => handleSearch('theatre', value)}
+                    onStopTyping={(value) => handleSearch('theatre', value)}
                     options={getTheatreNames()}
                     label="Theatre Name"
                 />

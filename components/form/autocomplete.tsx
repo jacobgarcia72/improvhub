@@ -7,12 +7,21 @@ type AutocompleteProps = {
   options: string[];
   placeholder?: string;
   onChange?: (value: string) => void;
+  onStopTyping?: (value: string) => void;
   label?: string;
   name?: string;
   required?: boolean;
 };
 
-const Autocomplete: React.FC<AutocompleteProps> = ({ options, placeholder, onChange, label, name = 'autocomplete', required }) => {
+const Autocomplete: React.FC<AutocompleteProps> = ({
+    options,
+    placeholder,
+    onChange,
+    onStopTyping,
+    label,
+    name = 'autocomplete',
+    required
+}) => {
   const [value, setValue] = useState('');
   const [showOptions, setShowOptions] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
@@ -26,16 +35,28 @@ const Autocomplete: React.FC<AutocompleteProps> = ({ options, placeholder, onCha
     onChange?.(newValue);
   };
 
+  const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout>();
+
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    updateValue(event.target.value);
-    setShowOptions(event.target.value !== '');
+    const { value } = event.target;
+    updateValue(value);
+    setShowOptions(value !== '');
     setActiveIndex(-1);
+    if (onStopTyping) {
+      clearTimeout(typingTimeout);
+      setTypingTimeout(
+        setTimeout(() => {
+          onStopTyping(value);
+        }, 500)
+      )
+    }
   };
 
   const handleOptionSelect = (option: string) => {
     updateValue(option);
     setShowOptions(false);
     setActiveIndex(-1);
+    if (onStopTyping) onStopTyping(option);
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
