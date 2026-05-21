@@ -8,7 +8,7 @@ import Autocomplete from "@/components/form/autocomplete";
 import { getTheatreNames } from "@/lib/theatres";
 
 export default function SearchBar() {
-    const searchTypes = ['theatre', 'state', 'zipcode'];
+    const searchTypes = ['theatre', 'state', 'zipcode', 'miles'];
     const searchParams = useSearchParams();
     const pathname = usePathname();
     const { replace } = useRouter();
@@ -22,6 +22,10 @@ export default function SearchBar() {
         replace(pathname);
         if (searchFor) {
             params.set('for', searchFor);
+            if (searchFor !== 'theatres' && searchBy === 'state') {
+                params.delete('state');
+                setSearchBy('');
+            }
             replace(`${pathname}?${params.toString()}`);
         }
     }
@@ -94,7 +98,7 @@ export default function SearchBar() {
                 >
                     <option value=""></option>
                     <option value="theatre">Theatre Name</option>
-                    <option value="state">State</option>
+                    {searchFor === 'theatres' && <option value="state">State</option>}
                     <option value="zipcode">ZIP Code</option>
                 </select>
             </div>
