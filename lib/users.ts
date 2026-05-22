@@ -1,7 +1,5 @@
 'use server';
 
-import fs from 'node:fs';
-
 import { User } from "@/types";
 import { getRandomNumberString } from './helper-functions';
 
@@ -14,6 +12,7 @@ function initDb() {
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT NOT NULL UNIQUE,
+            joinDate TEXT NOT NULL,
             firstName TEXT NOT NULL,
             lastName TEXT NOT NULL,
             pronouns TEXT,
@@ -58,6 +57,7 @@ export async function saveUser(user: User, image?: File): Promise<string> {
     usersDb.prepare(`
         INSERT INTO users (
             username,
+            joinDate,
             firstName,
             lastName,
             pronouns,
@@ -75,6 +75,7 @@ export async function saveUser(user: User, image?: File): Promise<string> {
         )
         VALUES (
             $username,
+            $joinDate,
             $firstName,
             $lastName,
             $pronouns,

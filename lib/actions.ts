@@ -94,6 +94,7 @@ export async function createUser(prevState: void | { message?: string }, formDat
     const user: User = {
         id: '',
         username: formData.get('username') as string || '',
+        joinDate: new Date().toISOString(),
         firstName: formData.get('firstName') as string,
         lastName: formData.get('lastName') as string,
         pronouns: formData.get('pronouns') as string,
