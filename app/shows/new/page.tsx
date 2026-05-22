@@ -1,7 +1,7 @@
 import Form from '@/components/form/form';
 import Input from '@/components/form/input';
 import ImagePicker from '@/components/form/image-picker';
-import { postShow } from '@/lib/actions';
+import { postShow } from '@/actions';
 import Text from '@/components/form/text';
 import TheatreSelect from '@/components/form/theatre-select';
 import DateInputs from './date-inputs';

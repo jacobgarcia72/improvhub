@@ -11,6 +11,7 @@ export default function UsernameInput() {
     return (
         <div className='relative'>
             <Input
+                required
                 value={username}
                 onChange={(value) => {
                     if (validateInputValue(value, 'username')) {

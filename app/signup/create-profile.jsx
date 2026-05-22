@@ -5,7 +5,7 @@ import { ethnicities, genderIdentities, orientations, pronouns } from '@/lib/dem
 import Form from '@/components/form/form';
 import Autocomplete from '@/components/form/autocomplete';
 import { getTheatreNames } from '@/lib/theatres';
-import { createUser } from '@/lib/actions';
+import { createUser } from '@/actions/auth-actions';
 import UsernameInput from './username-input';
 
 export default function CreateProfileForm() {
@@ -15,13 +15,17 @@ export default function CreateProfileForm() {
     return (
         <section className="max-w-3xl mx-auto p-6">
             <Form onSubmit={createUser} className="grid gap-6" buttonCaption='Create Profile'>
-                <ImagePicker label="Headshot" name="image" />
+                <div className="grid gap-4 sm:grid-cols-2">
+                    <UsernameInput />
+                    <Input required type='password' label='Password' name="password" />
+                </div>
+                <ImagePicker label="Profile Picture" name="image" />
                 <div className="grid gap-4 sm:grid-cols-2">
                     <Input label="First Name" name="firstName" maxLength={20} required />
                     <Input label="Last Name" name="lastName" maxLength={20} />
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2">
-                    <UsernameInput />
+                    {/* <UsernameInput /> */}
                     <Autocomplete options={pronouns} name="pronouns" maxLength={20} label="Pronouns" />
                 </div>
 

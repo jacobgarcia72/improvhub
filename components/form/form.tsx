@@ -17,8 +17,10 @@ export default function Form({ children, buttonCaption = 'Submit', onSubmit }: {
     return (
         <form action={formAction} className="flex flex-col gap-4 max-w-md mx-auto mb-1">
             {children}
-            <FormSubmit caption={buttonCaption} />
-            {formState?.message && <p>{formState.message}</p>}
+            <div className='flex flex-col'>
+                <FormSubmit caption={buttonCaption} />
+                {formState?.message && <p className='text-red-600 text-sm'>{formState.message}</p>}
+            </div>
         </form>
     )
 }

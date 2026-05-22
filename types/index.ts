@@ -55,7 +55,7 @@ interface Team {
 
 export interface User {
     id: string;
-    username: string;
+    password: string;
     joinDate: string;
     firstName: string;
     lastName?: string;

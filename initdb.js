@@ -4,8 +4,7 @@ const contentdb = sql('content.db');
 
 usersdb.prepare(`
    CREATE TABLE IF NOT EXISTS users (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      username TEXT NOT NULL UNIQUE,
+      id INTEGER PRIMARY KEY,
       firstName TEXT NOT NULL,
       lastName TEXT NOT NULL,
       pronouns TEXT,

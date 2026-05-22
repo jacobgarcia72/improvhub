@@ -79,6 +79,12 @@ section {
   border-radius: .5rem;
 }
 
+section.small-section {
+  width: 85vw;
+  max-width: 380px;
+  margin-top: 18px;
+}
+
 input, select, textarea {
   border: 1px solid var(--color-gray-300);
   border-radius: .375rem;

@@ -1,13 +1,11 @@
 'use server';
 
 import { redirect } from "next/navigation";
-import { saveShow } from "./shows";
-import { revalidatePath } from "next/cache";
-import { Candence, Event, User, WeekdayInitial } from "@/types";
-import { saveUser } from "./users";
-import { sortDates, weekdayInitials } from "./dates";
-import { theatres } from "./theatres";
-import { removeLeadingArticles } from "./helper-functions";
+import { saveShow } from "@/lib/shows";
+import { Candence, Event, WeekdayInitial } from "@/types";
+import { sortDates, weekdayInitials } from "@/lib/dates";
+import { theatres } from "@/lib/theatres";
+import { removeLeadingArticles } from "@/lib/helper-functions";
 
 export async function postShow(prevState: void | { message?: string }, formData: FormData) {
     const title = (formData.get('title') as string)?.trim() || null;
@@ -87,31 +85,4 @@ export async function postShow(prevState: void | { message?: string }, formData:
 
     const showId = await saveShow(show, imageFile);
     redirect(`/shows/${showId}`);
-}
-
-export async function createUser(prevState: void | { message?: string }, formData: FormData) {
-    const imageFile = formData.get('image') as File;
-    const user: User = {
-        id: '',
-        username: formData.get('username') as string || '',
-        joinDate: new Date().toISOString(),
-        firstName: formData.get('firstName') as string,
-        lastName: formData.get('lastName') as string,
-        pronouns: formData.get('pronouns') as string,
-        headline: formData.get('headline') as string,
-        bio: formData.get('bio') as string,
-        theatre: formData.get('theatreId') as string,
-        secondaryTheatre: formData.get('secondaryTheatreId') as string,
-        gender: formData.get('gender') as string,
-        orientation: formData.get('orientation') as string,
-        ethnicity: formData.get('ethnicity') as string,
-        website: formData.get('website') as string,
-        experience: formData.get('experience') as string,
-        teams: ''
-    }
-    if (!user.firstName) return { message: 'First Name is required' };
-
-    const username = await saveUser(user, imageFile);
-    revalidatePath(`/profile/${username}`);
-    redirect(`/profile/${username}`);
 }

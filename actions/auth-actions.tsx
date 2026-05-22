@@ -1,0 +1,87 @@
+'use server'
+
+import { createAuthSession, destroySession } from "@/lib/auth";
+import { uploadImage } from "@/lib/cloudinary";
+import { hashUserPassword, verifyPassword } from "@/lib/hash";
+import { getUser, saveUser } from "@/lib/users";
+import { User } from "@/types";
+import { redirect } from "next/navigation";
+
+export async function createUser(prevState: void | { message?: string }, formData: FormData) {
+    const username = (formData.get('username') as string).trim();
+    const password = formData.get('password') as string;
+    const firstName = formData.get('firstName') as string;
+
+    if (!username) return { message: 'Username is required' };
+    if (!password) return { message: 'Password is required' };
+    if (password.length < 8) return { message: 'Password must be at least 8 characters' };
+    if (!firstName) return { message: 'First Name is required' };
+
+    const imageFile = formData.get('image') as File;
+    let imageUrl = '';
+    if (imageFile && imageFile.size) {
+        if (imageFile.size > 5 * 1024 * 1024) { // 5MB limit
+            return { message: 'Image file size exceeds 5MB limit' };
+        }
+        try {
+            imageUrl = await uploadImage(imageFile, 'users');
+        } catch {
+            throw new Error('Image upload failed');
+        }
+    }
+    const user: User = {
+        id: username,
+        password: hashUserPassword(password),
+        joinDate: new Date().toISOString(),
+        image: imageUrl,
+        firstName,
+        lastName: formData.get('lastName') as string,
+        pronouns: formData.get('pronouns') as string,
+        headline: formData.get('headline') as string,
+        bio: formData.get('bio') as string,
+        theatre: formData.get('theatreId') as string,
+        secondaryTheatre: formData.get('secondaryTheatreId') as string,
+        gender: formData.get('gender') as string,
+        orientation: formData.get('orientation') as string,
+        ethnicity: formData.get('ethnicity') as string,
+        website: formData.get('website') as string,
+        experience: formData.get('experience') as string,
+        teams: ''
+    }
+
+    try {
+        await saveUser(user);
+        await createAuthSession(username);
+        redirect(`/profile/${username}`);
+    } catch (error) {
+        if (error instanceof Error && 'code' in error && error.code === 'SQLITE_CONSTRAINT_UNIQUE') {
+            return { message: 'Username is unavailable' }
+        }
+        throw error;
+    }
+}
+
+export async function login(prevState: void | { message?: string }, formData: FormData) {
+    const username = formData.get('username') as string;
+    const password = formData.get('password') as string;
+
+    const existingUser = await getUser(username);
+
+    if (!existingUser) {
+        return { message: 'Invalid credentials.' }
+    }
+
+    const isValidPassword = verifyPassword(existingUser.password, password);
+
+    if (!isValidPassword) {
+        return { message: 'Invalid credentials.' }
+    }
+
+    await createAuthSession(existingUser.id);
+    redirect('/');
+}
+
+export async function logout() {
+    await destroySession();
+    redirect('/');
+}

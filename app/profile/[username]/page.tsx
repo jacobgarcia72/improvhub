@@ -32,14 +32,11 @@ export default async function UserProfilePage({ params }: { params: Promise<{use
     }
     let theatres = user.theatre || '';
     if (theatres && user.secondaryTheatre) theatres += `, ${user.secondaryTheatre}`
-    user.bio = 'I am an improviser and this is my bio'
-    user.experience = 'I have a lot of experience, mate'
-    user.website = 'website.com'
-    theatres = 'The Hideout Theatre'
+
     return (
         <Suspense fallback={<p>Loading</p>}>
             <LayoutCard className="flex flex-row">
-                <div>
+                <div className="pl-4">
                     {user.image ? (
                         <Image className="object-cover rounded-xl w-32 h-32"
                             src={user.image} alt={displayName} width={120} height={120} />
@@ -47,7 +44,7 @@ export default async function UserProfilePage({ params }: { params: Promise<{use
                         <div className="h-full w-full">{initials}</div>
                     )}
                 </div>
-                <div className="pl-2 flex items-end">
+                <div className="pl-2 flex flex-col justify-end pl-4">
                     <h1 className="text-xl">{displayName}{user.pronouns && <span className="text-sm">&nbsp;({user.pronouns})</span>}</h1>
                     {user.headline && <h2>{user.headline}</h2>}
                 </div>

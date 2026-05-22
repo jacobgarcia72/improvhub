@@ -1,6 +1,7 @@
 import { appName } from "@/lib/app-info";
 import { Metadata } from "next";
-import CreateProfileForm from './create-profile';
+import { verifyAuth } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
 
 export const metadata: Metadata = {
@@ -8,8 +9,11 @@ export const metadata: Metadata = {
     description: "Improv performer profiles",
 };
 
-export default function ProfilePage() {
-    return (
-        <CreateProfileForm />
-    )
+export default async function ProfilePage() {
+    const { user } = await verifyAuth();
+    if (user?.id) {
+        return redirect(`/profile/${user.id}`);
+    } else {
+        return redirect('/login');
+    }
 }
