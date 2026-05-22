@@ -28,7 +28,7 @@ export interface Event {
     id: string;
     creatorId: string;
     title: string;
-    dateTimes: string | null;
+    dateTimes: string[] | null;
     recurringDay: WeekdayInitial | null;
     recurringTime: string | null;
     cadence: Candence | null;

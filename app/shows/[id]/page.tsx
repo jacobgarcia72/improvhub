@@ -1,6 +1,6 @@
 import { appName } from "@/lib/app-info";
 import { getShow } from "@/lib/shows";
-import { CadenceText, Event } from "@/types";
+import { CadenceText } from "@/types";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
@@ -20,7 +20,7 @@ export async function generateMetadata(
         const { id } = await params
 
     // fetch data
-    const show = await getShow(id) as Event | undefined;
+    const show = await getShow(id);
 
     return {
         title: show?.title || appName,
@@ -38,20 +38,17 @@ function Header({ children }: { children: React.ReactNode }) {
 
 export default async function ShowDetailsPage({ params }: Props) {
     const { id } = await params;
-    const show = await getShow(id) as Event | undefined;
+    const show = await getShow(id);
 
     if (!show) notFound();
 
     const theatre = theatres.find(t => t.name === show.theatre);
     const imageUrl = show.image || theatre?.logo;
 
-
     let upcomingShows: string[] = [];
     if (show.dateTimes) {
         upcomingShows = removePastDates(
-            sortDates(
-                show.dateTimes.split(',')
-            )
+            sortDates(show.dateTimes)
         ).slice(0, 4);
     }
 

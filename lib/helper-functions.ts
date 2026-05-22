@@ -56,8 +56,9 @@ export const arrangeEventsByDate = (events: Event[], startingDate?: string, limi
     let daysSearched = 0;
     while (Object.keys(res).length < limit && daysSearched < maxDaysSearched) {
         const dateString = formatDate(date);
+        if (!daysSearched) console.log(dateString)
         const dayOfWeek = weekdayInitials[date.getDay()];
-        const eventsOnDate = events.filter((event) => event.dateTimes?.includes(dateString) || (
+        const eventsOnDate = events.filter((event) => event.dateTimes?.find((dt) => dt.includes(dateString)) || (
             event.recurringDay === dayOfWeek && (
                 event.cadence?.includes(`${getWeekdayOccurence(dateString)}`) ||
                 event.cadence === 'last' && (

@@ -2,7 +2,7 @@
 
 import slugify from 'slugify';
 
-import { Event } from "@/types";
+import { Candence, Event, WeekdayInitial } from "@/types";
 import sql from 'better-sqlite3';
 import { removeLeadingArticles } from './helper-functions';
 import { uploadImage } from './cloudinary';
@@ -38,17 +38,45 @@ function initDb() {
 }
 initDb();
 
+const convertDataToShow = (data: {[key: string]: string | null}): Event => {
+    return {
+        id: data.id as string,
+        creatorId: data.creatorId as string,
+        title: data.title as string,
+        dateTimes: data.dateTimes?.split(',') || null,
+        recurringDay: data.recurringDay as WeekdayInitial || null,
+        recurringTime: data.recurringTime || null,
+        cadence: data.cadence as Candence || null,
+        description: data.description || null,
+        theatre: data.theatre || null,
+        zipcode: data.zipcode || null,
+        price: data.price === null ? null : Number(data.price),
+        doorPrice: data.doorPrice === null ? null : Number(data.doorPrice),
+        ticketsUrl: data.ticketsUrl || null,
+        image: data.image || null,
+        photoCredit: data.photoCredit || null,
+        runtime: data.runtime || null,
+        notes: data.notes || null,
+    }
+}
+
 export async function getShow(id: string) {
-    return await contentDB.prepare('SELECT * FROM shows WHERE id = ?').get(id);
+    const data = await contentDB.prepare('SELECT * FROM shows WHERE id = ?').get(id) as {[key: string]: string | null};
+    return data ? convertDataToShow(data) : null;
 }
 
 export async function getShowsByTheatre(theatre: string) {
-    return contentDB.prepare('SELECT * FROM shows WHERE theatre LIKE ?').all(theatre);
+    const data = contentDB.prepare('SELECT * FROM shows WHERE theatre LIKE ?').all(theatre) as {[key: string]: string | null}[];
+    return data.map(convertDataToShow);
 }
 
 export async function getShowsByZipcode(zipcode: string, miles: number) {
     const zipcodesInRange = zipcodes.radius(zipcode, miles, false).map((z) => typeof z === 'string' ? z : z.zip);
-    return contentDB.prepare(`SELECT * FROM shows WHERE zipcode IN (${zipcodesInRange.map(() => '?').join(', ')})`).all(...zipcodesInRange);
+    const data = contentDB.prepare(
+        `SELECT * FROM shows WHERE zipcode IN (${zipcodesInRange.map(() => '?').join(', ')})`
+    ).all(...zipcodesInRange) as {[key: string]: string | null}[];
+    return data.map(convertDataToShow);
+
 }
 
 export async function saveShow(show: Event, imageFile: File | null): Promise<string> {
@@ -98,26 +126,26 @@ export async function saveShow(show: Event, imageFile: File | null): Promise<str
             runtime,
             notes
         )
-        VALUES (
-            $id,
-            $creatorId,
-            $title,
-            $dateTimes,
-            $recurringDay,
-            $recurringTime,
-            $cadence,
-            $description,
-            $theatre,
-            $zipcode,
-            $price,
-            $doorPrice,
-            $ticketsUrl,
-            $image,
-            $photoCredit,
-            $runtime,
-            $notes
-        )
-    `).run(show);
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(
+        show.id,
+        show.creatorId,
+        show.title,
+        show.dateTimes?.join(',') || null,
+        show.recurringDay,
+        show.recurringTime,
+        show.cadence,
+        show.description,
+        show.theatre,
+        show.zipcode,
+        show.price,
+        show.doorPrice,
+        show.ticketsUrl,
+        show.image,
+        show.photoCredit,
+        show.runtime,
+        show.notes
+    );
 
     return show.id;
 }

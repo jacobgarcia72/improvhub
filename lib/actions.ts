@@ -5,7 +5,7 @@ import { saveShow } from "./shows";
 import { revalidatePath } from "next/cache";
 import { Candence, Event, User, WeekdayInitial } from "@/types";
 import { saveUser } from "./users";
-import { weekdayInitials } from "./dates";
+import { sortDates, weekdayInitials } from "./dates";
 import { theatres } from "./theatres";
 import { removeLeadingArticles } from "./helper-functions";
 
@@ -36,6 +36,7 @@ export async function postShow(prevState: void | { message?: string }, formData:
                     `${formData.get(`date-${i}`)} ${formData.get(`time-${i}`)}`
                 );
             }
+            dateTimes = sortDates(dateTimes);
         }
     }
 
@@ -71,7 +72,7 @@ export async function postShow(prevState: void | { message?: string }, formData:
         theatre,
         zipcode,
         description,
-        dateTimes: dateTimes ? dateTimes.join(',') : null,
+        dateTimes,
         recurringDay,
         recurringTime,
         cadence,
