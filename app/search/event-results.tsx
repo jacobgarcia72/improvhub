@@ -38,7 +38,7 @@ export default async function EventResults({ eventType, theatre, zipcode, miles 
                         <h2 className='text-slate-900 font-semibold '>{date === formatDate(new Date()) ? 'Today' : formatDateForDisplay(date)}</h2>
                     </div>
                     <div className='flex flex-row flex-wrap'>
-                        {results[date].map((event, i) => <EventCard key={i} event={event} type={eventType} />)}
+                        {results[date].map((result, i) => <EventCard key={i} event={result.event} time={result.time} type={eventType} />)}
                     </div>
                 </div>
             ))}

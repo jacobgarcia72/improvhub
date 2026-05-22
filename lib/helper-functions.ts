@@ -50,23 +50,36 @@ export const removeLeadingArticles = (text: string): string => {
     return result;
 }
 
-export const arrangeEventsByDate = (events: Event[], startingDate?: string, limit: number = 30, maxDaysSearched = 365): { [date: string]: Event[] } => {
+export const arrangeEventsByDate = (events: Event[], startingDate?: string, limit: number = 30, maxDaysSearched = 365): {
+    [date: string]: { time: string, event: Event }[]
+} => {
     const date = startingDate ? new Date(startingDate) : new Date();
-    const res: { [date: string]: Event[] } = { };
+    const res: { [date: string]: { time: string, event: Event }[] } = { };
     let daysSearched = 0;
     while (Object.keys(res).length < limit && daysSearched < maxDaysSearched) {
         const dateString = formatDate(date);
-        if (!daysSearched) console.log(dateString)
         const dayOfWeek = weekdayInitials[date.getDay()];
-        const eventsOnDate = events.filter((event) => event.dateTimes?.find((dt) => dt.includes(dateString)) || (
+        const eventsOnDate = events.filter((event) => event.dateTimes?.some((dt) => dt.includes(dateString)) || (
             event.recurringDay === dayOfWeek && (
                 event.cadence?.includes(`${getWeekdayOccurence(dateString)}`) ||
                 event.cadence === 'last' && (
                     isLastOfMonth(dateString)
+
                 )
             )
         ));
-        if (eventsOnDate.length) res[dateString] = eventsOnDate;
+        if (eventsOnDate.length) {
+            res[dateString] = eventsOnDate.map((event) => {
+                return {
+                    event,
+                    time: event.recurringTime || event.dateTimes?.find((dt) => dt.includes(dateString))?.split(' ')[1] || ''
+                }
+            }).sort((a, b) => {
+                const [aHours, aMinutes] = a.time.split(':').map(Number);
+                const [bHours, bMinutes] = b.time.split(':').map(Number);
+                return (aHours * 60 + aMinutes) - (bHours * 60 + bMinutes);
+            });
+        }
         addDays(date, 1);
         daysSearched++;
     }

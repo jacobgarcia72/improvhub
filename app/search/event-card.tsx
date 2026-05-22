@@ -1,10 +1,11 @@
+import { formatTime } from "@/lib/dates";
 import { removeLeadingArticles } from "@/lib/helper-functions";
 import { theatres } from "@/lib/theatres";
 import { Event } from "@/types";
 import Image from "next/image";
 import Link from "next/link";
 
-export default function EventCard({ event, type }: { event: Event, type: string }) {
+export default function EventCard({ event, time, type }: { event: Event, time: string, type: string }) {
     const image = event.image || event.theatre && (
         theatres.find((t) => removeLeadingArticles(t.name) === removeLeadingArticles(event.theatre || ''))
     )?.logo;
@@ -24,8 +25,9 @@ export default function EventCard({ event, type }: { event: Event, type: string 
                 </div>
                 <div className="px-5 pb-1 pt-1">
                     <h2 className="h-7 text-lg text-slate-900 overflow-hidden text-ellipsis">{event.title}</h2>
-                    <p className="text-sm text-slate-500">{event.theatre}</p>
-                    <div className="fade-out text-sm text-slate-900 overflow-hidden text-ellipsis flex flex-wrap gap-2 pt-1 h-32">
+                    <p className="h-6 text-sm text-slate-500">{event.theatre}</p>
+                    <time className="h-7 text-sm text-slate-700">{formatTime(time)}</time>
+                    <div className="fade-out text-sm text-slate-900 overflow-hidden text-ellipsis flex flex-wrap gap-2 pt-1 h-28">
                         {event.description || '(No description available)'}
                     </div>
                 </div>
