@@ -4,6 +4,8 @@ export const pronouns = [
     'they/them',
     'she/they',
     'he/they',
+    'they/she',
+    'they/he',
     'ze/zir',
     'xe/xem',
     'ey/em',
