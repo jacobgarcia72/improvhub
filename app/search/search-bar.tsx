@@ -16,7 +16,12 @@ export default function SearchBar() {
     const searchFor = searchParams.get('for');
 
 
-    const [searchBy, setSearchBy] = useState('');
+    const [searchBy, setSearchBy] = useState(() => {
+        if (searchParams.get('theatre')) return 'theatre';
+        if (searchParams.get('zipcode')) return 'zipcode';
+        if (searchParams.get('state')) return 'state';
+        return ''
+    });
 
     const handleSearchFor = (searchFor: string) => {
         replace(pathname);
@@ -89,6 +94,7 @@ export default function SearchBar() {
             <div className="flex-1 min-w-[100px]">
                 <label htmlFor="searchBy">Search By</label>
                 <select
+                    value={searchBy}
                     className="w-full border border-gray-300 rounded px-3 py-2"
                     onChange={(e) => {
                         setSearchBy(e.currentTarget.value);
