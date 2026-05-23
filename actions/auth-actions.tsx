@@ -61,7 +61,7 @@ export async function createUser(prevState: void | { message?: string }, formDat
     }
 }
 
-export async function login(prevState: void | { message?: string }, formData: FormData) {
+export async function login(redirectRoute = '/', prevState: void | { message?: string }, formData: FormData) {
     const username = formData.get('username') as string;
     const password = formData.get('password') as string;
 
@@ -78,7 +78,7 @@ export async function login(prevState: void | { message?: string }, formData: Fo
     }
 
     await createAuthSession(existingUser.id);
-    redirect('/');
+    redirect(redirectRoute);
 }
 
 export async function logout() {

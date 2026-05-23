@@ -39,6 +39,10 @@ export async function verifyAuth() {
     }
 }
 
+export async function isSignedIn(): Promise<boolean> {
+    return Boolean((await verifyAuth()).user?.id);
+}
+
 export async function destroySession() {
     const { session } = await verifyAuth();
     if (!session) {
