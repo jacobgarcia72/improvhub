@@ -6,13 +6,8 @@ import Text from '@/components/form/text';
 import TheatreSelect from '@/components/form/theatre-select';
 import DateInputs from './date-inputs';
 import PriceInputs from './price-inputs';
-import { isSignedIn } from '@/lib/auth';
-import { redirect } from 'next/navigation';
 
 export default async function NewShowPage() {
-    if (!(await isSignedIn())) {
-        redirect('/login?reroute=shows%2Fnew');
-    }
     return (
         <section>
             <Form onSubmit={postShow} buttonCaption="Create Show">

@@ -1,7 +1,8 @@
 import { Lucia } from "lucia";
 import { BetterSqlite3Adapter } from "@lucia-auth/adapter-sqlite";
 import { usersDb as db} from "./db";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
+import { redirect } from "next/navigation";
 
 const adapter = new BetterSqlite3Adapter(db, {
     user: 'users', // must match table name
@@ -55,4 +56,14 @@ export async function destroySession() {
     const sessionCookie = lucia.createBlankSessionCookie();
     const { name, value, attributes } = sessionCookie;
     (await cookies()).set(name, value, attributes);
+}
+
+export async function protectRoute() {
+    if (!(await isSignedIn())) {
+        let currentPath = (await headers()).get('x-pathname') || '';
+        if (currentPath.startsWith('/')) currentPath = currentPath.slice(1);
+        let redirectPath = '/login';
+        if (currentPath) redirectPath += `?reroute=${currentPath.replaceAll('/', '%2F')}`;
+        redirect(redirectPath);
+    }
 }
