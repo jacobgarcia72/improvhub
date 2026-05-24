@@ -1,5 +1,6 @@
 import Link from "next/link";
 import NavLink from "./nav-link";
+import ProfileImage from "./profile-image";
 
 const links = ['Shows', 'Auditions', 'Jams', 'Teams', 'Discussion', 'Search'];
 
@@ -14,7 +15,7 @@ export default function Header() {
             </nav>
             <div className="flex flex-row">
                 <Link href="/profile">
-                    <div>P</div>
+                    <ProfileImage />
                 </Link>
             </div>
         </header>
