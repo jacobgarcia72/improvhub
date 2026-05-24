@@ -83,5 +83,5 @@ export async function login(redirectRoute = '/', prevState: void | { message?: s
 
 export async function logout() {
     await destroySession();
-    redirect('/');
+    redirect('/login');
 }

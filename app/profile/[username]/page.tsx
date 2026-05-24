@@ -1,3 +1,6 @@
+import { logout } from "@/actions/auth-actions";
+import Button from "@/components/form/button";
+import { verifyAuth } from "@/lib/auth";
 import { optimizeImage } from "@/lib/cloudinary";
 import { getUser } from "@/lib/users";
 import { User } from "@/types";
@@ -6,9 +9,9 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
 function LayoutCard({
-  children, className, header
+    children, className, header
 }: Readonly<{
-  children?: React.ReactNode, className?: string, header?: string
+    children?: React.ReactNode, className?: string, header?: string
 }>) {
     if (!children) return null;
     return (
@@ -25,6 +28,9 @@ export default async function UserProfilePage({ params }: { params: Promise<{use
     const user = await getUser(username) as User | undefined;
 
     if (!user) notFound();
+
+    const isCurrentUser = username === (await verifyAuth()).user?.id;
+
     let displayName = user.firstName;
     let initials = user.firstName[0];
     if (user.lastName) {
@@ -61,6 +67,16 @@ export default async function UserProfilePage({ params }: { params: Promise<{use
             </LayoutCard>
             <LayoutCard header="Website">
                 {user.website && <a href={user.website}>{user.website}</a>}
+            </LayoutCard>
+            <LayoutCard>
+                {isCurrentUser && <div className="w-full flex flex-row justify-center">
+                    <Button
+                        type="button"
+                        caption="Sign Out"
+                        onClick={logout}
+                        style="link"
+                    />
+                </div>}
             </LayoutCard>
         </Suspense>
     )
