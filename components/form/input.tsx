@@ -10,6 +10,7 @@ interface InputProps {
     placeholder?: string,
     value?: string,
     onChange?: (value: string) => void,
+    onBlur?: (value: string) => void,
     maxLength?: number,
     disabled?: boolean;
     min?: number;
@@ -27,6 +28,7 @@ export default function Input({
     placeholder,
     value,
     onChange,
+    onBlur,
     maxLength = 50,
     disabled = false,
     min,
@@ -45,6 +47,7 @@ export default function Input({
             <input
                 value={value}
                 onChange={onChange ? (e) => onChange(e.target.value) : undefined}
+                onBlur={onBlur ? (e) => onBlur(e.target.value) : undefined}
                 type={type}
                 name={name}
                 id={name}
