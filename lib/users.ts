@@ -25,17 +25,7 @@ export async function saveUser(user: User): Promise<void> {
             firstName,
             lastName,
             pronouns,
-            headline,
-            bio,
-            theatre,
-            secondaryTheatre,
-            gender,
-            orientation,
-            ethnicity,
-            website,
-            experience,
-            image,
-            teams
+            image
         )
         VALUES (
             $id,
@@ -44,17 +34,7 @@ export async function saveUser(user: User): Promise<void> {
             $firstName,
             $lastName,
             $pronouns,
-            $headline,
-            $bio,
-            $theatre,
-            $secondaryTheatre,
-            $gender,
-            $orientation,
-            $ethnicity,
-            $website,
-            $experience,
-            $image,
-            $teams
+            $image
         )
     `).run(user);
 }

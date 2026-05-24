@@ -37,22 +37,11 @@ export async function createUser(prevState: void | { message?: string }, formDat
         firstName,
         lastName: formData.get('lastName') as string,
         pronouns: formData.get('pronouns') as string,
-        headline: formData.get('headline') as string,
-        bio: formData.get('bio') as string,
-        theatre: formData.get('theatreId') as string,
-        secondaryTheatre: formData.get('secondaryTheatreId') as string,
-        gender: formData.get('gender') as string,
-        orientation: formData.get('orientation') as string,
-        ethnicity: formData.get('ethnicity') as string,
-        website: formData.get('website') as string,
-        experience: formData.get('experience') as string,
-        teams: ''
     }
 
     try {
         await saveUser(user);
         await createAuthSession(username);
-        redirect(`/profile/${username}`);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         if (error?.code && error.code.includes('CONSTRAINT')) {
@@ -61,6 +50,7 @@ export async function createUser(prevState: void | { message?: string }, formDat
         console.error(error);
         return { message: 'Hmm, something went wrong. Try again later.'};
     }
+    redirect(`/profile`);
 }
 
 export async function login(redirectRoute = '/', prevState: void | { message?: string }, formData: FormData) {

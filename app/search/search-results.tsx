@@ -15,7 +15,7 @@ export default async function SearchResults({ params }: { params: {
     const searchFor = params?.for;
 
     return (
-        <section className="flex flex-row flex-wrap gap-4 px-4 pb-4 justify-center min-h-[308px]">
+        <section className="flex flex-row flex-wrap gap-4 px-4 pb-4 justify-center min-h-[calc(100vh-220px)]">
             {searchFor === 'theatres' && (
                 <TheatreResults
                     theatre={theatreNameQuery}

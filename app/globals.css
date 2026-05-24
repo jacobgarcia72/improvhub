@@ -3,9 +3,6 @@
 :root {
   --background: #e9eff0;
   --foreground: #171717;
-}
-
-@theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
@@ -63,13 +60,19 @@ button.icon-button {
 
 main {
   padding: 5px;
+  padding-bottom: 32px;
+  min-height: calc(100vh - 50px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
 }
 
 section {
-  margin: auto;
   margin-bottom: 10px;
-  padding: 16px 10px 20px;
-  max-width: 870px;
+  padding: 16px 12px 20px;
+  max-width: 800px;
+  width: 95vw;
   background-color: white;
   --tw-shadow: 0 1px 3px 0 var(--tw-shadow-color, #0000001a), 0 1px 2px -1px var(--tw-shadow-color, #0000001a);
   box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
@@ -79,10 +82,19 @@ section {
   border-radius: .5rem;
 }
 
+section.extra-padding {
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
 section.small-section {
   width: 85vw;
   max-width: 380px;
   margin-top: 18px;
+}
+
+section.medium-section {
+  max-width: 640px;
 }
 
 input, select, textarea {

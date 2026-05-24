@@ -4,9 +4,10 @@ import { useRef, useState } from 'react';
 import Image from 'next/image';
 import Button from './button';
 
-export default function ImagePicker({ label = 'Image', name = 'image' }: {
+export default function ImagePicker({ label = 'Image', name = 'image', square = false }: {
     label?: string;
     name?: string;
+    square?: boolean;
 }) {
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
@@ -39,9 +40,9 @@ export default function ImagePicker({ label = 'Image', name = 'image' }: {
     return (
         <div className='flex flex-col'>
             <label htmlFor={name}>{label}</label>
-            {selectedImage && <div className='mb-2'>
-                <Image src={selectedImage} alt="Selected image" width={500} height={500} />
-            </div>}
+            <div className='mb-2'>
+                {selectedImage && <Image className={`rounded${square && ' object-cover w-60 h-60'}`} src={selectedImage} alt="Selected image" width={500} height={500} />}
+            </div>
             <input
                 className='hidden'
                 type='file'
