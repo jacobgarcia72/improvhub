@@ -8,6 +8,7 @@ import { User } from "@/types";
 import Image from "next/image";
 import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
+import Link from "next/link";
 
 function LayoutCard({
     children, className, header
@@ -65,6 +66,15 @@ export default async function UserProfilePage({ params }: { params: Promise<{use
             </LayoutCard>
             <LayoutCard header="Theatres">
                 {theatres}
+            </LayoutCard>
+            <LayoutCard header="Teams">
+                {user.teams && <div>{/*TODO: Display teams with links to team pages*/}</div>}
+                {isCurrentUser && !user.teams && <p className="text-slate-500">No teams to display</p>}
+                {isCurrentUser && <div className="w-full flex flex-row justify-center">
+                    <Link href="/create/team">
+                        <Button caption="New Team" className="w-48" />
+                    </Link>
+                </div>}
             </LayoutCard>
             <LayoutCard header="Experience">
                 {user.experience}
