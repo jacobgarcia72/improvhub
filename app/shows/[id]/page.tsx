@@ -9,7 +9,7 @@ import { theatres } from "@/lib/theatres";
 import { formatDateTimeForDisplay, formatTime, removePastDates, sortDates, weekdayInitials, weekdays } from "@/lib/dates";
 import Button from "@/components/form/button";
 import { optimizeImage } from "@/lib/cloudinary";
-import Loading from "@/app/loading";
+import Loader from "@/components/loader";
 
 type Props = {
     params: Promise<{ id: string }>
@@ -80,7 +80,7 @@ export default async function ShowDetailsPage({ params }: Props) {
     }
 
     return (
-        <Suspense fallback={<Loading />}>
+        <Suspense fallback={<Loader />}>
             <section>
                 <div className="px-4">
                     <div className="w-full">

@@ -1,7 +1,8 @@
+/* HTML: <div class="loader"></div> */
 .loader {
   width: 40px;
   height: 30px;
-  --c:no-repeat linear-gradient(#000 0 0);
+  --c:no-repeat linear-gradient(#155dfc 0 0);
   background:
     var(--c) 0    100%/8px 30px,
     var(--c) 50%  100%/8px 20px,
@@ -15,7 +16,7 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #000;
+  background: #e7000b;
   left: -16px;
   top: 0;
   animation: 
