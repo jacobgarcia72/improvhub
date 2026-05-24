@@ -7,13 +7,21 @@ import Link from "next/link";
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
     const reroute = (await searchParams)?.reroute || '';
+    let caption = 'Sign In';
+    if (reroute) {
+        caption = reroute.includes('profile/') ? (
+            'Sign in to view this profile'
+        ) : (
+            'Sign in to use this feature'
+        );
+    }
 
     return (
         <section className="small-section">
             <div className="flex flex-col m-auto max-w-md pb-8 pt-4">
                 <Form onSubmit={login.bind(null, `/${reroute}`)}>
                     <h1 className="text-slate-800 text-lg">
-                        {reroute ? 'Sign in to use this feature' : 'Sign In'}
+                        {caption}
                     </h1>
                     <Input required name="username" label="Username" />
                     <Input required name="password" type="password" label="Password" />

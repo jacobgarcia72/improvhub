@@ -1,11 +1,11 @@
 import { logout } from "@/actions/auth-actions";
 import Button from "@/components/form/button";
-import { verifyAuth } from "@/lib/auth";
+import { isSignedIn, verifyAuth } from "@/lib/auth";
 import { optimizeImage } from "@/lib/cloudinary";
 import { getUser } from "@/lib/users";
 import { User } from "@/types";
 import Image from "next/image";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 
 function LayoutCard({
@@ -26,8 +26,11 @@ export default async function UserProfilePage({ params }: { params: Promise<{use
 
     const { username } = await params;
     const user = await getUser(username) as User | undefined;
-
     if (!user) notFound();
+
+    if (!(await isSignedIn())) {
+        redirect(`/login?reroute=profile%2F${username}`);
+    }
 
     const isCurrentUser = username === (await verifyAuth()).user?.id;
 
