@@ -91,7 +91,7 @@ input, select, textarea {
   padding: .5rem .75rem;
 }
 
-input, select, textarea {
+input, select {
   height: 42px;
 }
 
