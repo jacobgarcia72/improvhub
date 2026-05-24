@@ -4,7 +4,6 @@ import Form from "@/components/form/form";
 import Input from "@/components/form/input";
 import { SearchParams } from "next/dist/server/request/search-params";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
     const reroute = (await searchParams)?.reroute || '';
