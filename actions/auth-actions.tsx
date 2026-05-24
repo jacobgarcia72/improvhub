@@ -53,11 +53,13 @@ export async function createUser(prevState: void | { message?: string }, formDat
         await saveUser(user);
         await createAuthSession(username);
         redirect(`/profile/${username}`);
-    } catch (error) {
-        if (error instanceof Error && 'code' in error && error.code === 'SQLITE_CONSTRAINT_UNIQUE') {
-            return { message: 'Username is unavailable' }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+        if (error?.code && error.code.includes('CONSTRAINT')) {
+            return { message: 'Username is unavailable.' }
         }
-        throw error;
+        console.error(error);
+        return { message: 'Hmm, something went wrong. Try again later.'};
     }
 }
 
