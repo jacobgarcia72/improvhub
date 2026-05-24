@@ -6,13 +6,13 @@ export default async function ProfileImage() {
     const user = await getCurrentUser();
     let imageSource = '/icons/profile-image.png';
     if (user?.image) {
-        imageSource = optimizeImage(user.image, 26, 26, 60, true);
+        imageSource = optimizeImage(user.image, 72, 72, 80, true, true);
     }
     return (
         <Image
             src={imageSource}
             alt={'Profile image'}
-            width={26} height={26}
+            width={28} height={28}
             className="rounded-full width-[26px] height-[26px] object-fill"
         />
     )

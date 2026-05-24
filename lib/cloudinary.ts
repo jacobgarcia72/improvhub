@@ -37,12 +37,14 @@ export const optimizeImage = (
     width?: number | null,
     height?: number | null,
     quality?: number | null,
-    thumbnail?: boolean | null
+    thumbnail?: boolean | null,
+    rounded?: boolean | null
 ) => {
     const transformations = [];
     if (thumbnail) transformations.push('c_thumb,g_face');
     if (width) transformations.push(`w_${width}`);
     if (height) transformations.push(`h_${height}`);
     if (quality) transformations.push(`q_${quality}`);
+    if (rounded) transformations.push('r_max');
     return imagePath.split('upload/').join(`upload/${transformations.join(',')}/`);
 }
