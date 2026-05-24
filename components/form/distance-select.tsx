@@ -11,15 +11,15 @@ interface DistanceSelectProps {
 
 export default function DistanceSelect({ onUpdate }: DistanceSelectProps) {
     const validate = (value: string) => validateInputValue(value, 'zipcode');
-    const [zipcode, setZipcode] = useState<string>(() => {
-        const stored = window?.localStorage.getItem('zipcode');
-        if (stored && validate(stored)) return stored;
-        return '';
-    });
+    const [zipcode, setZipcode] = useState<string>('');
     const [miles, setMiles] = useState(25);
 
     useEffect(() => {
-        if (zipcode) return;
+        const storedZipcode = window?.localStorage.getItem('zipcode');
+        if (storedZipcode && validate(storedZipcode)) {
+            setZipcode(storedZipcode);
+            return;
+        }
         // Get user's location and reverse geocode to ZIP code
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
