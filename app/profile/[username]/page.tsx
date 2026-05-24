@@ -1,4 +1,5 @@
 import { logout } from "@/actions/auth-actions";
+import Loading from "@/app/loading";
 import Button from "@/components/form/button";
 import { isSignedIn, verifyAuth } from "@/lib/auth";
 import { optimizeImage } from "@/lib/cloudinary";
@@ -44,7 +45,7 @@ export default async function UserProfilePage({ params }: { params: Promise<{use
     if (theatres && user.secondaryTheatre) theatres += `, ${user.secondaryTheatre}`
 
     return (
-        <Suspense fallback={<p>Loading</p>}>
+        <Suspense fallback={<Loading />}>
             <LayoutCard className="flex flex-row">
                 <div className="pl-4">
                     {user.image ? (
