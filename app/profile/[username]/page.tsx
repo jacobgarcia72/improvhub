@@ -1,3 +1,4 @@
+import { optimizeImage } from "@/lib/cloudinary";
 import { getUser } from "@/lib/users";
 import { User } from "@/types";
 import Image from "next/image";
@@ -39,7 +40,7 @@ export default async function UserProfilePage({ params }: { params: Promise<{use
                 <div className="pl-4">
                     {user.image ? (
                         <Image className="object-cover rounded-xl w-32 h-32"
-                            src={user.image} alt={displayName} width={120} height={120} />
+                            src={optimizeImage(user.image, 320, 320, null, true)} alt={displayName} width={120} height={120} />
                     ) : (
                         <div className="h-full w-full">{initials}</div>
                     )}

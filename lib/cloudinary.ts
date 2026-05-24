@@ -31,3 +31,18 @@ export async function uploadImage(image: File, folder: string): Promise<string> 
     });
     return result.secure_url;
 }
+
+export const optimizeImage = (
+    imagePath: string,
+    width?: number | null,
+    height?: number | null,
+    quality?: number | null,
+    thumbnail?: boolean | null
+) => {
+    const transformations = [];
+    if (thumbnail) transformations.push('c_thumb,g_face');
+    if (width) transformations.push(`w_${width}`);
+    if (height) transformations.push(`h_${height}`);
+    if (quality) transformations.push(`q_${quality}`);
+    return imagePath.split('upload/').join(`upload/${transformations.join(',')}/`);
+}

@@ -1,3 +1,4 @@
+import { optimizeImage } from "@/lib/cloudinary";
 import { formatTime } from "@/lib/dates";
 import { removeLeadingArticles } from "@/lib/helper-functions";
 import { theatres } from "@/lib/theatres";
@@ -6,9 +7,13 @@ import Image from "next/image";
 import Link from "next/link";
 
 export default function EventCard({ event, time, type }: { event: Event, time: string, type: string }) {
-    const image = event.image || event.theatre && (
-        theatres.find((t) => removeLeadingArticles(t.name) === removeLeadingArticles(event.theatre || ''))
-    )?.logo;
+    const image = (
+        event.image && optimizeImage(event.image, 300, null, 80)
+    ) || (
+        event.theatre && (
+            theatres.find((t) => removeLeadingArticles(t.name) === removeLeadingArticles(event.theatre || ''))
+        )?.logo
+    );
     return (
         <Link href={`${type}/${event.id}`}>
             <div className="m-2 w-64 overflow-hidden rounded-3xl border border-slate-300 bg-slate-50/80 shadow-sm shadow-slate-800/10 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">

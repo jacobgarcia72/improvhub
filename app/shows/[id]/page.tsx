@@ -8,6 +8,7 @@ import type { Metadata } from 'next'
 import { theatres } from "@/lib/theatres";
 import { formatDateTimeForDisplay, formatTime, removePastDates, sortDates, weekdayInitials, weekdays } from "@/lib/dates";
 import Button from "@/components/form/button";
+import { optimizeImage } from "@/lib/cloudinary";
 
 type Props = {
     params: Promise<{ id: string }>
@@ -86,7 +87,7 @@ export default async function ShowDetailsPage({ params }: Props) {
                         {show.theatre && <h2 className="mb-3">{show.theatre}</h2>}
                     </div>
                     {imageUrl && <>
-                        <Image src={imageUrl}
+                        <Image src={optimizeImage(imageUrl, 600, null, 80)}
                             alt={show.title}
                             width={600}
                             height={400}

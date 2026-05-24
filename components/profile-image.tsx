@@ -1,3 +1,4 @@
+import { optimizeImage } from "@/lib/cloudinary";
 import { getCurrentUser } from "@/lib/users";
 import Image from "next/image";
 
@@ -5,7 +6,7 @@ export default async function ProfileImage() {
     const user = await getCurrentUser();
     let imageSource = '/icons/profile-image.png';
     if (user?.image) {
-        imageSource = user.image.split('upload/').join('upload/c_thumb,g_face,h_226,w_226,q_60/');
+        imageSource = optimizeImage(user.image, 26, 26, 60, true);
     }
     return (
         <Image
