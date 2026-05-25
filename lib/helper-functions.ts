@@ -1,11 +1,19 @@
 import { Event } from "@/types";
 import { addDays, formatDate, getWeekdayOccurence, isLastOfMonth, weekdayInitials } from "./dates";
+import { isAState } from "./location";
 
-export function validateInputValue(value: string, type: 'price' | 'zipcode' | 'username'): boolean {
-        if (type === 'price') return /^\d*\.?\d?\d?$/.test(value);
-        if (type === 'zipcode') return /^\d{0,5}$/.test(value);
-        if (type === 'username') return /^[a-zA-Z0-9]{0,20}$/.test(value);
-        return true;
+export function validateInputValue(value: string, type: 'price' | 'zipcode' | 'username' | 'city' | 'state'): boolean {
+    if (type === 'price') return /^\d*\.?\d?\d?$/.test(value);
+    if (type === 'zipcode') return /^\d{0,5}$/.test(value);
+    if (type === 'username') return /^[a-zA-Z0-9]{0,20}$/.test(value);
+    if (type === 'city') {
+        const split = value.replaceAll(',', '').split(' ');
+        const city = split.slice(0, split.length - 1).join('');
+        const state = split[split.length - 1];
+        return /^[a-zA-Z\s\-\']{2,50}$/.test(city) && isAState(state);
+    }
+    if (type === 'state') return isAState(value);
+    return true;
 }
 
 export const filterArrayBySearchTerm = (options: string[], searchTerm: string, limit?: number): string[] => {

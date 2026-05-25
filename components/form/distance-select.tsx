@@ -1,25 +1,20 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Button from './button';
 import Input from './input';
 import { validateInputValue } from '@/lib/helper-functions';
 
 interface DistanceSelectProps {
-    onUpdate?: (zipcode: string, miles: number) => void;
+    onUpdate?: (location: string, miles: number) => void;
 }
 
 export default function DistanceSelect({ onUpdate }: DistanceSelectProps) {
-    const validate = (value: string) => validateInputValue(value, 'zipcode');
-    const [zipcode, setZipcode] = useState<string>('');
-    const [miles, setMiles] = useState(25);
+    const [location, setLocation] = useState<string>('');
+    const [miles, setMiles] = useState(10);
+    const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout>();
 
     useEffect(() => {
-        const storedZipcode = window?.localStorage.getItem('zipcode');
-        if (storedZipcode && validate(storedZipcode)) {
-            setZipcode(storedZipcode);
-            return;
-        }
+        if (location) return;
         // Get user's location and reverse geocode to ZIP code
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
@@ -33,10 +28,10 @@ export default function DistanceSelect({ onUpdate }: DistanceSelectProps) {
                         // Extract ZIP code from address
                         const zip = data.address?.postcode || '';
                         if (zip) {
-                            setZipcode(zip.replace(/\D/g, '').slice(0, 5));
+                            setLocation(zip.replace(/\D/g, '').slice(0, 5));
                         }
                     } catch (error) {
-                        console.error('Error getting ZIP code:', error);
+                        console.error('Error getting location:', error);
                     }
                 }
             );
@@ -44,36 +39,49 @@ export default function DistanceSelect({ onUpdate }: DistanceSelectProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const handleSubmit = (e: React.SubmitEvent) => {
-        e.preventDefault();
-        const zip = zipcode.trim();
-        if (zip && onUpdate) {
-            localStorage.setItem('zipcode', zip);
-            onUpdate(zip, miles);
+    const handleUpdate = (type: string, value: string) => {
+        const loc = type === 'location' ? value : location;
+        const m = type === 'miles' ? value : miles;
+        clearTimeout(typingTimeout);
+        if (
+            onUpdate && loc && (
+                validateInputValue(loc, 'zipcode') ||
+                validateInputValue(loc, 'city') ||
+                validateInputValue(loc, 'state')
+            )
+        ) {
+            setTypingTimeout(
+                setTimeout(() => onUpdate(loc, Number(m)), 500)
+            )
         }
     };
 
     return (
-        <form onSubmit={handleSubmit} className="flex items-end justify-end gap-2">
+        <form className="flex items-end justify-end gap-2 w-[358px]">
             <Input
-                name="zipcode"
-                inputMode='numeric'
-                value={zipcode}
-                onChange={(value) => validate(value) && setZipcode(value)}
-                label="ZIP Code"
-                className="w-24"
+                name="location"
+                value={location}
+                onChange={(value) => {
+                    setLocation(value);
+                    handleUpdate('location', value);
+                }}
+                label="City and State or ZIP Code"
+                className="w-[200px]"
             />
             <Input
                 name="miles"
-                label='Miles'
+                label='Search Radius (Miles)'
+                placeholder='Miles'
                 type="number"
                 min={1}
                 max={100}
                 value={`${miles}`}
-                onChange={(value) => setMiles(Number(value))}
-                className="w-20"
+                onChange={(value) => {
+                    setMiles(Number(value));
+                    handleUpdate('miles', value);
+                }}
+                className="w-[150px]"
             />
-            <Button caption="Search" disabled={zipcode.trim().length !== 5} />
         </form>
     );
 }

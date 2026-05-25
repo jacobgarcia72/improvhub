@@ -2,13 +2,12 @@
 
 import { useState } from "react";
 import DistanceSelect from "@/components/form/distance-select";
-import StateSelect from "@/components/form/state-select";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Autocomplete from "@/components/form/autocomplete";
 import { getTheatreNames } from "@/lib/theatres";
 
 export default function SearchBar() {
-    const searchTypes = ['theatre', 'state', 'zipcode', 'miles'];
+    const searchTypes = ['theatre', 'location', 'miles'];
     const searchParams = useSearchParams();
     const pathname = usePathname();
     const { replace } = useRouter();
@@ -18,8 +17,7 @@ export default function SearchBar() {
 
     const [searchBy, setSearchBy] = useState(() => {
         if (searchParams.get('theatre')) return 'theatre';
-        if (searchParams.get('zipcode')) return 'zipcode';
-        if (searchParams.get('state')) return 'state';
+        if (searchParams.get('location')) return 'location';
         return ''
     });
 
@@ -27,10 +25,6 @@ export default function SearchBar() {
         replace(pathname);
         if (searchFor) {
             params.set('for', searchFor);
-            if (searchFor !== 'theatres' && searchBy === 'state') {
-                params.delete('state');
-                setSearchBy('');
-            }
             replace(`${pathname}?${params.toString()}`);
         }
     }
@@ -47,24 +41,21 @@ export default function SearchBar() {
     function SearchParams() {
         if (!searchBy || !searchFor) return null;
         switch (searchBy) {
-            case 'state':
-                return <StateSelect
-                    label="State"
-                    onChange={(value) => handleSearch('state', value)} 
-                />
-            case 'zipcode':
+            case 'location':
                 return <DistanceSelect
-                    onUpdate={(zipcode, miles) => {
-                        handleSearch('zipcode', zipcode);
+                    onUpdate={(location, miles) => {
+                        handleSearch('location', location);
                         handleSearch('miles', miles.toString());
                     }}
                 />
             case 'theatre':
-                return <Autocomplete
-                    onStopTyping={(value) => handleSearch('theatre', value)}
-                    options={getTheatreNames()}
-                    label="Theatre Name"
-                />
+                return <div className="w-[358px]">
+                    <Autocomplete
+                        onStopTyping={(value) => handleSearch('theatre', value)}
+                        options={getTheatreNames()}
+                        label="Theatre Name"
+                    />
+                    </div>
             default:
                 return null;
         }
@@ -72,7 +63,7 @@ export default function SearchBar() {
     
     return (
         <section className="flex flex-wrap gap-2">
-            <div className="flex-1 min-w-[100px]">
+            <div className="flex-1 min-w-[140px] max-w-[200px]">
                 <label htmlFor="searchFor">Find</label>
                 <select
                     value={searchFor || ''}
@@ -91,7 +82,7 @@ export default function SearchBar() {
                     <option value="workshops">Workshops</option>
                 </select>
             </div>
-            <div className="flex-1 min-w-[100px]">
+            <div className="flex-1 min-w-[140px] max-w-[200px]">
                 <label htmlFor="searchBy">Search By</label>
                 <select
                     value={searchBy}
@@ -104,13 +95,10 @@ export default function SearchBar() {
                 >
                     <option value=""></option>
                     <option value="theatre">Theatre Name</option>
-                    {searchFor === 'theatres' && <option value="state">State</option>}
-                    <option value="zipcode">ZIP Code</option>
+                    <option value="location">Location</option>
                 </select>
             </div>
-            <div className="flex-1 min-w-[280px] flex flex-row">
-                {SearchParams()}
-            </div>
+            {SearchParams()}
         </section>
     )
 }
