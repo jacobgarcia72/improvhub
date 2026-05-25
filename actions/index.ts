@@ -86,3 +86,7 @@ export async function postShow(prevState: void | { message?: string }, formData:
     const showId = await saveShow(show, imageFile);
     redirect(`/shows/${showId}`);
 }
+
+export async function postTeam(prevState: void | { message?: string }, formData: FormData) {
+
+}

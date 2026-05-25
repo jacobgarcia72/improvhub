@@ -9,7 +9,7 @@ import PriceInputs from './price-inputs';
 
 export default async function NewShowPage() {
     return (
-        <section>
+        <section className='medium-section'>
             <Form onSubmit={postShow} buttonCaption="Create Show">
                 <Input label="Show Name" name="title" required />
                 <TheatreSelect />
