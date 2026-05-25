@@ -1,5 +1,6 @@
 'use client'
 import Button from '@/components/form/button';
+import Checkbox from '@/components/form/checkbox';
 import Input from '@/components/form/input';
 import XButton from '@/components/form/x';
 import { addDays, addOrdinal, findNextOrdinalWeekday, formatDate, getDayOfWeek, getWeekdayOccurence, newDate, weekdays } from '@/lib/dates';
@@ -210,31 +211,13 @@ export default function DateInputs() {
     return (
         <>
             <p className='-mb-1 label'>Show Dates</p>
-            <div className="checkbox-wrapper">
-                <input
-                    name='tbd'
-                    type='checkbox'
-                    id='tbd'
-                    className='mr-1'
-                    value={1}
-                    onChange={(e) => {
-                        setDatesTBD(e.target.checked);
-                        if (e.target.checked) setIsRecurring(false);
-                    }}
-                />
-                <label htmlFor='tbd'>Dates TBD</label>
-            </div>
-            {!datesTBD && <div className="checkbox-wrapper">
-                <input
-                    name='recurring'
-                    type='checkbox'
-                    id='recurring'
-                    className='mr-1'
-                    value={1}
-                    onChange={(e) => setIsRecurring(e.target.checked)}
-                />
-                <label htmlFor='recurring'>Ongoing show</label>
-            </div>}
+            <Checkbox name="tbd" label='Dates TBD' onChange={(checked) => {
+                setDatesTBD(checked);
+                if (checked) setIsRecurring(false);
+            }} />
+            {!datesTBD && (
+                <Checkbox name="recurring" label='Ongoing show' onChange={setIsRecurring} />
+            )}
             {!datesTBD && isRecurring && <RecurringOptions />}
             {!(datesTBD || isRecurring) && <ScheduleOptions />}
         </>

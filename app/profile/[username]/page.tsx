@@ -9,6 +9,7 @@ import Image from "next/image";
 import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 import Link from "next/link";
+import Checkbox from "@/components/form/checkbox";
 
 function LayoutCard({
     children, className, header
@@ -71,16 +72,7 @@ export default async function UserProfilePage({ params }: { params: Promise<{use
                 {user.teams && <div>{/*TODO: Display teams with links to team pages*/}</div>}
                 {isCurrentUser && !user.teams && <p className="label">No teams to display</p>}
                 {isCurrentUser && ( 
-                    <div className="checkbox-wrapper mt-3">
-                        <input
-                            name='lookingForTeam'
-                            type='checkbox'
-                            id='lookingForTeam'
-                            className='mr-1'
-                            // onChange={}
-                        />
-                        <label htmlFor='lookingForTeam'>Open to joining teams</label>
-                    </div>
+                    <Checkbox name="lookingForTeam" label="Open to joining teams" />
                 )}
                 {isCurrentUser && <div className="w-full flex flex-row justify-center">
                     <Link href="/create/team">
