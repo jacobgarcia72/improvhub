@@ -1,6 +1,7 @@
 import TheatreResults from './theatre-results';
 import EventResults from './event-results';
 import { validateInputValue } from '@/lib/helper-functions';
+import { separateCityAndState } from '@/lib/location';
 
 export default async function SearchResults({ params }: { params: {
     theatre?: string;
@@ -21,9 +22,9 @@ export default async function SearchResults({ params }: { params: {
         } else if (validateInputValue(location, 'state')) {
             state = location;
         } else if (validateInputValue(location, 'city')) {
-            const split = location.replaceAll(',', '') .split(' ');
-            state = split[split.length - 1];
-            city = split.slice(0, split.length - 1).join(' ');
+            const cityAndState = separateCityAndState(location);
+            state = cityAndState.state;
+            city = cityAndState.city;
 
         }
     }

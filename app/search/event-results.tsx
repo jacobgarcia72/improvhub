@@ -4,8 +4,10 @@ import { getShowsByTheatre, getShowsByZipcode } from '@/lib/shows';
 import { Event } from '@/types';
 import EventCard from './event-card';
 
-export default async function EventResults({ eventType, theatre, zipcode, miles }: {
+export default async function EventResults({ eventType, city, state, theatre, zipcode, miles }: {
     eventType: string;
+    city?: string;
+    state?: string;
     theatre?: string;
     zipcode?: string;
     miles?: number;
@@ -19,6 +21,9 @@ export default async function EventResults({ eventType, theatre, zipcode, miles 
                 } else if (zipcode) {
                     const shows = await getShowsByZipcode(zipcode, miles || 1) as Event[];
                     return arrangeEventsByDate(shows);
+                } else if (city && state) {
+                    // const shows = await getShowsByZipcode(zipcode, miles || 1) as Event[];
+                    // return arrangeEventsByDate(shows);
                 }
             default:
                 return null;

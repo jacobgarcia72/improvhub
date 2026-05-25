@@ -1,18 +1,33 @@
 import zipcodes from 'zipcodes';
+import { validateInputValue } from './helper-functions';
 
-export function getZipcodesByCity(city: string, state: string, radius: number) {
-    const zipcodesInCity = zipcodes.lookupByName(city, state).map((z) => z.zip);
+export function getZipCodesWithinRange(cityOrZip: string, radius: number) {
+    let originZipcodes = [];
 
-    if (!radius) return zipcodesInCity;
+    if (validateInputValue(cityOrZip, 'zipcode')) {
+        originZipcodes = [ cityOrZip ];
+    } else {
+        const { city, state } = separateCityAndState(cityOrZip);
+        originZipcodes = zipcodes.lookupByName(city, state).map((z) => z.zip);
+    }
 
-    const zipcodesAroundCity = [...new Set(
-        zipcodesInCity
+    if (!radius) return originZipcodes;
+
+    const zipcodesInRange = [...new Set(
+        originZipcodes
             .map((z) => (
                 zipcodes.radius(z, radius).map((z) => typeof z === 'string' ? z : z.zip)
             ))
             .flat()
-        )].sort((z) => zipcodesInCity.includes(z) ? -1 : 1);
-    return zipcodesAroundCity;
+        )].sort((z) => originZipcodes.includes(z) ? -1 : 1);
+    return zipcodesInRange;
+}
+
+export function separateCityAndState(cityAndState: string): { city: string, state: string } {
+    const split = cityAndState.trim().replaceAll(',', '') .split(' ');
+    const state = split[split.length - 1];
+    const city = split.slice(0, split.length - 1).join(' ');
+    return { city, state: abbreviateState(state) };
 }
 
 export const states: { name: string, abbreviation: string }[] = [

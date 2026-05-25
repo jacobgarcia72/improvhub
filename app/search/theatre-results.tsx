@@ -1,4 +1,4 @@
-import { getTheatreByName, getTheatreNames, getTheatresByCity, getTheatresByDistance, getTheatresByState } from '@/lib/theatres';
+import { getTheatreByName, getTheatreNames, getTheatresByCity, getTheatresByZipcode, getTheatresByState } from '@/lib/theatres';
 import { filterArrayBySearchTerm } from '@/lib/helper-functions';
 import TheatreCard from './theatre-card';
 import { Theatre } from '@/types';
@@ -14,9 +14,9 @@ export default async function TheatreResults({ theatre, city, state, zipcode, mi
 
     const handleSearchParams = () => {
         if (theatre) return filterArrayBySearchTerm(theatreNames, theatre, 20).map(getTheatreByName);
-        if (city && state) return getTheatresByCity(city, state);
+        if (city && state) return getTheatresByCity(city, state, miles);
         if (state) return getTheatresByState(state);
-        if (zipcode) return getTheatresByDistance(zipcode, miles || 1);
+        if (zipcode) return getTheatresByZipcode(zipcode, miles || 1);
         return [];
     }
 
