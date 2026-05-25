@@ -23,6 +23,17 @@ export function getZipCodesWithinRange(cityOrZip: string, radius: number) {
     return zipcodesInRange;
 }
 
+export function getCitiesWithinRange(cityOrZip: string, radius: number) {
+    return [
+        ...new Set(
+            getZipCodesWithinRange(cityOrZip, radius).map((z) => {
+                const data = zipcodes.lookup(z);
+                return data ? `${data.city} ${data.state}` : null;
+            }).filter(Boolean)
+        )
+    ]
+}
+
 export function separateCityAndState(cityAndState: string): { city: string, state: string } {
     const split = cityAndState.trim().replaceAll(',', '') .split(' ');
     const state = split[split.length - 1];
