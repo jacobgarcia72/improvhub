@@ -38,11 +38,41 @@ const adjectives = [
     'Living',
     'Extra',
     'Fancy',
-    'Cheap'
+    'Cheap',
+    'Velvet',
+    'Shy',
+    'Brave',
+    'Cursed',
+    'Mighty',
+    'Ancient',
+    'Neon',
+    'Wicked',
+    'Crimson',
+    'Radiant',
+    'Secret',
+    'Cosmic',
+    'Electric',
+    'Sly',
+    'Sour',
+    'Lucky',
+    'Jealous',
+    'Soaring',
+    'Shimmering',
+    'Midnight',
+    'Solar',
+    'Lunar',
+    'Frosty',
+    'Gracious',
+    'Thriving',
+    'Neighborly',
+    'Rainbow',
+    'Abundant'
 ];
 
 const nouns = [
     'Wizard',
+    'Floppy Disk',
+    'Cupholder',
     'Turnip',
     'Lampshade',
     'Cheese',
@@ -64,7 +94,7 @@ const nouns = [
     'Pigeon',
     'Lightning',
     'Coward',
-    'Paper Planes',
+    'Paper Plane',
     'Lizard',
     'Reptile',
     'Jet',
@@ -73,11 +103,30 @@ const nouns = [
     'Horse',
     'Lemur',
     'Rodent',
-    'Letter',
     'Pork Chop',
-    'Popcorn',
+    'String Bean',
+    'Pea',
     'Paperback',
-]
+    'Siren',
+    'Spotlight',
+    'Dreamer',
+    'Moonbeam',
+    'Rocket',
+    'Candle',
+    'Carousel',
+    'Gondola',
+    'Feather',
+    'Anchor',
+    'Lantern',
+    'Castle',
+    'Garden',
+    'Serpent',
+    'Horizon',
+    'Meatball',
+    'Racecar',
+    'Pie',
+    'Submarine'
+];
 
 const actions = [
     'Driving',
@@ -94,6 +143,16 @@ const actions = [
     'Riding',
     'Awakening',
     'Finding',
+    'Drifting',
+    'Floating',
+    'Breaking',
+    'Dreaming',
+    'Summoning',
+    'Spinning',
+    'Climbing',
+    'Wandering',
+    'Charging',
+    'Gliding'
 ];
 
 const formats = [
@@ -111,6 +170,9 @@ const formats = [
     '{adj} {noun}s',
     '{adj} {noun}s',
     '{adj} {noun}s',
+    'The {noun}s',
+    'The {noun}s',
+    '{noun} {noun}',
     'The {adj} {noun}',
     'The {adj} {noun}',
     'The {adj} {noun}s',
@@ -122,18 +184,19 @@ const formats = [
     'The {adj} {noun}s',
     'The {adj} {noun}s',
     '{noun} and the {noun}s',
-    '{adj} {noun}s and the {noun}s',
     '{noun}s and {noun}s',
+    '{noun}s and {noun}s',
+    '{noun}s and {noun}s',
+    '{noun}s and {adj} {noun}s',
     '{act} the {noun}',
     '{act} {noun}s',
     '{act} {noun}s',
     '{act} the {noun}s',
-    '{act} {adj} {noun}s',
     '{adj} {adj} {noun}s',
-    'The {noun}s of {noun}',
     'The {adj}',
-    '{noun} and the {adj}'
-]
+    '{act} With {noun}s',
+    'The {noun} and the {noun}'
+];
 
 function rnd(max: number): number {
     return Math.floor(Math.random() * max)
