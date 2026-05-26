@@ -2,7 +2,7 @@ import Link from "next/link";
 import NavLink from "./nav-link";
 import ProfileImage from "./profile-image";
 
-const links = ['Shows', 'Auditions', 'Jams', 'Teams', 'Discussion', 'Search'];
+const links = ['Create', 'Search'];
 
 export default function Header() {
     return (
