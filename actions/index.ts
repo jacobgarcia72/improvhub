@@ -38,12 +38,19 @@ export async function postShow(prevState: void | { message?: string }, formData:
         }
     }
 
-    let zipcode = (formData.get('zipcode') as string)?.trim() || null;
+    let city = (formData.get('city') as string)?.trim() || null;
+    let state = (formData.get('state') as string)?.trim() || null;
     const theatre = (formData.get('theatre') as string)?.trim() || null;
-    if (theatre && !zipcode) zipcode = theatres.find((t) => (
-        removeLeadingArticles(t.name.toLowerCase()) === removeLeadingArticles(theatre.toLowerCase())
-    ))?.zipcode || null;
 
+    if (theatre && (!city || !state)) {
+        const matchingTheatre = theatres.find((t) => (
+            removeLeadingArticles(t.name.toLowerCase()) === removeLeadingArticles(theatre.toLowerCase())
+        ));
+        if (matchingTheatre) {
+            if (!city) city = matchingTheatre.city;
+            if (!state) state = matchingTheatre.state;
+        }
+    }
 
     const price = formData.get('price');
     const doorPrice = formData.get('doorPrice');
@@ -68,7 +75,8 @@ export async function postShow(prevState: void | { message?: string }, formData:
         image: null,
         photoCredit,
         theatre,
-        zipcode,
+        city,
+        state,
         description,
         dateTimes,
         recurringDay,

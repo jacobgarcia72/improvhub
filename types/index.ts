@@ -34,7 +34,8 @@ export interface Event {
     cadence: Candence | null;
     description: string | null;
     theatre: string | null;
-    zipcode: string | null;
+    city: string | null;
+    state: string | null;
     price: number | null;
     doorPrice: number | null;
     ticketsUrl: string | null;

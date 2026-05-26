@@ -1,8 +1,10 @@
 import { formatDate, formatDateForDisplay } from '@/lib/dates';
 import { arrangeEventsByDate } from '@/lib/helper-functions';
-import { getShowsByTheatre, getShowsByZipcode } from '@/lib/shows';
+import { getShowsByTheatre, getShowsInRange } from '@/lib/shows';
 import { Event } from '@/types';
 import EventCard from './event-card';
+import { Suspense } from 'react';
+import Loader from '@/components/loader';
 
 export default async function EventResults({ eventType, city, state, theatre, zipcode, miles }: {
     eventType: string;
@@ -18,12 +20,9 @@ export default async function EventResults({ eventType, city, state, theatre, zi
                 if (theatre) {
                     const shows = await getShowsByTheatre(theatre) as Event[];
                     return arrangeEventsByDate(shows);
-                } else if (zipcode) {
-                    const shows = await getShowsByZipcode(zipcode, miles || 1) as Event[];
+                } else if (zipcode || (city && state)) {
+                    const shows = await getShowsInRange(zipcode || `${city} ${state}`, miles || 0) as Event[];
                     return arrangeEventsByDate(shows);
-                } else if (city && state) {
-                    // const shows = await getShowsByZipcode(zipcode, miles || 1) as Event[];
-                    // return arrangeEventsByDate(shows);
                 }
             default:
                 return null;
@@ -36,6 +35,7 @@ export default async function EventResults({ eventType, city, state, theatre, zi
 
     return (
         <>
+            <Suspense fallback={<Loader />}>
             {hasNoResults && <p className="text-slate-700 mt-4">No results found.</p>}
             {results && Object.keys(results).map((date, i) => (
                 <div key={i} className='flex flex-col w-full px-4'>
@@ -47,6 +47,7 @@ export default async function EventResults({ eventType, city, state, theatre, zi
                     </div>
                 </div>
             ))}
+            </Suspense>
         </>
     )
 }

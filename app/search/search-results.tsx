@@ -1,6 +1,6 @@
 import TheatreResults from './theatre-results';
 import EventResults from './event-results';
-import { validateInputValue } from '@/lib/helper-functions';
+import { matchPattern } from '@/lib/helper-functions';
 import { separateCityAndState } from '@/lib/location';
 
 export default async function SearchResults({ params }: { params: {
@@ -17,11 +17,11 @@ export default async function SearchResults({ params }: { params: {
     let state = '';
     let city = '';
     if (location) {
-        if (validateInputValue(location, 'zipcode')) {
+        if (matchPattern(location, 'zipcode')) {
             zipcode = location;
-        } else if (validateInputValue(location, 'state')) {
+        } else if (matchPattern(location, 'state')) {
             state = location;
-        } else if (validateInputValue(location, 'city')) {
+        } else if (matchPattern(location, 'city')) {
             const cityAndState = separateCityAndState(location);
             state = cityAndState.state;
             city = cityAndState.city;
@@ -44,8 +44,8 @@ export default async function SearchResults({ params }: { params: {
                 <EventResults
                     eventType={searchFor}
                     theatre={theatre}
-                    // city={city}
-                    // state={state}
+                    city={city}
+                    state={state}
                     zipcode={zipcode}
                     miles={Number(miles)}
                 />

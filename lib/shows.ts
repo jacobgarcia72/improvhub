@@ -5,9 +5,8 @@ import slugify from 'slugify';
 import { Candence, Event, WeekdayInitial } from "@/types";
 import { removeLeadingArticles } from './helper-functions';
 import { uploadImage } from './cloudinary';
-
-import zipcodes from 'zipcodes';
 import { contentDb } from './db';
+import { getCitiesWithinRange } from './location';
 
 const convertDataToShow = (data: {[key: string]: string | null}): Event => {
     return {
@@ -20,7 +19,8 @@ const convertDataToShow = (data: {[key: string]: string | null}): Event => {
         cadence: data.cadence as Candence || null,
         description: data.description || null,
         theatre: data.theatre || null,
-        zipcode: data.zipcode || null,
+        city: data.city || null,
+        state: data.state || null,
         price: data.price === null ? null : Number(data.price),
         doorPrice: data.doorPrice === null ? null : Number(data.doorPrice),
         ticketsUrl: data.ticketsUrl || null,
@@ -41,11 +41,11 @@ export async function getShowsByTheatre(theatre: string) {
     return data.map(convertDataToShow);
 }
 
-export async function getShowsByZipcode(zipcode: string, miles: number) {
-    const zipcodesInRange = zipcodes.radius(zipcode, miles, false).map((z) => typeof z === 'string' ? z : z.zip);
+export async function getShowsInRange(cityOrZipcode: string, miles: number) {
+    const citiesInRange = getCitiesWithinRange(cityOrZipcode, miles);
     const data = contentDb.prepare(
-        `SELECT * FROM shows WHERE zipcode IN (${zipcodesInRange.map(() => '?').join(', ')})`
-    ).all(...zipcodesInRange) as {[key: string]: string | null}[];
+        `SELECT * FROM shows WHERE (city || ' ' || state) IN (${citiesInRange.map(() => '?').join(', ')}) COLLATE NOCASE`
+    ).all(...citiesInRange) as {[key: string]: string | null}[];
     return data.map(convertDataToShow);
 
 }
@@ -88,7 +88,8 @@ export async function saveShow(show: Event, imageFile: File | null): Promise<str
             cadence,
             description,
             theatre,
-            zipcode,
+            city,
+            state,
             price,
             doorPrice,
             ticketsUrl,
@@ -97,7 +98,7 @@ export async function saveShow(show: Event, imageFile: File | null): Promise<str
             runtime,
             notes
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
         show.id,
         show.creatorId,
@@ -108,7 +109,8 @@ export async function saveShow(show: Event, imageFile: File | null): Promise<str
         show.cadence,
         show.description,
         show.theatre,
-        show.zipcode,
+        show.city,
+        show.state,
         show.price,
         show.doorPrice,
         show.ticketsUrl,

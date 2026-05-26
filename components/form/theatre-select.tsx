@@ -3,31 +3,33 @@ import { getTheatreByName, getTheatreNames } from "@/lib/theatres";
 import Autocomplete from "./autocomplete";
 import Input from "./input";
 import { useState } from "react";
-import { validateInputValue } from "@/lib/helper-functions";
+import StateSelect from "./state-select";
 
 export default function TheatreSelect() {
-    const [zipcode, setZipcode] = useState('');
+    const [city, setCity] = useState<string>('');
+    const [state, setState] = useState<string>();
     const theatreNames = getTheatreNames();
 
-    const autofillZipcode = (theatreName: string) => {
+    const autoFillCityAndState = (theatreName: string) => {
         const theatre = getTheatreByName(theatreName);
         if (theatre) {
-            setZipcode(theatre.zipcode);
+            setCity(theatre.city);
+            setState(theatre.state)
         }
     }
     return (
         <div className="flex flex-row flex-wrap">
-            <div className="w-3/5 pr-2">
-                <Autocomplete label="Theatre" name="theatre" options={theatreNames} onChange={(value) => autofillZipcode(value)} />
+            <div className="w-[250px] pr-2">
+                <Autocomplete label="Theatre" name="theatre" options={theatreNames} onChange={(value) => autoFillCityAndState(value)} />
             </div>
-            <div className="w-2/5">
-                <Input label="ZIP Code"
-                    name="zipcode"
-                    inputMode="numeric"
-                    value={zipcode}
-                    onChange={(value) => validateInputValue(value, 'zipcode') && setZipcode(value)}
+            <div className="w-[186px] pr-2">
+                <Input label="City"
+                    name="city"
+                    value={city}
+                    onChange={setCity}
                 />
             </div>
+            <StateSelect name="state" value={state} onChange={setState} />
         </div>
     )
 }

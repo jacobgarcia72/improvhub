@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Input from './input';
-import { validateInputValue } from '@/lib/helper-functions';
+import { matchPattern } from '@/lib/helper-functions';
 
 interface DistanceSelectProps {
     onUpdate?: (location: string, miles: number) => void;
@@ -45,9 +45,9 @@ export default function DistanceSelect({ onUpdate }: DistanceSelectProps) {
         clearTimeout(typingTimeout);
         if (
             onUpdate && loc && (
-                validateInputValue(loc, 'zipcode') ||
-                validateInputValue(loc, 'city') ||
-                validateInputValue(loc, 'state')
+                matchPattern(loc, 'zipcode') ||
+                matchPattern(loc, 'city') ||
+                matchPattern(loc, 'state')
             )
         ) {
             setTypingTimeout(

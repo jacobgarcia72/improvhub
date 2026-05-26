@@ -1,10 +1,10 @@
 import zipcodes from 'zipcodes';
-import { validateInputValue } from './helper-functions';
+import { matchPattern } from './helper-functions';
 
 export function getZipCodesWithinRange(cityOrZip: string, radius: number) {
     let originZipcodes = [];
 
-    if (validateInputValue(cityOrZip, 'zipcode')) {
+    if (matchPattern(cityOrZip, 'zipcode')) {
         originZipcodes = [ cityOrZip ];
     } else {
         const { city, state } = separateCityAndState(cityOrZip);
