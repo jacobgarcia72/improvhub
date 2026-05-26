@@ -5,6 +5,7 @@ import ImagePicker from "@/components/form/image-picker";
 import Autocomplete from "@/components/form/autocomplete";
 import Text from "@/components/form/text";
 import Checkbox from "@/components/form/checkbox";
+import LocationInputs from "./location-inputs";
 
 export default function CreateTeamPage() {
     return (
@@ -16,6 +17,7 @@ export default function CreateTeamPage() {
                 <Autocomplete options={[]} label="Coach" />
                 <Checkbox label="Looking for Coach" name="lookingForCoach" />
                 <Text label="Team Description" name="description" />
+                <LocationInputs />
             </Form>
         </section>
     )
