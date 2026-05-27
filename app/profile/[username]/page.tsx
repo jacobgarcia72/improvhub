@@ -43,8 +43,8 @@ export default async function UserProfilePage({ params }: { params: Promise<{use
         displayName += ` ${user.lastName[0]}.`
         initials += user.lastName[0];
     }
-    let theatres = user.theatre || '';
-    if (theatres && user.secondaryTheatre) theatres += `, ${user.secondaryTheatre}`
+    // let theatres = user.theatre || '';
+    // if (theatres && user.secondaryTheatre) theatres += `, ${user.secondaryTheatre}`
 
     return (
         <Suspense fallback={<Loader />}>
@@ -65,9 +65,9 @@ export default async function UserProfilePage({ params }: { params: Promise<{use
             <LayoutCard header="Bio">
                 {user.bio}
             </LayoutCard>
-            <LayoutCard header="Theatres">
+            {/* <LayoutCard header="Theatres">
                 {theatres}
-            </LayoutCard>
+            </LayoutCard> */}
             <LayoutCard header="Teams">
                 {user.teams && <div>{/*TODO: Display teams with links to team pages*/}</div>}
                 {isCurrentUser && !user.teams && <p className="label">No teams to display</p>}
