@@ -63,8 +63,9 @@ export interface User {
     pronouns?: string;
     headline?: string;
     bio?: string;
-    theatre?: string;
-    secondaryTheatre?: string;
+    theatres?: string[];
+    city?: string;
+    state?: string;
     gender?: string;
     orientation?: string;
     ethnicity?: string;
