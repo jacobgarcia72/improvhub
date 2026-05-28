@@ -1,4 +1,4 @@
-import { Event } from "@/types";
+import { Event, InputOption } from "@/types";
 import { addDays, formatDate, getWeekdayOccurence, isLastOfMonth, weekdayInitials } from "./dates";
 import { isAState, separateCityAndState } from "./location";
 
@@ -19,23 +19,26 @@ export function matchPattern(value: string, type: 'zipcode' | 'city' | 'state'):
     return false;
 }
 
-export const filterArrayBySearchTerm = (options: string[], searchTerm: string, limit?: number): string[] => {
+export const getText = (option: InputOption): string => typeof option === 'string' ? option : option.label;
+export const filterArrayBySearchTerm = (
+    options: InputOption[], searchTerm: string, limit?: number
+): InputOption[] => {
     const normalized = searchTerm.trim().toLowerCase();
     if (!normalized) {
         return options;
     }
-    const results = options
-        .filter((option) => option.toLowerCase().includes(normalized))
+    const results: InputOption[] = options
+        .filter((option) => getText(option).toLowerCase().includes(normalized))
         .sort((a, b) => {
-            const aStarts = a.toLowerCase().startsWith(normalized);
-            const bStarts = b.toLowerCase().startsWith(normalized);
-            const aIncludesWord = a.toLowerCase().includes(` ${normalized}`);
-            const bIncludesWord = b.toLowerCase().includes(` ${normalized}`);
+            const aStarts = getText(a).toLowerCase().startsWith(normalized);
+            const bStarts = getText(b).toLowerCase().startsWith(normalized);
+            const aIncludesWord = getText(a).toLowerCase().includes(` ${normalized}`);
+            const bIncludesWord = getText(b).toLowerCase().includes(` ${normalized}`);
             if (aStarts && !bStarts) return -1;
             if (!aStarts && bStarts) return 1;
             if (aIncludesWord && !bIncludesWord) return -1;
             if (!aIncludesWord && bIncludesWord) return 1;
-            return a.localeCompare(b);
+            return getText(a).localeCompare(getText(b));
         });
     if (limit) {
         return results.slice(0, limit);

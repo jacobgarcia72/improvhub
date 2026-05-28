@@ -58,7 +58,7 @@ export default function Input({
                 disabled={disabled}
                 min={min}
                 max={max}
-                autoComplete={autocomplete ? 'on' : 'off'}
+                autoComplete={autocomplete ? 'on' : 'new-text'}
             />
         </div>
     )

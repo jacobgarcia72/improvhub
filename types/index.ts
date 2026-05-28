@@ -74,3 +74,5 @@ export interface User {
     image?: string;
     teams?: number[] | string;
 }
+
+export type InputOption = string | { value: string | number, label: string };

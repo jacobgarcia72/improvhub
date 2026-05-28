@@ -1,10 +1,11 @@
 'use client';
 
-import { filterArrayBySearchTerm } from '@/lib/helper-functions';
+import { filterArrayBySearchTerm, getText } from '@/lib/helper-functions';
+import { InputOption } from '@/types';
 import React, { useMemo, useState } from 'react';
 
 type AutocompleteProps = {
-  options: string[];
+  options: InputOption[];
   placeholder?: string;
   onChange?: (value: string) => void;
   onStopTyping?: (value: string) => void;
@@ -22,17 +23,17 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
     name = 'autocomplete',
     required
 }) => {
-  const [value, setValue] = useState('');
+  const [value, setValue] = useState<InputOption>('');
   const [showOptions, setShowOptions] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
 
   const filteredOptions = useMemo(() => {
-    return filterArrayBySearchTerm(options, value);
+    return filterArrayBySearchTerm(options, getText(value));
   }, [options, value]);
 
-  const updateValue = (newValue: string) => {
+  const updateValue = (newValue: InputOption) => {
     setValue(newValue);
-    onChange?.(newValue);
+    onChange?.(getText(newValue));
   };
 
   const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout>();
@@ -52,11 +53,11 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
     }
   };
 
-  const handleOptionSelect = (option: string) => {
+  const handleOptionSelect = (option: InputOption) => {
     updateValue(option);
     setShowOptions(false);
     setActiveIndex(-1);
-    if (onStopTyping) onStopTyping(option);
+    if (onStopTyping) onStopTyping(getText(option));
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -94,7 +95,7 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
         id={name}
         required={required}
         type="text"
-        value={value}
+        value={typeof value === 'string' ? value : value.value}
         placeholder={placeholder}
         onChange={handleInputChange}
         onFocus={() => setShowOptions(value !== '')}
@@ -123,7 +124,7 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
         >
           {filteredOptions.map((option, index) => (
             <li
-              key={`${option}-${index}`}
+              key={`${getText(option)}-${index}`}
               onMouseDown={() => handleOptionSelect(option)}
               style={{
                 padding: '8px 12px',
@@ -131,7 +132,7 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
                 cursor: 'pointer',
               }}
             >
-              {option}
+              {getText(option)}
             </li>
           ))}
         </ul>

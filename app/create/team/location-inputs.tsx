@@ -58,7 +58,7 @@ export default function LocationInputs() {
                     </li>
                 ))}
             </ul>
-            <InputList options={getTheatreNames()} name="added-theatre"  />
+            <InputList options={getTheatreNames()} name="added-theatre" addLabel="Theatre"  />
         </div>
     </div>
 }
