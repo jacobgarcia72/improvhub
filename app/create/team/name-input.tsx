@@ -9,10 +9,10 @@ export default function NameInput() {
     const [name, setName] = useState('');
     return (
         <div className="flex flex-row items-end">
-            <div className="w-4/5 pr-2">
+            <div className="w-6/7 pr-2">
                 <Input name="name" label="Team Name" onChange={setName} value={name} autocomplete={false} />
             </div>
-            <div className="w-1/5">
+            <div className="w-[80px]">
                 <Button type="button" caption="Random" onClick={() => setName(nameGenerator())} />
             </div>
         </div>

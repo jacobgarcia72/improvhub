@@ -1,9 +1,12 @@
 'use client';
 
+import Autocomplete from "@/components/form/autocomplete";
+import Button from "@/components/form/button";
 import Checkbox from "@/components/form/checkbox";
 import Input from "@/components/form/input";
+import InputList from "@/components/form/input-list";
 import StateSelect from "@/components/form/state-select";
-import { getTheatresByCity } from "@/lib/theatres";
+import { getTheatreNames, getTheatresByCity } from "@/lib/theatres";
 import { useState } from "react";
 
 export default function LocationInputs() {
@@ -19,7 +22,7 @@ export default function LocationInputs() {
             setTimeout(() => {
                 let theatres: string[] = [];
                 if (city && state) {
-                    theatres = getTheatresByCity(city, state, 25).map((t) => t.name);
+                    theatres = getTheatresByCity(city, state, 0).map((t) => t.name);
                 }
                 setNearbyTheatres(theatres);
             }, 100)
@@ -48,17 +51,16 @@ export default function LocationInputs() {
                 }}
             />
         </div>
-        {nearbyTheatres.length ? (
-            <div className="mt-4">
-                <p className="label mb-1">Where does your team perform (or hope to perform)?</p>
-                <ul>
-                    {nearbyTheatres.map((theatre, i) => (
-                        <li key={i} className="m-2">
-                            <Checkbox name={`theatre-${i}`} label={theatre} />
-                        </li>
-                    ))}
-                </ul>
-            </div>
-        ) : null}
+        <div className="mt-4">
+            <p className="label mb-1">Where does your team perform (or hope to perform)?</p>
+            <ul>
+                {nearbyTheatres.map((theatre, i) => (
+                    <li key={i} className="m-3">
+                        <Checkbox name={`theatre-${i}`} label={theatre} />
+                    </li>
+                ))}
+            </ul>
+            <InputList options={getTheatreNames()} name="added-theatre"  />
+        </div>
     </div>
 }
