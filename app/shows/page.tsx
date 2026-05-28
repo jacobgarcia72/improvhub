@@ -30,7 +30,7 @@ export default function ShowsPage() {
         <>
             <section className="flex flex-row items-center justify-between px-6 py-3 gap-2">
                 <Link href="/create/show">
-                    <Button type="button" caption="Post a Show" />
+                    <Button caption="Post a Show" />
                 </Link>
                 <DistanceSelect />
             </section>

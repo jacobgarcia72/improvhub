@@ -182,7 +182,7 @@ function ScheduleOptions() {
                     </select>
                 </div>
                 <div className='flex flex-col w-1/4'>
-                    <Button type='button' caption='Autofill' onClick={handleAutofill} />
+                    <Button caption='Autofill' onClick={handleAutofill} />
                 </div>
             </div>
         )}

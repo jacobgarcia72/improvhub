@@ -8,6 +8,7 @@ export default function FormSubmit({ caption = 'Submit' }: { caption?: string, d
     return (
         <div className="my-2 w-full flex flex-col">
             <Button
+                submit
                 caption={pending ? 'Pending...' : caption}
                 disabled={pending}
             />

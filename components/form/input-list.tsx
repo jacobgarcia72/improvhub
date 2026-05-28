@@ -21,8 +21,8 @@ export default function InputList({ name, options }: {
                 )
             ))}
             <div className="flex flex-row">
-                <Button onClick={() => setAddedInputs([...addedInputs, true])} type="button" caption="Add" className="w-26" />
-                {addedInputs.length > 0 && <Button onClick={() => setAddedInputs([...(addedInputs.slice(0, addedInputs.length - 1))])} style="link" type="button" caption="Remove" />}
+                <Button onClick={() => setAddedInputs([...addedInputs, true])} caption="Add" className="w-26" />
+                {addedInputs.length > 0 && <Button onClick={() => setAddedInputs([...(addedInputs.slice(0, addedInputs.length - 1))])} style="link" caption="Remove" />}
             </div>
         </div>
     )

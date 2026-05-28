@@ -89,7 +89,6 @@ export default async function UserProfilePage({ params }: { params: Promise<{use
             <LayoutCard>
                 {isCurrentUser && <div className="w-full flex flex-row justify-center">
                     <Button
-                        type="button"
                         caption="Sign Out"
                         onClick={logout}
                         style="link"

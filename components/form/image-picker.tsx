@@ -52,7 +52,7 @@ export default function ImagePicker({ label = 'Image', name = 'image', square = 
                 ref={imageInput}
                 onChange={handleImageChange}
             />
-            <Button type="button" caption={!selectedImage ?  "Pick Image" : "Change Image"} onClick={handlePickImage} />
+            <Button caption={!selectedImage ?  "Pick Image" : "Change Image"} onClick={handlePickImage} />
             {error && <p className='text-red-600'>{error}</p>}
         </div>
     )

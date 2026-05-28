@@ -13,7 +13,7 @@ export default function NameInput() {
                 <Input name="name" label="Team Name" onChange={setName} value={name} autocomplete={false} />
             </div>
             <div className="w-[80px]">
-                <Button type="button" caption="Random" onClick={() => setName(nameGenerator())} />
+                <Button caption="Random" onClick={() => setName(nameGenerator())} />
             </div>
         </div>
     )

@@ -116,7 +116,7 @@ export default async function ShowDetailsPage({ params }: Props) {
                             <P>{ticketInfo}</P>
                             {show.ticketsUrl && (
                                 <a href={show.ticketsUrl} target="_blank" rel="noopener noreferrer">
-                                    <Button type="button" caption="Get Tickets" />
+                                    <Button caption="Get Tickets" />
                                 </a>
                             )}
                         </div>

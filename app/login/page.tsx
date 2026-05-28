@@ -29,7 +29,6 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
                 <Link href="signup" className="m-auto">
                     <Button
                         caption="Create Account"
-                        type="button"
                         style="link"
                     />
                 </Link>
