@@ -3,8 +3,32 @@
 import { Team } from "@/types";
 import { contentDb } from './db';
 
-export async function getTeam(id: string): Promise<Team> {
-    return await contentDb.prepare('SELECT * FROM shows WHERE id = ?').get(id) as Team;
+const convertDataToTeam = (data: {[key: string]: string | null}): Team => {
+    return {
+        id: data.id || '',
+        admins: data.admins?.split(',') || [],
+        name: data.name || '',
+        image: data.image || null,
+        photoCredit: data.photoCredit || null,
+        city: data.city || null,
+        state: data.state || null,
+        theatres: data.theatres?.split(',') || [],
+        players: data.players?.split(',') || [],
+        unconfirmedPlayers: data.unconfirmedPlayers?.split(',') || [],
+        lookingForPlayers: Boolean(data.lookingForPlayers),
+        coach: data.coach || null,
+        unconfirmedCoach: data.unconfirmedCoach || null,
+        lookingForCoach: Boolean(data.lookingForCoach),
+        musician: data.musician || null,
+        unconfirmedMusician: data.unconfirmedMusician || null,
+        lookingForMusician: Boolean(data.lookingForMusician),
+        description: data.description || null
+    }
+}
+
+export async function getTeam(id: string): Promise<Team | null> {
+    const data = await contentDb.prepare('SELECT * FROM teams WHERE id = ?').get(id) as {[key: string]: string | null};
+    return data ? convertDataToTeam(data) : null;
 }
 
 export async function saveTeam(team: Team): Promise<string> {

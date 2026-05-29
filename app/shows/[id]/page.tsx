@@ -92,7 +92,7 @@ export default async function ShowDetailsPage({ params }: Props) {
                             alt={show.title}
                             width={600}
                             height={400}
-                            className="w-full h-auto min-h-18 max-h-[90vh] h-72 object-cover rounded"
+                            className="mt-2 w-full h-auto min-h-18 max-h-[90vh] h-72 object-cover rounded"
                         />
                         <P className="italic text-sm">{show.image && show.photoCredit && `Photo Credit: ${show.photoCredit}`}</P>
                     </>}
