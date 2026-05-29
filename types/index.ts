@@ -54,11 +54,15 @@ export interface Team {
     city: string | null;
     state: string | null;
     theatres: string[]; 
-    members: string[];
-    unconfirmedMembers: string[];
+    players: string[];
+    unconfirmedPlayers: string[];
+    lookingForPlayers: boolean;
     coach: string | null;
     unconfirmedCoach: string | null;
     lookingForCoach: boolean;
+    musician: string | null;
+    unconfirmedMusician: string | null;
+    lookingForMusician: boolean;
     description: string | null;
 }
 

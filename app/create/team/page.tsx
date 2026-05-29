@@ -25,14 +25,20 @@ export default async function CreateTeamPage() {
                 <ImagePicker />
                 <LocationInputs />
                 <div className="flex flex-col gap-2">
-                    <p className="label">Team Members</p>
+                    <p className="label">Players</p>
                     <input name="creator" className="hidden" value={user?.id} readOnly />
                     <Input name="creator-display" value={creatorName} disabled image={userImage} />
-                    <InputList options={allUsers} name="member" addLabel="Player" />
+                    <InputList options={allUsers} name="player" addLabel="Player" />
                 </div>
+                <Checkbox label="Looking for Players" name="lookingForPlayers" />
                 <div>
                     <p className="label pb-2">Coach</p>
                     <Autocomplete name="coach" options={allUsers} />
+                </div>
+                <Checkbox label="Looking for Coach" name="lookingForCoach" />
+                <div>
+                    <p className="label pb-2">Musician</p>
+                    <Autocomplete name="musician" options={allUsers} />
                 </div>
                 <Checkbox label="Looking for Coach" name="lookingForCoach" />
                 <Text label="Team Description" name="description" />

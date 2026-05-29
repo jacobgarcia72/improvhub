@@ -118,9 +118,9 @@ export async function postTeam(prevState: void | { message?: string }, formData:
     if (description) description = description.replace(/\r\n/g, '<br>').replace(/\n/g, '<br>').replace(/\r/g, '<br>');
 
     const data = Object.fromEntries(formData.entries());
-    const members = [data.creator as string];
-    const unconfirmedMembers = Object.keys(data)
-        .filter(key => key.startsWith('member-') && Boolean((data[key] as string).trim()))
+    const players = [data.creator as string];
+    const unconfirmedPlayers = Object.keys(data)
+        .filter(key => key.startsWith('player-') && Boolean((data[key] as string).trim()))
         .map(key => data[key] as string);
 
     const checkedTheatres = Object.keys(data)
@@ -140,11 +140,15 @@ export async function postTeam(prevState: void | { message?: string }, formData:
         city: formData.get('city') as string || null,
         state: formData.get('state') as string || null,
         theatres,
-        members,
-        unconfirmedMembers: [...new Set(unconfirmedMembers)],
+        players,
+        unconfirmedPlayers: [...new Set(unconfirmedPlayers)],
+        lookingForPlayers: Boolean(formData.get('lookingForPlayers')),
         coach: null,
         unconfirmedCoach: formData.get('coach') as string || null,
         lookingForCoach: Boolean(formData.get('lookingForCoach')),
+        musician: null,
+        unconfirmedMusician: formData.get('musician') as string || null,
+        lookingForMusician: Boolean(formData.get('lookingForMusician')),
         description,
     }
     console.log('team', team);
