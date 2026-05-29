@@ -31,6 +31,13 @@ export async function getTeam(id: string): Promise<Team | null> {
     return data ? convertDataToTeam(data) : null;
 }
 
+export async function getTeamsByUser(id: string): Promise<Team[]> {
+    const data = contentDb.prepare(
+        `SELECT * FROM teams WHERE ',' || players || ',' LIKE ? OR ',' || unconfirmedPlayers || ',' LIKE ?`
+    ).all(`%,${id},%`, `%,${id},%`) as {[key: string]: string | null}[];
+    return data.map(convertDataToTeam);
+}
+
 export async function saveTeam(team: Team): Promise<string> {
     let isUnique = false;
     let counter = 1;

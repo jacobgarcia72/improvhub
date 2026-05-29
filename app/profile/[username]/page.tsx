@@ -10,6 +10,8 @@ import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 import Link from "next/link";
 import Checkbox from "@/components/form/checkbox";
+import { getTeamsByUser } from "@/lib/teams";
+import MiniCard from "@/components/mini-card";
 
 function LayoutCard({
     children, className, header
@@ -40,9 +42,11 @@ export default async function UserProfilePage({ params }: { params: Promise<{use
     let displayName = user.firstName;
     let initials = user.firstName[0];
     if (user.lastName) {
-        displayName += ` ${user.lastName[0]}.`
+        displayName += ` ${user.lastName}`
         initials += user.lastName[0];
     }
+
+    const teams = await getTeamsByUser(username);
     // let theatres = user.theatre || '';
     // if (theatres && user.secondaryTheatre) theatres += `, ${user.secondaryTheatre}`
 
@@ -69,8 +73,11 @@ export default async function UserProfilePage({ params }: { params: Promise<{use
                 {theatres}
             </LayoutCard> */}
             <LayoutCard header="Teams">
-                {user.teams && <div>{/*TODO: Display teams with links to team pages*/}</div>}
-                {isCurrentUser && !user.teams && (
+                {teams.length ? (
+                    <div className="flex flex-row">
+                        {teams.map((team) => <MiniCard key={team.id} item={team} type='team' />)}
+                    </div>
+                ) : (
                     <div className="h-12 mt-3 ml-1">
                         <p className="label">No teams to display</p>
                     </div>
