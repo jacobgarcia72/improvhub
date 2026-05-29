@@ -71,7 +71,7 @@ const adjectives = [
 
 const nouns = [
     'Wizard',
-    'Floppy Disk',
+    'Gnome',
     'Cupholder',
     'Turnip',
     'Lampshade',
@@ -80,7 +80,7 @@ const nouns = [
     'Banana',
     'Cabbage',
     'Monkey',
-    'Stage',
+    'Tomato',
     'Ball',
     'Day',
     'Night',
@@ -94,7 +94,7 @@ const nouns = [
     'Pigeon',
     'Lightning',
     'Coward',
-    'Paper Plane',
+    'Tiger',
     'Lizard',
     'Reptile',
     'Jet',
@@ -116,7 +116,7 @@ const nouns = [
     'Carousel',
     'Gondola',
     'Feather',
-    'Anchor',
+    'Unicorn',
     'Lantern',
     'Castle',
     'Garden',
@@ -127,7 +127,9 @@ const nouns = [
     'Pie',
     'Submarine',
     'Explorer',
-    'Berry'
+    'Berry',
+    'Grape',
+    'Bunny'
 ];
 
 const actions = [
@@ -212,7 +214,9 @@ export function nameGenerator(): string {
         .replace('{noun}', nouns[rnd(nouns.length)])
         .replace('{noun}', nouns[rnd(nouns.length)])
         .replace('{act}', actions[rnd(actions.length)])
-        .replaceAll('rys', 'ries');
+        .replaceAll('nys', 'nies')
+        .replaceAll('rys', 'ries')
+        .replaceAll('tos', 'toes');
 }
 
 export default nameGenerator

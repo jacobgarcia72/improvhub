@@ -41,7 +41,7 @@ export default async function CreateTeamPage() {
                     <p className="label pb-2">Musician</p>
                     <Autocomplete name="musician" options={allUsers} />
                 </div>
-                <Checkbox label="Looking for Coach" name="lookingForCoach" />
+                <Checkbox label="Looking for Musician" name="lookingForMusician" />
                 <Text label="Team Description" name="description" />
             </Form>
         </section>

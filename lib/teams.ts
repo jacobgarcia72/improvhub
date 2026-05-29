@@ -22,6 +22,7 @@ export async function saveTeam(team: Team): Promise<string> {
     contentDb.prepare(`
         INSERT INTO teams (
             id,
+            admins,
             name,
             image,
             photoCredit,
@@ -37,11 +38,12 @@ export async function saveTeam(team: Team): Promise<string> {
             musician,
             unconfirmedMusician,
             lookingForMusician,
-            description,
+            description
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
         team.id,
+        team.admins,
         team.name,
         team.image,
         team.photoCredit,
@@ -50,13 +52,13 @@ export async function saveTeam(team: Team): Promise<string> {
         team.theatres?.join(',') || null,
         team.players?.join(',') || null,
         team.unconfirmedPlayers?.join(',') || null,
-        team.lookingForPlayers,
+        team.lookingForPlayers ? 1 : 0,
         team.coach,
         team.unconfirmedCoach,
-        team.lookingForCoach,
+        team.lookingForCoach ? 1 : 0,
         team.musician,
         team.unconfirmedMusician,
-        team.lookingForMusician,
+        team.lookingForMusician ? 1 : 0,
         team.description,
     );
 
