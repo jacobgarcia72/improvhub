@@ -1,9 +1,10 @@
 'use client';
 
-export default function Checkbox({ onChange, name, label }: {
+export default function Checkbox({ onChange, name, label, value }: {
     onChange?: (checked: boolean) => void,
     name: string,
-    label: string
+    label: string,
+    value?: string
 }) {
     return (
     <div className="checkbox-wrapper">
@@ -12,7 +13,7 @@ export default function Checkbox({ onChange, name, label }: {
             type='checkbox'
             id={name}
             className='mr-1'
-            value={1}
+            value={value || 1}
             onChange={(e) => onChange && onChange(e.target.checked)}
         />
         <label htmlFor={name}>{label}</label>

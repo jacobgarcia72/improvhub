@@ -32,7 +32,7 @@ export default async function CreateTeamPage() {
                 </div>
                 <div>
                     <p className="label pb-2">Coach</p>
-                    <Autocomplete options={allUsers} />
+                    <Autocomplete name="coach" options={allUsers} />
                 </div>
                 <Checkbox label="Looking for Coach" name="lookingForCoach" />
                 <Text label="Team Description" name="description" />

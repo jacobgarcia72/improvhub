@@ -54,7 +54,7 @@ export default function LocationInputs() {
             <ul>
                 {nearbyTheatres.map((theatre, i) => (
                     <li key={i} className="m-3">
-                        <Checkbox name={`theatre-${i}`} label={theatre} />
+                        <Checkbox name={`theatre-${i}`} label={theatre} value={theatre} />
                     </li>
                 ))}
             </ul>

@@ -7,6 +7,7 @@ import { sortDates, weekdayInitials } from "@/lib/dates";
 import { theatres } from "@/lib/theatres";
 import { removeLeadingArticles } from "@/lib/helper-functions";
 import { Team } from '@/types';
+import { uploadImage } from '@/lib/cloudinary';
 
 export async function postShow(prevState: void | { message?: string }, formData: FormData) {
     const title = (formData.get('title') as string)?.trim() || null;
@@ -99,6 +100,19 @@ export async function postShow(prevState: void | { message?: string }, formData:
 export async function postTeam(prevState: void | { message?: string }, formData: FormData) {
     const name = (formData.get('name') as string)?.trim() || null;
     if (!name) return { message: 'Team name is required' };
+    
+    const imageFile = formData.get('image') as File;
+    let imageUrl = '';
+    if (imageFile && imageFile.size) {
+        if (imageFile.size > 5 * 1024 * 1024) { // 5MB limit
+            return { message: 'Image file size exceeds 5MB limit' };
+        }
+        try {
+            imageUrl = await uploadImage(imageFile, 'teams');
+        } catch {
+            throw new Error('Image upload failed');
+        }
+    }
 
     let description = formData.get('description') as string || null;
     if (description) description = description.replace(/\r\n/g, '<br>').replace(/\n/g, '<br>').replace(/\r/g, '<br>');
@@ -106,22 +120,32 @@ export async function postTeam(prevState: void | { message?: string }, formData:
     const data = Object.fromEntries(formData.entries());
     const members = [data.creator as string];
     const unconfirmedMembers = Object.keys(data)
-        .filter(key => key.startsWith('member-'))
+        .filter(key => key.startsWith('member-') && Boolean((data[key] as string).trim()))
         .map(key => data[key] as string);
 
+    const checkedTheatres = Object.keys(data)
+        .filter(key => key.startsWith('theatre-') && Boolean((data[key] as string).trim()))
+        .map(key => data[key] as string);
+
+    const addedTheatres = Object.keys(data)
+        .filter(key => key.startsWith('added-theatre-') && Boolean((data[key] as string).trim()))
+        .map(key => data[key] as string);
+
+    const theatres = [...new Set(checkedTheatres.concat(addedTheatres))];
+
     const team: Team = {
-        id: slugify(name),
+        id: slugify(name, { lower: true, trim: true }),
         name,
-        image: '',
+        image: imageUrl,
         city: formData.get('city') as string || null,
         state: formData.get('state') as string || null,
-        theatres: [],
+        theatres,
         members,
-        unconfirmedMembers,
+        unconfirmedMembers: [...new Set(unconfirmedMembers)],
         coach: null,
         unconfirmedCoach: formData.get('coach') as string || null,
         lookingForCoach: Boolean(formData.get('lookingForCoach')),
         description,
     }
-    console.log(team);
+    console.log('team', team);
 }
