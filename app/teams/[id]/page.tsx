@@ -6,7 +6,8 @@ import type { Metadata } from 'next'
 import { optimizeImage } from "@/lib/cloudinary";
 import Loader from "@/components/loader";
 import { getTeam } from "@/lib/teams";
-import { getCurrentUser, getUserName } from "@/lib/users";
+import { getCurrentUser, getUser, getUserName } from "@/lib/users";
+import Link from "next/link";
 
 type Props = {
     params: Promise<{ id: string }>
@@ -35,6 +36,30 @@ function Header({ children }: { children: React.ReactNode }) {
     return children ? <h3 className="mt-3 font-semibold text-sm">{children}</h3> : null;
 }
 
+async function PlayerLink(id: string) {
+    const name = getUserName(id);
+    return (
+        <Link
+            className="link flex flex-row gap-2 items-center fit-content"
+            href={`/profile/${id}`}
+        >
+            {PlayerImage(id)}
+            <P>{name}</P>
+        </Link>
+    )
+}
+
+async function PlayerImage(id: string) {
+    const user = await getUser(id);
+    const image = user?.image;
+    if (!image) return null;
+    return <Image
+        src={optimizeImage(image, 72, 72, 90, true, true)}
+        alt={user.firstName} width={36} height={36}
+        className="mb-[10px]"
+    />
+} 
+
 export default async function TeamPage({ params }: Props) {
     const { id } = await params;
     const team = await getTeam(id);
@@ -42,21 +67,18 @@ export default async function TeamPage({ params }: Props) {
     if (!team) notFound();
 
     const currentUser = await getCurrentUser();
+    // const isAdmin = currentUser && team.admins.includes(currentUser.id);
+    const isMember = currentUser && (
+        team.players.includes(currentUser.id) ||
+        team.unconfirmedPlayers.includes(currentUser.id) ||
+        currentUser.id === team.coach ||
+        currentUser.id === team.musician ||
+        currentUser.id === team.unconfirmedCoach ||
+        currentUser.id === team.unconfirmedMusician
+    );
 
-    const playerNames = team.players.map(async (id) => await getUserName(id));
-    const coachName = team.coach ? await getUserName(team.coach) : null;
-    const musicianName = team.musician ? await getUserName(team.musician) : null;
+    const showUnconfirmedPlayers = isMember && team.unconfirmedPlayers.length > 0;
 
-    let unconfirmedPlayerNames: string[] | null | Promise<string | null>[] = null;
-    let unconfirmedCoachName: string | null = null;
-    let unconfirmedMusicianName: string | null = null;
-
-    if (currentUser && team.admins.includes(currentUser.id)) {
-        unconfirmedPlayerNames = team.unconfirmedPlayers.map(async (id) => await getUserName(id));
-        if (!unconfirmedPlayerNames.length) unconfirmedPlayerNames = null;
-        unconfirmedCoachName = team.unconfirmedCoach ? await getUserName(team.unconfirmedCoach) : null;
-        unconfirmedMusicianName = team.unconfirmedMusician ? await getUserName(team.unconfirmedMusician) : null;
-    }
     return (
         <Suspense fallback={<Loader />}>
             <section>
@@ -75,37 +97,45 @@ export default async function TeamPage({ params }: Props) {
                         />
                         <P className="italic text-sm">{team.image && team.photoCredit && `Photo Credit: ${team.photoCredit}`}</P>
                     </>}
-                    <P>{team.city && team.state && `${team.city}, ${team.state}`}</P>
                     {team.description?.split('<br>').map((line, i) => <P key={i}>{line}</P>)}
                     <div className="flex flex-row flex-wrap">
                         <div className="w-1/2">
-                            {playerNames?.length > 0 && <>
-                                <Header>{`${unconfirmedPlayerNames ? 'Confirmed ' : ''}Players`}</Header>
+                            {team.players?.length > 0 && <>
+                                <Header>{`${showUnconfirmedPlayers ? 'Confirmed ' : ''}Players`}</Header>
                                 <ul className="mt-2">
-                                    {playerNames.map((player, i) => (
-                                        <li key={i} className="no-bullets">{player}</li>
+                                    {team.players.map((id, i) => (
+                                        <li key={i} className="no-bullets">{PlayerLink(id)}</li>
                                     ))}
                                 </ul>
                             </>}
-                            {unconfirmedPlayerNames && <>
-                                <Header>{`(Unconfirmed Players)`}</Header>
+                            {showUnconfirmedPlayers && <>
+                                <Header>Unconfirmed Players</Header>
                                 <ul className="mt-2">
-                                    {unconfirmedPlayerNames.map((player, i) => (
-                                        <li key={i} className="no-bullets">{player}</li>
+                                    {team.unconfirmedPlayers.map((id, i) => (
+                                        <li key={i} className="no-bullets">{PlayerLink(id)}</li>
                                     ))}
                                 </ul>
                             </>}
                         </div>
                         <div className="w-1/2">
-                            {musicianName && <Header>Musician</Header>}
-                            <P>{musicianName}</P>
-                            {unconfirmedMusicianName && <Header>Musician (Unconfirmed)</Header>}
-                            <P>{unconfirmedMusicianName}</P>
-                            {coachName && <Header>Coach</Header>}
-                            <P>{coachName}</P>
-                            {unconfirmedCoachName && <Header>Coach (Unconfirmed)</Header>}
-                            <P>{unconfirmedCoachName}</P>
+                            {team.musician && <>
+                                <Header>Musician</Header>
+                                {PlayerLink(team.musician)}
+                            </>}
+                            {isMember && team.unconfirmedMusician && <>
+                                <Header>Unconfirmed Musician</Header>
+                                {PlayerLink(team.unconfirmedMusician)}
+                            </>}
+                            {team.coach && <>
+                                <Header>Coach</Header>
+                                {PlayerLink(team.coach)}
+                            </>}
+                            {isMember && team.unconfirmedCoach && <>
+                                <Header>Unconfirmed Coach</Header>
+                                {PlayerLink(team.unconfirmedCoach)}
+                            </>}
                         </div>
+                    <P className="text-sm">{team.city && team.state && `${team.city}, ${team.state}`}</P>
                     </div>
                 </div>
             </section>
