@@ -21,8 +21,7 @@ usersDb.prepare(`
         ethnicity TEXT,
         website TEXT,
         experience TEXT,
-        image TEXT,
-        teams TEXT
+        image TEXT
     )
 `).run();
 

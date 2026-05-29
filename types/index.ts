@@ -86,7 +86,6 @@ export interface User {
     website?: string;
     experience?: string;
     image?: string;
-    teams?: number[] | string;
 }
 
 export type InputOption = string | { id: string | number, text: string, image?: string };
