@@ -1,11 +1,12 @@
 'use server';
-
+import slugify from 'slugify';
 import { redirect } from "next/navigation";
 import { saveShow } from "@/lib/shows";
 import { Candence, Event, WeekdayInitial } from "@/types";
 import { sortDates, weekdayInitials } from "@/lib/dates";
 import { theatres } from "@/lib/theatres";
 import { removeLeadingArticles } from "@/lib/helper-functions";
+import { Team } from '@/types';
 
 export async function postShow(prevState: void | { message?: string }, formData: FormData) {
     const title = (formData.get('title') as string)?.trim() || null;
@@ -96,5 +97,31 @@ export async function postShow(prevState: void | { message?: string }, formData:
 }
 
 export async function postTeam(prevState: void | { message?: string }, formData: FormData) {
+    const name = (formData.get('name') as string)?.trim() || null;
+    if (!name) return { message: 'Team name is required' };
 
+    let description = formData.get('description') as string || null;
+    if (description) description = description.replace(/\r\n/g, '<br>').replace(/\n/g, '<br>').replace(/\r/g, '<br>');
+
+    const data = Object.fromEntries(formData.entries());
+    const members = [data.creator as string];
+    const unconfirmedMembers = Object.keys(data)
+        .filter(key => key.startsWith('member-'))
+        .map(key => data[key] as string);
+
+    const team: Team = {
+        id: slugify(name),
+        name,
+        image: '',
+        city: formData.get('city') as string || null,
+        state: formData.get('state') as string || null,
+        theatres: [],
+        members,
+        unconfirmedMembers,
+        coach: null,
+        unconfirmedCoach: formData.get('coach') as string || null,
+        lookingForCoach: Boolean(formData.get('lookingForCoach')),
+        description,
+    }
+    console.log(team);
 }

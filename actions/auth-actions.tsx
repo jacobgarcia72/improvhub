@@ -8,7 +8,7 @@ import { User } from "@/types";
 import { redirect } from "next/navigation";
 
 export async function createUser(prevState: void | { message?: string }, formData: FormData) {
-    const username = (formData.get('username') as string).trim();
+    const username = (formData.get('username') as string).trim().toLowerCase();
     const password = formData.get('password') as string;
     const firstName = formData.get('firstName') as string;
 

@@ -19,7 +19,7 @@ export function matchPattern(value: string, type: 'zipcode' | 'city' | 'state'):
     return false;
 }
 
-export const getText = (option: InputOption): string => typeof option === 'string' ? option : option.label;
+export const getText = (option: InputOption): string => typeof option === 'string' ? option : option.text;
 export const filterArrayBySearchTerm = (
     options: InputOption[], searchTerm: string, limit?: number
 ): InputOption[] => {

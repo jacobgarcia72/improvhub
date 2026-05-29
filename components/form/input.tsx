@@ -1,5 +1,7 @@
 'use client';
 
+import Image from "next/image";
+
 interface InputProps {
     className?: string,
     label?: string,
@@ -16,6 +18,7 @@ interface InputProps {
     min?: number;
     max?: number;
     autocomplete?: boolean;
+    image?: string;
 }
 
 export default function Input({
@@ -33,7 +36,8 @@ export default function Input({
     disabled = false,
     min,
     max,
-    autocomplete = true
+    autocomplete = true,
+    image,
 }: InputProps) {
     let inputLabel = label;
     if (label && required) inputLabel += ' *';
@@ -42,9 +46,15 @@ export default function Input({
     if (!placeholder && type === 'url') inputPlaceholder = 'https://';
 
     return (
-        <div className={`flex flex-col ${className}`}>
+        <div className={`flex flex-col ${className} relative`}>
             {label && <label htmlFor={name}>{inputLabel}</label>}
+            {image && (
+                <div className='mr-2' style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', zIndex: 10 }}>
+                    <Image src={image} alt={label || placeholder || name} width={25} height={25} />
+                </div>
+            )}
             <input
+                style={image ? {paddingLeft: '42px'} : undefined}
                 value={value}
                 onChange={onChange ? (e) => onChange(e.target.value) : undefined}
                 onBlur={onBlur ? (e) => onBlur(e.target.value) : undefined}

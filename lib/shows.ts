@@ -47,7 +47,6 @@ export async function getShowsInRange(cityOrZipcode: string, miles: number) {
         `SELECT * FROM shows WHERE (city || ' ' || state) IN (${citiesInRange.map(() => '?').join(', ')}) COLLATE NOCASE`
     ).all(...citiesInRange) as {[key: string]: string | null}[];
     return data.map(convertDataToShow);
-
 }
 
 export async function saveShow(show: Event, imageFile: File | null): Promise<string> {

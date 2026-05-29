@@ -125,7 +125,9 @@ const nouns = [
     'Meatball',
     'Racecar',
     'Pie',
-    'Submarine'
+    'Submarine',
+    'Explorer',
+    'Berry'
 ];
 
 const actions = [
@@ -173,6 +175,7 @@ const formats = [
     'The {noun}s',
     'The {noun}s',
     '{noun} {noun}',
+    'The {noun} {noun}s',
     'The {adj} {noun}',
     'The {adj} {noun}',
     'The {adj} {noun}s',
@@ -209,6 +212,7 @@ export function nameGenerator(): string {
         .replace('{noun}', nouns[rnd(nouns.length)])
         .replace('{noun}', nouns[rnd(nouns.length)])
         .replace('{act}', actions[rnd(actions.length)])
+        .replaceAll('rys', 'ries');
 }
 
 export default nameGenerator

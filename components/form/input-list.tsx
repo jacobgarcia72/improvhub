@@ -4,12 +4,13 @@ import { useState } from "react";
 import Autocomplete from "./autocomplete";
 import Button from "./button";
 import Input from "./input";
+import { InputOption } from "@/types";
 
 export default function InputList({ name, options, label, addLabel }: {
     name: string;
     label?: string;
     addLabel?: string;
-    options?: string[]
+    options?: InputOption[]
 }) {
     const [addedInputs, setAddedInputs] = useState<boolean[]>([]);
 
@@ -19,9 +20,9 @@ export default function InputList({ name, options, label, addLabel }: {
             <div className="grid gap-2 w-full">
                 {addedInputs.map((input, i) => (
                     options?.length ? (
-                        <Autocomplete key={i} options={options} name={`added-${name}-${i}`} placeholder={addLabel} />
+                        <Autocomplete key={i} options={options} name={`${name}-${i}`} placeholder={addLabel} />
                     ) : (
-                        <Input key={i} name={`added-${name}-${i}`} placeholder={addLabel} /> 
+                        <Input key={i} name={`${name}-${i}`} placeholder={addLabel} /> 
                     )
                 ))}
             </div>

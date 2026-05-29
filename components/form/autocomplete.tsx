@@ -2,6 +2,7 @@
 
 import { filterArrayBySearchTerm, getText } from '@/lib/helper-functions';
 import { InputOption } from '@/types';
+import Image from 'next/image';
 import React, { useMemo, useState } from 'react';
 
 type AutocompleteProps = {
@@ -84,18 +85,29 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
     }
   };
 
-    let inputLabel = label;
-    if (label && required) inputLabel += ' *';
+  const getImage = (option: InputOption) => {
+    if (typeof option === 'string' || !option.image) return null;
+    return (
+      <div className='mr-2' style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)' }}>
+        <Image src={option.image} alt={option.text} width={25} height={25} />
+      </div>
+    )
+  }
+  let inputLabel = label;
+  if (label && required) inputLabel += ' *';
 
   return (
     <div className="flex flex-col relative w-full">
       {label && <label htmlFor={name}>{inputLabel}</label>}
+      {getImage(value)}
       <input
-        name={name}
+        style={typeof value === 'object' &&  value.image ? {paddingLeft: '42px'} : undefined}
+        name={typeof value === 'string' ? name : undefined}
         id={name}
         required={required}
         type="text"
-        value={typeof value === 'string' ? value : value.value}
+        value={getText(value)}
+        data-id={typeof value === 'string' ? value : value.id}
         placeholder={placeholder}
         onChange={handleInputChange}
         onFocus={() => setShowOptions(value !== '')}
@@ -103,6 +115,9 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
         onKeyDown={handleKeyDown}
         autoComplete="off"
       />
+    {typeof value === 'object' && value.id ? (
+      <input className='hidden' name={name} value={value.id} onChange={() => null} />
+    ) : null}
 
       {showOptions && filteredOptions.length > 0 && (
         <ul
@@ -130,8 +145,12 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
                 padding: '8px 12px',
                 background: index === activeIndex ? '#f0f0f0' : '#fff',
                 cursor: 'pointer',
+                paddingLeft: typeof option === 'object' &&  option.image ? '42px' : '12px',
+                position: 'relative'
               }}
+              className="flex flex-row"
             >
+              {getImage(option)}
               {getText(option)}
             </li>
           ))}

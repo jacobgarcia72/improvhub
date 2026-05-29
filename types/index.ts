@@ -47,11 +47,19 @@ export interface Event {
     performers?: User[] | null;
 }
 
-interface Team {
+export interface Team {
     id: string;
     name: string;
-    performers: string[];
-    description: string;
+    image: string | null;
+    city: string | null;
+    state: string | null;
+    theatres: string[]; 
+    members: string[];
+    unconfirmedMembers: string[];
+    coach: string | null;
+    unconfirmedCoach: string | null;
+    lookingForCoach: boolean;
+    description: string | null;
 }
 
 export interface User {
@@ -75,4 +83,4 @@ export interface User {
     teams?: number[] | string;
 }
 
-export type InputOption = string | { value: string | number, label: string };
+export type InputOption = string | { id: string | number, text: string, image?: string };

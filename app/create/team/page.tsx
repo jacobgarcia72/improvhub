@@ -8,11 +8,16 @@ import Checkbox from "@/components/form/checkbox";
 import LocationInputs from "./location-inputs";
 import InputList from "@/components/form/input-list";
 import Input from "@/components/form/input";
-import { getCurrentUser } from "@/lib/users";
+import { getAllUsers, getCurrentUser } from "@/lib/users";
+import { optimizeImage } from "@/lib/cloudinary";
 
 export default async function CreateTeamPage() {
     const user = await getCurrentUser();
     const creatorName = `${user?.firstName} ${user?.lastName}`;
+    const userImage = user?.image ? optimizeImage(user.image, 50, 50, 80, true, true) : undefined
+    const allUsers = (await getAllUsers()).map(({ id, name, image}) => {
+        return { id, image: image ? optimizeImage(image, 50, 50, 80, true, true) : undefined, text: name };
+    });
     return (
         <section className="medium-section extra-padding">
             <Form onSubmit={postTeam}>
@@ -21,10 +26,14 @@ export default async function CreateTeamPage() {
                 <LocationInputs />
                 <div className="flex flex-col gap-2">
                     <p className="label">Team Members</p>
-                    <Input name="creator" value={creatorName} disabled />
-                    <InputList name="team-members" addLabel="Player" />
+                    <input name="creator" className="hidden" value={user?.id} readOnly />
+                    <Input name="creator-display" value={creatorName} disabled image={userImage} />
+                    <InputList options={allUsers} name="member" addLabel="Player" />
                 </div>
-                <Autocomplete options={[]} label="Coach" />
+                <div>
+                    <p className="label pb-2">Coach</p>
+                    <Autocomplete options={allUsers} />
+                </div>
                 <Checkbox label="Looking for Coach" name="lookingForCoach" />
                 <Text label="Team Description" name="description" />
             </Form>

@@ -10,7 +10,7 @@ export default function NameInput() {
     return (
         <div className="flex flex-row items-end">
             <div className="w-6/7 pr-2">
-                <Input name="name" label="Team Name" onChange={setName} value={name} autocomplete={false} />
+                <Input required name="name" label="Team Name" onChange={setName} value={name} autocomplete={false} />
             </div>
             <div className="w-[80px]">
                 <Button caption="Random" onClick={() => setName(nameGenerator())} />
