@@ -8,6 +8,7 @@ import { theatres } from "@/lib/theatres";
 import { removeLeadingArticles } from "@/lib/helper-functions";
 import { Team } from '@/types';
 import { uploadImage } from '@/lib/cloudinary';
+import { saveTeam } from '@/lib/teams';
 
 export async function postShow(prevState: void | { message?: string }, formData: FormData) {
     const title = (formData.get('title') as string)?.trim() || null;
@@ -135,8 +136,10 @@ export async function postTeam(prevState: void | { message?: string }, formData:
 
     const team: Team = {
         id: slugify(name, { lower: true, trim: true }),
+        admins: players,
         name,
         image: imageUrl,
+        photoCredit: formData.get('photoCredit') as string || null,
         city: formData.get('city') as string || null,
         state: formData.get('state') as string || null,
         theatres,
@@ -151,5 +154,6 @@ export async function postTeam(prevState: void | { message?: string }, formData:
         lookingForMusician: Boolean(formData.get('lookingForMusician')),
         description,
     }
-    console.log('team', team);
+    const teamId = await saveTeam(team);
+    redirect(`/teams/${teamId}`);
 }

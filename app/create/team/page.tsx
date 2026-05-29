@@ -23,6 +23,7 @@ export default async function CreateTeamPage() {
             <Form onSubmit={postTeam}>
                 <NameInput />
                 <ImagePicker />
+                <Input label="Photo Credit" name="photoCredit" />
                 <LocationInputs />
                 <div className="flex flex-col gap-2">
                     <p className="label">Players</p>

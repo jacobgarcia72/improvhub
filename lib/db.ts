@@ -57,3 +57,26 @@ contentDb.prepare(`
         performers TEXT
     )
 `).run();
+
+contentDb.prepare(`
+    CREATE TABLE IF NOT EXISTS teams (
+        id STRING PRIMARY KEY,
+        admins TEXT NOT NULL,
+        name TEXT NOT NULL,
+        image TEXT,
+        photoCredit TEXT,
+        city TEXT,
+        state TEXT,
+        theatres TEXT,
+        players TEXT,
+        unconfirmedPlayers TEXT,
+        lookingForPlayers INTEGER,
+        coach TEXT,
+        unconfirmedCoach TEXT,
+        lookingForCoach INTEGER,
+        musician TEXT,
+        unconfirmedMusician TEXT,
+        lookingForMusician INTEGER,
+        description TEXT
+    )
+`).run();

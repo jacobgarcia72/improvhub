@@ -49,8 +49,10 @@ export interface Event {
 
 export interface Team {
     id: string;
+    admins: string[];
     name: string;
     image: string | null;
+    photoCredit: string | null;
     city: string | null;
     state: string | null;
     theatres: string[]; 
