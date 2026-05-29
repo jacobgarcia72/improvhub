@@ -70,13 +70,17 @@ export default async function UserProfilePage({ params }: { params: Promise<{use
             </LayoutCard> */}
             <LayoutCard header="Teams">
                 {user.teams && <div>{/*TODO: Display teams with links to team pages*/}</div>}
-                {isCurrentUser && !user.teams && <p className="label">No teams to display</p>}
+                {isCurrentUser && !user.teams && (
+                    <div className="h-12 mt-3 ml-1">
+                        <p className="label">No teams to display</p>
+                    </div>
+                )}
                 {isCurrentUser && ( 
                     <Checkbox name="lookingForTeam" label="Open to joining teams" />
                 )}
                 {isCurrentUser && <div className="w-full flex flex-row justify-center">
                     <Link href="/create/team">
-                        <Button caption="New Team" className="w-48" />
+                        <Button caption="New Team" style="link" className="w-48" />
                     </Link>
                 </div>}
             </LayoutCard>
