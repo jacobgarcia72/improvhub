@@ -33,8 +33,8 @@ export async function getTeam(id: string): Promise<Team | null> {
 
 export async function getTeamsByUser(id: string): Promise<Team[]> {
     const data = contentDb.prepare(
-        `SELECT * FROM teams WHERE ',' || players || ',' LIKE ? OR ',' || unconfirmedPlayers || ',' LIKE ?`
-    ).all(`%,${id},%`, `%,${id},%`) as {[key: string]: string | null}[];
+        `SELECT * FROM teams WHERE ',' || players || ',' LIKE ?`
+    ).all(`%,${id},%`) as {[key: string]: string | null}[];
     return data.map(convertDataToTeam);
 }
 
