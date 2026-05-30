@@ -82,7 +82,7 @@ contentDb.prepare(`
 
 contentDb.prepare(`
     CREATE TABLE IF NOT EXISTS team_invitations (
-        team_id TEXT NOT NULL,
+        team TEXT NOT NULL,
         invited TEXT NOT NULL,
         invitee TEXT NOT NULL,
         role TEXT NOT NULL,

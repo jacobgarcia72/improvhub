@@ -35,10 +35,18 @@ export async function getTeamsByUser(id: string): Promise<Team[]> {
     return data.map(convertDataToTeam);
 }
 
-export async function getTeamInvitationsByTeam(id: string): Promise<TeamInvitation[]> {
-    return contentDb.prepare(
-        `SELECT * FROM team_invitations WHERE team_id = ?`
-    ).all(id) as TeamInvitation[];
+export async function getTeamInvitations(params: {
+    team?: string,
+    invited?: string,
+    invitee?: string
+}): Promise<TeamInvitation[]> {
+    let query = `SELECT * FROM team_invitations`;
+    if (Object.keys(params)) {
+        query += ' WHERE ';
+        const queries = Object.keys(params).map(param => `${param} = ?`);
+        query += (queries.join(' OR '));
+    }
+    return contentDb.prepare(query).all(...Object.values(params)) as TeamInvitation[];
 }
 
 export async function saveTeam(team: Team, invitations?: {
@@ -98,7 +106,7 @@ export async function saveTeam(team: Team, invitations?: {
         const { players, coaches, musicians } = invitations;
         const timestamp = new Date().toISOString();
         const statement = `INSERT INTO team_invitations (
-            team_id, invited, invitee, role, timestamp
+            team, invited, invitee, role, timestamp
             ) VALUES (?, ?, ?, ?, ?)`;
         players?.forEach((player) => {
             contentDb.prepare(statement).run(team.id, player, team.admins[0], 'player', timestamp);

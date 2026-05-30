@@ -5,7 +5,7 @@ import { Suspense } from "react";
 import type { Metadata } from 'next'
 import { optimizeImage } from "@/lib/cloudinary";
 import Loader from "@/components/loader";
-import { getTeam, getTeamInvitationsByTeam } from "@/lib/teams";
+import { getTeam, getTeamInvitations } from "@/lib/teams";
 import { getCurrentUser, getUser, getUserName } from "@/lib/users";
 import Link from "next/link";
 import { pluralize } from "@/lib/helper-functions";
@@ -68,7 +68,7 @@ export default async function TeamPage({ params }: Props) {
     if (!team) notFound();
 
     const currentUser = await getCurrentUser();
-    const invitations = await getTeamInvitationsByTeam(id);
+    const invitations = await getTeamInvitations({ team: id});
 
     const unconfirmedPlayers = invitations
         .filter((invite) => invite.role === 'player')
