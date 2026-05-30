@@ -8,6 +8,7 @@ import Loader from "@/components/loader";
 import { getTeam, getTeamInvitationsByTeam } from "@/lib/teams";
 import { getCurrentUser, getUser, getUserName } from "@/lib/users";
 import Link from "next/link";
+import { pluralize } from "@/lib/helper-functions";
 
 type Props = {
     params: Promise<{ id: string }>
@@ -73,25 +74,27 @@ export default async function TeamPage({ params }: Props) {
         .filter((invite) => invite.role === 'player')
         .map((invite) => invite.invited);
 
-    const unconfirmedCoach = invitations
-        .filter((invite) => invite.role === 'coach')[0] // TODO: allow multiple coaches
-        .invited
+    const unconfirmedCoaches = invitations
+        .filter((invite) => invite.role === 'coach')
+        .map((invite) => invite.invited);
 
-    const unconfirmedMusician = invitations
-        .filter((invite) => invite.role === 'musician')[0] // TODO: allow multiple musicians?
-        .invited
+    const unconfirmedMusicians = invitations
+        .filter((invite) => invite.role === 'musician')
+        .map((invite) => invite.invited);
 
     // const isAdmin = currentUser && team.admins.includes(currentUser.id);
     const isMember = currentUser && (
         team.players.includes(currentUser.id) ||
         unconfirmedPlayers.includes(currentUser.id) ||
-        currentUser.id === team.coach ||
-        currentUser.id === team.musician ||
-        currentUser.id === unconfirmedCoach ||
-        currentUser.id === unconfirmedMusician
+        team.coaches.includes(currentUser.id) ||
+        unconfirmedCoaches.includes(currentUser.id) ||
+        team.musicians.includes(currentUser.id) ||
+        unconfirmedMusicians.includes(currentUser.id)
     );
 
     const showUnconfirmedPlayers = isMember && unconfirmedPlayers.length > 0;
+    const showUnconfirmedCoaches = isMember && unconfirmedCoaches.length > 0;
+    const showUnconfirmedMusicians = isMember && unconfirmedMusicians.length > 0;
 
     return (
         <Suspense fallback={<Loader />}>
@@ -115,7 +118,7 @@ export default async function TeamPage({ params }: Props) {
                     <div className="flex flex-row flex-wrap">
                         <div className="w-1/2">
                             {team.players?.length > 0 && <>
-                                <Header>{`${showUnconfirmedPlayers ? 'Confirmed ' : ''}Players`}</Header>
+                                <Header>{`${showUnconfirmedPlayers ? 'Confirmed ' : ''}${pluralize('Player', team.players.length > 0)}`}</Header>
                                 <ul className="mt-2">
                                     {team.players.map((id, i) => (
                                         <li key={i} className="no-bullets">{PlayerLink(id)}</li>
@@ -123,7 +126,7 @@ export default async function TeamPage({ params }: Props) {
                                 </ul>
                             </>}
                             {showUnconfirmedPlayers && <>
-                                <Header>Unconfirmed Players</Header>
+                                <Header>{`Unconfirmed ${pluralize('Player', unconfirmedPlayers.length > 0)}`}</Header>
                                 <ul className="mt-2">
                                     {unconfirmedPlayers.map((id, i) => (
                                         <li key={i} className="no-bullets">{PlayerLink(id)}</li>
@@ -132,21 +135,37 @@ export default async function TeamPage({ params }: Props) {
                             </>}
                         </div>
                         <div className="w-1/2">
-                            {team.musician && <>
-                                <Header>Musician</Header>
-                                {PlayerLink(team.musician)}
+                            {team.musicians?.length > 0 && <>
+                                <Header>{`${showUnconfirmedMusicians ? 'Confirmed ' : ''}${pluralize('Musician', team.musicians.length > 0)}`}</Header>
+                                <ul className="mt-2">
+                                    {team.musicians.map((id, i) => (
+                                        <li key={i} className="no-bullets">{PlayerLink(id)}</li>
+                                    ))}
+                                </ul>
                             </>}
-                            {isMember && unconfirmedMusician && <>
-                                <Header>Unconfirmed Musician</Header>
-                                {PlayerLink(unconfirmedMusician)}
+                            {showUnconfirmedMusicians && <>
+                                <Header>{`Unconfirmed ${pluralize('Musician', unconfirmedMusicians.length > 0)}`}</Header>
+                                <ul className="mt-2">
+                                    {unconfirmedMusicians.map((id, i) => (
+                                        <li key={i} className="no-bullets">{PlayerLink(id)}</li>
+                                    ))}
+                                </ul>
                             </>}
-                            {team.coach && <>
-                                <Header>Coach</Header>
-                                {PlayerLink(team.coach)}
+                            {team.coaches?.length > 0 && <>
+                                <Header>{`${showUnconfirmedCoaches ? 'Confirmed ' : ''}${pluralize('Coach', team.coaches.length > 0)}`}</Header>
+                                <ul className="mt-2">
+                                    {team.coaches.map((id, i) => (
+                                        <li key={i} className="no-bullets">{PlayerLink(id)}</li>
+                                    ))}
+                                </ul>
                             </>}
-                            {isMember && unconfirmedCoach && <>
-                                <Header>Unconfirmed Coach</Header>
-                                {PlayerLink(unconfirmedCoach)}
+                            {showUnconfirmedCoaches && <>
+                                <Header>{`Unconfirmed ${pluralize('Coach', unconfirmedCoaches.length > 0)}`}</Header>
+                                <ul className="mt-2">
+                                    {unconfirmedCoaches.map((id, i) => (
+                                        <li key={i} className="no-bullets">{PlayerLink(id)}</li>
+                                    ))}
+                                </ul>
                             </>}
                         </div>
                     <P className="text-sm">{team.city && team.state && `${team.city}, ${team.state}`}</P>

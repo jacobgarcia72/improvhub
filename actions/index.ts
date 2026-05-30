@@ -141,19 +141,25 @@ export async function postTeam(prevState: void | { message?: string }, formData:
         theatres,
         players: [data.creator as string],
         lookingForPlayers: Boolean(formData.get('lookingForPlayers')),
-        coach: null,
+        coaches: [],
         lookingForCoach: Boolean(formData.get('lookingForCoach')),
-        musician: null,
+        musicians: [],
         lookingForMusician: Boolean(formData.get('lookingForMusician')),
         description,
     }
     const playerInvitations = Object.keys(data)
         .filter(key => key.startsWith('player-') && Boolean((data[key] as string).trim()))
         .map(key => data[key] as string);
+    const coachInvitations = Object.keys(data)
+        .filter(key => key.startsWith('coach-') && Boolean((data[key] as string).trim()))
+        .map(key => data[key] as string);
+    const musicianInvitations = Object.keys(data)
+        .filter(key => key.startsWith('musician-') && Boolean((data[key] as string).trim()))
+        .map(key => data[key] as string);
     const invitations = {
         players: [...new Set(playerInvitations)],
-        coach: formData.get('coach') as string || null,
-        musician: formData.get('musician') as string || null
+        coaches: [...new Set(coachInvitations)],
+        musicians: [...new Set(musicianInvitations)]
     }
     const teamId = await saveTeam(team, invitations);
     redirect(`/teams/${teamId}`);

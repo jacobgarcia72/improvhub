@@ -58,9 +58,9 @@ export interface Team {
     theatres: string[]; 
     players: string[];
     lookingForPlayers: boolean;
-    coach: string | null;
+    coaches: string[];
     lookingForCoach: boolean;
-    musician: string | null;
+    musicians: string[];
     lookingForMusician: boolean;
     description: string | null;
 }
@@ -93,4 +93,5 @@ export interface User {
     image?: string;
 }
 
-export type InputOption = string | { id: string | number, text: string, image?: string };
+export type InputOptionObject = { id: string | number, text: string, image?: string };
+export type InputOption = string | InputOptionObject;

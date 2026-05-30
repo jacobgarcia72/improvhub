@@ -70,10 +70,10 @@ contentDb.prepare(`
         players TEXT,
         unconfirmedPlayers TEXT,
         lookingForPlayers INTEGER,
-        coach TEXT,
+        coaches TEXT,
         unconfirmedCoach TEXT,
         lookingForCoach INTEGER,
-        musician TEXT,
+        musicians TEXT,
         unconfirmedMusician TEXT,
         lookingForMusician INTEGER,
         description TEXT

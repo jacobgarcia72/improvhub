@@ -15,9 +15,9 @@ const convertDataToTeam = (data: {[key: string]: string | null}): Team => {
         theatres: data.theatres?.split(',') || [],
         players: data.players?.split(',') || [],
         lookingForPlayers: Boolean(data.lookingForPlayers),
-        coach: data.coach || null,
+        coaches: data.coaches?.split(',') || [],
         lookingForCoach: Boolean(data.lookingForCoach),
-        musician: data.musician || null,
+        musicians: data.musicians?.split(',') || [],
         lookingForMusician: Boolean(data.lookingForMusician),
         description: data.description || null
     }
@@ -43,8 +43,8 @@ export async function getTeamInvitationsByTeam(id: string): Promise<TeamInvitati
 
 export async function saveTeam(team: Team, invitations?: {
     players: string[] | null,
-    coach: string | null,
-    musician: string | null
+    coaches: string[],
+    musicians: string[]
 }): Promise<string> {
     let isUnique = false;
     let counter = 1;
@@ -69,9 +69,9 @@ export async function saveTeam(team: Team, invitations?: {
             theatres,
             players,
             lookingForPlayers,
-            coach,
+            coaches,
             lookingForCoach,
-            musician,
+            musicians,
             lookingForMusician,
             description
         )
@@ -87,15 +87,15 @@ export async function saveTeam(team: Team, invitations?: {
         team.theatres?.join(',') || null,
         team.players?.join(',') || null,
         team.lookingForPlayers ? 1 : 0,
-        team.coach,
+        team.coaches?.join(',') || null,
         team.lookingForCoach ? 1 : 0,
-        team.musician,
+        team.musicians?.join(',') || null,
         team.lookingForMusician ? 1 : 0,
         team.description,
     );
 
     if (invitations) {
-        const { players, coach, musician } = invitations;
+        const { players, coaches, musicians } = invitations;
         const timestamp = new Date().toISOString();
         const statement = `INSERT INTO team_invitations (
             team_id, invited, invitee, role, timestamp
@@ -103,12 +103,12 @@ export async function saveTeam(team: Team, invitations?: {
         players?.forEach((player) => {
             contentDb.prepare(statement).run(team.id, player, team.admins[0], 'player', timestamp);
         });
-        if (coach) {
+        coaches?.forEach((coach) => {
             contentDb.prepare(statement).run(team.id, coach, team.admins[0], 'coach', timestamp);
-        }
-        if (musician) {
+        });
+        musicians?.forEach((musician) => {
             contentDb.prepare(statement).run(team.id, musician, team.admins[0], 'musician', timestamp);
-        }
+        });
     }
 
     return team.id;

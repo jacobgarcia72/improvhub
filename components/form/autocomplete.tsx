@@ -8,7 +8,7 @@ import React, { useMemo, useState } from 'react';
 type AutocompleteProps = {
   options: InputOption[];
   placeholder?: string;
-  onChange?: (value: string) => void;
+  onChange?: (value: InputOption) => void;
   onStopTyping?: (value: string) => void;
   label?: string;
   name?: string;
@@ -34,7 +34,7 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
 
   const updateValue = (newValue: InputOption) => {
     setValue(newValue);
-    onChange?.(getText(newValue));
+    onChange?.(newValue);
   };
 
   const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout>();
