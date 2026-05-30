@@ -14,7 +14,9 @@ export default function InputList({ name, options, label, addLabel, startingOpti
     startingOptions?: InputOption[]
 }) {
     const [addedInputs, setAddedInputs] = useState<(InputOption | null)[]>(startingOptions || []);
-    const [availableOptions, setAvailableOptions] = useState<InputOption[] | undefined>(options);
+    const [availableOptions, setAvailableOptions] = useState<InputOption[] | undefined>((
+        startingOptions ? options?.filter((option) => !startingOptions.includes(option)) : options
+    ));
 
     const updateInput = (value: InputOption, i: number) => {
         const inputs = [...addedInputs];
