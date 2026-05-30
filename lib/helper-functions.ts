@@ -19,6 +19,18 @@ export function matchPattern(value: string, type: 'zipcode' | 'city' | 'state'):
     return false;
 }
 
+export const pluralize = (word: string, pluralize = true): string => {
+    if (pluralize === false) return word;
+    const last = word[word.length - 1];
+    const last2 = word.slice(word.length - 2);
+    if (['io', 'eo', 'oo', 'uo'].includes(last2)) return `${word}s`;
+    if (['o', 's', 'x', 'z'].includes(last)) return `${word}es`;
+    if (['ch', 'sh', 'oy', 'uy'].includes(last2)) return `${word}es`;
+    if (['ay', 'ey', 'oy', 'uy'].includes(last2)) return `${word}s`;
+    if (last === 'y') return `${word.slice(0, word.length - 1)}ies`;
+    return `${word}s`;
+}
+
 export const getText = (option: InputOption): string => typeof option === 'string' ? option : option.text;
 export const filterArrayBySearchTerm = (
     options: InputOption[], searchTerm: string, limit?: number

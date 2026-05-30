@@ -1,3 +1,5 @@
+import { pluralize } from "./helper-functions";
+
 const adjectives = [
     'Fresh',
     'Wet',
@@ -31,10 +33,9 @@ const adjectives = [
     'Stolen',
     'Smooth',
     'Pickled',
-    'Frozen',
+    'Ripe',
     'Hot',
     'Brass',
-    'Unspoken',
     'Living',
     'Extra',
     'Fancy',
@@ -52,6 +53,7 @@ const adjectives = [
     'Secret',
     'Cosmic',
     'Electric',
+    'Paper',
     'Sly',
     'Sour',
     'Lucky',
@@ -66,13 +68,19 @@ const adjectives = [
     'Thriving',
     'Neighborly',
     'Rainbow',
-    'Abundant'
+    'Abundant',
+    'Wealthy',
+    'Deviant',
+    'Leafy',
+    'Available',
+    'Loose'
 ];
 
 const nouns = [
     'Wizard',
     'Gnome',
     'Cupholder',
+    'Coaster',
     'Turnip',
     'Lampshade',
     'Cheese',
@@ -106,7 +114,7 @@ const nouns = [
     'Pork Chop',
     'String Bean',
     'Pea',
-    'Paperback',
+    'Peanut',
     'Siren',
     'Spotlight',
     'Dreamer',
@@ -120,43 +128,21 @@ const nouns = [
     'Lantern',
     'Castle',
     'Garden',
-    'Serpent',
     'Horizon',
-    'Meatball',
-    'Racecar',
     'Pie',
     'Submarine',
     'Explorer',
     'Berry',
+    'Strawberry',
     'Grape',
-    'Bunny'
-];
-
-const actions = [
-    'Driving',
-    'Playing',
-    'Daring',
-    'Catching',
-    'Chasing',
-    'Paying',
-    'Baking',
-    'Smoking',
-    'Stealing',
-    'Hazing',
-    'Waking',
-    'Riding',
-    'Awakening',
-    'Finding',
-    'Drifting',
-    'Floating',
-    'Breaking',
-    'Dreaming',
-    'Summoning',
-    'Spinning',
-    'Climbing',
-    'Wandering',
-    'Charging',
-    'Gliding'
+    'Bunny',
+    'Giraffe',
+    'Woodchuck',
+    'Penny',
+    'Swinging',
+    'Dragonfly',
+    'Tree',
+    'Appetizer'
 ];
 
 const formats = [
@@ -164,59 +150,51 @@ const formats = [
     '{adj} {noun}',
     '{adj} {noun}',
     '{adj} {noun}',
-    '{adj} {noun}s',
-    '{adj} {noun}s',
-    '{adj} {noun}s',
-    '{adj} {noun}s',
-    '{adj} {noun}s',
-    '{adj} {noun}s',
-    '{adj} {noun}s',
-    '{adj} {noun}s',
-    '{adj} {noun}s',
-    '{adj} {noun}s',
-    'The {noun}s',
-    'The {noun}s',
+    '{adj} {nouns}',
+    '{adj} {nouns}',
+    '{adj} {nouns}',
+    '{adj} {nouns}',
+    '{adj} {nouns}',
+    '{adj} {nouns}',
+    '{adj} {nouns}',
+    '{adj} {nouns}',
+    '{adj} {nouns}',
+    '{adj} {nouns}',
+    'The {nouns}',
+    'The {nouns}',
     '{noun} {noun}',
-    'The {noun} {noun}s',
+    'The {noun} {nouns}',
     'The {adj} {noun}',
     'The {adj} {noun}',
-    'The {adj} {noun}s',
-    'The {adj} {noun}s',
-    'The {adj} {noun}s',
-    'The {adj} {noun}s',
-    'The {adj} {noun}s',
-    'The {adj} {noun}s',
-    'The {adj} {noun}s',
-    'The {adj} {noun}s',
-    '{noun} and the {noun}s',
-    '{noun}s and {noun}s',
-    '{noun}s and {noun}s',
-    '{noun}s and {noun}s',
-    '{noun}s and {adj} {noun}s',
-    '{act} the {noun}',
-    '{act} {noun}s',
-    '{act} {noun}s',
-    '{act} the {noun}s',
-    '{adj} {adj} {noun}s',
+    'The {adj} {nouns}',
+    'The {adj} {nouns}',
+    'The {adj} {nouns}',
+    'The {adj} {nouns}',
+    'The {adj} {nouns}',
+    'The {adj} {nouns}',
+    'The {adj} {nouns}',
+    'The {adj} {nouns}',
+    '{noun} and the {nouns}',
+    '{nouns} and {nouns}',
+    '{nouns} and {nouns}',
+    '{nouns} and {nouns}',
     'The {adj}',
-    '{act} With {noun}s',
     'The {noun} and the {noun}'
 ];
 
-function rnd(max: number): number {
-    return Math.floor(Math.random() * max)
+function rnd(arr: string[]): string {
+    return arr[Math.floor(Math.random() * arr.length)];
 }
 
 export function nameGenerator(): string {
-    return formats[rnd(formats.length)]
-        .replace('{adj}', adjectives[rnd(adjectives.length)])
-        .replace('{adj}', adjectives[rnd(adjectives.length)])
-        .replace('{noun}', nouns[rnd(nouns.length)])
-        .replace('{noun}', nouns[rnd(nouns.length)])
-        .replace('{act}', actions[rnd(actions.length)])
-        .replaceAll('nys', 'nies')
-        .replaceAll('rys', 'ries')
-        .replaceAll('tos', 'toes');
+    let name = rnd(formats);
+    while (name.includes('{')) {
+        name = name
+            .replace('{adj}', rnd(adjectives))
+            .replace('{noun}', rnd(nouns))
+            .replace('{nouns}', pluralize(rnd(nouns)))
+    };
+    return name;
 }
 
 export default nameGenerator
