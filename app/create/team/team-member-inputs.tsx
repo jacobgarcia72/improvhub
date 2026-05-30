@@ -9,21 +9,21 @@ export async function TeamMemberInputs() {
         return { id, image: image ? optimizeImage(image, 50, 50, 80, true, true) : undefined, text: name };
     });
     const creatorOption = allUsers.find((option) => option.id === user?.id);
-    return <>
+    return <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-2">
             <p className="label">Players</p>
+            <Checkbox label="Looking for Players" name="lookingForPlayers" />
             <InputList options={allUsers} name="player" addLabel="Player" startingOptions={creatorOption ? [creatorOption] : undefined} />
         </div>
-        <Checkbox label="Looking for Players" name="lookingForPlayers" />
-        <div>
-            <p className="label pb-2">Coach</p>
+        <div className="flex flex-col gap-2">
+            <p className="label">Coach(es)</p>
+            <Checkbox label="Looking for Coach" name="lookingForCoach" />
             <InputList options={allUsers} name="coach" addLabel="Coach" />
         </div>
-        <Checkbox label="Looking for Coach" name="lookingForCoach" />
-        <div>
-            <p className="label pb-2">Musician</p>
+        <div className="flex flex-col gap-2">
+            <p className="label">Musician(s)</p>
+            <Checkbox label="Looking for Musician" name="lookingForMusician" />
             <InputList options={allUsers} name="musician" addLabel="Musician" />
         </div>
-        <Checkbox label="Looking for Musician" name="lookingForMusician" />
-    </>
+    </div>
 }
