@@ -23,7 +23,7 @@ export default function InputList({ name, options, label, addLabel, startingOpti
         inputs[i] = value;
         setAddedInputs(inputs);
         if (!options) return;
-        setAvailableOptions(availableOptions?.filter((option) => option !== value));
+        setAvailableOptions(options?.filter((option) => !addedInputs.includes(option) && option !== value));
     }
 
     return (
