@@ -13,6 +13,7 @@ type AutocompleteProps = {
   label?: string;
   name?: string;
   required?: boolean;
+  startingValue?: InputOption
 };
 
 const Autocomplete: React.FC<AutocompleteProps> = ({
@@ -22,9 +23,10 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
     onStopTyping,
     label,
     name = 'autocomplete',
-    required
+    required,
+    startingValue
 }) => {
-  const [value, setValue] = useState<InputOption>('');
+  const [value, setValue] = useState<InputOption>(startingValue || '');
   const [showOptions, setShowOptions] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
 

@@ -6,13 +6,14 @@ import Button from "./button";
 import Input from "./input";
 import { InputOption } from "@/types";
 
-export default function InputList({ name, options, label, addLabel }: {
+export default function InputList({ name, options, label, addLabel, startingOptions }: {
     name: string;
     label?: string;
     addLabel?: string;
     options?: InputOption[]
+    startingOptions?: InputOption[]
 }) {
-    const [addedInputs, setAddedInputs] = useState<(InputOption | null)[]>([]);
+    const [addedInputs, setAddedInputs] = useState<(InputOption | null)[]>(startingOptions || []);
     const [availableOptions, setAvailableOptions] = useState<InputOption[] | undefined>(options);
 
     const updateInput = (value: InputOption, i: number) => {
@@ -34,6 +35,7 @@ export default function InputList({ name, options, label, addLabel }: {
                             name={`${name}-${i}`}
                             placeholder={addLabel}
                             onChange={(value) => updateInput(value, i)}
+                            startingValue = {startingOptions?.[i] || undefined}
                         />
                     ) : (
                         <Input key={i}

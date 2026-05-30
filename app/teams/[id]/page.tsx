@@ -82,8 +82,9 @@ export default async function TeamPage({ params }: Props) {
         .filter((invite) => invite.role === 'musician')
         .map((invite) => invite.invited);
 
-    // const isAdmin = currentUser && team.admins.includes(currentUser.id);
+    const isAdmin = currentUser && team.admins.includes(currentUser.id);
     const isMember = currentUser && (
+        isAdmin ||
         team.players.includes(currentUser.id) ||
         unconfirmedPlayers.includes(currentUser.id) ||
         team.coaches.includes(currentUser.id) ||

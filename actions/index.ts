@@ -5,12 +5,16 @@ import { saveShow } from "@/lib/shows";
 import { Candence, Event, WeekdayInitial } from "@/types";
 import { sortDates, weekdayInitials } from "@/lib/dates";
 import { theatres } from "@/lib/theatres";
-import { removeLeadingArticles } from "@/lib/helper-functions";
+import { capitalize, removeLeadingArticles } from "@/lib/helper-functions";
 import { Team } from '@/types';
 import { uploadImage } from '@/lib/cloudinary';
 import { saveTeam } from '@/lib/teams';
+import { getCurrentUser } from '@/lib/users';
 
 export async function postShow(prevState: void | { message?: string }, formData: FormData) {
+    const creatorId = (await getCurrentUser())?.id;
+    if (!creatorId) throw new Error('You must be logged in to continue');
+
     const title = (formData.get('title') as string)?.trim() || null;
     if (!title) return { message: 'Title is required' };
 
@@ -73,7 +77,7 @@ export async function postShow(prevState: void | { message?: string }, formData:
 
     const show: Event = {
         id: '',
-        creatorId: '1', // TODO: Use actual userId
+        creatorId,
         title,
         image: null,
         photoCredit,
@@ -99,10 +103,15 @@ export async function postShow(prevState: void | { message?: string }, formData:
 }
 
 export async function postTeam(prevState: void | { message?: string }, formData: FormData) {
-    const name = (formData.get('name') as string)?.trim() || null;
+    const creatorId = (await getCurrentUser())?.id;
+    if (!creatorId) throw new Error('You must be logged in to continue');
+
+    const data = Object.fromEntries(formData.entries());
+
+    const name = (data.name as string)?.trim() || null;
     if (!name) return { message: 'Team name is required' };
     
-    const imageFile = formData.get('image') as File;
+    const imageFile = data.image as File;
     let imageUrl = '';
     if (imageFile && imageFile.size) {
         if (imageFile.size > 5 * 1024 * 1024) { // 5MB limit
@@ -115,10 +124,8 @@ export async function postTeam(prevState: void | { message?: string }, formData:
         }
     }
 
-    let description = formData.get('description') as string || null;
+    let description = data.description as string || null;
     if (description) description = description.replace(/\r\n/g, '<br>').replace(/\n/g, '<br>').replace(/\r/g, '<br>');
-
-    const data = Object.fromEntries(formData.entries());
 
     const checkedTheatres = Object.keys(data)
         .filter(key => key.startsWith('theatre-') && Boolean((data[key] as string).trim()))
@@ -130,37 +137,44 @@ export async function postTeam(prevState: void | { message?: string }, formData:
 
     const theatres = [...new Set(checkedTheatres.concat(addedTheatres))];
 
+    const getAddedTeamMembersByRole = (role: string): string[] => {
+        const invitations = Object.keys(data)
+            .filter(key => key.startsWith(`${role}-`) && Boolean((data[key] as string).trim()))
+            .map(key => (data[key] as string).trim());
+        return [...new Set(invitations)];
+    }
+    const getConfirmedMembers = (members: string[]) => members.includes(creatorId) ? [creatorId] : []; // Only the creator is confirmed. All else must be invited.
+    const players = getAddedTeamMembersByRole('player');
+    const coaches = getAddedTeamMembersByRole('coach');
+    const musicians = getAddedTeamMembersByRole('musician');
+
+    let city = (data.city as string).trim() || null;
+    if (city) city = capitalize(city);
+
     const team: Team = {
         id: slugify(name, { lower: true, trim: true }),
-        admins: [data.creator as string],
+        admins: [creatorId],
         name,
         image: imageUrl,
-        photoCredit: formData.get('photoCredit') as string || null,
-        city: formData.get('city') as string || null,
-        state: formData.get('state') as string || null,
+        photoCredit: data.photoCredit as string || null,
+        city,
+        state: data.state as string || null,
         theatres,
-        players: [data.creator as string],
-        lookingForPlayers: Boolean(formData.get('lookingForPlayers')),
-        coaches: [],
-        lookingForCoach: Boolean(formData.get('lookingForCoach')),
-        musicians: [],
-        lookingForMusician: Boolean(formData.get('lookingForMusician')),
+        players: getConfirmedMembers(players),
+        lookingForPlayers: Boolean(data.lookingForPlayers),
+        coaches: getConfirmedMembers(coaches),
+        lookingForCoach: Boolean(data.lookingForCoach),
+        musicians: getConfirmedMembers(musicians),
+        lookingForMusician: Boolean(data.lookingForMusician),
         description,
     }
-    const playerInvitations = Object.keys(data)
-        .filter(key => key.startsWith('player-') && Boolean((data[key] as string).trim()))
-        .map(key => data[key] as string);
-    const coachInvitations = Object.keys(data)
-        .filter(key => key.startsWith('coach-') && Boolean((data[key] as string).trim()))
-        .map(key => data[key] as string);
-    const musicianInvitations = Object.keys(data)
-        .filter(key => key.startsWith('musician-') && Boolean((data[key] as string).trim()))
-        .map(key => data[key] as string);
+
     const invitations = {
-        players: [...new Set(playerInvitations)],
-        coaches: [...new Set(coachInvitations)],
-        musicians: [...new Set(musicianInvitations)]
+        players: players.filter((id) => id !== creatorId),
+        coaches: coaches.filter((id) => id !== creatorId),
+        musicians: musicians.filter((id) => id !== creatorId)
     }
+
     const teamId = await saveTeam(team, invitations);
     redirect(`/teams/${teamId}`);
 }

@@ -31,6 +31,10 @@ export const pluralize = (word: string, pluralize = true): string => {
     return `${word}s`;
 }
 
+export const capitalize = (phrase: string): string => (
+    phrase.split(' ').map((word) => word[0].toUpperCase() + word.slice(1)).join(' ')
+); 
+
 export const getText = (option: InputOption): string => typeof option === 'string' ? option : option.text;
 export const filterArrayBySearchTerm = (
     options: InputOption[], searchTerm: string, limit?: number
