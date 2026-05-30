@@ -54,7 +54,7 @@ export async function createUser(prevState: void | { message?: string }, formDat
 }
 
 export async function login(redirectRoute = '/', prevState: void | { message?: string }, formData: FormData) {
-    const username = formData.get('username') as string;
+    const username = (formData.get('username') as string).toLowerCase();
     const password = formData.get('password') as string;
 
     const existingUser = await getUser(username);
