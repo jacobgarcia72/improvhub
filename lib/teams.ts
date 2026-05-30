@@ -1,6 +1,6 @@
 'use server';
 
-import { Team } from "@/types";
+import { Team, TeamInvitation } from "@/types";
 import { contentDb } from './db';
 
 const convertDataToTeam = (data: {[key: string]: string | null}): Team => {
@@ -14,13 +14,10 @@ const convertDataToTeam = (data: {[key: string]: string | null}): Team => {
         state: data.state || null,
         theatres: data.theatres?.split(',') || [],
         players: data.players?.split(',') || [],
-        unconfirmedPlayers: data.unconfirmedPlayers?.split(',') || [],
         lookingForPlayers: Boolean(data.lookingForPlayers),
         coach: data.coach || null,
-        unconfirmedCoach: data.unconfirmedCoach || null,
         lookingForCoach: Boolean(data.lookingForCoach),
         musician: data.musician || null,
-        unconfirmedMusician: data.unconfirmedMusician || null,
         lookingForMusician: Boolean(data.lookingForMusician),
         description: data.description || null
     }
@@ -38,7 +35,17 @@ export async function getTeamsByUser(id: string): Promise<Team[]> {
     return data.map(convertDataToTeam);
 }
 
-export async function saveTeam(team: Team): Promise<string> {
+export async function getTeamInvitationsByTeam(id: string): Promise<TeamInvitation[]> {
+    return contentDb.prepare(
+        `SELECT * FROM team_invitations WHERE team_id = ?`
+    ).all(id) as TeamInvitation[];
+}
+
+export async function saveTeam(team: Team, invitations?: {
+    players: string[] | null,
+    coach: string | null,
+    musician: string | null
+}): Promise<string> {
     let isUnique = false;
     let counter = 1;
     const id = team.id;
@@ -61,17 +68,14 @@ export async function saveTeam(team: Team): Promise<string> {
             state,
             theatres,
             players,
-            unconfirmedPlayers,
             lookingForPlayers,
             coach,
-            unconfirmedCoach,
             lookingForCoach,
             musician,
-            unconfirmedMusician,
             lookingForMusician,
             description
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
         team.id,
         team.admins,
@@ -82,16 +86,30 @@ export async function saveTeam(team: Team): Promise<string> {
         team.state,
         team.theatres?.join(',') || null,
         team.players?.join(',') || null,
-        team.unconfirmedPlayers?.join(',') || null,
         team.lookingForPlayers ? 1 : 0,
         team.coach,
-        team.unconfirmedCoach,
         team.lookingForCoach ? 1 : 0,
         team.musician,
-        team.unconfirmedMusician,
         team.lookingForMusician ? 1 : 0,
         team.description,
     );
+
+    if (invitations) {
+        const { players, coach, musician } = invitations;
+        const timestamp = new Date().toISOString();
+        const statement = `INSERT INTO team_invitations (
+            team_id, invited, invitee, role, timestamp
+            ) VALUES (?, ?, ?, ?, ?)`;
+        players?.forEach((player) => {
+            contentDb.prepare(statement).run(team.id, player, team.admins[0], 'player', timestamp);
+        });
+        if (coach) {
+            contentDb.prepare(statement).run(team.id, coach, team.admins[0], 'coach', timestamp);
+        }
+        if (musician) {
+            contentDb.prepare(statement).run(team.id, musician, team.admins[0], 'musician', timestamp);
+        }
+    }
 
     return team.id;
 }

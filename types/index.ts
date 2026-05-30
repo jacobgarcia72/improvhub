@@ -57,15 +57,20 @@ export interface Team {
     state: string | null;
     theatres: string[]; 
     players: string[];
-    unconfirmedPlayers: string[];
     lookingForPlayers: boolean;
     coach: string | null;
-    unconfirmedCoach: string | null;
     lookingForCoach: boolean;
     musician: string | null;
-    unconfirmedMusician: string | null;
     lookingForMusician: boolean;
     description: string | null;
+}
+
+export interface TeamInvitation {
+    team: string;
+    invited: string;
+    invitee: string;
+    role: 'player' | 'coach' | 'musician'
+    timestamp: string;
 }
 
 export interface User {

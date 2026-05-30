@@ -5,7 +5,7 @@ import { Suspense } from "react";
 import type { Metadata } from 'next'
 import { optimizeImage } from "@/lib/cloudinary";
 import Loader from "@/components/loader";
-import { getTeam } from "@/lib/teams";
+import { getTeam, getTeamInvitationsByTeam } from "@/lib/teams";
 import { getCurrentUser, getUser, getUserName } from "@/lib/users";
 import Link from "next/link";
 
@@ -67,17 +67,31 @@ export default async function TeamPage({ params }: Props) {
     if (!team) notFound();
 
     const currentUser = await getCurrentUser();
+    const invitations = await getTeamInvitationsByTeam(id);
+
+    const unconfirmedPlayers = invitations
+        .filter((invite) => invite.role === 'player')
+        .map((invite) => invite.invited);
+
+    const unconfirmedCoach = invitations
+        .filter((invite) => invite.role === 'coach')[0] // TODO: allow multiple coaches
+        .invited
+
+    const unconfirmedMusician = invitations
+        .filter((invite) => invite.role === 'musician')[0] // TODO: allow multiple musicians?
+        .invited
+
     // const isAdmin = currentUser && team.admins.includes(currentUser.id);
     const isMember = currentUser && (
         team.players.includes(currentUser.id) ||
-        team.unconfirmedPlayers.includes(currentUser.id) ||
+        unconfirmedPlayers.includes(currentUser.id) ||
         currentUser.id === team.coach ||
         currentUser.id === team.musician ||
-        currentUser.id === team.unconfirmedCoach ||
-        currentUser.id === team.unconfirmedMusician
+        currentUser.id === unconfirmedCoach ||
+        currentUser.id === unconfirmedMusician
     );
 
-    const showUnconfirmedPlayers = isMember && team.unconfirmedPlayers.length > 0;
+    const showUnconfirmedPlayers = isMember && unconfirmedPlayers.length > 0;
 
     return (
         <Suspense fallback={<Loader />}>
@@ -111,7 +125,7 @@ export default async function TeamPage({ params }: Props) {
                             {showUnconfirmedPlayers && <>
                                 <Header>Unconfirmed Players</Header>
                                 <ul className="mt-2">
-                                    {team.unconfirmedPlayers.map((id, i) => (
+                                    {unconfirmedPlayers.map((id, i) => (
                                         <li key={i} className="no-bullets">{PlayerLink(id)}</li>
                                     ))}
                                 </ul>
@@ -122,17 +136,17 @@ export default async function TeamPage({ params }: Props) {
                                 <Header>Musician</Header>
                                 {PlayerLink(team.musician)}
                             </>}
-                            {isMember && team.unconfirmedMusician && <>
+                            {isMember && unconfirmedMusician && <>
                                 <Header>Unconfirmed Musician</Header>
-                                {PlayerLink(team.unconfirmedMusician)}
+                                {PlayerLink(unconfirmedMusician)}
                             </>}
                             {team.coach && <>
                                 <Header>Coach</Header>
                                 {PlayerLink(team.coach)}
                             </>}
-                            {isMember && team.unconfirmedCoach && <>
+                            {isMember && unconfirmedCoach && <>
                                 <Header>Unconfirmed Coach</Header>
-                                {PlayerLink(team.unconfirmedCoach)}
+                                {PlayerLink(unconfirmedCoach)}
                             </>}
                         </div>
                     <P className="text-sm">{team.city && team.state && `${team.city}, ${team.state}`}</P>

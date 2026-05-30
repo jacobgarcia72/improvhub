@@ -79,3 +79,13 @@ contentDb.prepare(`
         description TEXT
     )
 `).run();
+
+contentDb.prepare(`
+    CREATE TABLE IF NOT EXISTS team_invitations (
+        team_id TEXT NOT NULL,
+        invited TEXT NOT NULL,
+        invitee TEXT NOT NULL,
+        role TEXT NOT NULL,
+        timestamp TEXT NOT NULL
+    )
+`).run();

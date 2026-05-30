@@ -119,10 +119,6 @@ export async function postTeam(prevState: void | { message?: string }, formData:
     if (description) description = description.replace(/\r\n/g, '<br>').replace(/\n/g, '<br>').replace(/\r/g, '<br>');
 
     const data = Object.fromEntries(formData.entries());
-    const players = [data.creator as string];
-    const unconfirmedPlayers = Object.keys(data)
-        .filter(key => key.startsWith('player-') && Boolean((data[key] as string).trim()))
-        .map(key => data[key] as string);
 
     const checkedTheatres = Object.keys(data)
         .filter(key => key.startsWith('theatre-') && Boolean((data[key] as string).trim()))
@@ -136,24 +132,29 @@ export async function postTeam(prevState: void | { message?: string }, formData:
 
     const team: Team = {
         id: slugify(name, { lower: true, trim: true }),
-        admins: players,
+        admins: [data.creator as string],
         name,
         image: imageUrl,
         photoCredit: formData.get('photoCredit') as string || null,
         city: formData.get('city') as string || null,
         state: formData.get('state') as string || null,
         theatres,
-        players,
-        unconfirmedPlayers: [...new Set(unconfirmedPlayers)],
+        players: [data.creator as string],
         lookingForPlayers: Boolean(formData.get('lookingForPlayers')),
         coach: null,
-        unconfirmedCoach: formData.get('coach') as string || null,
         lookingForCoach: Boolean(formData.get('lookingForCoach')),
         musician: null,
-        unconfirmedMusician: formData.get('musician') as string || null,
         lookingForMusician: Boolean(formData.get('lookingForMusician')),
         description,
     }
-    const teamId = await saveTeam(team);
+    const playerInvitations = Object.keys(data)
+        .filter(key => key.startsWith('player-') && Boolean((data[key] as string).trim()))
+        .map(key => data[key] as string);
+    const invitations = {
+        players: [...new Set(playerInvitations)],
+        coach: formData.get('coach') as string || null,
+        musician: formData.get('musician') as string || null
+    }
+    const teamId = await saveTeam(team, invitations);
     redirect(`/teams/${teamId}`);
 }
