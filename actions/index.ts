@@ -175,7 +175,6 @@ export async function postTeam(prevState: void | { message?: string }, formData:
     const coaches = getTeamMembersByRole('coach');
     const musicians = getTeamMembersByRole('musician');
     const teamMembers = [ ...players, ...coaches, ...musicians ];
-    console.log('teamMembers', teamMembers)
     const teamId = await saveTeam(team, teamMembers);
     redirect(`/teams/${teamId}`);
 }
