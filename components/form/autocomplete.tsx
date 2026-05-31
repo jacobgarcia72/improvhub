@@ -104,7 +104,7 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
       {getImage(value)}
       <input
         style={typeof value === 'object' &&  value.image ? {paddingLeft: '42px'} : undefined}
-        name={typeof value === 'string' ? name : undefined}
+        name={name}
         id={name}
         required={required}
         type="text"
@@ -118,7 +118,7 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
         autoComplete="off"
       />
     {typeof value === 'object' && value.id ? (
-      <input className='hidden' name={name} value={value.id} onChange={() => null} />
+      <input className='hidden' name={`${name}-id`} value={value.id} onChange={() => null} />
     ) : null}
 
       {showOptions && filteredOptions.length > 0 && (

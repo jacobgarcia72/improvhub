@@ -67,13 +67,10 @@ contentDb.prepare(`
         city TEXT,
         state TEXT,
         theatres TEXT,
-        players TEXT,
         unconfirmedPlayers TEXT,
         lookingForPlayers INTEGER,
-        coaches TEXT,
         unconfirmedCoach TEXT,
         lookingForCoach INTEGER,
-        musicians TEXT,
         unconfirmedMusician TEXT,
         lookingForMusician INTEGER,
         description TEXT
@@ -81,11 +78,13 @@ contentDb.prepare(`
 `).run();
 
 contentDb.prepare(`
-    CREATE TABLE IF NOT EXISTS team_invitations (
+    CREATE TABLE IF NOT EXISTS team_members (
         team TEXT NOT NULL,
-        invited TEXT NOT NULL,
-        invitee TEXT NOT NULL,
+        name TEXT NOT NULL,
+        id TEXT,
         role TEXT NOT NULL,
-        timestamp TEXT NOT NULL
+        dateAdded TEXT NOT NULL,
+        addedBy TEXT NOT NULL,
+        confirmed INTEGER
     )
 `).run();

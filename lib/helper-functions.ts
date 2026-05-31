@@ -19,8 +19,8 @@ export function matchPattern(value: string, type: 'zipcode' | 'city' | 'state'):
     return false;
 }
 
-export const pluralize = (word: string, pluralize = true): string => {
-    if (pluralize === false) return word;
+export const pluralize = (word: string, pluralize: boolean | number = true): string => {
+    if (pluralize === false || pluralize === 1) return word;
     const last = word[word.length - 1];
     const last2 = word.slice(word.length - 2);
     if (['io', 'eo', 'oo', 'uo'].includes(last2)) return `${word}s`;

@@ -2,7 +2,7 @@
 import slugify from 'slugify';
 import { redirect } from "next/navigation";
 import { saveShow } from "@/lib/shows";
-import { Candence, Event, WeekdayInitial } from "@/types";
+import { Candence, Event, TeamMemberRole, WeekdayInitial } from "@/types";
 import { sortDates, weekdayInitials } from "@/lib/dates";
 import { theatres } from "@/lib/theatres";
 import { capitalize, removeLeadingArticles } from "@/lib/helper-functions";
@@ -137,22 +137,11 @@ export async function postTeam(prevState: void | { message?: string }, formData:
 
     const theatres = [...new Set(checkedTheatres.concat(addedTheatres))];
 
-    const getAddedTeamMembersByRole = (role: string): string[] => {
-        const invitations = Object.keys(data)
-            .filter(key => key.startsWith(`${role}-`) && Boolean((data[key] as string).trim()))
-            .map(key => (data[key] as string).trim());
-        return [...new Set(invitations)];
-    }
-    const getConfirmedMembers = (members: string[]) => members.includes(creatorId) ? [creatorId] : []; // Only the creator is confirmed. All else must be invited.
-    const players = getAddedTeamMembersByRole('player');
-    const coaches = getAddedTeamMembersByRole('coach');
-    const musicians = getAddedTeamMembersByRole('musician');
-
     let city = (data.city as string).trim() || null;
     if (city) city = capitalize(city);
 
     const team: Team = {
-        id: slugify(name, { lower: true, trim: true }),
+        id: slugify(removeLeadingArticles(name), { lower: true, trim: true }),
         admins: [creatorId],
         name,
         image: imageUrl,
@@ -160,21 +149,33 @@ export async function postTeam(prevState: void | { message?: string }, formData:
         city,
         state: data.state as string || null,
         theatres,
-        players: getConfirmedMembers(players),
         lookingForPlayers: Boolean(data.lookingForPlayers),
-        coaches: getConfirmedMembers(coaches),
         lookingForCoach: Boolean(data.lookingForCoach),
-        musicians: getConfirmedMembers(musicians),
         lookingForMusician: Boolean(data.lookingForMusician),
         description,
     }
 
-    const invitations = {
-        players: players.filter((id) => id !== creatorId),
-        coaches: coaches.filter((id) => id !== creatorId),
-        musicians: musicians.filter((id) => id !== creatorId)
+    const getTeamMembersByRole = (role: TeamMemberRole): { name: string, id: string | null, role: TeamMemberRole }[] => {
+        const members = Object.keys(data)
+            .filter((key) => (
+                (key.split('-')[0] === role) &&
+                (key.split('-')[2] !== 'id') &&
+                Boolean((data[key] as string).trim())
+            ))
+            .map((key) => {
+                return {
+                    name: (data[key] as string).trim(),
+                    id: (data[`${key}-id`] as string)?.trim() || null,
+                    role
+                }
+            });
+        return [...new Set(members)];
     }
-
-    const teamId = await saveTeam(team, invitations);
+    const players = getTeamMembersByRole('player');
+    const coaches = getTeamMembersByRole('coach');
+    const musicians = getTeamMembersByRole('musician');
+    const teamMembers = [ ...players, ...coaches, ...musicians ];
+    console.log('teamMembers', teamMembers)
+    const teamId = await saveTeam(team, teamMembers);
     redirect(`/teams/${teamId}`);
 }

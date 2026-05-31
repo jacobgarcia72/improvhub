@@ -28,9 +28,9 @@ export default function MiniCard({ item, type }: { item: Event | Team, type: str
                         )}
                     </div>
                 </div>
-                <div className="px-5 pb-1 pt-1">
-                    <h2 className="h-7 text-lg text-slate-900 overflow-hidden text-ellipsis">{name}</h2>
-                    <div className="fade-out text-sm text-slate-900 overflow-hidden text-ellipsis flex flex-col gap-1 pt-1 h-28">
+                <div className="h-32 px-5 pb-1 pt-1">
+                    <h2 className="leading-none text-lg pt-1 pb-1.5 text-slate-900 overflow-hidden text-ellipsis">{name}</h2>
+                    <div className="h-full fade-out text-sm text-slate-900 overflow-hidden text-ellipsis flex flex-col gap-1 pt-1">
                         {item.description ? (
                             item.description.split('<br>').map((line, i) => <p key={i}>{line}</p>)
                         ) : <p>(No description available)</p>}

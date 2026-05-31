@@ -56,21 +56,22 @@ export interface Team {
     city: string | null;
     state: string | null;
     theatres: string[]; 
-    players: string[];
     lookingForPlayers: boolean;
-    coaches: string[];
     lookingForCoach: boolean;
-    musicians: string[];
     lookingForMusician: boolean;
     description: string | null;
 }
 
-export interface TeamInvitation {
+export type TeamMemberRole = 'player' | 'coach' | 'musician';
+
+export interface TeamMember {
     team: string;
-    invited: string;
-    invitee: string;
-    role: 'player' | 'coach' | 'musician'
-    timestamp: string;
+    name: string;
+    id: string | null;
+    role: TeamMemberRole;
+    dateAdded: string;
+    addedBy: string;
+    confirmed: boolean | null;
 }
 
 export interface User {
