@@ -55,7 +55,7 @@ export default async function UserProfilePage({ params }: { params: Promise<{use
             <LayoutCard className="flex flex-row">
                 <div className="pl-4">
                     {user.image ? (
-                        <Image className="object-cover rounded-xl w-32 h-32"
+                        <Image loading="eager" className="object-cover rounded-xl w-32 h-32"
                             src={optimizeImage(user.image, 320, 320, null, true)} alt={displayName} width={120} height={120} />
                     ) : (
                         <div className="h-full w-full">{initials}</div>
@@ -83,7 +83,9 @@ export default async function UserProfilePage({ params }: { params: Promise<{use
                     </div>
                 )}
                 {isCurrentUser && ( 
-                    <Checkbox name="lookingForTeam" label="Open to joining teams" />
+                    <div className="pl-3 pt-1">
+                        <Checkbox name="lookingForTeam" label="Open to joining teams" />
+                    </div>
                 )}
                 {isCurrentUser && <div className="w-full flex flex-row justify-center">
                     <Link href="/create/team">
