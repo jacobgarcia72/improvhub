@@ -8,7 +8,7 @@ import UsernameInput from './username-input';
 
 export default function CreateProfileForm() {
     return (
-        <section className='grid gap-4 extra-padding medium-section'>
+        <section className='grid gap-4 medium-section'>
             <Form
                 onSubmit={createUser}
                 buttonCaption='Create Profile'

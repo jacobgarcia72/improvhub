@@ -9,7 +9,7 @@ import { TeamMemberInputs } from "./team-member-inputs";
 
 export default async function CreateTeamPage() {
     return (
-        <section className="medium-section extra-padding">
+        <section className="medium-section">
             <Form onSubmit={postTeam}>
                 <NameInput />
                 <ImagePicker />

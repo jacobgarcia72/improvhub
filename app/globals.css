@@ -88,7 +88,7 @@ main {
 
 section {
   margin-bottom: 10px;
-  padding: 16px 12px 20px;
+  padding: 16px 4vw 20px;
   max-width: 800px;
   width: 95vw;
   background-color: white;
@@ -98,11 +98,6 @@ section {
   border-width: 1px;
   border-color: var(--color-gray-300);
   border-radius: .5rem;
-}
-
-section.extra-padding {
-  padding-left: 24px;
-  padding-right: 24px;
 }
 
 section.small-section {
