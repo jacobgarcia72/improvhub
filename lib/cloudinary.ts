@@ -37,11 +37,11 @@ export const optimizeImage = (
     width?: number | null,
     height?: number | null,
     quality?: number | null,
-    thumbnail?: boolean | null,
+    square?: boolean | null,
     rounded?: boolean | null
 ) => {
     const transformations = [];
-    if (thumbnail) transformations.push('c_thumb,g_face');
+    if (square) transformations.push('ar_1.0,c_fill');
     if (width) transformations.push(`w_${width}`);
     if (height) transformations.push(`h_${height}`);
     if (quality) transformations.push(`q_${quality}`);

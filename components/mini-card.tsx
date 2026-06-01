@@ -4,6 +4,7 @@ import { theatres } from "@/lib/theatres";
 import { Event, Team } from "@/types";
 import Image from "next/image";
 import Link from "next/link";
+import { Border } from "./border";
 
 export default function MiniCard({ item, type }: { item: Event | Team, type: string }) {
     const image = (
@@ -16,7 +17,7 @@ export default function MiniCard({ item, type }: { item: Event | Team, type: str
     const name = 'name' in item ? item.name : 'title' in item ? item.title : '';
     return (
         <Link href={`/${type}s/${item.id}`}>
-            <div className="m-2 w-44 overflow-hidden rounded-3xl border border-slate-300 bg-slate-50/80 shadow-sm shadow-slate-800/10 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
+            <Border className="m-2 w-44 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
                 <div className="h-20 w-full bg-gray-300">
                     <div className="flex h-full w-full items-center justify-center">
                         {image ? (
@@ -36,7 +37,7 @@ export default function MiniCard({ item, type }: { item: Event | Team, type: str
                         ) : <p>(No description available)</p>}
                     </div>
                 </div>
-            </div>
+            </Border>
         </Link>
     )
 }

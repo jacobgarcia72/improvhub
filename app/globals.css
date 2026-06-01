@@ -49,6 +49,24 @@ button {
   padding: 7px 18px;
 }
 
+button.small {
+  padding: 1px 14px !important;
+}
+
+button.green {
+  background-color: var(--color-green-700);
+}
+button.green:hover {
+  background-color: var(--color-green-600);
+}
+
+button.red {
+  background-color: var(--color-red-800);
+}
+button.red:hover {
+  background-color: var(--color-red-700);
+}
+
 button:disabled {
   cursor: not-allowed;
   opacity: 0.6;

@@ -15,7 +15,7 @@ export const pronouns = [
     'any pronouns'
 ];
 
-export const getPronounForm = (pronouns: string, pronounFormIndex: number): string => {
+export const getPronounForm = (pronouns: string = 'they', pronounFormIndex: number): string => {
     const pronounForms: { [key: string]: string[] } = {
         they: ['they', 'them', 'their', 'theirs'],
         she: ['she', 'her', 'her', 'hers'],
