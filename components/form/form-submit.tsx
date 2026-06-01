@@ -3,15 +3,20 @@
 import { useFormStatus } from "react-dom";
 import Button from "./button";
 
-export default function FormSubmit({ caption = 'Submit' }: { caption?: string, disabled?: boolean }) {
+export default function FormSubmit({ caption = 'Submit', cancel }: { caption?: string, disabled?: boolean, cancel?: () => void }) {
     const { pending } = useFormStatus();
     return (
-        <div className="my-2 w-full flex flex-col">
+        <div className="my-2 w-full flex flex-row">
             <Button
                 submit
                 caption={pending ? 'Pending...' : caption}
                 disabled={pending}
             />
+            {cancel && <Button
+                style="link"
+                caption="Cancel"
+                onClick={cancel}
+            />}
         </div>
     )
 }

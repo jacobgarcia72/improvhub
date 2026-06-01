@@ -7,7 +7,10 @@ import StateSelect from "@/components/form/state-select";
 import { getTheatreNames, getTheatresByCity } from "@/lib/theatres";
 import { useState } from "react";
 
-export default function LocationInputs() {
+export default function LocationInputs({ cityCaption, theatreCaption }: {
+    cityCaption?: string;
+    theatreCaption?: string;
+}) {
     const [city, setCity] = useState<string>('');
     const [state, setState] = useState<string>();
     const [nearbyTheatres, setNearbyTheatres] = useState<string[]>([]);
@@ -28,7 +31,7 @@ export default function LocationInputs() {
     }
 
     return <div>
-        <p className="label mb-2 mt-1">Where is your team based?</p>
+        {cityCaption && <p className="label mb-2 mt-1">{cityCaption}</p>}
         <div className="flex flex-row flex-wrap">
             <div className="w-[186px] pr-2">
                 <Input label="City"
@@ -50,7 +53,7 @@ export default function LocationInputs() {
             />
         </div>
         <div className="mt-4">
-            <p className="label mb-1">Where does your team perform (or hope to perform)?</p>
+            {theatreCaption && <p className="label mb-1">{theatreCaption}</p>}
             <ul>
                 {nearbyTheatres.map((theatre, i) => (
                     <li key={i} className="m-3">

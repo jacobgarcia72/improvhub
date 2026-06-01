@@ -7,11 +7,12 @@ const initialState = {
     message: '',
 }
 
-export default function Form({ children, buttonCaption = 'Submit', onSubmit, className }: {
+export default function Form({ children, buttonCaption = 'Submit', onSubmit, cancel, className }: {
     children: React.ReactNode,
     buttonCaption?: string,
     onSubmit: (prevState: void | { message?: string }, formData: FormData) => Promise<{ message?: string } | void>
-    className?: string
+    className?: string,
+    cancel?: () => void
 }) {
     const [formState, formAction] = useActionState(onSubmit, initialState);
 
@@ -19,7 +20,7 @@ export default function Form({ children, buttonCaption = 'Submit', onSubmit, cla
         <form action={formAction} className={`${className} flex flex-col gap-4 mx-auto mb-1`}>
             {children}
             <div className='flex flex-col'>
-                <FormSubmit caption={buttonCaption} />
+                <FormSubmit caption={buttonCaption} cancel={cancel} />
                 {formState?.message && <p className='text-red-600 text-sm'>{formState.message}</p>}
             </div>
         </form>

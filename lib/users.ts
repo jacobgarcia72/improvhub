@@ -27,6 +27,14 @@ export async function getCurrentUser(): Promise<User | null> {
     return null;
 }
 
+export async function updateUser(userId: string, updates: {[key: string]: string | null}): Promise<void> {
+    const updateFields = Object.keys(updates).map(key => `${key} = $${key}`).join(', ');
+    usersDb.prepare(`
+        UPDATE users SET ${updateFields} WHERE id = $id
+    `).run({ ...updates, id: userId });
+}
+
+
 export async function saveUser(user: User): Promise<void> {
     usersDb.prepare(`
         INSERT INTO users (

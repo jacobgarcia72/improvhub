@@ -9,7 +9,7 @@ import { capitalize, removeLeadingArticles } from "@/lib/helper-functions";
 import { Team } from '@/types';
 import { uploadImage } from '@/lib/cloudinary';
 import { saveTeam } from '@/lib/teams';
-import { getCurrentUser } from '@/lib/users';
+import { getCurrentUser, updateUser } from "@/lib/users";
 
 export async function postShow(prevState: void | { message?: string }, formData: FormData) {
     const creatorId = (await getCurrentUser())?.id;
@@ -177,4 +177,27 @@ export async function postTeam(prevState: void | { message?: string }, formData:
     const teamMembers = [ ...players, ...coaches, ...musicians ];
     const teamId = await saveTeam(team, teamMembers);
     redirect(`/teams/${teamId}`);
+}
+
+export async function updateUserCommunityOptions(prevState: void | { message?: string }, formData: FormData) {
+    try {
+        const data = Object.fromEntries(formData.entries());
+        const userId = (await getCurrentUser())?.id;
+        if (!userId) throw new Error('You must be logged in to continue');
+        const city = (data.city as string).trim() || null;
+        const state = (data.state as string).trim() || null;
+        const checkedTheatres = Object.keys(data)
+            .filter(key => key.startsWith('theatre-') && Boolean((data[key] as string).trim()))
+            .map(key => data[key] as string);
+
+        const addedTheatres = Object.keys(data)
+            .filter(key => key.startsWith('added-theatre-') && Boolean((data[key] as string).trim()))
+            .map(key => data[key] as string);
+        const theatres = [...new Set(checkedTheatres.concat(addedTheatres))].join(',');
+        await updateUser(userId, { city, state, theatres });
+        return;
+    } catch (error) {
+        console.error('Error updating user community options:', error);
+        return { message: 'Something went wrong. Please try again later.' };
+    }
 }
