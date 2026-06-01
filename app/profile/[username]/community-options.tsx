@@ -7,13 +7,12 @@ import LocationInputs from "@/components/form/location-inputs";
 import Form from "@/components/form/form";
 import { updateUserCommunityOptions } from "@/actions";
 
-export default function CommunityOptions({ user, refresh }: { user: User, refresh: () => void }) {
+export default function CommunityOptions({ user }: { user: User }) {
     const [makeChanges, setMakeChanges] = useState(false);
     
     const handleSubmit = async (prevState: void | { message?: string }, formData: FormData) => {
         await updateUserCommunityOptions(prevState, formData);
         setMakeChanges(false);
-        refresh();
     }
     
     if (makeChanges) {

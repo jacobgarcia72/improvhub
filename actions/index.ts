@@ -10,6 +10,7 @@ import { Team } from '@/types';
 import { uploadImage } from '@/lib/cloudinary';
 import { saveTeam } from '@/lib/teams';
 import { getCurrentUser, updateUser } from "@/lib/users";
+import { revalidatePath } from 'next/cache';
 
 export async function postShow(prevState: void | { message?: string }, formData: FormData) {
     const creatorId = (await getCurrentUser())?.id;
@@ -195,6 +196,7 @@ export async function updateUserCommunityOptions(prevState: void | { message?: s
             .map(key => data[key] as string);
         const theatres = [...new Set(checkedTheatres.concat(addedTheatres))].join(',');
         await updateUser(userId, { city, state, theatres });
+        revalidatePath(`/profile/${userId}`);
         return;
     } catch (error) {
         console.error('Error updating user community options:', error);
