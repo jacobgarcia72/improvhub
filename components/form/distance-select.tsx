@@ -6,11 +6,13 @@ import { matchPattern } from '@/lib/helper-functions';
 
 interface DistanceSelectProps {
     onUpdate?: (location: string, miles: number) => void;
+    startingLocation?: string;
+    startingMiles?: number;
 }
 
-export default function DistanceSelect({ onUpdate }: DistanceSelectProps) {
-    const [location, setLocation] = useState<string>('');
-    const [miles, setMiles] = useState(10);
+export default function DistanceSelect({ onUpdate, startingLocation, startingMiles }: DistanceSelectProps) {
+    const [location, setLocation] = useState<string>(startingLocation || '');
+    const [miles, setMiles] = useState(startingMiles || 10);
     const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout>();
 
     useEffect(() => {

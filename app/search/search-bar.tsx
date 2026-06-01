@@ -5,6 +5,7 @@ import DistanceSelect from "@/components/form/distance-select";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Autocomplete from "@/components/form/autocomplete";
 import { getTheatreNames } from "@/lib/theatres";
+import { capitalize } from "@/lib/helper-functions";
 
 export default function SearchBar() {
     const searchTypes = ['theatre', 'location', 'miles'];
@@ -45,12 +46,15 @@ export default function SearchBar() {
                 return <DistanceSelect
                     onUpdate={(location, miles) => {
                         handleSearch('location', location);
-                        handleSearch('miles', miles.toString());
+                        handleSearch('miles', miles.toString())
                     }}
+                    startingLocation={searchParams.get('location')?.replaceAll('+', ' ') || undefined}
+                    startingMiles={searchParams.get('miles') ? Number(searchParams.get('miles')) : undefined}
                 />
             case 'theatre':
                 return <div className="w-[358px]">
                     <Autocomplete
+                        startingValue={capitalize(searchParams.get('theatre')?.replaceAll('+', ' ') || '') || undefined}
                         onStopTyping={(value) => handleSearch('theatre', value)}
                         options={getTheatreNames()}
                         label="Theatre Name"
