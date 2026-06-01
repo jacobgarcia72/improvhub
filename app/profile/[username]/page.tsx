@@ -74,7 +74,7 @@ export default async function UserProfilePage({ params }: { params: Promise<{use
             </LayoutCard> */}
             <LayoutCard header="Teams">
                 {teams.length ? (
-                    <div className="flex flex-row">
+                    <div className="flex flex-row flex-wrap justify-center">
                         {teams.map((team) => <MiniCard key={team.id} item={team} type='team' />)}
                     </div>
                 ) : (
