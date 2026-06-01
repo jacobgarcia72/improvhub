@@ -48,8 +48,8 @@ export default function InputList({ name, options, label, addLabel, startingOpti
                     )
                 ))}
             </div>
-            <div className="flex flex-row mt-2">
-                <Button onClick={() => setAddedInputs([...addedInputs, null])} caption={`Add${addLabel ? ` ${addLabel}` : ''}`} className="min-w-26" />
+            <div className="flex flex-row">
+                <Button onClick={() => setAddedInputs([...addedInputs, null])} caption={`Add${addLabel ? ` ${addLabel}` : ''}`} style="link" className="min-w-26" />
                 {addedInputs.length > 0 && <Button onClick={() => setAddedInputs([...(addedInputs.slice(0, addedInputs.length - 1))])} style="link" caption="Remove" />}
             </div>
         </div>

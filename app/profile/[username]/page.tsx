@@ -13,6 +13,7 @@ import Checkbox from "@/components/form/checkbox";
 import { getTeamsByUser } from "@/lib/teams";
 import MiniCard from "@/components/mini-card";
 import CommunityOptions from "./community-options";
+import CommunityDetails from "./community-details";
 
 function LayoutCard({
     children, className, header
@@ -71,7 +72,11 @@ export default async function UserProfilePage({ params }: { params: Promise<{use
                 {user.bio}
             </LayoutCard>
             <LayoutCard header="Community">
-                {isCurrentUser ? <CommunityOptions user={user} /> : null}
+                {isCurrentUser ? (
+                    <CommunityOptions user={user} />
+                ) : (
+                    <CommunityDetails user={user} />
+                )}
             </LayoutCard>
             {/* <LayoutCard header="Theatres">
                 {theatres}
