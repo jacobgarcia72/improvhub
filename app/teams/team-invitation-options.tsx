@@ -4,7 +4,7 @@ import Button from "@/components/form/button";
 import { respondToTeamInvitation } from "@/lib/teams";
 import { useState } from "react";
 
-export default function TeamInvitationOptions({ teamId, userId }: { teamId: string, userId: string }) {
+export default function TeamInvitationOptions({ teamId, userId, role }: { teamId: string, userId: string, role: string }) {
     const [ accepted, setAccepted ] = useState<boolean | null>(null);
 
     return (
@@ -12,13 +12,13 @@ export default function TeamInvitationOptions({ teamId, userId }: { teamId: stri
             {accepted === null && <>
                 <Button caption="Accept" className="small green"
                     onClick={() => {
-                        respondToTeamInvitation(teamId, userId, true);
+                        respondToTeamInvitation(teamId, userId, role, true);
                         setAccepted(true);
                     }}
                 />
                 <Button caption="Reject" className="small red"
                     onClick={() => {
-                        respondToTeamInvitation(teamId, userId, false);
+                        respondToTeamInvitation(teamId, userId, role, false);
                         setAccepted(false);
                     }}
                 />

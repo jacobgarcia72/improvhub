@@ -58,12 +58,9 @@ export async function getTeamInvitations(userId: string): Promise<TeamMember[]> 
     return data.map(convertDataToTeamMember);
 }
 
-export async function respondToTeamInvitation(teamId: string, userId: string, accept: boolean): Promise<void> {
-    if (accept) {
-        contentDb.prepare('UPDATE team_members SET confirmed = 1 WHERE team = ? AND id = ?').run(teamId, userId);
-    } else {
-        contentDb.prepare('DELETE FROM team_members WHERE team = ? AND id = ?').run(teamId, userId);
-    }
+export async function respondToTeamInvitation(teamId: string, userId: string, role: string, accept: boolean): Promise<void> {
+    const action = accept ? 'UPDATE team_members SET confirmed = 1' : 'DELETE FROM team_members';
+    contentDb.prepare(`${action} WHERE team = ? AND id = ? AND role = ?`).run(teamId, userId, role);
 }
 
 export async function saveTeam(team: Team, members: { name: string, id: string | null, role: TeamMemberRole }[]): Promise<string> {

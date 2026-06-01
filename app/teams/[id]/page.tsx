@@ -6,10 +6,11 @@ import type { Metadata } from 'next'
 import { optimizeImage } from "@/lib/cloudinary";
 import Loader from "@/components/loader";
 import { getTeam, getTeamMembers } from "@/lib/teams";
-import { getUser } from "@/lib/users";
+import { getCurrentUser, getUser } from "@/lib/users";
 import Link from "next/link";
 import { pluralize } from "@/lib/helper-functions";
 import { TeamMember } from "@/types";
+import TeamInvitationOptions from "../team-invitation-options";
 
 type Props = {
     params: Promise<{ id: string }>
@@ -76,7 +77,10 @@ export default async function TeamPage({ params }: Props) {
     const coaches = members.filter((member) => member.role === 'coach');
     const musicians = members.filter((member) => member.role === 'musician');
 
-    // const currentUser = await getCurrentUser();
+    const currentUser = await getCurrentUser();
+    const openInvitations = members.filter((member) => member.id === currentUser?.id && !member.confirmed);
+    const inviters = await Promise.all(openInvitations.map((invite) => getUser(invite.addedBy)));
+
     // const isAdmin = currentUser && team.admins.includes(currentUser.id);
     // const isMember = currentUser && (
     //     isAdmin ||
@@ -89,6 +93,22 @@ export default async function TeamPage({ params }: Props) {
                 <div className="px-4">
                     <div className="w-full">
                         <h1 className="text-2xl">{team.name}</h1>
+                        {openInvitations.map((invite, i) => {
+                            if (!inviters[i]) return null;
+                            let joinVerb = 'join';
+                            if (invite.role === 'coach') joinVerb = 'coach';
+                            if (invite.role === 'musician') joinVerb = 'accompany';
+                            return (
+                                <div key={i} className="p-4 pl-8 my-2 bg-yellow-50 border border-yellow-200 rounded">
+                                    <p>
+                                        {`You have been invited by `}
+                                        <Link className="link" href={`profile/${inviters[i].id}`}>{`${inviters[i].firstName} ${inviters[i].lastName}`}</Link>
+                                        {` to ${joinVerb} this team!`}
+                                    </p>
+                                    <TeamInvitationOptions teamId={team.id} userId={currentUser?.id || ''} role={invite.role} />
+                                </div>
+                            )
+                        })}
                         {/* TODO: Add headline */}
                         {/* {team.headline && <h2 className="mb-3">{team.headline}</h2>} */}
                     </div>
