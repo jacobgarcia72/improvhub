@@ -76,10 +76,10 @@ export interface TeamMember {
 
 export interface User {
     id: string;
-    password: string;
+    password?: string;
     joinDate: string;
     firstName: string;
-    lastName?: string;
+    lastName: string;
     pronouns?: string;
     headline?: string;
     bio?: string;

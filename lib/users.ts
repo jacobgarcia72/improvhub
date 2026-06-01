@@ -4,8 +4,31 @@ import { User } from "@/types";
 import { usersDb } from "./db";
 import { verifyAuth } from "./auth";
 
-export async function getUser(username: string): Promise<User | null> {
-    return (await usersDb.prepare('SELECT * FROM users WHERE id = ?').get(username) || null) as User | null;
+const convertDataToUser = (data: {[key: string]: string | null}, includePassword = false): User => {
+    return {
+        id: data.id as string,
+        password: includePassword ? data.password as string : undefined,
+        joinDate: data.joinDate as string,
+        firstName: data.firstName as string,
+        lastName: data.lastName as string,
+        pronouns: data.pronouns || undefined,
+        headline: data.headline || undefined,
+        bio: data.bio || undefined,
+        theatres: data.theatres ? data.theatres.split(',') : undefined,
+        city: data.city || undefined,
+        state: data.state || undefined,
+        gender: data.gender || undefined,
+        orientation: data.orientation || undefined,
+        ethnicity: data.ethnicity || undefined,
+        website: data.website || undefined,
+        experience: data.experience || undefined,
+        image: data.image || undefined,
+    }
+}
+
+export async function getUser(username: string, includePassword = false): Promise<User | null> {
+    const user = await usersDb.prepare('SELECT * FROM users WHERE id = ?').get(username) as {[key: string]: string | null};
+    return user ? convertDataToUser(user, includePassword) : null;
 }
 
 export async function getUserName(username: string): Promise<string | null> {
@@ -21,10 +44,11 @@ export async function getAllUsers(): Promise<{ name: string, id: string, image?:
 
 export async function getCurrentUser(): Promise<User | null> {
     const user = (await verifyAuth()).user;
+    let userData: {[key: string]: string | null} | null = null;
     if (user) {
-        return (await usersDb.prepare('SELECT * FROM users WHERE id = ?').get(user.id) || null) as User | null;
+        userData = await usersDb.prepare('SELECT * FROM users WHERE id = ?').get(user.id) as {[key: string]: string | null} || null;
     }
-    return null;
+    return userData ? convertDataToUser(userData) : null;
 }
 
 export async function updateUser(userId: string, updates: {[key: string]: string | null}): Promise<void> {

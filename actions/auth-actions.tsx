@@ -11,11 +11,13 @@ export async function createUser(prevState: void | { message?: string }, formDat
     const username = (formData.get('username') as string).trim().toLowerCase();
     const password = formData.get('password') as string;
     const firstName = formData.get('firstName') as string;
+    const lastName = formData.get('lastName') as string;
 
     if (!username) return { message: 'Username is required' };
     if (!password) return { message: 'Password is required' };
     if (password.length < 8) return { message: 'Password must be at least 8 characters' };
     if (!firstName) return { message: 'First Name is required' };
+    if (!lastName) return { message: 'Last Name is required' };
 
     const imageFile = formData.get('image') as File;
     let imageUrl = '';
@@ -35,7 +37,7 @@ export async function createUser(prevState: void | { message?: string }, formDat
         joinDate: new Date().toISOString(),
         image: imageUrl,
         firstName,
-        lastName: formData.get('lastName') as string,
+        lastName,
         pronouns: formData.get('pronouns') as string,
     }
 
@@ -57,9 +59,9 @@ export async function login(redirectRoute = '/', prevState: void | { message?: s
     const username = (formData.get('username') as string).toLowerCase();
     const password = formData.get('password') as string;
 
-    const existingUser = await getUser(username);
+    const existingUser = await getUser(username, true);
 
-    if (!existingUser) {
+    if (!existingUser || !existingUser.password) {
         return { message: 'Invalid credentials.' }
     }
 

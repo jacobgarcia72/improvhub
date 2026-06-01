@@ -24,7 +24,7 @@ export default function CreateProfileForm() {
                 </div>
                 <div className="grid gap-4 sm:grid-cols-3">
                     <Input label="First Name" name="firstName" maxLength={20} required />
-                    <Input label="Last Name" name="lastName" maxLength={20} />
+                    <Input label="Last Name" name="lastName" maxLength={20} required />
                     <Autocomplete options={pronouns} name="pronouns" maxLength={20} label="Pronouns" />
                 </div>
             </Form>

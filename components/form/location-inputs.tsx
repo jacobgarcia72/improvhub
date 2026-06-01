@@ -5,15 +5,19 @@ import Input from "@/components/form/input";
 import InputList from "@/components/form/input-list";
 import StateSelect from "@/components/form/state-select";
 import { getTheatreNames, getTheatresByCity } from "@/lib/theatres";
+import { User } from "@/types";
 import { useState } from "react";
 
-export default function LocationInputs({ cityCaption, theatreCaption }: {
+export default function LocationInputs({ cityCaption, theatreCaption, user }: {
     cityCaption?: string;
     theatreCaption?: string;
+    user?: User;
 }) {
-    const [city, setCity] = useState<string>('');
-    const [state, setState] = useState<string>();
-    const [nearbyTheatres, setNearbyTheatres] = useState<string[]>([]);
+    const [city, setCity] = useState<string>( user?.city || '');
+    const [state, setState] = useState<string>(user?.state || '');
+    const [nearbyTheatres, setNearbyTheatres] = useState<string[]>(
+        (user?.city && user?.state) ? getTheatresByCity(user.city, user.state, 0).map((t) => t.name) : []
+    );
     
     const [delay, setDelay] = useState<NodeJS.Timeout>();
 
@@ -30,6 +34,9 @@ export default function LocationInputs({ cityCaption, theatreCaption }: {
         )
     }
 
+    const inputTheatres = user?.theatres ? (
+        user.theatres.filter((theatre) => !nearbyTheatres.includes(theatre))
+    ) : [];
     return <div>
         {cityCaption && <p className="label mb-2 mt-1">{cityCaption}</p>}
         <div className="flex flex-row flex-wrap">
@@ -57,11 +64,20 @@ export default function LocationInputs({ cityCaption, theatreCaption }: {
             <ul>
                 {nearbyTheatres.map((theatre, i) => (
                     <li key={i} className="m-3">
-                        <Checkbox name={`theatre-${i}`} label={theatre} value={theatre} />
+                        <Checkbox
+                            name={`theatre-${i}`}
+                            label={theatre}
+                            value={theatre}
+                            defaultChecked={user?.theatres?.includes(theatre)}
+                        />
                     </li>
                 ))}
             </ul>
-            <InputList options={getTheatreNames()} name="added-theatre" addLabel="Theatre"  />
+            <InputList
+                startingOptions={inputTheatres}
+                options={getTheatreNames()}
+                name="added-theatre"
+                addLabel="Theatre"  />
         </div>
     </div>
 }
