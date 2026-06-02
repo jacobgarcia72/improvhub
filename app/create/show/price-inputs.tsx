@@ -27,6 +27,7 @@ export default function PriceInputs() {
                     name="doorPrice"
                     inputMode='decimal'
                     autocomplete={false}
+                    disabled={price === ''}
                 />
             </div>
         </div>

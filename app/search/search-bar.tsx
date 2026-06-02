@@ -100,8 +100,8 @@ export default function SearchBar() {
                     }}
                 >
                     <option value=""></option>
-                    <option value="theatre">Theatre Name</option>
                     <option value="location">Location</option>
+                    <option value="theatre">Theatre Name</option>
                 </select>
             </div>
             {SearchParams()}

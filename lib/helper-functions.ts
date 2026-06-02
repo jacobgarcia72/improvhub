@@ -1,5 +1,5 @@
-import { Event, InputOption } from "@/types";
-import { addDays, formatDate, getWeekdayOccurence, isLastOfMonth, weekdayInitials } from "./dates";
+import { Event, InputOption, Showing } from "@/types";
+import { addDays, formatDate, getWeekdayOccurence, isLastOfMonth } from "./dates";
 import { isAState, separateCityAndState } from "./location";
 
 export function validateInputValue(value: string, type: 'price' | 'zipcode' | 'username'): boolean {
@@ -80,7 +80,7 @@ export const removeLeadingArticles = (text: string): string => {
     return result;
 }
 
-export const arrangeEventsByDate = (events: Event[], startingDate?: string, limit: number = 30, maxDaysSearched = 365): {
+export const arrangeEventsByDate = (showings: Showing[], shows: Event[], startingDate?: string, limit: number = 30, maxDaysSearched = 365): {
     [date: string]: { time: string, event: Event }[]
 } => {
     const date = startingDate ? new Date(startingDate) : new Date();
@@ -88,27 +88,40 @@ export const arrangeEventsByDate = (events: Event[], startingDate?: string, limi
     let daysSearched = 0;
     while (Object.keys(res).length < limit && daysSearched < maxDaysSearched) {
         const dateString = formatDate(date);
-        const dayOfWeek = weekdayInitials[date.getDay()];
-        const eventsOnDate = events.filter((event) => event.dateTimes?.some((dt) => dt.includes(dateString)) || (
-            event.recurringDay === dayOfWeek && (
-                event.cadence?.includes(`${getWeekdayOccurence(dateString)}`) ||
-                event.cadence === 'last' && (
-                    isLastOfMonth(dateString)
-
-                )
+        const dayOfWeek = date.getDay();
+        const scheduledShowingsOnDate = showings.filter(({dateTime}) => {
+            const date = dateTime.split(' ')[0];
+            return date === dateString
+        })
+        const recurringShowsOnDate = shows.filter((show) => (
+            show.recurringDay === dayOfWeek && (
+                show.cadence?.includes(`${getWeekdayOccurence(dateString)}`) ||
+                show.cadence === 'last' && isLastOfMonth(dateString)
             )
         ));
-        if (eventsOnDate.length) {
-            res[dateString] = eventsOnDate.map((event) => {
-                return {
-                    event,
-                    time: event.recurringTime || event.dateTimes?.find((dt) => dt.includes(dateString))?.split(' ')[1] || ''
-                }
-            }).sort((a, b) => {
-                const [aHours, aMinutes] = a.time.split(':').map(Number);
-                const [bHours, bMinutes] = b.time.split(':').map(Number);
-                return (aHours * 60 + aMinutes) - (bHours * 60 + bMinutes);
-            });
+        if (scheduledShowingsOnDate.length || recurringShowsOnDate.length) {
+            res[dateString] = scheduledShowingsOnDate
+                .map(({ dateTime, eventId }) => {
+                    const event = shows.find((show) => show.id === eventId);
+                    if (!event) return null;
+                    return { event, time: dateTime?.split(' ')[1] }
+                })
+                .concat(
+                    recurringShowsOnDate.map((event) => {
+                        if (!event.recurringTime) return null;
+                        return {
+                            event,
+                            time: event.recurringTime
+                        }
+                    })
+                )
+                .filter((event) => event !== null)
+                .concat()
+                .sort((a, b) => {
+                    const [aHours, aMinutes] = a.time.split(':').map(Number);
+                    const [bHours, bMinutes] = b.time.split(':').map(Number);
+                    return (aHours * 60 + aMinutes) - (bHours * 60 + bMinutes);
+                });
         }
         addDays(date, 1);
         daysSearched++;

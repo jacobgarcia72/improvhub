@@ -2,9 +2,8 @@
 
 import slugify from 'slugify';
 
-import { Candence, Event, WeekdayInitial } from "@/types";
+import { Candence, Event, Showing } from "@/types";
 import { removeLeadingArticles } from './helper-functions';
-import { uploadImage } from './cloudinary';
 import { contentDb } from './db';
 import { getCitiesWithinRange } from './location';
 
@@ -12,9 +11,9 @@ const convertDataToShow = (data: {[key: string]: string | null}): Event => {
     return {
         id: data.id as string,
         creatorId: data.creatorId as string,
+        admins: data.admins?.split(',') || [],
         title: data.title as string,
-        dateTimes: data.dateTimes?.split(',') || null,
-        recurringDay: data.recurringDay as WeekdayInitial || null,
+        recurringDay: data.recurringDay === null ? null : Number(data.recurringDay),
         recurringTime: data.recurringTime || null,
         cadence: data.cadence as Candence || null,
         description: data.description || null,
@@ -31,9 +30,29 @@ const convertDataToShow = (data: {[key: string]: string | null}): Event => {
     }
 }
 
+const convertDataToShowing = (data: {[key: string]: string | null}): Showing => ({
+    eventId: data.eventId as string,
+    dateTime: data.dateTime as string,
+    teams: data.teams?.split(',') || null,
+    players: data.players?.split(',') || null,
+    directors: data.directors?.split(',') || null,
+    musicians: data.musicians?.split(',') || null,
+    tech: data.tech?.split(',') || null,
+});
+
 export async function getShow(id: string) {
     const data = await contentDb.prepare('SELECT * FROM shows WHERE id = ?').get(id) as {[key: string]: string | null};
     return data ? convertDataToShow(data) : null;
+}
+
+export async function getShowingsForEvent(eventId: string): Promise<Showing[]> {
+    const data = contentDb.prepare('SELECT * FROM showings WHERE eventId = ?').all(eventId) as {[key: string]: string | null}[];
+    return data.map(convertDataToShowing);
+}
+
+export async function getShowingsForEvents(eventIds: string[]): Promise<Showing[]> {
+    const data = contentDb.prepare(`SELECT * FROM showings WHERE eventId IN (${eventIds.map(() => '?').join(', ')})`).all(eventIds) as {[key: string]: string | null}[];
+    return data.map(convertDataToShowing);
 }
 
 export async function getShowsByTheatre(theatre: string) {
@@ -49,7 +68,7 @@ export async function getShowsInRange(cityOrZipcode: string, miles: number) {
     return data.map(convertDataToShow);
 }
 
-export async function saveShow(show: Event, imageFile: File | null): Promise<string> {
+export async function saveShow(show: Event, showings: Showing[] | null): Promise<string> {
     const id = slugify(`${show.theatre ? removeLeadingArticles(show.theatre) + ' ' : ''}${removeLeadingArticles(show.title)}`, { lower: true, trim: true });
     show.id = id;
     let isUnique = false;
@@ -63,25 +82,12 @@ export async function saveShow(show: Event, imageFile: File | null): Promise<str
         }
     }
 
-    if (imageFile && imageFile.size) {
-        if (imageFile.size > 5 * 1024 * 1024) { // 5MB limit
-            throw new Error('Image file size exceeds 5MB limit');
-        }
-        let imageUrl = '';
-        try {
-            imageUrl = await uploadImage(imageFile, 'shows');
-        } catch {
-            throw new Error('Image upload failed');
-        }
-        show.image = imageUrl || null;
-    }
-
     contentDb.prepare(`
         INSERT INTO shows (
             id,
             creatorId,
+            admins,
             title,
-            dateTimes,
             recurringDay,
             recurringTime,
             cadence,
@@ -101,8 +107,8 @@ export async function saveShow(show: Event, imageFile: File | null): Promise<str
     `).run(
         show.id,
         show.creatorId,
+        show.admins.join(','),
         show.title,
-        show.dateTimes?.join(',') || null,
         show.recurringDay,
         show.recurringTime,
         show.cadence,
@@ -118,6 +124,19 @@ export async function saveShow(show: Event, imageFile: File | null): Promise<str
         show.runtime,
         show.notes
     );
+
+    showings?.forEach((showing) => {
+        contentDb.prepare(`
+            INSERT INTO showings (
+                eventId,
+                dateTime
+            )
+            VALUES (?, ?)
+        `).run(
+            show.id,
+            showing.dateTime
+        );
+    });
 
     return show.id;
 }

@@ -2,8 +2,8 @@
 import slugify from 'slugify';
 import { redirect } from "next/navigation";
 import { saveShow } from "@/lib/shows";
-import { Candence, Event, TeamMemberRole, WeekdayInitial } from "@/types";
-import { sortDates, weekdayInitials } from "@/lib/dates";
+import { Candence, Event, Showing, TeamMemberRole } from "@/types";
+import { sortDates } from "@/lib/dates";
 import { theatres } from "@/lib/theatres";
 import { capitalize, removeLeadingArticles } from "@/lib/helper-functions";
 import { Team } from '@/types';
@@ -25,13 +25,26 @@ export async function postShow(prevState: void | { message?: string }, formData:
         if (!isValid) return { message: 'Tickets link must be a valid URL' };
     }
 
+    const imageFile = formData.get('image') as File || null;
+    let imageUrl = '';
+    if (imageFile && imageFile.size) {
+        if (imageFile.size > 5 * 1024 * 1024) { // 5MB limit
+            return { message: 'Image file size exceeds 5MB limit' };
+        }
+        try {
+            imageUrl = await uploadImage(imageFile, 'teams');
+        } catch {
+            throw new Error('Image upload failed');
+        }
+    }
+
     let dateTimes: string[] | null = null;
-    let recurringDay: WeekdayInitial | null = null;
+    let recurringDay: number | null = null;
     let recurringTime: string | null = null;
     let cadence: Candence | null = null;
     if (!formData.get('tbd')) {
         if (formData.get('recurring')) {
-            recurringDay = weekdayInitials[Number(formData.get('weekday'))];
+            recurringDay = Number(formData.get('weekday'));
             cadence = formData.get('cadence') as Candence;
             recurringTime = formData.get('regularTime') as string;
         } else {
@@ -79,14 +92,14 @@ export async function postShow(prevState: void | { message?: string }, formData:
     const show: Event = {
         id: '',
         creatorId,
+        admins: [creatorId],
         title,
-        image: null,
+        image: imageUrl || null,
         photoCredit,
         theatre,
         city,
         state,
         description,
-        dateTimes,
         recurringDay,
         recurringTime,
         cadence,
@@ -95,11 +108,13 @@ export async function postShow(prevState: void | { message?: string }, formData:
         doorPrice: doorPrice === '' ? null : Number(doorPrice),
         ticketsUrl,
         notes
-    }
+    };
+    const showings: Showing[] | null = dateTimes?.map((dateTime => ({
+        eventId: show.id,
+        dateTime
+    }))) || null;
 
-    const imageFile = formData.get('image') as File || null;
-
-    const showId = await saveShow(show, imageFile);
+    const showId = await saveShow(show, showings);
     redirect(`/shows/${showId}`);
 }
 

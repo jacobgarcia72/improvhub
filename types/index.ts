@@ -9,8 +9,6 @@ export interface Theatre {
 
 export type Candence = '1' | '2' | '3' | '4' | '5' | '13' | '24' |'135' | '12345' | 'last';
 
-export type WeekdayInitial = 'u' | 'm' | 't' | 'w' | 'r' | 'f' | 's';
-
 export const CadenceText: Record<Candence, string> = {
     '1': 'First X of every month',
     '2': 'Second X of every month',
@@ -27,9 +25,9 @@ export const CadenceText: Record<Candence, string> = {
 export interface Event {
     id: string;
     creatorId: string;
+    admins: string[];
     title: string;
-    dateTimes: string[] | null;
-    recurringDay: WeekdayInitial | null;
+    recurringDay: number | null;
     recurringTime: string | null;
     cadence: Candence | null;
     description: string | null;
@@ -43,8 +41,18 @@ export interface Event {
     photoCredit: string | null;
     runtime: string | null;
     notes: string | null;
-    teams?: Team[] | null;
-    performers?: User[] | null;
+    teams?: string[] | null;
+    players?: string[] | null;
+}
+
+export interface Showing {
+    eventId: string;
+    dateTime: string;
+    teams?: string[] | null;
+    players?: string[] | null;
+    directors?: string[] | null;
+    musicians?: string[] | null;
+    tech?: string[] | null;
 }
 
 export interface Team {

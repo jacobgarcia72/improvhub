@@ -1,15 +1,15 @@
 import { appName } from "@/lib/app-info";
-import { getShow } from "@/lib/shows";
-import { CadenceText } from "@/types";
+import { getShow, getShowingsForEvent } from "@/lib/shows";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import type { Metadata } from 'next'
 import { theatres } from "@/lib/theatres";
-import { formatDateTimeForDisplay, formatTime, removePastDates, sortDates, weekdayInitials, weekdays } from "@/lib/dates";
+import { formatDateTimeForDisplay, formatTime, removePastDates, sortDates, weekdays } from "@/lib/dates";
 import Button from "@/components/form/button";
 import { optimizeImage } from "@/lib/cloudinary";
 import Loader from "@/components/loader";
+import { CadenceText } from "@/types";
 
 type Props = {
     params: Promise<{ id: string }>
@@ -47,17 +47,18 @@ export default async function ShowDetailsPage({ params }: Props) {
     const theatre = theatres.find(t => t.name === show.theatre);
     const imageUrl = show.image || theatre?.image;
 
+    const showings = await getShowingsForEvent(id);
+    const dateTimes = showings.map(({ dateTime }) => dateTime);
     let upcomingShows: string[] = [];
-    if (show.dateTimes) {
+    if (dateTimes) {
         upcomingShows = removePastDates(
-            sortDates(show.dateTimes)
+            sortDates(dateTimes)
         ).slice(0, 4);
     }
 
     let recurringSchedule = null;
-    if (show.recurringDay && show.cadence) {
-        const dayIndex = weekdayInitials.indexOf(show.recurringDay);
-        const day = weekdays[dayIndex];
+    if (typeof show.recurringDay === 'number' && show.cadence) {
+        const day = weekdays[show.recurringDay];
         let text = CadenceText[show.cadence].replace('X', day);
         if (show.recurringTime) text += ` at ${formatTime(show.recurringTime)}`;
         recurringSchedule = text;

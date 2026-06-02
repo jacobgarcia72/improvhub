@@ -1,9 +1,7 @@
 import { formatDate, formatDateForDisplay } from '@/lib/dates';
 import { arrangeEventsByDate } from '@/lib/helper-functions';
-import { getShowsByTheatre, getShowsInRange } from '@/lib/shows';
-import { Event } from '@/types';
-import { Suspense } from 'react';
-import Loader from '@/components/loader';
+import { getShowingsForEvents, getShowsByTheatre, getShowsInRange } from '@/lib/shows';
+import { Event, Showing } from '@/types';
 import ItemCard from './item-card';
 
 export default async function EventResults({ eventType, city, state, theatre, zipcode, miles }: {
@@ -17,13 +15,15 @@ export default async function EventResults({ eventType, city, state, theatre, zi
     const handleSearchParams = async () => {
         switch (eventType) {
             case 'shows':
+                let shows: Event[] = []
                 if (theatre) {
-                    const shows = await getShowsByTheatre(theatre) as Event[];
-                    return arrangeEventsByDate(shows);
+                    shows = await getShowsByTheatre(theatre);
                 } else if (zipcode || (city && state)) {
-                    const shows = await getShowsInRange(zipcode || `${city} ${state}`, miles || 0) as Event[];
-                    return arrangeEventsByDate(shows);
+                    shows = await getShowsInRange(zipcode || `${city} ${state}`, miles || 0);
                 }
+                if (!shows.length) return null;
+                const showDates: Showing[] = await getShowingsForEvents(shows.map(({ id }) => id));
+                return arrangeEventsByDate(showDates, shows);
             default:
                 return null;
         }
@@ -35,7 +35,6 @@ export default async function EventResults({ eventType, city, state, theatre, zi
 
     return (
         <>
-            <Suspense fallback={<Loader />}>
             {hasNoResults && <p className="text-slate-700 mt-4">No results found.</p>}
             {results && Object.keys(results).map((date, i) => (
                 <div key={i} className='flex flex-col w-full px-4'>
@@ -47,7 +46,6 @@ export default async function EventResults({ eventType, city, state, theatre, zi
                     </div>
                 </div>
             ))}
-            </Suspense>
         </>
     )
 }

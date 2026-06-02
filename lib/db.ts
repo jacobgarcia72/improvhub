@@ -34,10 +34,10 @@ usersDb.prepare(`CREATE TABLE IF NOT EXISTS sessions (
 
 contentDb.prepare(`
     CREATE TABLE IF NOT EXISTS shows (
-        id STRING PRIMARY KEY,
+        id TEXT PRIMARY KEY,
         creatorId TEXT NOT NULL,
+        admins TEXT NOT NULL,
         title TEXT NOT NULL,
-        dateTimes TEXT,
         recurringDay TEXT,
         recurringTime TEXT,
         cadence TEXT,
@@ -54,6 +54,19 @@ contentDb.prepare(`
         notes TEXT,
         teams TEXT,
         performers TEXT
+    )
+`).run();
+
+contentDb.prepare(`
+    CREATE TABLE IF NOT EXISTS showings (
+        eventId TEXT NOT NULL,
+        dateTime TEXT NOT NULL,
+        teams TEXT,
+        performers TEXT,
+        musicians TEXT,
+        directors TEXT,
+        tech TEXT,
+        FOREIGN KEY (eventId) REFERENCES shows(id)
     )
 `).run();
 
@@ -85,6 +98,7 @@ contentDb.prepare(`
         role TEXT NOT NULL,
         dateAdded TEXT NOT NULL,
         addedBy TEXT NOT NULL,
-        confirmed INTEGER
+        confirmed INTEGER,
+        FOREIGN KEY (team) REFERENCES teams(id)
     )
 `).run();

@@ -1,16 +1,12 @@
-import { WeekdayInitial } from "@/types";
-
 // use to get new dates when there is no time to avoid time zone issues
 export const newDate = (dateAsString: string): Date => new Date(`${dateAsString} 00:00`);
 
 export const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-export const weekdayInitials: WeekdayInitial[] = ['u', 'm', 't', 'w', 'r', 'f', 's']
-
 export const addOrdinal = (num: number) => `${num}${['st', 'nd', 'rd'][((num + 90) % 100 - 10) % 10 - 1] || 'th'}`;
 
 export const addDays = (date: Date | string, days: number) => {
-    const result = typeof date === 'string' ? new Date(date) : date;
+    const result = typeof date === 'string' ? newDate(date) : date;
     result.setDate(result.getDate() + days);
     return result;
 }

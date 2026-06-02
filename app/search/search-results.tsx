@@ -5,6 +5,8 @@ import { getTheatreByName, getTheatreNames, getTheatresByCity, getTheatresByStat
 import { Team } from '@/types';
 import { getTeamsByTheatre, getTeamsInRange } from '@/lib/teams';
 import ItemCard from './item-card';
+import { Suspense } from 'react';
+import Loader from '@/components/loader';
 
 export default async function SearchResults({ params }: { params: {
     theatre?: string;
@@ -54,6 +56,7 @@ export default async function SearchResults({ params }: { params: {
 
     return (
         <section className="flex flex-row flex-wrap px-4 pb-4 justify-evenly min-h-[calc(100vh-220px)]">
+            <Suspense fallback={<Loader />}>
             {searchFor && eventTypes.includes(searchFor) ? (
                 <EventResults
                     eventType={searchFor}
@@ -67,6 +70,7 @@ export default async function SearchResults({ params }: { params: {
                 {hasNoResults && <p className="text-gray-500 mt-4">No results found.</p>}
                 {results?.map((result, i) => result ? <ItemCard key={i} item={result} type={searchFor || ''} /> : null)}
             </>}
+            </Suspense>
         </section>
     )
 }

@@ -16,7 +16,7 @@ export default function ItemCard({ item, type, time }: { item: Event | Team | Th
         )?.image
     );
     const name = 'name' in item ? item.name : 'title' in item ? item.title : '';
-    const link = 'id' in item ? `/${type}s/${item.id}` : `/search?for=shows&theatre=${item.name.toLowerCase().split(" ").join("+")}`
+    const link = 'id' in item ? `/${type}/${item.id}` : `/search?for=shows&theatre=${item.name.toLowerCase().split(" ").join("+")}`
     return (
         <Link href={link}>
             <Border className="flex flex-col h-[300px] w-[222px] m-2 w-44 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
