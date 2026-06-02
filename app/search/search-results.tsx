@@ -1,14 +1,19 @@
-import TheatreResults from './theatre-results';
 import EventResults from './event-results';
-import { matchPattern } from '@/lib/helper-functions';
+import { filterArrayBySearchTerm, matchPattern } from '@/lib/helper-functions';
 import { separateCityAndState } from '@/lib/location';
+import { getTheatreByName, getTheatreNames, getTheatresByCity, getTheatresByState, getTheatresByZipcode } from '@/lib/theatres';
+import TheatreCard from './theatre-card';
+import { Team, Theatre } from '@/types';
+import { getTeamsByTheatre, getTeamsInRange } from '@/lib/teams';
+import TeamCard from './team-card';
 
 export default async function SearchResults({ params }: { params: {
     theatre?: string;
     location?: string;
     miles?: string;
-    for?: 'theatres' | 'shows' | 'jams';
+    for?: 'theatres' | 'shows' | 'jams' | 'teams';
 }}) {
+    const eventTypes = ['shows', 'jams', 'auditions'];
     const theatre = params?.theatre?.trim();
     const location = params?.location?.trim();
     const miles = params?.miles?.trim();
@@ -28,19 +33,29 @@ export default async function SearchResults({ params }: { params: {
 
         }
     }
+        const theatreNames = getTheatreNames();
+    
+        const handleSearchParams = async () => {
+            const radius = Number(miles);
+            if (searchFor === 'theatres') {
+                if (theatre) return (filterArrayBySearchTerm(theatreNames, theatre, 20) as string[]).map(getTheatreByName);
+                if (city && state) return getTheatresByCity(city, state, radius);
+                if (state) return getTheatresByState(state);
+                if (zipcode) return getTheatresByZipcode(zipcode, radius || 1);
+            } else if (searchFor === 'teams') {
+                if (theatre) return await getTeamsByTheatre(theatre) as Team[];
+                if (zipcode || (city && state)) return await getTeamsInRange(zipcode || `${city} ${state}`, radius || 0) as Team[];
+            }
+            return [];
+        }
+    
+        const hasActiveQuery = Boolean(theatre || state || zipcode);
+        const results = (await handleSearchParams()).filter(Boolean);
+        const hasNoResults = hasActiveQuery && results?.length === 0;
 
     return (
         <section className="flex flex-row flex-wrap gap-4 px-4 pb-4 justify-center min-h-[calc(100vh-220px)]">
-            {searchFor === 'theatres' && (
-                <TheatreResults
-                    theatre={theatre}
-                    city={city}
-                    state={state}
-                    zipcode={zipcode}
-                    miles={Number(miles)}
-                />
-            )}
-            {searchFor && ['shows', 'jams'].includes(searchFor) && (
+            {searchFor && eventTypes.includes(searchFor) ? (
                 <EventResults
                     eventType={searchFor}
                     theatre={theatre}
@@ -49,7 +64,13 @@ export default async function SearchResults({ params }: { params: {
                     zipcode={zipcode}
                     miles={Number(miles)}
                 />
-            )}
+            ) : <>
+                {hasNoResults && <p className="text-gray-500 mt-4">No results found.</p>}
+                {results?.map((result, i) => {
+                    if (searchFor === 'theatres') return <TheatreCard key={i} theatre={result as Theatre} />
+                    if (searchFor === 'teams') return <TeamCard key={i} team={result as Team} />
+                })}
+            </>}
         </section>
     )
 }

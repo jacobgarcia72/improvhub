@@ -37,7 +37,7 @@ export async function getShow(id: string) {
 }
 
 export async function getShowsByTheatre(theatre: string) {
-    const data = contentDb.prepare('SELECT * FROM shows WHERE theatre LIKE ?').all(`%${theatre}%`) as {[key: string]: string | null}[];
+    const data = contentDb.prepare('SELECT * FROM shows WHERE theatre LIKE ?').all(`%${removeLeadingArticles(theatre)}%`) as {[key: string]: string | null}[];
     return data.map(convertDataToShow);
 }
 

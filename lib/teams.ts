@@ -2,6 +2,8 @@
 
 import { Team, TeamMember, TeamMemberRole } from "@/types";
 import { contentDb } from './db';
+import { getCitiesWithinRange } from "./location";
+import { removeLeadingArticles } from "./helper-functions";
 
 const convertDataToTeam = (data: {[key: string]: string | null}): Team => {
     return {
@@ -37,6 +39,19 @@ const convertDataToTeamMember = (data: {[key: string]: string | null}): TeamMemb
 export async function getTeam(id: string): Promise<Team | null> {
     const data = await contentDb.prepare('SELECT * FROM teams WHERE id = ?').get(id) as {[key: string]: string | null};
     return data ? convertDataToTeam(data) : null;
+}
+
+export async function getTeamsByTheatre(theatre: string) {
+    const data = contentDb.prepare('SELECT * FROM teams WHERE theatres LIKE ?').all(`%${removeLeadingArticles(theatre)}%`) as {[key: string]: string | null}[];
+    return data.map(convertDataToTeam);
+}
+
+export async function getTeamsInRange(cityOrZipcode: string, miles: number) {
+    const citiesInRange = getCitiesWithinRange(cityOrZipcode, miles);
+    const data = contentDb.prepare(
+        `SELECT * FROM teams WHERE (city || ' ' || state) IN (${citiesInRange.map(() => '?').join(', ')}) COLLATE NOCASE`
+    ).all(...citiesInRange) as {[key: string]: string | null}[];
+    return data.map(convertDataToTeam);
 }
 
 export async function getTeamsByUser(id: string): Promise<Team[]> {

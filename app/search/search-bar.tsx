@@ -15,10 +15,12 @@ export default function SearchBar() {
     const params = new URLSearchParams(searchParams);
     const searchFor = searchParams.get('for');
 
-
+    const theatre = searchParams.get('theatre')?.trim() || '';
+    const location = searchParams.get('location')?.trim() || '';
+    const miles = searchParams.get('miles')?.trim() || '';
     const [searchBy, setSearchBy] = useState(() => {
-        if (searchParams.get('theatre')) return 'theatre';
-        if (searchParams.get('location')) return 'location';
+        if (theatre) return 'theatre';
+        if (location) return 'location';
         return ''
     });
 
@@ -48,13 +50,13 @@ export default function SearchBar() {
                         handleSearch('location', location);
                         handleSearch('miles', miles.toString())
                     }}
-                    startingLocation={searchParams.get('location')?.replaceAll('+', ' ') || undefined}
-                    startingMiles={searchParams.get('miles') ? Number(searchParams.get('miles')) : undefined}
+                    startingLocation={location?.replaceAll('+', ' ') || undefined}
+                    startingMiles={miles ? Number(miles) : undefined}
                 />
             case 'theatre':
                 return <div className="w-[358px]">
                     <Autocomplete
-                        startingValue={capitalize(searchParams.get('theatre')?.replaceAll('+', ' ') || '') || undefined}
+                        startingValue={theatre ? capitalize(theatre.replaceAll('+', ' ')) : undefined}
                         onStopTyping={(value) => handleSearch('theatre', value)}
                         options={getTheatreNames()}
                         label="Theatre Name"
@@ -77,13 +79,13 @@ export default function SearchBar() {
                     }}
                 >
                     <option value=""></option>
-                    <option value="auditions">Auditions</option>
-                    <option value="jams">Jams</option>
+                    {/* <option value="auditions">Auditions</option> */}
+                    {/* <option value="jams">Jams</option> */}
                     <option value="shows">Shows</option>
-                    <option value="performers">Performers</option>
+                    {/* <option value="performers">Performers</option> */}
                     <option value="teams">Teams</option>
                     <option value="theatres">Theatres</option>
-                    <option value="workshops">Workshops</option>
+                    {/* <option value="workshops">Workshops</option> */}
                 </select>
             </div>
             <div className="flex-1 min-w-[140px] max-w-[200px]">
