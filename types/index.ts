@@ -4,7 +4,7 @@ export interface Theatre {
     state: string;
     zipcode: string;
     website: string;
-    logo?: string;
+    image?: string;
 }
 
 export type Candence = '1' | '2' | '3' | '4' | '5' | '13' | '24' |'135' | '12345' | 'last';

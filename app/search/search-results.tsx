@@ -2,10 +2,9 @@ import EventResults from './event-results';
 import { filterArrayBySearchTerm, matchPattern } from '@/lib/helper-functions';
 import { separateCityAndState } from '@/lib/location';
 import { getTheatreByName, getTheatreNames, getTheatresByCity, getTheatresByState, getTheatresByZipcode } from '@/lib/theatres';
-import TheatreCard from './theatre-card';
-import { Team, Theatre } from '@/types';
+import { Team } from '@/types';
 import { getTeamsByTheatre, getTeamsInRange } from '@/lib/teams';
-import TeamCard from './team-card';
+import ItemCard from './item-card';
 
 export default async function SearchResults({ params }: { params: {
     theatre?: string;
@@ -54,7 +53,7 @@ export default async function SearchResults({ params }: { params: {
         const hasNoResults = hasActiveQuery && results?.length === 0;
 
     return (
-        <section className="flex flex-row flex-wrap gap-4 px-4 pb-4 justify-center min-h-[calc(100vh-220px)]">
+        <section className="flex flex-row flex-wrap px-4 pb-4 justify-evenly min-h-[calc(100vh-220px)]">
             {searchFor && eventTypes.includes(searchFor) ? (
                 <EventResults
                     eventType={searchFor}
@@ -66,10 +65,7 @@ export default async function SearchResults({ params }: { params: {
                 />
             ) : <>
                 {hasNoResults && <p className="text-gray-500 mt-4">No results found.</p>}
-                {results?.map((result, i) => {
-                    if (searchFor === 'theatres') return <TheatreCard key={i} theatre={result as Theatre} />
-                    if (searchFor === 'teams') return <TeamCard key={i} team={result as Team} />
-                })}
+                {results?.map((result, i) => result ? <ItemCard key={i} item={result} type={searchFor || ''} /> : null)}
             </>}
         </section>
     )

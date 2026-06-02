@@ -20,9 +20,9 @@ export default function TheatreSelect() {
     return (
         <div className="flex flex-row flex-wrap">
             <div className="w-[250px] pr-2">
-                <Autocomplete label="Theatre" name="theatre" options={theatreNames} onChange={(value) => autoFillCityAndState(value)} />
+                <Autocomplete label="Theatre" name="theatre" options={theatreNames} onChange={(value) => autoFillCityAndState(value as string)} />
             </div>
-            <div className="w-[186px] pr-2">
+            <div className="w-[166px] pr-2">
                 <Input label="City"
                     name="city"
                     value={city}

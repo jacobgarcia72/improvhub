@@ -12,7 +12,7 @@ export default function MiniCard({ item, type }: { item: Event | Team, type: str
     ) || (
         'theatre' in item && (
             theatres.find((t) => removeLeadingArticles(t.name) === removeLeadingArticles(item.theatre || ''))
-        )?.logo
+        )?.image
     );
     const name = 'name' in item ? item.name : 'title' in item ? item.title : '';
     return (

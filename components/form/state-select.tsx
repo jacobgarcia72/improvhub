@@ -19,7 +19,7 @@ export default function StateSelect({
   };
 
   return (
-    <div className="flex flex-col w-[178px]">
+    <div className="flex flex-col w-[158px]">
       {label && <label htmlFor={name}>{label}</label>}
       <select
         id={name}

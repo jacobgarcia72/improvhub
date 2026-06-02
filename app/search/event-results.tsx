@@ -2,9 +2,9 @@ import { formatDate, formatDateForDisplay } from '@/lib/dates';
 import { arrangeEventsByDate } from '@/lib/helper-functions';
 import { getShowsByTheatre, getShowsInRange } from '@/lib/shows';
 import { Event } from '@/types';
-import EventCard from './event-card';
 import { Suspense } from 'react';
 import Loader from '@/components/loader';
+import ItemCard from './item-card';
 
 export default async function EventResults({ eventType, city, state, theatre, zipcode, miles }: {
     eventType: string;
@@ -43,7 +43,7 @@ export default async function EventResults({ eventType, city, state, theatre, zi
                         <h2 className='text-slate-900 font-semibold '>{date === formatDate(new Date()) ? 'Today' : formatDateForDisplay(date)}</h2>
                     </div>
                     <div className='flex flex-row flex-wrap'>
-                        {results[date].map((result, i) => <EventCard key={i} event={result.event} time={result.time} type={eventType} />)}
+                        {results[date].map(({ event, time }, i) => <ItemCard key={i} item={event} time={time} type={eventType} />)}
                     </div>
                 </div>
             ))}

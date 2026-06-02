@@ -45,7 +45,7 @@ export default async function ShowDetailsPage({ params }: Props) {
     if (!show) notFound();
 
     const theatre = theatres.find(t => t.name === show.theatre);
-    const imageUrl = show.image || theatre?.logo;
+    const imageUrl = show.image || theatre?.image;
 
     let upcomingShows: string[] = [];
     if (show.dateTimes) {
