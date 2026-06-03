@@ -10,6 +10,8 @@ import Button from "@/components/form/button";
 import { optimizeImage } from "@/lib/cloudinary";
 import Loader from "@/components/loader";
 import { CadenceText } from "@/types";
+import { getCurrentUser } from "@/lib/users";
+import Link from "next/link";
 
 type Props = {
     params: Promise<{ id: string }>
@@ -43,6 +45,9 @@ export default async function ShowDetailsPage({ params }: Props) {
     const show = await getShow(id);
 
     if (!show) notFound();
+
+    const user = await getCurrentUser();
+    const isAdmin = user && show.admins.includes(user.id);
 
     const theatre = theatres.find(t => t.name === show.theatre);
     const imageUrl = show.image || theatre?.image;
@@ -84,9 +89,16 @@ export default async function ShowDetailsPage({ params }: Props) {
         <Suspense fallback={<Loader />}>
             <section>
                 <div className="px-4">
-                    <div className="w-full">
-                        <h1 className="text-2xl">{show.title}</h1>
-                        {show.theatre && <h2 className="mb-3">{show.theatre}</h2>}
+                    <div className="w-full flex flex-row items-center">
+                        <div className="w-full">
+                            <h1 className="text-2xl">{show.title}</h1>
+                            {show.theatre && <h2 className="mb-3">{show.theatre}</h2>}
+                        </div>
+                        {isAdmin ? <div>
+                            <Link href={`/shows/${id}/manage`} >
+                                <Button caption="Manage" />
+                            </Link>
+                        </div> : null}
                     </div>
                     {imageUrl && <>
                         <Image src={optimizeImage(imageUrl, 600, null, 80)}
