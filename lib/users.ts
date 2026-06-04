@@ -67,6 +67,13 @@ export async function getFollowing(userId: string, followId: string, type: Follo
     return typeof following === 'number' ? Boolean(following) : null;
 }
 
+export async function getFollowerCount(followId: string, type: Followee): Promise<number | null> {
+    const data = usersDb
+        .prepare(`SELECT COUNT(*) AS total FROM follows WHERE followId = ? AND type = ?`)
+        .get(followId, type) as { total: number | undefined }
+    return typeof data.total === 'number' ? data.total : null;
+}
+
 export async function setFollowing(userId: string, followId: string, type: Followee): Promise<void> {
     const currentFollowStatus = await getFollowing(userId, followId, type);
     let statement = '';

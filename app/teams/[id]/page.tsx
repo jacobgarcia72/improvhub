@@ -6,7 +6,7 @@ import type { Metadata } from 'next'
 import { optimizeImage } from "@/lib/cloudinary";
 import Loader from "@/components/loader";
 import { getTeam, getTeamMembers } from "@/lib/teams";
-import { getCurrentUser, getFollowing, getUser } from "@/lib/users";
+import { getCurrentUser, getFollowerCount, getFollowing, getUser } from "@/lib/users";
 import Link from "next/link";
 import TeamInvitationOptions from "../team-invitation-options";
 import CastList from "@/components/cast-list";
@@ -51,6 +51,8 @@ export default async function TeamPage({ params }: Props) {
     const openInvitations = members.filter((member) => member.id === currentUser?.id && !member.confirmed);
     const inviters = await Promise.all(openInvitations.map((invite) => getUser(invite.addedBy)));
     const following = currentUser ? (await getFollowing(currentUser.id, id, 'team')) || false : false;
+
+    const followerCount = await getFollowerCount(id, 'team');
 
     // const isAdmin = currentUser && team.admins.includes(currentUser.id);
     // const isMember = currentUser && (
@@ -121,6 +123,11 @@ export default async function TeamPage({ params }: Props) {
                             </P>
                         ))}
                     </div>
+                </section>
+            ) : null}
+            {followerCount ? (
+                <section className="px-8">
+                    {`${followerCount} Followers`}
                 </section>
             ) : null}
         </Suspense>
