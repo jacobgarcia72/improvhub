@@ -2,8 +2,8 @@
 
 import slugify from 'slugify';
 
-import { Candence, Event, Showing } from "@/types";
-import { removeLeadingArticles } from './helper-functions';
+import { Candence, Event, Role, ShowCastMember, Showing } from "@/types";
+import { prepDataForDb, removeLeadingArticles } from './helper-functions';
 import { contentDb } from './db';
 import { getCitiesWithinRange } from './location';
 
@@ -33,11 +33,19 @@ const convertDataToShow = (data: {[key: string]: string | null}): Event => {
 const convertDataToShowing = (data: {[key: string]: string | null}): Showing => ({
     eventId: data.eventId as string,
     dateTime: data.dateTime as string,
-    teams: data.teams?.split(',') || null,
-    players: data.players?.split(',') || null,
-    directors: data.directors?.split(',') || null,
-    musicians: data.musicians?.split(',') || null,
-    tech: data.tech?.split(',') || null,
+    lookingForTeams: Boolean(data.lookingForTeams),
+    lookingForPlayers: Boolean(data.lookingForPlayers),
+    lookingForDirectors: Boolean(data.lookingForDirectors),
+    lookingForMusician: Boolean(data.lookingForMusician),
+    lookingForTech: Boolean(data.lookingForTech)
+});
+
+const convertDataToShowCastMember = (data: {[key: string]: string | null}): ShowCastMember => ({
+    showId: data.showId as string,
+    dateTime: data.dateTime as string,
+    role: data.role as Role | 'team',
+    name: data.name as string,
+    id: data.id as string
 });
 
 export async function getShow(id: string) {
@@ -145,4 +153,32 @@ export async function saveShow(show: Event, showings: Showing[] | null): Promise
     });
 
     return show.id;
+}
+
+export async function updateShowing(showId: string, dateTime: string, updates: Partial<Showing>, cast?: Partial<ShowCastMember>[]): Promise<boolean> {
+    const data = prepDataForDb(updates);
+    const updateFields = Object.keys(data).map(key => `${key} = $${key}`).join(', ');
+    contentDb.prepare(`
+        UPDATE showings SET ${updateFields} WHERE eventId = ? AND dateTime = ?
+    `).run({ ...data, showId, dateTime });
+
+    cast?.forEach((castMember) => {
+        contentDb.prepare(`
+            INSERT INTO showing_cast (
+                name,
+                id,
+                role,
+                showId,
+                dateTime
+            )
+            VALUES (?, ?, ?, ?, ?)
+        `).run(
+            castMember.name,
+            castMember.id,
+            castMember.role,
+            showId,
+            dateTime
+        );
+    });
+    return true;
 }

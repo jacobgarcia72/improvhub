@@ -10,7 +10,7 @@ import Button from "@/components/form/button";
 import { optimizeImage } from "@/lib/cloudinary";
 import Loader from "@/components/loader";
 import { CadenceText } from "@/types";
-import { getCurrentUser } from "@/lib/users";
+// import { getCurrentUser } from "@/lib/users";
 import Link from "next/link";
 
 type Props = {
@@ -47,8 +47,8 @@ export default async function ShowDetailsLayout({ params, children }: Props) {
 
     if (!show) notFound();
 
-    const user = await getCurrentUser();
-    const isAdmin = user && show.admins.includes(user.id);
+    // const user = await getCurrentUser();
+    // const isAdmin = user && show.admins.includes(user.id);
 
     const theatre = theatres.find(t => t.name === show.theatre);
     const imageUrl = show.image || theatre?.image;
@@ -82,7 +82,7 @@ export default async function ShowDetailsLayout({ params, children }: Props) {
     if (show.runtime) {
         const [hours, minutes] = show.runtime.split('h');
         if (hours && hours !== '0') runtime += `${hours} hour${hours !== '1' ? 's' : ''}`;
-        if (minutes && minutes !== '00') runtime += ` ${minutes} minute${minutes !== '1' ? 's' : ''}`;
+        if (minutes && minutes !== '0') runtime += ` ${minutes} minute${minutes !== '1' ? 's' : ''}`;
     }
 
     return (
@@ -94,11 +94,11 @@ export default async function ShowDetailsLayout({ params, children }: Props) {
                             <h1 className="text-2xl">{show.title}</h1>
                             {show.theatre && <h2 className="mb-3">{show.theatre}</h2>}
                         </div>
-                        {isAdmin ? <div>
+                        {/* {isAdmin ? <div>
                             <Link href={`/shows/${id}/manage`} >
                                 <Button caption="Manage" />
                             </Link>
-                        </div> : null}
+                        </div> : null} */}
                     </div>
                     {imageUrl && <div className="flex flex-col items-center content-center">
                         <Image src={optimizeImage(imageUrl, 600, null, 80)}

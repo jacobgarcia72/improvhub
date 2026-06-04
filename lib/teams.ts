@@ -1,6 +1,6 @@
 'use server';
 
-import { Team, CastMember, Role } from "@/types";
+import { Team, Role, TeamMember } from "@/types";
 import { contentDb } from './db';
 import { getCitiesWithinRange } from "./location";
 import { removeLeadingArticles } from "./helper-functions";
@@ -22,7 +22,7 @@ const convertDataToTeam = (data: {[key: string]: string | null}): Team => {
     }
 }
 
-const convertDataToTeamMember = (data: {[key: string]: string | null}): CastMember => {
+const convertDataToTeamMember = (data: {[key: string]: string | null}): TeamMember => {
     let confirmed = null;
     if (typeof data.confirmed === 'number') confirmed = Boolean(data.confirmed);
     return {
@@ -39,6 +39,11 @@ const convertDataToTeamMember = (data: {[key: string]: string | null}): CastMemb
 export async function getTeam(id: string): Promise<Team | null> {
     const data = await contentDb.prepare('SELECT * FROM teams WHERE id = ?').get(id) as {[key: string]: string | null};
     return data ? convertDataToTeam(data) : null;
+}
+
+export async function getAllTeams(): Promise<{ name: string, id: string, image?: string }[]> {
+    return contentDb
+        .prepare(`SELECT name, id, image FROM teams`).all() as { name: string, id: string, image?: string }[];
 }
 
 export async function getTeamsByTheatre(theatre: string) {
@@ -63,12 +68,12 @@ export async function getTeamsByUser(id: string): Promise<Team[]> {
     return data.map(convertDataToTeam);
 }
 
-export async function getTeamMembers(teamId: string): Promise<CastMember[]> {
+export async function getTeamMembers(teamId: string): Promise<TeamMember[]> {
     const data = contentDb.prepare('SELECT * FROM team_members WHERE team = ?').all(teamId) as {[key: string]: string | null}[];
     return data.map(convertDataToTeamMember);
 }
 
-export async function getTeamInvitations(userId: string): Promise<CastMember[]> {
+export async function getTeamInvitations(userId: string): Promise<TeamMember[]> {
     const data = contentDb.prepare('SELECT * FROM team_members WHERE id = ? AND confirmed = 0').all(userId) as {[key: string]: string | null}[];
     return data.map(convertDataToTeamMember);
 }

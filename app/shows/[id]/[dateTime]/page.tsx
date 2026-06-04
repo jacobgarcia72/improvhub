@@ -18,7 +18,7 @@ export default async function ShowDatePage({ params } : {
     return (
         <div className="flex flex-col px-3 pb-3">
             <h3 className="font-semibold font-lg pb-2">{formatDateTimeForDisplay(showDate)}</h3>
-            {isAdmin ? <CastingTools id={id} /> : <CastList castMembers={[]} />}
+            {isAdmin ? <CastingTools id={id} showDate={showDate} /> : <CastList castMembers={[]} />}
         </div>
     )
 }

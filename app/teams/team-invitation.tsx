@@ -3,12 +3,12 @@ import { optimizeImage } from "@/lib/cloudinary";
 import { getPronounForm } from "@/lib/demographics";
 import { getTeam } from "@/lib/teams";
 import { getUser } from "@/lib/users";
-import { CastMember } from "@/types";
+import { TeamMember } from "@/types";
 import Image from "next/image";
 import Link from "next/link";
 import TeamInvitationOptions from "./team-invitation-options";
 
-export default async function TeamInvitation({ teamMembership }: { teamMembership: CastMember }) {
+export default async function TeamInvitation({ teamMembership }: { teamMembership: TeamMember }) {
     const team = await getTeam(teamMembership.team);
     const inviter = await getUser(teamMembership.addedBy);
     const user = teamMembership.id ? await getUser(teamMembership.id) : null;

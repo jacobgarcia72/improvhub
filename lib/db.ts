@@ -61,12 +61,22 @@ contentDb.prepare(`
     CREATE TABLE IF NOT EXISTS showings (
         eventId TEXT NOT NULL,
         dateTime TEXT NOT NULL,
-        teams TEXT,
-        performers TEXT,
-        musicians TEXT,
-        directors TEXT,
-        tech TEXT,
+        lookingForTeams INTEGER,
+        lookingForPlayers INTEGER,
+        lookingForDirectors INTEGER,
+        lookingForMusicians INTEGER,
+        lookingForTech INTEGER,
         FOREIGN KEY (eventId) REFERENCES shows(id)
+    )
+`).run();
+
+contentDb.prepare(`
+    CREATE TABLE IF NOT EXISTS showing_cast (
+        name TEXT NOT NULL,
+        id TEXT,
+        role TEXT NOT NULL,
+        showId TEXT NOT NULL,
+        dateTime TEXT NOT NULL
     )
 `).run();
 

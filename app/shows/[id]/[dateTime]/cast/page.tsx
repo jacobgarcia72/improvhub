@@ -1,17 +1,24 @@
-import { getShow } from "@/lib/shows";
+import { postShowCast } from "@/actions";
+import CastingInputs from "@/components/form/casting-inputs";
+import Form from "@/components/form/form";
+import { getShow, getShowing } from "@/lib/shows";
 import { getCurrentUser } from "@/lib/users";
 import { notFound } from "next/navigation";
 
 export default async function ShowCastPage({ params } : {
-    params: Promise<{ id: string }>
+    params: Promise<{ id: string, dateTime: string }>
     }) {
-    const { id } = await params;
-    const show = id ? await getShow(id) : null;
+    const { id, dateTime } = await params;
+    const showDate = dateTime.replace('%20', ' ').replace('%3A', ':');
+    const showing = id ? await getShowing(id, showDate) : null;
+    const parentShow = id ? await getShow(id) : null;
     const user = await getCurrentUser();
-    const isAdmin = user && show?.admins.includes(user.id);
-    if (!isAdmin || !show) notFound();
+    const isAdmin = user && parentShow?.admins.includes(user.id);
+    if (!showing || !parentShow || !isAdmin) notFound();
 
     return (
-        <div>Cast</div>
+        <Form onSubmit={postShowCast.bind(null, id, dateTime)}>
+            <CastingInputs roles={['director', 'tech', 'team', 'player', 'musician']} />
+        </Form>
     )
 }

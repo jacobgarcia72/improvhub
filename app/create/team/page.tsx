@@ -5,7 +5,7 @@ import ImagePicker from "@/components/form/image-picker";
 import Text from "@/components/form/text";
 import LocationInputs from "@/components/form/location-inputs";
 import Input from "@/components/form/input";
-import { TeamMemberInputs } from "./team-member-inputs";
+import CastingInputs from "@/components/form/casting-inputs";
 
 export default async function CreateTeamPage() {
     return (
@@ -18,7 +18,7 @@ export default async function CreateTeamPage() {
                     cityCaption="Where is your team based?"
                     theatreCaption="Where does your team perform (or hope to perform)?"
                 />
-                <TeamMemberInputs />
+                <CastingInputs roles={['player', 'coach', 'musician']} creatorAsDefaultPlayer />
                 <Text label="Team Description" name="description" />
             </Form>
         </section>

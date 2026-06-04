@@ -48,11 +48,11 @@ export interface Event {
 export interface Showing {
     eventId: string;
     dateTime: string;
-    teams?: string[] | null;
-    players?: string[] | null;
-    directors?: string[] | null;
-    musicians?: string[] | null;
-    tech?: string[] | null;
+    lookingForTeams?: boolean;
+    lookingForPlayers?: boolean;
+    lookingForDirectors?: boolean;
+    lookingForMusician?: boolean;
+    lookingForTech?: boolean;
 }
 
 export interface Team {
@@ -73,13 +73,21 @@ export interface Team {
 export type Role = 'player' | 'coach' | 'musician' | 'director' | 'tech';
 
 export interface CastMember {
-    team: string;
     name: string;
     id: string | null;
-    role: Role;
+    role: Role | 'team';
+    confirmed?: boolean | null;
+}
+
+export interface TeamMember extends CastMember {
+    team: string;
     dateAdded: string;
     addedBy: string;
-    confirmed: boolean | null;
+}
+
+export interface ShowCastMember extends CastMember {
+    showId: string;
+    dateTime: string;
 }
 
 export interface User {

@@ -1,8 +1,8 @@
 'use server';
 import slugify from 'slugify';
 import { redirect } from "next/navigation";
-import { saveShow } from "@/lib/shows";
-import { Candence, Event, Showing, Role } from "@/types";
+import { saveShow, updateShowing } from "@/lib/shows";
+import { Candence, Event, Showing, Role, ShowCastMember } from "@/types";
 import { sortDates } from "@/lib/dates";
 import { theatres } from "@/lib/theatres";
 import { capitalize, removeLeadingArticles } from "@/lib/helper-functions";
@@ -116,6 +116,49 @@ export async function postShow(prevState: void | { message?: string }, formData:
 
     const showId = await saveShow(show, showings);
     redirect(`/shows/${showId}`);
+}
+
+export async function postShowCast(showId: string, showDateTime: string, prevState: void | { message?: string }, formData: FormData) {
+    const creatorId = (await getCurrentUser())?.id;
+    if (!creatorId) throw new Error('You must be logged in to continue');
+
+    const data = Object.fromEntries(formData.entries());
+
+    const getCastByRole = (role: (Role | 'team')): { name: string, id: string | null, role: (Role | 'team') }[] => {
+        const members = Object.keys(data)
+            .filter((key) => (
+                (key.split('-')[0] === role) &&
+                (key.split('-')[2] !== 'id') &&
+                Boolean((data[key] as string).trim())
+            ))
+            .map((key) => {
+                return {
+                    name: (data[key] as string).trim(),
+                    id: (data[`${key}-id`] as string)?.trim() || null,
+                    role
+                }
+            });
+        return [...new Set(members)];
+    }
+    const directors = getCastByRole('director');
+    const teams = getCastByRole('team');
+    const players = getCastByRole('player');
+    const tech = getCastByRole('tech');
+    const musicians = getCastByRole('musician');
+
+    const updates: Partial<Showing> = {
+        lookingForDirectors: Boolean(data.lookingForDirectors),
+        lookingForTeams: Boolean(data.lookingForTeams),
+        lookingForPlayers: Boolean(data.lookingForPlayers),
+        lookingForTech: Boolean(data.lookingForTech),
+        lookingForMusician: Boolean(data.lookingForMusician)
+    }
+    const cast: Partial<ShowCastMember>[] = [
+        ...directors, ...teams, ...players, ...tech, ...musicians
+    ]
+    await updateShowing(showId, showDateTime, updates, cast);
+    revalidatePath(`/shows/${showId}/${showDateTime}`);
+    redirect(`/shows/${showId}/${showDateTime}`);
 }
 
 export async function postTeam(prevState: void | { message?: string }, formData: FormData) {
