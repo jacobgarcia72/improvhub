@@ -1,6 +1,6 @@
 'use server';
 
-import { Team, TeamMember, TeamMemberRole } from "@/types";
+import { Team, CastMember, Role } from "@/types";
 import { contentDb } from './db';
 import { getCitiesWithinRange } from "./location";
 import { removeLeadingArticles } from "./helper-functions";
@@ -22,14 +22,14 @@ const convertDataToTeam = (data: {[key: string]: string | null}): Team => {
     }
 }
 
-const convertDataToTeamMember = (data: {[key: string]: string | null}): TeamMember => {
+const convertDataToTeamMember = (data: {[key: string]: string | null}): CastMember => {
     let confirmed = null;
     if (typeof data.confirmed === 'number') confirmed = Boolean(data.confirmed);
     return {
         team: data.team as string,
         name: data.name as string,
         id: data.id,
-        role: data.role as TeamMemberRole,
+        role: data.role as Role,
         dateAdded: data.dateAdded as string,
         addedBy: data.addedBy as string,
         confirmed
@@ -63,12 +63,12 @@ export async function getTeamsByUser(id: string): Promise<Team[]> {
     return data.map(convertDataToTeam);
 }
 
-export async function getTeamMembers(teamId: string): Promise<TeamMember[]> {
+export async function getTeamMembers(teamId: string): Promise<CastMember[]> {
     const data = contentDb.prepare('SELECT * FROM team_members WHERE team = ?').all(teamId) as {[key: string]: string | null}[];
     return data.map(convertDataToTeamMember);
 }
 
-export async function getTeamInvitations(userId: string): Promise<TeamMember[]> {
+export async function getTeamInvitations(userId: string): Promise<CastMember[]> {
     const data = contentDb.prepare('SELECT * FROM team_members WHERE id = ? AND confirmed = 0').all(userId) as {[key: string]: string | null}[];
     return data.map(convertDataToTeamMember);
 }
@@ -78,7 +78,7 @@ export async function respondToTeamInvitation(teamId: string, userId: string, ro
     contentDb.prepare(`${action} WHERE team = ? AND id = ? AND role = ?`).run(teamId, userId, role);
 }
 
-export async function saveTeam(team: Team, members: { name: string, id: string | null, role: TeamMemberRole }[]): Promise<string> {
+export async function saveTeam(team: Team, members: { name: string, id: string | null, role: Role }[]): Promise<string> {
     let isUnique = false;
     let counter = 1;
     const id = team.id;

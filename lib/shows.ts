@@ -50,6 +50,12 @@ export async function getShowingsForEvent(eventId: string): Promise<Showing[]> {
     return data.map(convertDataToShowing);
 }
 
+export async function getShowing(eventId: string, dateTime: string): Promise<Showing | null> {
+    const data = contentDb.prepare('SELECT * FROM showings WHERE eventId = ? AND dateTime = ?')
+        .get(eventId, dateTime.replace('%20', ' ').replace('%3A', ':')) as {[key: string]: string | null};
+    return data ? convertDataToShowing(data) : null;
+}
+
 export async function getShowingsForEvents(eventIds: string[]): Promise<Showing[]> {
     const data = contentDb.prepare(`SELECT * FROM showings WHERE eventId IN (${eventIds.map(() => '?').join(', ')})`).all(eventIds) as {[key: string]: string | null}[];
     return data.map(convertDataToShowing);

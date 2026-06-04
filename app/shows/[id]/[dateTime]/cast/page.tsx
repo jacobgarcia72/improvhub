@@ -2,7 +2,7 @@ import { getShow } from "@/lib/shows";
 import { getCurrentUser } from "@/lib/users";
 import { notFound } from "next/navigation";
 
-export default async function ShowManagePage({ params } : {
+export default async function ShowCastPage({ params } : {
     params: Promise<{ id: string }>
     }) {
     const { id } = await params;
@@ -12,6 +12,6 @@ export default async function ShowManagePage({ params } : {
     if (!isAdmin || !show) notFound();
 
     return (
-        <div>Manage</div>
+        <div>Cast</div>
     )
 }

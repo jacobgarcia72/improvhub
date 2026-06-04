@@ -2,7 +2,7 @@
 import slugify from 'slugify';
 import { redirect } from "next/navigation";
 import { saveShow } from "@/lib/shows";
-import { Candence, Event, Showing, TeamMemberRole } from "@/types";
+import { Candence, Event, Showing, Role } from "@/types";
 import { sortDates } from "@/lib/dates";
 import { theatres } from "@/lib/theatres";
 import { capitalize, removeLeadingArticles } from "@/lib/helper-functions";
@@ -171,7 +171,7 @@ export async function postTeam(prevState: void | { message?: string }, formData:
         description,
     }
 
-    const getTeamMembersByRole = (role: TeamMemberRole): { name: string, id: string | null, role: TeamMemberRole }[] => {
+    const getTeamMembersByRole = (role: Role): { name: string, id: string | null, role: Role }[] => {
         const members = Object.keys(data)
             .filter((key) => (
                 (key.split('-')[0] === role) &&

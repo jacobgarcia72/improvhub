@@ -70,13 +70,13 @@ export interface Team {
     description: string | null;
 }
 
-export type TeamMemberRole = 'player' | 'coach' | 'musician';
+export type Role = 'player' | 'coach' | 'musician' | 'director' | 'tech';
 
-export interface TeamMember {
+export interface CastMember {
     team: string;
     name: string;
     id: string | null;
-    role: TeamMemberRole;
+    role: Role;
     dateAdded: string;
     addedBy: string;
     confirmed: boolean | null;

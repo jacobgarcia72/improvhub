@@ -8,9 +8,8 @@ import Loader from "@/components/loader";
 import { getTeam, getTeamMembers } from "@/lib/teams";
 import { getCurrentUser, getUser } from "@/lib/users";
 import Link from "next/link";
-import { pluralize } from "@/lib/helper-functions";
-import { TeamMember } from "@/types";
 import TeamInvitationOptions from "../team-invitation-options";
+import CastList from "@/components/cast-list";
 
 type Props = {
     params: Promise<{ id: string }>
@@ -39,33 +38,6 @@ function Header({ children }: { children: React.ReactNode }) {
     return children ? <h3 className="mt-3 font-semibold text-sm">{children}</h3> : null;
 }
 
-async function MemberEntry(member: TeamMember) {
-    if (member.id && member.confirmed) {
-        return (
-            <Link
-                className="link flex flex-row gap-2 items-center fit-content"
-                href={`/profile/${member.id}`}
-            >
-                {PlayerImage(member.id)}
-                <P>{member.name}</P>
-            </Link>
-        )
-    } else {
-        return <P>{member.name}</P>
-    }
-}
-
-async function PlayerImage(id: string) {
-    const user = await getUser(id);
-    const image = user?.image;
-    if (!image) return null;
-    return <Image
-        src={optimizeImage(image, 72, 72, 90, true, true)}
-        alt={user.firstName} width={36} height={36}
-        className="mb-[10px]"
-    />
-} 
-
 export default async function TeamPage({ params }: Props) {
     const { id } = await params;
     const team = await getTeam(id);
@@ -73,9 +45,6 @@ export default async function TeamPage({ params }: Props) {
     if (!team) notFound();
 
     const members = await getTeamMembers(id);
-    const players = members.filter((member) => member.role === 'player');
-    const coaches = members.filter((member) => member.role === 'coach');
-    const musicians = members.filter((member) => member.role === 'musician');
 
     const currentUser = await getCurrentUser();
     const openInvitations = members.filter((member) => member.id === currentUser?.id && !member.confirmed);
@@ -123,36 +92,7 @@ export default async function TeamPage({ params }: Props) {
                 </div>
             </section>
             <section>
-                <div className="flex flex-row flex-wrap px-8">
-                    <div className="w-1/2">
-                        {players.length > 0 && <>
-                            <Header>{pluralize('Player', players.length)}</Header>
-                            <ul className="mt-2">
-                                {players.map((player, i) => (
-                                    <li key={i} className="no-bullets">{MemberEntry(player)}</li>
-                                ))}
-                            </ul>
-                        </>}
-                    </div>
-                    <div className="w-1/2">
-                        {musicians.length > 0 && <>
-                            <Header>{pluralize('Musician', musicians.length)}</Header>
-                            <ul className="mt-2">
-                                {musicians.map((musician, i) => (
-                                    <li key={i} className="no-bullets">{MemberEntry(musician)}</li>
-                                ))}
-                            </ul>
-                        </>}
-                        {coaches.length > 0 && <>
-                            <Header>{pluralize('Coach', coaches.length)}</Header>
-                            <ul className="mt-2">
-                                {coaches.map((coach, i) => (
-                                    <li key={i} className="no-bullets">{MemberEntry(coach)}</li>
-                                ))}
-                            </ul>
-                        </>}
-                    </div>
-                </div>
+                <CastList castMembers={members} />
             </section>
             {(team.city && team.state) || team.theatres.length > 0 ? (
                 <section>
