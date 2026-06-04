@@ -6,10 +6,11 @@ import type { Metadata } from 'next'
 import { optimizeImage } from "@/lib/cloudinary";
 import Loader from "@/components/loader";
 import { getTeam, getTeamMembers } from "@/lib/teams";
-import { getCurrentUser, getUser } from "@/lib/users";
+import { getCurrentUser, getFollowing, getUser } from "@/lib/users";
 import Link from "next/link";
 import TeamInvitationOptions from "../team-invitation-options";
 import CastList from "@/components/cast-list";
+import FollowButton from "@/components/follow-button";
 
 type Props = {
     params: Promise<{ id: string }>
@@ -49,6 +50,7 @@ export default async function TeamPage({ params }: Props) {
     const currentUser = await getCurrentUser();
     const openInvitations = members.filter((member) => member.id === currentUser?.id && !member.confirmed);
     const inviters = await Promise.all(openInvitations.map((invite) => getUser(invite.addedBy)));
+    const following = currentUser ? (await getFollowing(currentUser.id, id, 'team')) || false : false;
 
     // const isAdmin = currentUser && team.admins.includes(currentUser.id);
     // const isMember = currentUser && (
@@ -60,7 +62,10 @@ export default async function TeamPage({ params }: Props) {
         <Suspense fallback={<Loader />}>
             <section>
                 <div className="w-full px-8">
-                    <h1 className="text-2xl">{team.name}</h1>
+                    <div className="w-full flex flex-row justify-between">
+                        <h1 className="text-2xl">{team.name}</h1>
+                        {currentUser && <FollowButton userId={currentUser.id} followId={id} type="team" following={following} />}
+                    </div>
                     {openInvitations.map((invite, i) => {
                         if (!inviters[i]) return null;
                         let joinVerb = 'join';

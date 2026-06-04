@@ -1,8 +1,9 @@
 'use server';
 
-import { User } from "@/types";
+import { Followee, User } from "@/types";
 import { usersDb } from "./db";
 import { verifyAuth } from "./auth";
+import { revalidatePath } from "next/cache";
 
 const convertDataToUser = (data: {[key: string]: string | null}, includePassword = false): User => {
     return {
@@ -58,6 +59,27 @@ export async function updateUser(userId: string, updates: {[key: string]: string
     `).run({ ...updates, id: userId });
 }
 
+export async function getFollowing(userId: string, followId: string, type: Followee): Promise<boolean | null> {
+    const currentFollowStatus = usersDb
+        .prepare(`SELECT following FROM follows WHERE userId = ? AND followId = ? AND type = ?`)
+        .get(userId, followId, type) as {following: number | undefined}
+    const following = currentFollowStatus.following
+    return typeof following === 'number' ? Boolean(following) : null;
+}
+
+export async function setFollowing(userId: string, followId: string, type: Followee): Promise<void> {
+    const currentFollowStatus = await getFollowing(userId, followId, type);
+    let statement = '';
+    if (currentFollowStatus === null) {
+        statement = `INSERT INTO follows (userId, followId, type, following) 
+            VALUES ($userId, $followId, $type, $following)`
+    } else {
+        statement = `UPDATE follows SET following = $following
+            WHERE userId = $userId AND followId = $followId AND type = $type`
+    }
+    usersDb.prepare(statement).run({userId, followId, type, following: currentFollowStatus ? 0 : 1});
+    if (type === 'team') revalidatePath (`/teams/${followId}`, 'layout');
+}
 
 export async function saveUser(user: User): Promise<void> {
     usersDb.prepare(`

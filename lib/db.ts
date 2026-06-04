@@ -112,3 +112,12 @@ contentDb.prepare(`
         FOREIGN KEY (team) REFERENCES teams(id)
     )
 `).run();
+
+usersDb.prepare(`
+    CREATE TABLE IF NOT EXISTS follows (
+        userId TEXT NOT NULL,
+        followId TEXT NOT NULL,
+        type TEXT NOT NULL,
+        following INTEGER NOT NULL
+    )
+`).run();
