@@ -75,7 +75,9 @@ export default async function UserProfilePage({ params }: { params: Promise<{use
                 {isCurrentUser ? (
                     <CommunityOptions user={user} />
                 ) : (
-                    <CommunityDetails user={user} />
+                    user.state || user.city || user.theatres ? (
+                        <CommunityDetails user={user} />
+                    ) : null
                 )}
             </LayoutCard>
             {/* <LayoutCard header="Theatres">
