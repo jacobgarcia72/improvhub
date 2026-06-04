@@ -64,7 +64,7 @@ export default async function TeamPage({ params }: Props) {
         <Suspense fallback={<Loader />}>
             <section>
                 <div className="w-full px-8">
-                    <div className="w-full flex flex-row justify-between">
+                    <div className="w-full flex flex-row justify-between items-center">
                         <h1 className="text-2xl">{team.name}</h1>
                         {currentUser && <FollowButton userId={currentUser.id} followId={id} type="team" following={following} />}
                     </div>
@@ -126,8 +126,8 @@ export default async function TeamPage({ params }: Props) {
                 </section>
             ) : null}
             {followerCount ? (
-                <section className="px-8">
-                    {`${followerCount} Followers`}
+                <section>
+                    <p className="pl-8">{`${followerCount} Followers`}</p>
                 </section>
             ) : null}
         </Suspense>
