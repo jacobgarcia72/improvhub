@@ -1,13 +1,19 @@
 import { Border } from "@/components/border";
+import FollowButton from "@/components/follow-button";
 import { optimizeImage } from "@/lib/cloudinary";
 import { formatTime } from "@/lib/dates";
 import { removeLeadingArticles } from "@/lib/helper-functions";
 import { theatres } from "@/lib/theatres";
+import { getFollowing } from "@/lib/users";
 import { Event, Team, Theatre } from "@/types";
 import Image from "next/image";
 import Link from "next/link";
 
-export default function ItemCard({ item, type, time, date }: { item: Event | Team | Theatre, type: string, time?: string, date?: string }) {
+export default async function ItemCard({
+    item, type, time, date, userId
+} : {
+    item: Event | Team | Theatre, type: string, time?: string, date?: string, userId?: string | null
+}) {
     const image = (
         item.image && optimizeImage(item.image, 300, 300, 90, true)
     ) || (
@@ -18,9 +24,19 @@ export default function ItemCard({ item, type, time, date }: { item: Event | Tea
     const name = 'name' in item ? item.name : 'title' in item ? item.title : '';
     let link = 'id' in item ? `/${type}/${item.id}` : `/search?for=shows&theatre=${item.name.toLowerCase().split(" ").join("+")}`;
     if (date && time) link += `/${date}%20${time}`;
+
+    let following = false;
+    let showFollowButton = false;
+    if (userId && (type === 'teams') && ('id' in item)) {
+        following = await getFollowing(userId, item.id, 'team') || false;
+        showFollowButton = true;
+    }
     return (
-        <Link href={link}>
-            <Border className="flex flex-col h-[300px] w-[222px] m-2 w-44 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
+        <Border className="relative flex flex-col h-[300px] w-[222px] m-2 w-44 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
+            {showFollowButton ? <div className="absolute right-2 top-2">
+                <FollowButton mini userId={userId || ''} followId={'id' in item ? item.id : ''} type="team" following={following} />
+            </div> : null}
+            <Link href={link}>
                 {image ? (
                     <div className="h-[120px] w-full bg-gray-300">
                         <Image src={image} alt={name} width={120} height={120} className="object-cover h-[120px] w-full" />
@@ -45,7 +61,7 @@ export default function ItemCard({ item, type, time, date }: { item: Event | Tea
                         ) : null}
                     </div>
                 </div>
-            </Border>
-        </Link>
+            </Link>
+        </Border>
     )
 }
