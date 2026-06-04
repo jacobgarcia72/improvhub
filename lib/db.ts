@@ -64,7 +64,7 @@ contentDb.prepare(`
         lookingForTeams INTEGER,
         lookingForPlayers INTEGER,
         lookingForDirectors INTEGER,
-        lookingForMusicians INTEGER,
+        lookingForMusician INTEGER,
         lookingForTech INTEGER,
         FOREIGN KEY (eventId) REFERENCES shows(id)
     )

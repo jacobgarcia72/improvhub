@@ -1,5 +1,5 @@
 import { appName } from "@/lib/app-info";
-import { getShow, getShowingsForEvent } from "@/lib/shows";
+import { getShow, getShowings } from "@/lib/shows";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
@@ -53,7 +53,7 @@ export default async function ShowDetailsLayout({ params, children }: Props) {
     const theatre = theatres.find(t => t.name === show.theatre);
     const imageUrl = show.image || theatre?.image;
 
-    const showings = await getShowingsForEvent(id);
+    const showings = await getShowings(id);
     const dateTimes = showings.map(({ dateTime }) => dateTime);
     let upcomingShows: string[] = [];
     if (dateTimes) {

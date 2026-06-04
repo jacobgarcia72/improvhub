@@ -15,8 +15,8 @@ function Header({ children }: { children: React.ReactNode }) {
     return children ? <h3 className="mt-3 font-semibold text-sm">{children}</h3> : null;
 }
 
-async function MemberEntry(member: CastMember) {
-    if (member.id && member.confirmed) {
+async function MemberEntry(member: CastMember, noConfirm?: boolean) {
+    if (member.id && (member.confirmed || noConfirm)) {
         return (
             <Link
                 className="link flex flex-row gap-2 items-center fit-content"
@@ -42,7 +42,7 @@ async function PlayerImage(id: string) {
     />
 }
 
-export default async function CastList({ castMembers }: { castMembers: CastMember[]}) {
+export default async function CastList({ castMembers, noConfirm }: { castMembers: CastMember[], noConfirm?: boolean }) {
     const players = castMembers.filter((member) => member.role === 'player');
     const coaches = castMembers.filter((member) => member.role === 'coach');
     const musicians = castMembers.filter((member) => member.role === 'musician');
@@ -50,23 +50,23 @@ export default async function CastList({ castMembers }: { castMembers: CastMembe
     const tech = castMembers.filter((member) => member.role === 'tech');
     return (
         <Suspense fallback={<Loader />}>
-            <div className="flex flex-row flex-wrap px-8">
-                <div className="w-1/2">
+            <div className="flex flex-row flex-wrap px-6 justify-between">
+                <div className="w-48 grow-2">
                     {players?.length ? <>
                         <Header>{pluralize('Player', players.length)}</Header>
                         <ul className="mt-2">
                             {players.map((player, i) => (
-                                <li key={i} className="no-bullets">{MemberEntry(player)}</li>
+                                <li key={i} className="no-bullets">{MemberEntry(player, noConfirm)}</li>
                             ))}
                         </ul>
                     </> : null}
                 </div>
-                <div className="w-1/2">
+                <div className="w-48 grow-1">
                     {directors.length > 0 && <>
                         <Header>{pluralize('Director', directors.length)}</Header>
                         <ul className="mt-2">
                             {directors.map((director, i) => (
-                                <li key={i} className="no-bullets">{MemberEntry(director)}</li>
+                                <li key={i} className="no-bullets">{MemberEntry(director, noConfirm)}</li>
                             ))}
                         </ul>
                     </>}
@@ -74,7 +74,7 @@ export default async function CastList({ castMembers }: { castMembers: CastMembe
                         <Header>Tech</Header>
                         <ul className="mt-2">
                             {tech.map((techMember, i) => (
-                                <li key={i} className="no-bullets">{MemberEntry(techMember)}</li>
+                                <li key={i} className="no-bullets">{MemberEntry(techMember, noConfirm)}</li>
                             ))}
                         </ul>
                     </>}
@@ -82,7 +82,7 @@ export default async function CastList({ castMembers }: { castMembers: CastMembe
                         <Header>{pluralize('Musician', musicians.length)}</Header>
                         <ul className="mt-2">
                             {musicians.map((musician, i) => (
-                                <li key={i} className="no-bullets">{MemberEntry(musician)}</li>
+                                <li key={i} className="no-bullets">{MemberEntry(musician, noConfirm)}</li>
                             ))}
                         </ul>
                     </>}
@@ -90,7 +90,7 @@ export default async function CastList({ castMembers }: { castMembers: CastMembe
                         <Header>{pluralize('Coach', coaches.length)}</Header>
                         <ul className="mt-2">
                             {coaches.map((coach, i) => (
-                                <li key={i} className="no-bullets">{MemberEntry(coach)}</li>
+                                <li key={i} className="no-bullets">{MemberEntry(coach, noConfirm)}</li>
                             ))}
                         </ul>
                     </>}

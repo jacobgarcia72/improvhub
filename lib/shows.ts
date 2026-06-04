@@ -53,7 +53,7 @@ export async function getShow(id: string) {
     return data ? convertDataToShow(data) : null;
 }
 
-export async function getShowingsForEvent(eventId: string): Promise<Showing[]> {
+export async function getShowings(eventId: string): Promise<Showing[]> {
     const data = contentDb.prepare('SELECT * FROM showings WHERE eventId = ?').all(eventId) as {[key: string]: string | null}[];
     return data.map(convertDataToShowing);
 }
@@ -67,6 +67,11 @@ export async function getShowing(eventId: string, dateTime: string): Promise<Sho
 export async function getShowingsForEvents(eventIds: string[]): Promise<Showing[]> {
     const data = contentDb.prepare(`SELECT * FROM showings WHERE eventId IN (${eventIds.map(() => '?').join(', ')})`).all(eventIds) as {[key: string]: string | null}[];
     return data.map(convertDataToShowing);
+}
+
+export async function getShowCast(showId: string, dateTime: string): Promise<ShowCastMember[]> {
+    const data = contentDb.prepare('SELECT * FROM showing_cast WHERE showId = ? AND dateTime = ?').all(showId, dateTime) as {[key: string]: string | null}[];
+    return data.map(convertDataToShowCastMember);
 }
 
 export async function getShowsByTheatre(theatre: string) {
@@ -159,7 +164,7 @@ export async function updateShowing(showId: string, dateTime: string, updates: P
     const data = prepDataForDb(updates);
     const updateFields = Object.keys(data).map(key => `${key} = $${key}`).join(', ');
     contentDb.prepare(`
-        UPDATE showings SET ${updateFields} WHERE eventId = ? AND dateTime = ?
+        UPDATE showings SET ${updateFields} WHERE eventId = $showId AND dateTime = $dateTime
     `).run({ ...data, showId, dateTime });
 
     cast?.forEach((castMember) => {
