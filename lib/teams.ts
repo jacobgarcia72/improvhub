@@ -60,7 +60,8 @@ export async function getTeamsInRange(cityOrZipcode: string, miles: number) {
 }
 
 export async function getTeamsByUser(id: string): Promise<Team[]> {
-    const teamMemberships = contentDb.prepare('SELECT team FROM team_members WHERE name = ?').all(id) as { team: string }[];
+    const teamMemberships = contentDb.prepare('SELECT team FROM team_members WHERE id = ?').all(id) as { team: string }[];
+    if (!teamMemberships.length) return [];
     const queries = teamMemberships.map(() => `id = ?`).join(' OR ');
     const data = contentDb.prepare(
         `SELECT * FROM teams WHERE ${queries}`
