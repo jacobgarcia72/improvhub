@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Autocomplete from "./autocomplete";
 import Button from "./button";
 import Input from "./input";
+import XButton from "./x";
 import { InputOption } from "@/types";
 
 export default function InputList({ name, options, label, addLabel, startingOptions }: {
@@ -13,17 +14,27 @@ export default function InputList({ name, options, label, addLabel, startingOpti
     options?: InputOption[]
     startingOptions?: InputOption[]
 }) {
-    const [addedInputs, setAddedInputs] = useState<(InputOption | null)[]>(startingOptions || []);
-    const [availableOptions, setAvailableOptions] = useState<InputOption[] | undefined>((
-        startingOptions ? options?.filter((option) => !startingOptions.includes(option)) : options
+    const nextKey = useRef(startingOptions?.length || 0);
+    const [addedInputs, setAddedInputs] = useState<{ key: number, value: InputOption | null }[]>(
+        () => startingOptions?.map((option, i) => ({ key: i, value: option })) || []
+    );
+    const availableOptions = options?.filter((option) => (
+        !addedInputs.some((input) => input.value === option)
     ));
 
     const updateInput = (value: InputOption, i: number) => {
         const inputs = [...addedInputs];
-        inputs[i] = value;
+        inputs[i] = { ...inputs[i], value };
         setAddedInputs(inputs);
-        if (!options) return;
-        setAvailableOptions(options?.filter((option) => !addedInputs.includes(option) && option !== value));
+    }
+
+    const addInput = () => {
+        setAddedInputs([...addedInputs, { key: nextKey.current, value: null }]);
+        nextKey.current++;
+    }
+
+    const removeInput = (key: number) => {
+        setAddedInputs(addedInputs.filter((input) => input.key !== key));
     }
 
     return (
@@ -31,26 +42,29 @@ export default function InputList({ name, options, label, addLabel, startingOpti
             {label && <p className="label">{label}</p>}
             <div className="grid gap-2 w-full">
                 {addedInputs.map((input, i) => (
-                    availableOptions?.length ? (
-                        <Autocomplete key={i}
-                            options={availableOptions}
-                            name={`${name}-${i}`}
-                            placeholder={addLabel}
-                            onChange={(value) => updateInput(value, i)}
-                            startingValue = {startingOptions?.[i] || undefined}
-                        />
-                    ) : (
-                        <Input key={i}
-                            name={`${name}-${i}`}
-                            placeholder={addLabel}
-                            onChange={(value) => updateInput(value, i)}
-                        /> 
-                    )
+                    <div key={input.key} className="flex items-center gap-2">
+                        {options ? (
+                            <Autocomplete
+                                options={availableOptions || []}
+                                name={`${name}-${i}`}
+                                placeholder={addLabel}
+                                onChange={(value) => updateInput(value, i)}
+                                startingValue={input.value || undefined}
+                            />
+                        ) : (
+                            <Input
+                                name={`${name}-${i}`}
+                                placeholder={addLabel}
+                                value={typeof input.value === 'string' ? input.value : undefined}
+                                onChange={(value) => updateInput(value, i)}
+                            />
+                        )}
+                        <XButton onClick={() => removeInput(input.key)} />
+                    </div>
                 ))}
             </div>
             <div className="flex flex-row">
-                <Button onClick={() => setAddedInputs([...addedInputs, null])} caption={`Add${addLabel ? ` ${addLabel}` : ''}`} style="link" className="min-w-26" />
-                {addedInputs.length > 0 && <Button onClick={() => setAddedInputs([...(addedInputs.slice(0, addedInputs.length - 1))])} style="link" caption="Remove" />}
+                <Button onClick={addInput} caption={`Add${addLabel ? ` ${addLabel}` : ''}`} style="link" className="min-w-26" />
             </div>
         </div>
     )
