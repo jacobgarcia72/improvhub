@@ -73,7 +73,9 @@ const adjectives = [
     'Deviant',
     'Leafy',
     'Available',
-    'Loose'
+    'Loose',
+    'Candy',
+    'Peach'
 ];
 
 const nouns = [
