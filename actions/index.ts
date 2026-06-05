@@ -8,7 +8,7 @@ import { theatres } from "@/lib/theatres";
 import { capitalize, removeLeadingArticles } from "@/lib/helper-functions";
 import { Team } from '@/types';
 import { uploadImage } from '@/lib/cloudinary';
-import { saveTeam } from '@/lib/teams';
+import { getTeam, saveTeam, updateTeam as updateTeamRecord } from '@/lib/teams';
 import { getCurrentUser, updateUser } from "@/lib/users";
 import { revalidatePath } from 'next/cache';
 
@@ -235,6 +235,48 @@ export async function postTeam(prevState: void | { message?: string }, formData:
     const musicians = getTeamMembersByRole('musician');
     const teamMembers = [ ...players, ...coaches, ...musicians ];
     const teamId = await saveTeam(team, teamMembers);
+    redirect(`/teams/${teamId}`);
+}
+
+export async function updateTeam(teamId: string, prevState: void | { message?: string }, formData: FormData) {
+    const userId = (await getCurrentUser())?.id;
+    if (!userId) throw new Error('You must be logged in to continue');
+
+    const team = await getTeam(teamId);
+    if (!team || !team.admins.includes(userId)) throw new Error('Unauthorized');
+
+    const data = Object.fromEntries(formData.entries());
+    const getTeamMembersByRole = (role: Role): { name: string, id: string | null, role: Role }[] => {
+        const members = Object.keys(data)
+            .filter((key) => (
+                (key.split('-')[0] === role) &&
+                (key.split('-')[2] !== 'id') &&
+                Boolean((data[key] as string).trim())
+            ))
+            .map((key) => {
+                return {
+                    name: (data[key] as string).trim(),
+                    id: (data[`${key}-id`] as string)?.trim() || null,
+                    role
+                }
+            });
+        return [...new Set(members)];
+    }
+
+    const players = getTeamMembersByRole('player');
+    const coaches = getTeamMembersByRole('coach');
+    const musicians = getTeamMembersByRole('musician');
+    await updateTeamRecord(
+        teamId,
+        {
+            lookingForPlayers: Boolean(data.lookingForPlayers),
+            lookingForCoach: Boolean(data.lookingForCoach),
+            lookingForMusician: Boolean(data.lookingForMusician)
+        },
+        [ ...players, ...coaches, ...musicians ],
+        userId
+    );
+    revalidatePath(`/teams/${teamId}`);
     redirect(`/teams/${teamId}`);
 }
 

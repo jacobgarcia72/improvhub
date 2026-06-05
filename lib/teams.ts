@@ -3,7 +3,7 @@
 import { Team, Role, TeamMember } from "@/types";
 import { contentDb } from './db';
 import { getCitiesWithinRange } from "./location";
-import { removeLeadingArticles } from "./helper-functions";
+import { prepDataForDb, removeLeadingArticles } from "./helper-functions";
 
 const convertDataToTeam = (data: {[key: string]: string | null}): Team => {
     return {
@@ -138,4 +138,53 @@ export async function saveTeam(team: Team, members: { name: string, id: string |
     });
 
     return team.id;
+}
+
+export async function updateTeam(teamId: string, updates: Partial<Team>, members: { name: string, id: string | null, role: Role }[], addedBy: string): Promise<boolean> {
+    const data = prepDataForDb(updates);
+    const updateFields = Object.keys(data).map(key => `${key} = $${key}`).join(', ');
+    if (updateFields) {
+        contentDb.prepare(`
+            UPDATE teams SET ${updateFields} WHERE id = $teamId
+        `).run({ ...data, teamId });
+    }
+
+    const existingMembers = await getTeamMembers(teamId);
+    const getExistingMember = (member: { name: string, id: string | null, role: Role }) => (
+        existingMembers.find((existing) => (
+            existing.role === member.role &&
+            existing.id === member.id &&
+            existing.name === member.name
+        ))
+    );
+
+    contentDb.prepare('DELETE FROM team_members WHERE team = ?').run(teamId);
+
+    const timestamp = new Date().toISOString();
+    const statement = contentDb.prepare(`
+        INSERT INTO team_members (team, name, id, role, dateAdded, addedBy, confirmed)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    `);
+
+    members.forEach((member) => {
+        const existingMember = getExistingMember(member);
+        let confirmed: number | null = null;
+        if (typeof existingMember?.confirmed === 'boolean') {
+            confirmed = existingMember.confirmed ? 1 : 0;
+        } else if (member.id) {
+            confirmed = member.id === addedBy ? 1 : 0;
+        }
+
+        statement.run(
+            teamId,
+            member.name,
+            member.id,
+            member.role,
+            existingMember?.dateAdded || timestamp,
+            existingMember?.addedBy || addedBy,
+            confirmed
+        );
+    });
+
+    return true;
 }
