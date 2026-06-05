@@ -57,7 +57,6 @@ export interface Showing {
 
 export interface Team {
     id: string;
-    admins: string[];
     name: string;
     image: string | null;
     photoCredit: string | null;

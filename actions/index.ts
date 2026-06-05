@@ -201,7 +201,6 @@ export async function postTeam(prevState: void | { message?: string }, formData:
 
     const team: Team = {
         id: slugify(removeLeadingArticles(name), { lower: true, trim: true }),
-        admins: [creatorId],
         name,
         image: imageUrl,
         photoCredit: data.photoCredit as string || null,
@@ -243,7 +242,7 @@ export async function updateTeam(teamId: string, prevState: void | { message?: s
     if (!userId) throw new Error('You must be logged in to continue');
 
     const team = await getTeam(teamId);
-    if (!team || !team.admins.includes(userId)) throw new Error('Unauthorized');
+    if (!team) throw new Error('Cannot find record of team');
 
     const data = Object.fromEntries(formData.entries());
     const getTeamMembersByRole = (role: Role): { name: string, id: string | null, role: Role }[] => {

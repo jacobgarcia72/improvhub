@@ -83,7 +83,6 @@ contentDb.prepare(`
 contentDb.prepare(`
     CREATE TABLE IF NOT EXISTS teams (
         id STRING PRIMARY KEY,
-        admins TEXT NOT NULL,
         name TEXT NOT NULL,
         image TEXT,
         photoCredit TEXT,

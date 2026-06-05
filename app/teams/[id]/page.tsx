@@ -1,4 +1,4 @@
-import { getTeam, getTeamMembers } from "@/lib/teams";
+import { getTeamMembers } from "@/lib/teams";
 import CastList from "@/components/cast-list";
 import { getCurrentUser } from "@/lib/users";
 import Link from "next/link";
@@ -11,11 +11,10 @@ export default async function TeamPage({ params }: Props) {
     const { id } = await params;
     const members = await getTeamMembers(id);
     const currentUser = await getCurrentUser();
-    const team = await getTeam(id);
-    const isAdmin = currentUser && team?.admins.includes(currentUser.id);
+    const isMember = currentUser && members.find((member) => member.id === currentUser.id);
 
     return <>
-        {isAdmin ? (
+        {isMember ? (
             <Link className="ml-4 mb-1" href={`/teams/${id}/manage-members`}>
                 <Button caption="Manage Members" />
             </Link>

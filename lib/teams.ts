@@ -4,11 +4,11 @@ import { Team, Role, TeamMember } from "@/types";
 import { contentDb } from './db';
 import { getCitiesWithinRange } from "./location";
 import { prepDataForDb, removeLeadingArticles } from "./helper-functions";
+import { getCurrentUser } from "./users";
 
 const convertDataToTeam = (data: {[key: string]: string | null}): Team => {
     return {
         id: data.id || '',
-        admins: data.admins?.split(',') || [],
         name: data.name || '',
         image: data.image || null,
         photoCredit: data.photoCredit || null,
@@ -99,7 +99,6 @@ export async function saveTeam(team: Team, members: { name: string, id: string |
     contentDb.prepare(`
         INSERT INTO teams (
             id,
-            admins,
             name,
             image,
             photoCredit,
@@ -114,7 +113,6 @@ export async function saveTeam(team: Team, members: { name: string, id: string |
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
         team.id,
-        team.admins,
         team.name,
         team.image,
         team.photoCredit,
@@ -127,7 +125,7 @@ export async function saveTeam(team: Team, members: { name: string, id: string |
         team.description,
     );
 
-    const creator = team.admins[0];
+    const creator = (await getCurrentUser())?.id;
 
     const timestamp = new Date().toISOString();
     const statement = `INSERT INTO team_members (team, name, id, role, dateAdded, addedBy, confirmed) VALUES (?, ?, ?, ?, ?, ?, ?)`;
