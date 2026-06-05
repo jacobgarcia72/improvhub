@@ -13,8 +13,10 @@ export default async function TeamManagePage({ params }: Props) {
     const members = await getTeamMembers(id);
     const currentUser = await getCurrentUser();
     const team = await getTeam(id);
-    const isMember = currentUser && members.find((member) => member.id === currentUser.id);
-    if (!isMember || !team) notFound();
+    const isMemberNotCoach = currentUser && members.some(
+        (member) => member.id === currentUser.id && member.confirmed && member.role !== 'coach'
+    );
+    if (!isMemberNotCoach || !team) notFound();
 
     async function cancel() {
         'use server';

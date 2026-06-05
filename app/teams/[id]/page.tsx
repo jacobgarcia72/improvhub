@@ -11,10 +11,12 @@ export default async function TeamPage({ params }: Props) {
     const { id } = await params;
     const members = await getTeamMembers(id);
     const currentUser = await getCurrentUser();
-    const isMember = currentUser && members.find((member) => member.id === currentUser.id);
+    const isMemberNotCoach = currentUser && members.some(
+        (member) => member.id === currentUser.id && member.confirmed && member.role !== 'coach'
+    );
 
     return <>
-        {isMember ? (
+        {isMemberNotCoach ? (
             <Link className="ml-4 mb-1" href={`/teams/${id}/manage-members`}>
                 <Button caption="Manage Members" />
             </Link>

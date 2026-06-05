@@ -52,8 +52,6 @@ contentDb.prepare(`
         photoCredit TEXT,
         runtime TEXT,
         notes TEXT,
-        teams TEXT,
-        performers TEXT
     )
 `).run();
 

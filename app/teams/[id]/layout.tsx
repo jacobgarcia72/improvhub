@@ -1,4 +1,6 @@
+import { leaveTeam } from "@/actions";
 import { appName } from "@/lib/app-info";
+import Button from "@/components/form/button";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import type { Metadata } from 'next'
@@ -47,6 +49,7 @@ export default async function TeamLayout({ params, children }: Props) {
     const members = await getTeamMembers(id);
 
     const currentUser = await getCurrentUser();
+    const isMember = currentUser && members.some((member) => member.id === currentUser.id && member.confirmed);
     const openInvitations = members.filter((member) => member.id === currentUser?.id && !member.confirmed);
     const inviters = await Promise.all(openInvitations.map((invite) => getUser(invite.addedBy)));
     const following = currentUser ? (await getFollowing(currentUser.id, id, 'team')) || false : false;
@@ -113,6 +116,13 @@ export default async function TeamLayout({ params, children }: Props) {
             {followerCount ? (
                 <section>
                     <p className="pl-8">{`${followerCount} Followers`}</p>
+                </section>
+            ) : null}
+            {isMember ? (
+                <section className="flex flex-row justify-center">
+                    <form action={leaveTeam.bind(null, id)}>
+                        <Button submit caption="Leave Team" style="link" />
+                    </form>
                 </section>
             ) : null}
         </Suspense>

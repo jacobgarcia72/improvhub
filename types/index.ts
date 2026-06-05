@@ -41,8 +41,6 @@ export interface Event {
     photoCredit: string | null;
     runtime: string | null;
     notes: string | null;
-    teams?: string[] | null;
-    players?: string[] | null;
 }
 
 export interface Showing {

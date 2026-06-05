@@ -8,7 +8,7 @@ import { theatres } from "@/lib/theatres";
 import { capitalize, removeLeadingArticles } from "@/lib/helper-functions";
 import { Team } from '@/types';
 import { uploadImage } from '@/lib/cloudinary';
-import { getTeam, saveTeam, updateTeam as updateTeamRecord } from '@/lib/teams';
+import { getTeam, getTeamMembers, leaveTeam as leaveTeamRecord, saveTeam, updateTeam as updateTeamRecord } from '@/lib/teams';
 import { getCurrentUser, updateUser } from "@/lib/users";
 import { revalidatePath } from 'next/cache';
 
@@ -243,6 +243,9 @@ export async function updateTeam(teamId: string, prevState: void | { message?: s
 
     const team = await getTeam(teamId);
     if (!team) throw new Error('Cannot find record of team');
+    const members = await getTeamMembers(teamId);
+    const isMember = members.some((member) => member.id === userId && member.confirmed);
+    if (!isMember) throw new Error('You must be a member of this team to update it');
 
     const data = Object.fromEntries(formData.entries());
     const getTeamMembersByRole = (role: Role): { name: string, id: string | null, role: Role }[] => {
@@ -276,6 +279,19 @@ export async function updateTeam(teamId: string, prevState: void | { message?: s
         userId
     );
     revalidatePath(`/teams/${teamId}`);
+    redirect(`/teams/${teamId}`);
+}
+
+export async function leaveTeam(teamId: string): Promise<void> {
+    const userId = (await getCurrentUser())?.id;
+    if (!userId) throw new Error('You must be logged in to continue');
+
+    const result = await leaveTeamRecord(teamId, userId);
+    revalidatePath(`/teams/${teamId}`, 'layout');
+    if (result.deletedTeam) {
+        revalidatePath('/teams');
+        redirect('/teams');
+    }
     redirect(`/teams/${teamId}`);
 }
 

@@ -1,7 +1,7 @@
 'use server';
 
 import { Team, Role, TeamMember } from "@/types";
-import { contentDb } from './db';
+import { contentDb, usersDb } from './db';
 import { getCitiesWithinRange } from "./location";
 import { prepDataForDb, removeLeadingArticles } from "./helper-functions";
 import { getCurrentUser } from "./users";
@@ -185,4 +185,28 @@ export async function updateTeam(teamId: string, updates: Partial<Team>, members
     });
 
     return true;
+}
+
+export async function leaveTeam(teamId: string, userId: string): Promise<{ deletedTeam: boolean }> {
+    const confirmedMemberships = contentDb
+        .prepare('SELECT * FROM team_members WHERE team = ? AND id = ? AND confirmed = 1')
+        .all(teamId, userId) as { [key: string]: string | null }[];
+    if (!confirmedMemberships.length) return { deletedTeam: false };
+
+    contentDb.prepare('DELETE FROM team_members WHERE team = ? AND id = ?').run(teamId, userId);
+
+    const remainingMembersWithIds = contentDb
+        .prepare('SELECT COUNT(*) AS total FROM team_members WHERE team = ? AND id IS NOT NULL AND id != ?')
+        .get(teamId, '') as { total: number };
+
+    if (remainingMembersWithIds.total > 0) {
+        return { deletedTeam: false };
+    }
+
+    contentDb.prepare('DELETE FROM team_members WHERE team = ?').run(teamId);
+    contentDb.prepare('DELETE FROM teams WHERE id = ?').run(teamId);
+    contentDb.prepare("DELETE FROM showing_cast WHERE role = 'team' AND id = ?").run(teamId);
+    usersDb.prepare("DELETE FROM follows WHERE followId = ? AND type = 'team'").run(teamId);
+
+    return { deletedTeam: true };
 }
