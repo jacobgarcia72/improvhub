@@ -1,9 +1,7 @@
 import { appName } from "@/lib/app-info";
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import type { Metadata } from 'next'
-import { optimizeImage } from "@/lib/cloudinary";
 import Loader from "@/components/loader";
 import { getTeam, getTeamMembers } from "@/lib/teams";
 import { getCurrentUser, getFollowerCount, getFollowing, getUser } from "@/lib/users";
@@ -11,6 +9,7 @@ import Link from "next/link";
 import TeamInvitationOptions from "../team-invitation-options";
 import CastList from "@/components/cast-list";
 import FollowButton from "@/components/follow-button";
+import CoverPhoto from "@/components/cover-photo";
 
 type Props = {
     params: Promise<{ id: string }>
@@ -85,15 +84,7 @@ export default async function TeamPage({ params }: Props) {
                         )
                     })}
                 </div>
-                {team.image && <>
-                    <Image src={optimizeImage(team.image, 600, null, 80)}
-                        alt={team.name}
-                        width={600}
-                        height={400}
-                        className="mt-2 w-full h-auto min-h-18 max-h-[90vh] h-72 object-cover rounded"
-                    />
-                    <P className="italic text-sm">{team.image && team.photoCredit && `Photo Credit: ${team.photoCredit}`}</P>
-                </>}
+                {team.image && <CoverPhoto src={team.image} alt={team.name} photoCredit={team.photoCredit} />}
                 <div className="px-8 pt-2">
                     {team.description?.split('<br>').map((line, i) => <P key={i}>{line}</P>)}
                 </div>

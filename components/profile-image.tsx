@@ -1,4 +1,4 @@
-import { optimizeImage } from "@/lib/cloudinary";
+import { optimizeImage } from "@/lib/optimize-image";
 import { getCurrentUser } from "@/lib/users";
 import Image from "next/image";
 

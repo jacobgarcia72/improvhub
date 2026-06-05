@@ -1,17 +1,16 @@
 import { appName } from "@/lib/app-info";
 import { getShow, getShowings } from "@/lib/shows";
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import type { Metadata } from 'next'
 import { theatres } from "@/lib/theatres";
 import { formatDateTimeForDisplay, formatTime, removePastDates, sortDates, weekdays } from "@/lib/dates";
 import Button from "@/components/form/button";
-import { optimizeImage } from "@/lib/cloudinary";
 import Loader from "@/components/loader";
 import { CadenceText } from "@/types";
 // import { getCurrentUser } from "@/lib/users";
 import Link from "next/link";
+import CoverPhoto from "@/components/cover-photo";
 
 type Props = {
     params: Promise<{ id: string }>;
@@ -100,15 +99,7 @@ export default async function ShowDetailsLayout({ params, children }: Props) {
                             </Link>
                         </div> : null} */}
                     </div>
-                    {imageUrl && <div className="flex flex-col items-center content-center">
-                        <Image src={optimizeImage(imageUrl, 600, null, 80)}
-                            alt={show.title}
-                            width={600}
-                            height={400}
-                            className="mt-2 w-3/4 h-36 h-[40vw] max-h-64 object-cover rounded"
-                        />
-                        <P className="italic text-sm">{show.image && show.photoCredit && `Photo Credit: ${show.photoCredit}`}</P>
-                    </div>}
+                    {imageUrl && <CoverPhoto src={imageUrl} alt={show.title} photoCredit={show.photoCredit} />}
 
                     {children}
 
