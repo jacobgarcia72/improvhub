@@ -9,10 +9,12 @@ import { CastMember, Role } from "@/types";
 export default async function CastingInputs({
     roles,
     currentCast,
+    lookingFors,
     creatorAsDefaultPlayer
 }: {
     roles: (Role | 'team')[],
     currentCast?: CastMember[],
+    lookingFors?: Partial<Record<`lookingFor${string}`, boolean>>,
     creatorAsDefaultPlayer?: boolean
 }) {
     const user = await getCurrentUser();
@@ -43,7 +45,11 @@ export default async function CastingInputs({
             return (
                 <div key={role} className="flex flex-col gap-2">
                     <p className="label">{`${label}${maybePlural}`}</p>
-                    <Checkbox label={`Looking for ${label}${maybePlural}`} name={`lookingFor${label}`} />
+                    <Checkbox
+                        label={`Looking for ${label}${maybePlural}`}
+                        name={`lookingFor${label}`}
+                        defaultChecked={lookingFors?.[`lookingFor${label}`]}
+                    />
                     <InputList
                         options={role === 'team' ? allTeams : allUsers}
                         name={role}

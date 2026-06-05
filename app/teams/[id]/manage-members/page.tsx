@@ -13,12 +13,16 @@ export default async function TeamManagePage({ params }: Props) {
     const team = await getTeam(id);
     const isAdmin = currentUser && team?.admins.includes(currentUser.id);
     if (!isAdmin || !team) notFound();
-
+    const { lookingForPlayers, lookingForCoach, lookingForMusician } = team;
     return <>
         <CastingInputs
             roles={['player', 'coach', 'musician']}
             currentCast={members}
-            // TODO: Add lookingFors
+            lookingFors={{
+                lookingForPlayers,
+                lookingForCoach,
+                lookingForMusician
+            }}
         />
     </>
 }
