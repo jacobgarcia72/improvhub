@@ -51,7 +51,7 @@ contentDb.prepare(`
         image TEXT,
         photoCredit TEXT,
         runtime TEXT,
-        notes TEXT,
+        notes TEXT
     )
 `).run();
 
