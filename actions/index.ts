@@ -7,7 +7,7 @@ import { sortDates } from "@/lib/dates";
 import { theatres } from "@/lib/theatres";
 import { capitalize, removeLeadingArticles } from "@/lib/helper-functions";
 import { Team } from '@/types';
-import { uploadImage } from '@/lib/cloudinary';
+import { destroyImage, uploadImage } from '@/lib/cloudinary';
 import { getTeam, getTeamMembers, leaveTeam as leaveTeamRecord, saveTeam, updateTeam as updateTeamRecord, updateTeamDetails as updateTeamDetailsRecord } from '@/lib/teams';
 import { getCurrentUser, updateUser } from "@/lib/users";
 import { revalidatePath } from 'next/cache';
@@ -309,6 +309,9 @@ export async function updateTeamDetails(teamId: string, prevState: void | { mess
         }
         try {
             imageUrl = await uploadImage(imageFile, 'teams');
+            if (team.image && team.image !== imageUrl) {
+                await destroyImage(team.image);
+            }
         } catch {
             throw new Error('Image upload failed');
         }

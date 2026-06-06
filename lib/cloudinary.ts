@@ -32,6 +32,30 @@ export async function uploadImage(image: File, folder: string): Promise<string> 
     return result.secure_url;
 }
 
+function getPublicIdFromUrl(imageUrl: string): string | null {
+    const uploadMarker = '/upload/';
+    const uploadIndex = imageUrl.indexOf(uploadMarker);
+    if (uploadIndex === -1) return null;
+
+    const afterUpload = imageUrl.slice(uploadIndex + uploadMarker.length);
+    const pathParts = afterUpload.split('/');
+    const versionIndex = pathParts.findIndex((part) => /^v\d+$/.test(part));
+    const publicIdParts = versionIndex >= 0 ? pathParts.slice(versionIndex + 1) : pathParts;
+    const publicIdWithExtension = publicIdParts.join('/');
+    if (!publicIdWithExtension) return null;
+
+    return decodeURIComponent(publicIdWithExtension.replace(/\.[^/.]+$/, ''));
+}
+
+export async function destroyImage(imageUrl: string | null | undefined): Promise<void> {
+    if (!imageUrl) return;
+
+    const publicId = getPublicIdFromUrl(imageUrl);
+    if (!publicId) return;
+
+    await cloudinary.uploader.destroy(publicId);
+}
+
 export const optimizeImage = (
     imagePath: string,
     width?: number | null,
