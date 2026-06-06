@@ -2,7 +2,7 @@ export default function Button({ caption, disabled = false, submit = false, onCl
     caption: string,
     disabled?: boolean,
     submit?: boolean,
-    onClick?: () => void,
+    onClick?: React.MouseEventHandler<HTMLButtonElement>,
     className?: string,
     style?: 'primary' | 'link'
 }) {

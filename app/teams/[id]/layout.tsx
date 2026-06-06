@@ -1,6 +1,6 @@
 import { leaveTeam } from "@/actions";
 import { appName } from "@/lib/app-info";
-import Button from "@/components/form/button";
+import LeaveTeamConfirm from "@/components/leave-team-confirm";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import type { Metadata } from 'next'
@@ -121,7 +121,7 @@ export default async function TeamLayout({ params, children }: Props) {
             {isMember ? (
                 <section className="flex flex-row justify-center">
                     <form action={leaveTeam.bind(null, id)}>
-                        <Button submit caption="Leave Team" style="link" />
+                        <LeaveTeamConfirm />
                     </form>
                 </section>
             ) : null}
