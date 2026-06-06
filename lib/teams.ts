@@ -5,6 +5,7 @@ import { contentDb, usersDb } from './db';
 import { getCitiesWithinRange } from "./location";
 import { prepDataForDb, removeLeadingArticles } from "./helper-functions";
 import { getCurrentUser } from "./users";
+import { destroyImage } from "./cloudinary";
 
 const convertDataToTeam = (data: {[key: string]: string | null}): Team => {
     return {
@@ -82,6 +83,7 @@ export async function getTeamInvitations(userId: string): Promise<TeamMember[]> 
 export async function respondToTeamInvitation(teamId: string, userId: string, role: string, accept: boolean): Promise<void> {
     const action = accept ? 'UPDATE team_members SET confirmed = 1' : 'DELETE FROM team_members';
     contentDb.prepare(`${action} WHERE team = ? AND id = ? AND role = ?`).run(teamId, userId, role);
+    if (!accept) deleteTeamIfNooneLeft(teamId);
 }
 
 export async function saveTeam(team: Team, members: { name: string, id: string | null, role: Role }[]): Promise<string> {
@@ -207,18 +209,22 @@ export async function leaveTeam(teamId: string, userId: string): Promise<{ delet
 
     contentDb.prepare('DELETE FROM team_members WHERE team = ? AND id = ?').run(teamId, userId);
 
+    const deletedTeam = await deleteTeamIfNooneLeft(teamId);
+    return { deletedTeam };
+}
+
+async function deleteTeamIfNooneLeft(teamId: string): Promise<boolean> {
     const remainingMembersWithIds = contentDb
-        .prepare('SELECT COUNT(*) AS total FROM team_members WHERE team = ? AND id IS NOT NULL AND id != ?')
+        .prepare(`SELECT COUNT(*) AS total FROM team_members WHERE team = ? AND id IS NOT NULL AND id != ? AND role != 'coach'`)
         .get(teamId, '') as { total: number };
-
     if (remainingMembersWithIds.total > 0) {
-        return { deletedTeam: false };
+        return false;
     }
-
+    const team = await (getTeam(teamId));
+    if (team) await destroyImage(team.image);
     contentDb.prepare('DELETE FROM team_members WHERE team = ?').run(teamId);
     contentDb.prepare('DELETE FROM teams WHERE id = ?').run(teamId);
     contentDb.prepare("DELETE FROM showing_cast WHERE role = 'team' AND id = ?").run(teamId);
     usersDb.prepare("DELETE FROM follows WHERE followId = ? AND type = 'team'").run(teamId);
-
-    return { deletedTeam: true };
+    return true;
 }
