@@ -55,7 +55,8 @@ export default function Input({
             )}
             <input
                 style={image ? {paddingLeft: '42px'} : undefined}
-                value={value}
+                value={onChange ? value : undefined}
+                defaultValue={onChange ? undefined : value}
                 onChange={onChange ? (e) => onChange(e.target.value) : undefined}
                 onBlur={onBlur ? (e) => onBlur(e.target.value) : undefined}
                 type={type}

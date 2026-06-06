@@ -8,7 +8,7 @@ import { theatres } from "@/lib/theatres";
 import { capitalize, removeLeadingArticles } from "@/lib/helper-functions";
 import { Team } from '@/types';
 import { uploadImage } from '@/lib/cloudinary';
-import { getTeam, getTeamMembers, leaveTeam as leaveTeamRecord, saveTeam, updateTeam as updateTeamRecord } from '@/lib/teams';
+import { getTeam, getTeamMembers, leaveTeam as leaveTeamRecord, saveTeam, updateTeam as updateTeamRecord, updateTeamDetails as updateTeamDetailsRecord } from '@/lib/teams';
 import { getCurrentUser, updateUser } from "@/lib/users";
 import { revalidatePath } from 'next/cache';
 
@@ -279,6 +279,67 @@ export async function updateTeam(teamId: string, prevState: void | { message?: s
         userId
     );
     revalidatePath(`/teams/${teamId}`);
+    redirect(`/teams/${teamId}`);
+}
+
+export async function updateTeamDetails(teamId: string, prevState: void | { message?: string }, formData: FormData) {
+    const userId = (await getCurrentUser())?.id;
+    if (!userId) throw new Error('You must be logged in to continue');
+
+    const team = await getTeam(teamId);
+    if (!team) throw new Error('Cannot find record of team');
+
+    const members = await getTeamMembers(teamId);
+    const canManageTeam = members.some((member) => (
+        member.id === userId &&
+        member.confirmed &&
+        member.role !== 'coach'
+    ));
+    if (!canManageTeam) throw new Error('You must be a member of this team to update it');
+
+    const data = Object.fromEntries(formData.entries());
+    const name = (data.name as string)?.trim();
+    if (!name) return { message: 'Team name is required' };
+
+    const imageFile = data.image as File;
+    let imageUrl = team.image;
+    if (imageFile && imageFile.size) {
+        if (imageFile.size > 5 * 1024 * 1024) {
+            return { message: 'Image file size exceeds 5MB limit' };
+        }
+        try {
+            imageUrl = await uploadImage(imageFile, 'teams');
+        } catch {
+            throw new Error('Image upload failed');
+        }
+    }
+
+    const checkedTheatres = Object.keys(data)
+        .filter(key => key.startsWith('theatre-') && Boolean((data[key] as string).trim()))
+        .map(key => data[key] as string);
+
+    const addedTheatres = Object.keys(data)
+        .filter(key => key.startsWith('added-theatre-') && Boolean((data[key] as string).trim()))
+        .map(key => data[key] as string);
+
+    const theatres = [...new Set(checkedTheatres.concat(addedTheatres))];
+
+    let city = (data.city as string)?.trim() || null;
+    if (city) city = capitalize(city);
+
+    let description = data.description as string || null;
+    if (description) description = description.replace(/\r\n/g, '<br>').replace(/\n/g, '<br>').replace(/\r/g, '<br>');
+
+    await updateTeamDetailsRecord(teamId, {
+        name,
+        image: imageUrl,
+        photoCredit: data.photoCredit as string || null,
+        city,
+        state: data.state as string || null,
+        theatres,
+        description
+    });
+    revalidatePath(`/teams/${teamId}`, 'layout');
     redirect(`/teams/${teamId}`);
 }
 

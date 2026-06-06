@@ -187,6 +187,18 @@ export async function updateTeam(teamId: string, updates: Partial<Team>, members
     return true;
 }
 
+export async function updateTeamDetails(teamId: string, updates: Partial<Team>): Promise<boolean> {
+    const data = prepDataForDb(updates);
+    const updateFields = Object.keys(data).map(key => `${key} = $${key}`).join(', ');
+    if (!updateFields) return true;
+
+    contentDb.prepare(`
+        UPDATE teams SET ${updateFields} WHERE id = $teamId
+    `).run({ ...data, teamId });
+
+    return true;
+}
+
 export async function leaveTeam(teamId: string, userId: string): Promise<{ deletedTeam: boolean }> {
     const confirmedMemberships = contentDb
         .prepare('SELECT * FROM team_members WHERE team = ? AND id = ? AND confirmed = 1')

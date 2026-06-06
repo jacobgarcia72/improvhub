@@ -5,8 +5,8 @@ import Input from "@/components/form/input";
 import nameGenerator from "@/lib/name-generator";
 import { useState } from "react";
 
-export default function NameInput() {
-    const [name, setName] = useState('');
+export default function TeamNameInput({ value = '' }: { value?: string }) {
+    const [name, setName] = useState(value);
     return (
         <div className="flex flex-row items-end">
             <div className="w-[calc(100%-98px)] pr-2">

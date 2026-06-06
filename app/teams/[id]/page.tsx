@@ -17,9 +17,14 @@ export default async function TeamPage({ params }: Props) {
 
     return <>
         {isMemberNotCoach ? (
-            <Link className="ml-4 mb-1" href={`/teams/${id}/manage-members`}>
-                <Button caption="Manage Members" />
-            </Link>
+            <div className="flex flex-row gap-2 justify-center mb-2">
+                <Link href={`/teams/${id}/manage-members`}>
+                    <Button caption="Manage Members" />
+                </Link>
+                <Link href={`/manage/team/${id}`}>
+                    <Button caption="Manage Team Details" />
+                </Link>
+            </div>
         ) : null}
         <CastList castMembers={members} />
     </>

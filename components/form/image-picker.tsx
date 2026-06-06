@@ -4,10 +4,11 @@ import { useRef, useState } from 'react';
 import Image from 'next/image';
 import Button from './button';
 
-export default function ImagePicker({ label = 'Image', name = 'image', square = false }: {
+export default function ImagePicker({ label = 'Image', name = 'image', square = false, currentImage }: {
     label?: string;
     name?: string;
     square?: boolean;
+    currentImage?: string | null;
 }) {
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
@@ -41,7 +42,15 @@ export default function ImagePicker({ label = 'Image', name = 'image', square = 
         <div className='flex flex-col'>
             <label htmlFor={name}>{label}</label>
             <div className='mb-2'>
-                {selectedImage && <Image className={`rounded${square && ' object-cover w-60 h-60'}`} src={selectedImage} alt="Selected image" width={500} height={500} />}
+                {(selectedImage || currentImage) && (
+                    <Image
+                        className={`rounded${square && ' object-cover w-60 h-60'}`}
+                        src={selectedImage || currentImage || ''}
+                        alt="Selected image"
+                        width={500}
+                        height={500}
+                    />
+                )}
             </div>
             <input
                 className='hidden'
@@ -52,7 +61,7 @@ export default function ImagePicker({ label = 'Image', name = 'image', square = 
                 ref={imageInput}
                 onChange={handleImageChange}
             />
-            <Button caption={!selectedImage ?  "Pick Image" : "Change Image"} onClick={handlePickImage} />
+            <Button caption={!(selectedImage || currentImage) ?  "Pick Image" : "Change Image"} onClick={handlePickImage} />
             {error && <p className='text-red-600'>{error}</p>}
         </div>
     )
