@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react';
 import Image from 'next/image';
 import Button from './button';
+import CoverPhoto from '../cover-photo';
 
 export default function ImagePicker({ label = 'Image', name = 'image', square = false, currentImage }: {
     label?: string;
@@ -42,15 +43,22 @@ export default function ImagePicker({ label = 'Image', name = 'image', square = 
         <div className='flex flex-col'>
             <label htmlFor={name}>{label}</label>
             <div className='mb-2'>
-                {(selectedImage || currentImage) && (
-                    <Image
-                        className={`rounded${square && ' object-cover w-60 h-60'}`}
-                        src={selectedImage || currentImage || ''}
-                        alt="Selected image"
-                        width={500}
-                        height={500}
-                    />
-                )}
+                {(selectedImage || currentImage) && <>
+                    {square ? (
+                        <Image
+                            className={`rounded object-cover w-60 h-60'}`}
+                            src={selectedImage || currentImage || ''}
+                            alt="Selected image"
+                            width={500}
+                            height={500}
+                        />
+                    ) : (
+                        <CoverPhoto
+                            src={selectedImage || currentImage || ''}
+                            alt="Selected image"
+                        />
+                    )}
+                </>}
             </div>
             <input
                 className='hidden'
