@@ -104,9 +104,6 @@ export default async function UserProfilePage({ params }: { params: Promise<{use
                     </Link>
                 </div>}
             </LayoutCard>
-            <LayoutCard header="Experience">
-                {user.experience}
-            </LayoutCard>
             <LayoutCard header="Website">
                 {user.website && <a href={user.website}>{user.website}</a>}
             </LayoutCard>

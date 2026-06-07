@@ -129,18 +129,21 @@ export const arrangeEventsByDate = (showings: Showing[], shows: Event[], startin
     return res;
 }
 
+export const toSnakeCase = (key: string): string => key.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const prepDataForDb = (data: { [key: string]: any }): { [key: string]: any } => {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const res: { [key: string]: any } = { }
     Object.keys(data).forEach((key) => {
+        const snakeKey = toSnakeCase(key);
         let value = data[key];
         if (typeof value === 'boolean') {
             value = value ? 1 : 0;
         } else if (Array.isArray(value)) {
             value = value.join(',');
         }
-        res[key] = value;
+        res[snakeKey] = value;
     })
     return res;
 }

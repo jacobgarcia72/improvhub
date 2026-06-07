@@ -1,35 +1,45 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use server';
 
 import { Followee, User } from "@/types";
-import { usersDb } from "./db";
+import { supabaseAdmin } from "./supabase-server";
 import { verifyAuth } from "./auth";
 import { revalidatePath } from "next/cache";
+import { toSnakeCase } from "./helper-functions";
 
-const convertDataToUser = (data: {[key: string]: string | null}, includePassword = false): User => {
+const convertDataToUser = (data: {[key: string]: any}, includePassword = false): User => {
     return {
         id: data.id as string,
         password: includePassword ? data.password as string : undefined,
-        joinDate: data.joinDate as string,
-        firstName: data.firstName as string,
-        lastName: data.lastName as string,
+        joinDate: data.join_date as string,
+        firstName: data.first_name as string,
+        lastName: data.last_name as string,
         pronouns: data.pronouns || undefined,
         headline: data.headline || undefined,
         bio: data.bio || undefined,
         theatres: data.theatres ? data.theatres.split(',') : undefined,
         city: data.city || undefined,
         state: data.state || undefined,
-        gender: data.gender || undefined,
-        orientation: data.orientation || undefined,
-        ethnicity: data.ethnicity || undefined,
         website: data.website || undefined,
-        experience: data.experience || undefined,
         image: data.image || undefined,
     }
 }
 
+const snakeCaseObject = (data: { [key: string]: any }) => {
+    return Object.keys(data).reduce((result: { [key: string]: any }, key) => {
+        result[toSnakeCase(key)] = data[key];
+        return result;
+    }, {} as { [key: string]: any });
+};
+
 export async function getUser(username: string, includePassword = false): Promise<User | null> {
-    const user = await usersDb.prepare('SELECT * FROM users WHERE id = ?').get(username) as {[key: string]: string | null};
-    return user ? convertDataToUser(user, includePassword) : null;
+    const { data, error } = await supabaseAdmin
+        .from('users')
+        .select('*')
+        .eq('id', username)
+        .maybeSingle();
+    if (error) throw error;
+    return data ? convertDataToUser(data, includePassword) : null;
 }
 
 export async function getUserName(username: string): Promise<string | null> {
@@ -39,74 +49,90 @@ export async function getUserName(username: string): Promise<string | null> {
 }
 
 export async function getAllUsers(): Promise<{ name: string, id: string, image?: string }[]> {
-    return usersDb
-        .prepare(`SELECT (firstName || ' ' || lastName) AS name, id, image FROM users`).all() as { name: string, id: string, image?: string }[];
+    const { data, error } = await supabaseAdmin
+        .from('users')
+        .select('first_name, last_name, id, image');
+    if (error) throw error;
+    return (data || []).map((user: any) => ({
+        name: `${user.first_name}${user.last_name ? ` ${user.last_name}` : ''}`,
+        id: user.id,
+        image: user.image || undefined
+    }));
 }
 
 export async function getCurrentUser(): Promise<User | null> {
     const user = (await verifyAuth()).user;
-    let userData: {[key: string]: string | null} | null = null;
-    if (user) {
-        userData = await usersDb.prepare('SELECT * FROM users WHERE id = ?').get(user.id) as {[key: string]: string | null} || null;
-    }
-    return userData ? convertDataToUser(userData) : null;
+    if (!user) return null;
+    return getUser(user.id);
 }
 
 export async function updateUser(userId: string, updates: {[key: string]: string | null}): Promise<void> {
-    const updateFields = Object.keys(updates).map(key => `${key} = $${key}`).join(', ');
-    usersDb.prepare(`
-        UPDATE users SET ${updateFields} WHERE id = $id
-    `).run({ ...updates, id: userId });
+    const { error } = await supabaseAdmin
+        .from('users')
+        .update(snakeCaseObject(updates))
+        .eq('id', userId);
+    if (error) throw error;
 }
 
 export async function getFollowing(userId: string, followId: string, type: Followee): Promise<boolean | null> {
-    const currentFollowStatus = usersDb
-        .prepare(`SELECT following FROM follows WHERE userId = ? AND followId = ? AND type = ?`)
-        .get(userId, followId, type) as {following: number | undefined}
-    const following = currentFollowStatus.following
-    return typeof following === 'number' ? Boolean(following) : null;
+    const { data, error } = await supabaseAdmin
+        .from('follows')
+        .select('following')
+        .eq('user_id', userId)
+        .eq('follow_id', followId)
+        .eq('type', type)
+        .maybeSingle();
+    if (error) throw error;
+    if (!data || typeof data.following !== 'number') return null;
+    return Boolean(data.following);
 }
 
 export async function getFollowerCount(followId: string, type: Followee): Promise<number | null> {
-    const data = usersDb
-        .prepare(`SELECT COUNT(*) AS total FROM follows WHERE followId = ? AND type = ?`)
-        .get(followId, type) as { total: number | undefined }
-    return typeof data.total === 'number' ? data.total : null;
+    const { count, error } = await supabaseAdmin
+        .from('follows')
+        .select('*', { count: 'exact', head: true })
+        .eq('follow_id', followId)
+        .eq('type', type);
+    if (error) throw error;
+    return count ?? 0;
 }
 
 export async function setFollowing(userId: string, followId: string, type: Followee): Promise<void> {
     const currentFollowStatus = await getFollowing(userId, followId, type);
-    let statement = '';
     if (currentFollowStatus === null) {
-        statement = `INSERT INTO follows (userId, followId, type, following) 
-            VALUES ($userId, $followId, $type, $following)`
+        const { error } = await supabaseAdmin
+            .from('follows')
+            .insert({ user_id: userId, follow_id: followId, type, following: 1 });
+        if (error) throw error;
     } else {
-        statement = `UPDATE follows SET following = $following
-            WHERE userId = $userId AND followId = $followId AND type = $type`
+        const { error } = await supabaseAdmin
+            .from('follows')
+            .update({ following: currentFollowStatus ? 0 : 1 })
+            .eq('user_id', userId)
+            .eq('follow_id', followId)
+            .eq('type', type);
+        if (error) throw error;
     }
-    usersDb.prepare(statement).run({userId, followId, type, following: currentFollowStatus ? 0 : 1});
-    if (type === 'team') revalidatePath (`/teams/${followId}`, 'layout');
+    if (type === 'team') revalidatePath(`/teams/${followId}`, 'layout');
 }
 
 export async function saveUser(user: User): Promise<void> {
-    usersDb.prepare(`
-        INSERT INTO users (
-            id,
-            password,
-            joinDate,
-            firstName,
-            lastName,
-            pronouns,
-            image
-        )
-        VALUES (
-            $id,
-            $password,
-            $joinDate,
-            $firstName,
-            $lastName,
-            $pronouns,
-            $image
-        )
-    `).run(user);
+    const { error } = await supabaseAdmin
+        .from('users')
+        .insert({
+            id: user.id,
+            password: user.password,
+            join_date: user.joinDate,
+            first_name: user.firstName,
+            last_name: user.lastName,
+            pronouns: user.pronouns,
+            headline: user.headline,
+            bio: user.bio,
+            theatres: user.theatres?.join(',') || null,
+            city: user.city,
+            state: user.state,
+            website: user.website,
+            image: user.image,
+        });
+    if (error) throw error;
 }

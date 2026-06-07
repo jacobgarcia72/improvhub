@@ -1,43 +1,56 @@
-import { Lucia } from "lucia";
-import { BetterSqlite3Adapter } from "@lucia-auth/adapter-sqlite";
-import { usersDb as db} from "./db";
+import crypto from "node:crypto";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { supabaseAdmin } from "./supabase-server";
 
-const adapter = new BetterSqlite3Adapter(db, {
-    user: 'users', // must match table name
-    session: 'sessions'
-});
-
-const lucia = new Lucia(adapter, {
-    sessionCookie: {
-        expires: false,
-        attributes: {
-            secure: process.env.NODE_ENV === 'production'
-        }
-    }
-});
+const COOKIE_NAME = "improvhub_session";
+const COOKIE_PATH = "/";
+const COOKIE_MAX_AGE = 60 * 60 * 24 * 30; // 30 days
 
 export async function createAuthSession(userId: string) {
-    const session = await lucia.createSession(userId, { });
-    const sessionCookie = lucia.createSessionCookie(session.id);
-    const { name, value, attributes } = sessionCookie;
-    (await cookies()).set(name, value, attributes);
+    const sessionId = crypto.randomUUID();
+    const expiresAt = Math.floor(Date.now() / 1000) + COOKIE_MAX_AGE;
+
+    const { error } = await supabaseAdmin
+        .from('sessions')
+        .insert({ id: sessionId, user_id: userId, expires_at: expiresAt });
+    if (error) throw error;
+
+    (await cookies()).set(COOKIE_NAME, sessionId, {
+        httpOnly: true,
+        path: COOKIE_PATH,
+        maxAge: COOKIE_MAX_AGE,
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production'
+    });
 }
 
 export async function verifyAuth() {
-    const sessionCookie = (await cookies()).get(lucia.sessionCookieName);
-    const sessionId = sessionCookie?.value;
-
-    if (sessionId) {
-        const result = await lucia.validateSession(sessionId);
-        return result;
-    } else {
-        return {
-            user: null,
-            session: null
-        }
+    const cookie = (await cookies()).get(COOKIE_NAME);
+    const sessionId = cookie?.value;
+    if (!sessionId) {
+        return { user: null, session: null };
     }
+
+    const { data: session, error: sessionError } = await supabaseAdmin
+        .from('sessions')
+        .select('*')
+        .eq('id', sessionId)
+        .maybeSingle();
+    if (sessionError || !session || session.expires_at < Math.floor(Date.now() / 1000)) {
+        return { user: null, session: null };
+    }
+
+    const { data: user, error: userError } = await supabaseAdmin
+        .from('users')
+        .select('*')
+        .eq('id', session.user_id)
+        .maybeSingle();
+    if (userError || !user) {
+        return { user: null, session: null };
+    }
+
+    return { user, session };
 }
 
 export async function isSignedIn(): Promise<boolean> {
@@ -47,15 +60,22 @@ export async function isSignedIn(): Promise<boolean> {
 export async function destroySession() {
     const { session } = await verifyAuth();
     if (!session) {
-        return {
-            error: 'Unauthorized'
-        }
+        return { error: 'Unauthorized' };
     }
 
-    await lucia.invalidateSession(session.id);
-    const sessionCookie = lucia.createBlankSessionCookie();
-    const { name, value, attributes } = sessionCookie;
-    (await cookies()).set(name, value, attributes);
+    const { error } = await supabaseAdmin
+        .from('sessions')
+        .delete()
+        .eq('id', session.id);
+    if (error) throw error;
+
+    (await cookies()).set(COOKIE_NAME, '', {
+        httpOnly: true,
+        path: COOKIE_PATH,
+        maxAge: 0,
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production'
+    });
 }
 
 export async function protectRoute() {

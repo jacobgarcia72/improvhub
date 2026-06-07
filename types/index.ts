@@ -99,11 +99,7 @@ export interface User {
     theatres?: string[];
     city?: string;
     state?: string;
-    gender?: string;
-    orientation?: string;
-    ethnicity?: string;
     website?: string;
-    experience?: string;
     image?: string;
 }
 
