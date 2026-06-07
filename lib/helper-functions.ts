@@ -130,20 +130,22 @@ export const arrangeEventsByDate = (showings: Showing[], shows: Event[], startin
 }
 
 export const toSnakeCase = (key: string): string => key.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
-
+export const toCamelCase = (key: string): string => key.toLowerCase().replace(/_([a-z0-9])/g, (_, char) => char.toUpperCase());
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const prepDataForDb = (data: { [key: string]: any }): { [key: string]: any } => {
+export const snakeCaseObject = (data: { [key: string]: any }) => {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const res: { [key: string]: any } = { }
-    Object.keys(data).forEach((key) => {
-        const snakeKey = toSnakeCase(key);
-        let value = data[key];
-        if (typeof value === 'boolean') {
-            value = value ? 1 : 0;
-        } else if (Array.isArray(value)) {
-            value = value.join(',');
-        }
-        res[snakeKey] = value;
-    })
-    return res;
-}
+    return Object.keys(data).reduce((result: { [key: string]: any }, key) => {
+        result[toSnakeCase(key)] = data[key];
+        return result;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+    }, {} as { [key: string]: any });
+};
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const camelCaseObject = (data: { [key: string]: any }) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return Object.keys(data).reduce((result: { [key: string]: any }, key) => {
+        result[toCamelCase(key)] = data[key];
+        return result;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+    }, {} as { [key: string]: any });
+};

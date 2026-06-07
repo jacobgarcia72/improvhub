@@ -95,7 +95,7 @@ export default async function UserProfilePage({ params }: { params: Promise<{use
                 )}
                 {isCurrentUser && ( 
                     <div className="pl-3 pt-1">
-                        <Checkbox name="lookingForTeam" label="Open to joining teams" />
+                        <Checkbox defaultChecked={user.openToJoinTeam} name="lookingForTeam" label="Open to joining teams" />
                     </div>
                 )}
                 {isCurrentUser && <div className="w-full flex flex-row justify-center">

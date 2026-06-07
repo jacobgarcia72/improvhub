@@ -5,41 +5,18 @@ import { Followee, User } from "@/types";
 import { supabaseAdmin } from "./supabase-server";
 import { verifyAuth } from "./auth";
 import { revalidatePath } from "next/cache";
-import { toSnakeCase } from "./helper-functions";
-
-const convertDataToUser = (data: {[key: string]: any}, includePassword = false): User => {
-    return {
-        id: data.id as string,
-        password: includePassword ? data.password as string : undefined,
-        joinDate: data.join_date as string,
-        firstName: data.first_name as string,
-        lastName: data.last_name as string,
-        pronouns: data.pronouns || undefined,
-        headline: data.headline || undefined,
-        bio: data.bio || undefined,
-        theatres: data.theatres ? data.theatres.split(',') : undefined,
-        city: data.city || undefined,
-        state: data.state || undefined,
-        website: data.website || undefined,
-        image: data.image || undefined,
-    }
-}
-
-const snakeCaseObject = (data: { [key: string]: any }) => {
-    return Object.keys(data).reduce((result: { [key: string]: any }, key) => {
-        result[toSnakeCase(key)] = data[key];
-        return result;
-    }, {} as { [key: string]: any });
-};
+import { camelCaseObject, snakeCaseObject } from "./helper-functions";
 
 export async function getUser(username: string, includePassword = false): Promise<User | null> {
-    const { data, error } = await supabaseAdmin
+    const { data } = await supabaseAdmin
         .from('users')
         .select('*')
         .eq('id', username)
         .maybeSingle();
-    if (error) throw error;
-    return data ? convertDataToUser(data, includePassword) : null;
+    return data ? camelCaseObject({
+        ...data,
+        password: includePassword ? data.password as string : '',
+    }) as User : null;
 }
 
 export async function getUserName(username: string): Promise<string | null> {
@@ -102,12 +79,12 @@ export async function setFollowing(userId: string, followId: string, type: Follo
     if (currentFollowStatus === null) {
         const { error } = await supabaseAdmin
             .from('follows')
-            .insert({ user_id: userId, follow_id: followId, type, following: 1 });
+            .insert({ user_id: userId, follow_id: followId, type, following: true });
         if (error) throw error;
     } else {
         const { error } = await supabaseAdmin
             .from('follows')
-            .update({ following: currentFollowStatus ? 0 : 1 })
+            .update({ following: !currentFollowStatus })
             .eq('user_id', userId)
             .eq('follow_id', followId)
             .eq('type', type);
@@ -128,7 +105,7 @@ export async function saveUser(user: User): Promise<void> {
             pronouns: user.pronouns,
             headline: user.headline,
             bio: user.bio,
-            theatres: user.theatres?.join(',') || null,
+            theatres: user.theatres,
             city: user.city,
             state: user.state,
             website: user.website,

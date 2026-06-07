@@ -19,7 +19,7 @@ async function MemberEntry(member: CastMember, noConfirm?: boolean) {
     if (member.id && (member.confirmed || noConfirm)) {
         return (
             <Link
-                className="link flex flex-row gap-2 items-center fit-content"
+                className="link flex flex-row gap-2 items-center w-fit"
                 href={`/profile/${member.id}`}
             >
                 {PlayerImage(member.id)}

@@ -4,40 +4,11 @@
 import { Team, Role, TeamMember } from "@/types";
 import { supabaseAdmin } from './supabase-server';
 import { getCitiesWithinRange } from "./location";
-import { prepDataForDb, removeLeadingArticles } from "./helper-functions";
+import { camelCaseObject, removeLeadingArticles, snakeCaseObject } from "./helper-functions";
 import { getCurrentUser } from "./users";
 import { destroyImage } from "./cloudinary";
+import { revalidatePath } from "next/cache";
 
-const convertDataToTeam = (data: { [key: string]: any }): Team => {
-    return {
-        id: data.id || '',
-        name: data.name || '',
-        image: data.image || null,
-        photoCredit: data.photo_credit || null,
-        city: data.city || null,
-        state: data.state || null,
-        theatres: typeof data.theatres === 'string' ? data.theatres.split(',') : data.theatres || [],
-        lookingForPlayers: Boolean(data.looking_for_players),
-        lookingForCoach: Boolean(data.looking_for_coach),
-        lookingForMusician: Boolean(data.looking_for_musician),
-        description: data.description || null
-    };
-};
-
-const convertDataToTeamMember = (data: { [key: string]: any }): TeamMember => {
-    let confirmed = null;
-    if (typeof data.confirmed === 'boolean') confirmed = data.confirmed;
-    if (typeof data.confirmed === 'number') confirmed = Boolean(data.confirmed);
-    return {
-        team: data.team as string,
-        name: data.name as string,
-        id: data.id,
-        role: data.role as Role,
-        dateAdded: data.date_added as string,
-        addedBy: data.added_by as string,
-        confirmed
-    };
-};
 
 export async function getTeam(id: string): Promise<Team | null> {
     const { data, error } = await supabaseAdmin
@@ -46,7 +17,7 @@ export async function getTeam(id: string): Promise<Team | null> {
         .eq('id', id)
         .maybeSingle();
     if (error) throw error;
-    return data ? convertDataToTeam(data) : null;
+    return data ? camelCaseObject(data) as Team : null;
 }
 
 export async function getAllTeams(): Promise<{ name: string, id: string, image?: string }[]> {
@@ -65,9 +36,9 @@ export async function getTeamsByTheatre(theatre: string) {
     const { data, error } = await supabaseAdmin
         .from('teams')
         .select('*')
-        .ilike('theatres', `%${removeLeadingArticles(theatre)}%`);
+        .or(`theatres.text.ilike.%${removeLeadingArticles(theatre)}%`);
     if (error) throw error;
-    return (data || []).map(convertDataToTeam);
+    return (data || []).map(camelCaseObject);
 }
 
 export async function getTeamsInRange(cityOrZipcode: string, miles: number) {
@@ -79,7 +50,7 @@ export async function getTeamsInRange(cityOrZipcode: string, miles: number) {
     if (error) throw error;
     return (data || [])
         .filter((team: any) => team.city && team.state && citiesInRange.includes(`${team.city} ${team.state}`))
-        .map(convertDataToTeam);
+        .map(camelCaseObject);
 }
 
 export async function getTeamMembershipsByUser(id: string): Promise<TeamMember[]> {
@@ -89,7 +60,7 @@ export async function getTeamMembershipsByUser(id: string): Promise<TeamMember[]
         .eq('id', id);
     if (error) throw error;
     if (!data?.length) return [];
-    return (data || []).map(convertDataToTeamMember);
+    return (data || []).map(camelCaseObject) as TeamMember[];
 }
 
 export async function getTeamsByUser(id: string): Promise<Team[]> {
@@ -105,7 +76,7 @@ export async function getTeamsByUser(id: string): Promise<Team[]> {
         .select('*')
         .in('id', teamIds);
     if (error) throw error;
-    return (data || []).map(convertDataToTeam);
+    return (data || []).map(camelCaseObject) as Team[];
 }
 
 export async function getTeamMembers(teamId: string): Promise<TeamMember[]> {
@@ -114,7 +85,7 @@ export async function getTeamMembers(teamId: string): Promise<TeamMember[]> {
         .select('*')
         .eq('team', teamId);
     if (error) throw error;
-    return (data || []).map(convertDataToTeamMember);
+    return (data || []).map(camelCaseObject) as TeamMember[];
 }
 
 export async function getTeamInvitations(userId: string): Promise<TeamMember[]> {
@@ -122,19 +93,20 @@ export async function getTeamInvitations(userId: string): Promise<TeamMember[]> 
         .from('team_members')
         .select('*')
         .eq('id', userId)
-        .eq('confirmed', 0);
+        .eq('confirmed', false);
     if (error) throw error;
-    return (data || []).map(convertDataToTeamMember);
+    return (data || []).map(camelCaseObject) as TeamMember[];
 }
 
 export async function respondToTeamInvitation(teamId: string, userId: string, role: string, accept: boolean): Promise<void> {
     if (accept) {
         const { error } = await supabaseAdmin
             .from('team_members')
-            .update({ confirmed: 1 })
+            .update({ confirmed: true })
             .eq('team', teamId)
             .eq('id', userId)
             .eq('role', role);
+        revalidatePath('/teams', 'layout')
         if (error) throw error;
     } else {
         const { error } = await supabaseAdmin
@@ -159,7 +131,6 @@ export async function saveTeam(team: Team, members: { name: string, id: string |
         existingTeam = await getTeam(teamId);
     }
     team.id = teamId;
-
     const { error: teamInsertError } = await supabaseAdmin
         .from('teams')
         .insert({
@@ -169,13 +140,13 @@ export async function saveTeam(team: Team, members: { name: string, id: string |
             photo_credit: team.photoCredit,
             city: team.city,
             state: team.state,
-            theatres: team.theatres?.join(',') || null,
-            looking_for_players: team.lookingForPlayers ? 1 : 0,
-            looking_for_coach: team.lookingForCoach ? 1 : 0,
-            looking_for_musician: team.lookingForMusician ? 1 : 0,
+            theatres: team.theatres,
+            looking_for_players: team.lookingForPlayers,
+            looking_for_coach: team.lookingForCoach,
+            looking_for_musician: team.lookingForMusician,
             description: team.description
         });
-    if (teamInsertError) throw teamInsertError;
+    if (teamInsertError) console.error(teamInsertError);
 
     const creator = (await getCurrentUser())?.id;
     const timestamp = new Date().toISOString();
@@ -186,7 +157,7 @@ export async function saveTeam(team: Team, members: { name: string, id: string |
         role,
         date_added: timestamp,
         added_by: creator,
-        confirmed: id ? (id === creator ? 1 : 0) : null
+        confirmed: id ? id === creator : null
     }));
     if (memberRows.length) {
         const { error: memberInsertError } = await supabaseAdmin
@@ -198,11 +169,10 @@ export async function saveTeam(team: Team, members: { name: string, id: string |
 }
 
 export async function updateTeam(teamId: string, updates: Partial<Team>, members: { name: string, id: string | null, role: Role }[], addedBy: string): Promise<boolean> {
-    const data = prepDataForDb(updates);
-    if (Object.keys(data).length) {
+    if (Object.keys(updates).length) {
         const { error } = await supabaseAdmin
             .from('teams')
-            .update(data)
+            .update(snakeCaseObject(updates))
             .eq('id', teamId);
         if (error) throw error;
     }
@@ -225,11 +195,11 @@ export async function updateTeam(teamId: string, updates: Partial<Team>, members
     const timestamp = new Date().toISOString();
     const memberRows = members.map((member) => {
         const existingMember = getExistingMember(member);
-        let confirmed: number | null = null;
+        let confirmed: boolean | null = null;
         if (typeof existingMember?.confirmed === 'boolean') {
-            confirmed = existingMember.confirmed ? 1 : 0;
+            confirmed = existingMember.confirmed;
         } else if (member.id) {
-            confirmed = member.id === addedBy ? 1 : 0;
+            confirmed = member.id === addedBy;
         }
         return {
             team: teamId,
@@ -252,11 +222,10 @@ export async function updateTeam(teamId: string, updates: Partial<Team>, members
 }
 
 export async function updateTeamDetails(teamId: string, updates: Partial<Team>): Promise<boolean> {
-    const data = prepDataForDb(updates);
-    if (!Object.keys(data).length) return true;
+    if (!Object.keys(updates).length) return true;
     const { error } = await supabaseAdmin
         .from('teams')
-        .update(data)
+        .update(snakeCaseObject(updates))
         .eq('id', teamId);
     if (error) throw error;
     return true;
@@ -268,7 +237,7 @@ export async function leaveTeam(teamId: string, userId: string): Promise<{ delet
         .select('*')
         .eq('team', teamId)
         .eq('id', userId)
-        .eq('confirmed', 1);
+        .eq('confirmed', true);
     if (membershipError) throw membershipError;
     if (!confirmedMemberships?.length) return { deletedTeam: false };
 

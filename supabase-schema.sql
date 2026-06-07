@@ -9,11 +9,14 @@ create table if not exists users (
   pronouns text,
   headline text,
   bio text,
-  theatres text,
+  theatres text[],
   city text,
   state text,
   website text,
-  image text
+  image text,
+  open_to_join_team boolean,
+  open_to_accompany_team boolean,
+  open_to_coach_team boolean
 );
 
 create table if not exists sessions (
@@ -46,11 +49,11 @@ create table if not exists shows (
 create table if not exists showings (
   event_id text not null references shows(id) on delete cascade,
   date_time text not null,
-  looking_for_teams integer,
-  looking_for_players integer,
-  looking_for_directors integer,
-  looking_for_musician integer,
-  looking_for_tech integer,
+  looking_for_teams boolean,
+  looking_for_players boolean,
+  looking_for_directors boolean,
+  looking_for_musician boolean,
+  looking_for_tech boolean,
   primary key (event_id, date_time)
 );
 
@@ -69,13 +72,10 @@ create table if not exists teams (
   photo_credit text,
   city text,
   state text,
-  theatres text,
-  unconfirmed_players text,
-  looking_for_players integer,
-  unconfirmed_coach text,
-  looking_for_coach integer,
-  unconfirmed_musician text,
-  looking_for_musician integer,
+  theatres text[],
+  looking_for_players boolean,
+  looking_for_coach boolean,
+  looking_for_musician boolean,
   description text
 );
 
@@ -86,7 +86,7 @@ create table if not exists team_members (
   role text not null,
   date_added text not null,
   added_by text not null,
-  confirmed integer,
+  confirmed boolean,
   primary key (team, name, date_added)
 );
 
@@ -94,5 +94,5 @@ create table if not exists follows (
   user_id text not null,
   follow_id text not null,
   type text not null,
-  following integer not null
+  following boolean not null
 );

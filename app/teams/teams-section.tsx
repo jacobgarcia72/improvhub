@@ -1,18 +1,15 @@
 import MiniCard from "@/components/mini-card";
-import { getTeam, getTeamMembershipsByUser } from "@/lib/teams";
-import { getCurrentUser } from "@/lib/users";
-import { Role } from "@/types";
+import { getTeam } from "@/lib/teams";
+import { Role, TeamMember } from "@/types";
 
 export default async function TeamsSection({
-    roles, header
+    roles, header, teamMemberships
 } : {
     roles: Role[],
-    header: string
+    header: string,
+    teamMemberships: TeamMember[]
 }) {
-    const user = await getCurrentUser();
-    if (!user) return null;
-    const allMemberships = await getTeamMembershipsByUser(user.id);
-    const membershipsByRoles = allMemberships.filter(
+    const membershipsByRoles = teamMemberships.filter(
         (m) => roles.includes(m.role as Role) && m.confirmed
     );
     const uniqueTeams = [...new Map(membershipsByRoles.map((m) => [m.team, m])).values()];

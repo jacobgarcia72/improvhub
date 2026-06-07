@@ -101,6 +101,9 @@ export interface User {
     state?: string;
     website?: string;
     image?: string;
+    openToJoinTeam?: boolean;
+    openToAccompanyTeam?: boolean;
+    openToCoachTeam?: boolean;
 }
 
 export type Followee = 'team' | 'theatre' | 'user';

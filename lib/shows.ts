@@ -3,51 +3,10 @@
 
 import slugify from 'slugify';
 
-import { Candence, Event, Role, ShowCastMember, Showing } from "@/types";
-import { prepDataForDb, removeLeadingArticles } from './helper-functions';
+import { Event, ShowCastMember, Showing } from "@/types";
+import { camelCaseObject, removeLeadingArticles, snakeCaseObject } from './helper-functions';
 import { supabaseAdmin } from './supabase-server';
 import { getCitiesWithinRange } from './location';
-
-const convertDataToShow = (data: { [key: string]: any }): Event => {
-    return {
-        id: data.id as string,
-        creatorId: data.creator_id as string,
-        admins: typeof data.admins === 'string' ? data.admins.split(',') : data.admins || [],
-        title: data.title as string,
-        recurringDay: data.recurring_day === null ? null : Number(data.recurring_day),
-        recurringTime: data.recurring_time || null,
-        cadence: data.cadence as Candence || null,
-        description: data.description || null,
-        theatre: data.theatre || null,
-        city: data.city || null,
-        state: data.state || null,
-        price: data.price === null ? null : Number(data.price),
-        doorPrice: data.door_price === null ? null : Number(data.door_price),
-        ticketsUrl: data.tickets_url || null,
-        image: data.image || null,
-        photoCredit: data.photo_credit || null,
-        runtime: data.runtime || null,
-        notes: data.notes || null,
-    };
-};
-
-const convertDataToShowing = (data: { [key: string]: any }): Showing => ({
-    eventId: data.event_id as string,
-    dateTime: data.date_time as string,
-    lookingForTeams: Boolean(data.looking_for_teams),
-    lookingForPlayers: Boolean(data.looking_for_players),
-    lookingForDirectors: Boolean(data.looking_for_directors),
-    lookingForMusician: Boolean(data.looking_for_musician),
-    lookingForTech: Boolean(data.looking_for_tech)
-});
-
-const convertDataToShowCastMember = (data: { [key: string]: any }): ShowCastMember => ({
-    showId: data.show_id as string,
-    dateTime: data.date_time as string,
-    role: data.role as Role | 'team',
-    name: data.name as string,
-    id: data.id as string
-});
 
 export async function getShow(id: string) {
     const { data, error } = await supabaseAdmin
@@ -56,7 +15,7 @@ export async function getShow(id: string) {
         .eq('id', id)
         .maybeSingle();
     if (error) throw error;
-    return data ? convertDataToShow(data) : null;
+    return data ? camelCaseObject(data) : null;
 }
 
 export async function getShowings(eventId: string): Promise<Showing[]> {
@@ -65,7 +24,7 @@ export async function getShowings(eventId: string): Promise<Showing[]> {
         .select('*')
         .eq('event_id', eventId);
     if (error) throw error;
-    return (data || []).map(convertDataToShowing);
+    return (data || []).map(camelCaseObject) as Showing[];
 }
 
 export async function getShowing(eventId: string, dateTime: string): Promise<Showing | null> {
@@ -77,7 +36,7 @@ export async function getShowing(eventId: string, dateTime: string): Promise<Sho
         .eq('date_time', normalizedDateTime)
         .maybeSingle();
     if (error) throw error;
-    return data ? convertDataToShowing(data) : null;
+    return data ? camelCaseObject(data) as Showing : null;
 }
 
 export async function getShowingsForEvents(eventIds: string[]): Promise<Showing[]> {
@@ -86,7 +45,7 @@ export async function getShowingsForEvents(eventIds: string[]): Promise<Showing[
         .select('*')
         .in('event_id', eventIds);
     if (error) throw error;
-    return (data || []).map(convertDataToShowing);
+    return (data || []).map(camelCaseObject) as Showing[];
 }
 
 export async function getShowCast(showId: string, dateTime: string): Promise<ShowCastMember[]> {
@@ -96,7 +55,7 @@ export async function getShowCast(showId: string, dateTime: string): Promise<Sho
         .eq('show_id', showId)
         .eq('date_time', dateTime);
     if (error) throw error;
-    return (data || []).map(convertDataToShowCastMember);
+    return (data || []).map(camelCaseObject) as ShowCastMember[];
 }
 
 export async function getShowsByTheatre(theatre: string) {
@@ -105,7 +64,7 @@ export async function getShowsByTheatre(theatre: string) {
         .select('*')
         .ilike('theatre', `%${removeLeadingArticles(theatre)}%`);
     if (error) throw error;
-    return (data || []).map(convertDataToShow);
+    return (data || []).map(camelCaseObject);
 }
 
 export async function getShowsInRange(cityOrZipcode: string, miles: number) {
@@ -117,7 +76,7 @@ export async function getShowsInRange(cityOrZipcode: string, miles: number) {
     if (error) throw error;
     return (data || [])
         .filter((show: any) => show.city && show.state && citiesInRange.includes(`${show.city} ${show.state}`))
-        .map(convertDataToShow);
+        .map(camelCaseObject);
 }
 
 export async function saveShow(show: Event, showings: Showing[] | null): Promise<string> {
@@ -137,7 +96,7 @@ export async function saveShow(show: Event, showings: Showing[] | null): Promise
         .insert({
             id: show.id,
             creator_id: show.creatorId,
-            admins: show.admins.join(','),
+            admins: show.admins,
             title: show.title,
             recurring_day: show.recurringDay,
             recurring_time: show.recurringTime,
@@ -171,10 +130,9 @@ export async function saveShow(show: Event, showings: Showing[] | null): Promise
 }
 
 export async function updateShowing(showId: string, dateTime: string, updates: Partial<Showing>, cast?: Partial<ShowCastMember>[]): Promise<boolean> {
-    const data = prepDataForDb(updates);
     const { error: updateError } = await supabaseAdmin
         .from('showings')
-        .update(data)
+        .update(snakeCaseObject(updates))
         .eq('event_id', showId)
         .eq('date_time', dateTime);
     if (updateError) throw updateError;
