@@ -27,7 +27,7 @@ export default function MiniCard({ item, type }: { item: Event | Team, type: str
                 ) : (
                     <div className="w-[48px] h-full" />
                 )}
-                <div className="w-full h-full pr-2 pb-1 pt-3 pl-1">
+                <div className="w-full h-full pr-2 pb-1 pt-3 pl-2">
                     <h2 className="leading-none text-lg pt-1 pb-1 text-slate-900 overflow-hidden text-ellipsis">{name}</h2>
                     <div className="h-full fade-out text-sm text-gray-700 overflow-hidden text-ellipsis flex flex-col gap-1 pt-1">
                         {item.description ? (

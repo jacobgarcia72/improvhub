@@ -79,7 +79,7 @@ button.icon-button {
 main {
   padding: 5px;
   padding-bottom: 32px;
-  min-height: calc(100vh - 50px);
+  min-height: 150px;
   display: flex;
   align-items: center;
   justify-content: center;
