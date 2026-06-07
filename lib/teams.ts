@@ -82,6 +82,16 @@ export async function getTeamsInRange(cityOrZipcode: string, miles: number) {
         .map(convertDataToTeam);
 }
 
+export async function getTeamMembershipsByUser(id: string): Promise<TeamMember[]> {
+    const { data, error } = await supabaseAdmin
+        .from('team_members')
+        .select('*')
+        .eq('id', id);
+    if (error) throw error;
+    if (!data?.length) return [];
+    return (data || []).map(convertDataToTeamMember);
+}
+
 export async function getTeamsByUser(id: string): Promise<Team[]> {
     const { data: memberships, error: membershipError } = await supabaseAdmin
         .from('team_members')

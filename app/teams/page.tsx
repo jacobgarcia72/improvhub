@@ -1,12 +1,13 @@
 import Link from "next/link";
-import MyTeams from "./my-teams";
 import TeamInvitations from "./team-invitations";
 import Button from "@/components/form/button";
+import TeamsSection from "./teams-section";
 
 export default function TeamsPage() {
     return <>
         <TeamInvitations />
-        <MyTeams />
+        <TeamsSection header="My Teams" roles={['player', 'musician']} />
+        <TeamsSection header="Teams I Coach" roles={['coach']} />
         <section className="flex flex row gap-2">
             <Link href="/create/team">
                 <Button caption="New Team" />
