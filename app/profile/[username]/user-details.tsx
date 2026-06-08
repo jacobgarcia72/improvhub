@@ -1,9 +1,13 @@
 'use client'
+import { capitalize } from "@/lib/helper-functions";
 import { optimizeImage } from "@/lib/optimize-image";
 import { User } from "@/types";
 import Image from "next/image";
 
-export default function UserDetails({ user } : { user: User }) {
+export default function UserDetails({ user, userRoles }: {
+    user: User,
+    userRoles?: { [role: string]: boolean }
+}) {
     const initials = user.firstName[0] + user.lastName[0];
     const displayName = `${user.firstName} ${user.lastName}`;
     return <div className="flex flex-row">
@@ -17,8 +21,9 @@ export default function UserDetails({ user } : { user: User }) {
                 </div>
             )}
         </div>
-        <div className="p-3 flex flex-col justify-end text-mist-700">
-            <h1 className="text-2xl font-thin">{displayName}{user.pronouns && <span className="text-sm">&nbsp;({user.pronouns})</span>}</h1>
+        <div className="pl-3 pb-1 flex flex-col justify-end text-mist-700">
+            <h1 className="text-2xl font-thin">{displayName}{user.pronouns && <span className="text-sm">&nbsp;&nbsp;({user.pronouns})</span>}</h1>
+            {userRoles ? <h2 className="pl-1 flex flex-row text-mist-500">{Object.keys(userRoles).filter((role) => userRoles[role]).map(capitalize).join(`\u2002\u2022\u2002`)}</h2> : null}
         </div>
     </div>
 }

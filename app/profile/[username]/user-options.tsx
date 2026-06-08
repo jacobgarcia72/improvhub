@@ -61,7 +61,7 @@ export default function UserOptions({ user, userRoles }: {
     }
     return (
         <div className="flex flex-col">
-            <UserDetails user={user} />
+            <UserDetails user={user} userRoles={userRoles} />
             <div className="flex flex-row justify-center">
                 <Button style="link"
                     caption="Edit User Details"

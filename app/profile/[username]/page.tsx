@@ -43,7 +43,7 @@ export default async function UserProfilePage({ params }: { params: Promise<{use
 
     const authUser = await verifyAuth();
     const isCurrentUser = username === authUser.user?.id;
-    const userRoles = isCurrentUser ? (await getUserRoles(username)) ?? undefined : undefined;
+    const userRoles = (await getUserRoles(username)) ?? undefined;
 
     const teams = await getTeamsByUser(username);
     return (
@@ -51,7 +51,7 @@ export default async function UserProfilePage({ params }: { params: Promise<{use
             <LayoutCard>
                 {isCurrentUser ? (
                     <UserOptions user={user} userRoles={userRoles} />
-                ) : <UserDetails user={user} />}
+                ) : <UserDetails user={user} userRoles={userRoles} />}
             </LayoutCard>
             <LayoutCard header={user.bio ? "Bio" : ''}>
                 {isCurrentUser ? (
