@@ -42,7 +42,6 @@ const adjectives = [
     'Cheap',
     'Cherry',
     'Velvet',
-    'Shy',
     'Brave',
     'Cursed',
     'Mighty',

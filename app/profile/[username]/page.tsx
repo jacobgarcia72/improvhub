@@ -2,7 +2,7 @@ import { logout } from "@/actions/auth-actions";
 import Loader from "@/components/loader";
 import Button from "@/components/form/button";
 import { isSignedIn, verifyAuth } from "@/lib/auth";
-import { getUser } from "@/lib/users";
+import { getUser, getUserRoles } from "@/lib/users";
 import { User } from "@/types";
 import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
@@ -41,14 +41,16 @@ export default async function UserProfilePage({ params }: { params: Promise<{use
         redirect(`/login?reroute=profile%2F${username}`);
     }
 
-    const isCurrentUser = username === (await verifyAuth()).user?.id;
+    const authUser = await verifyAuth();
+    const isCurrentUser = username === authUser.user?.id;
+    const userRoles = isCurrentUser ? (await getUserRoles(username)) ?? undefined : undefined;
 
     const teams = await getTeamsByUser(username);
     return (
         <Suspense fallback={<Loader />}>
             <LayoutCard>
                 {isCurrentUser ? (
-                    <UserOptions user={user} />
+                    <UserOptions user={user} userRoles={userRoles} />
                 ) : <UserDetails user={user} />}
             </LayoutCard>
             <LayoutCard header={user.bio ? "Bio" : ''}>

@@ -20,6 +20,23 @@ export async function getUser(username: string, includePassword = false): Promis
     }) as User : null;
 }
 
+export async function getUserRoles(userId: string): Promise<{ [role: string]: boolean } | null> {
+    const { data, error } = await supabaseAdmin
+        .from('user_roles')
+        .select('*')
+        .eq('user_id', userId)
+        .maybeSingle();
+    if (error) throw error;
+    if (!data) return null;
+    return {
+        player: Boolean(data.player),
+        tech: Boolean(data.tech),
+        director: Boolean(data.director),
+        musician: Boolean(data.musician),
+        coach: Boolean(data.coach),
+    };
+}
+
 export async function getUserName(username: string): Promise<string | null> {
     const user = await getUser(username);
     if (user) return `${user.firstName}${user.lastName ? ` ${user.lastName}` : ''}`;
@@ -44,7 +61,7 @@ export async function getCurrentUser(): Promise<User | null> {
     return getUser(user.id);
 }
 
-export async function updateUser(updates: { [key: string]: any }): Promise<void> {
+export async function updateUser(updates: { [key: string]: any }, userRoles?: { [role: string]: boolean }): Promise<void> {
     const user = (await verifyAuth()).user;
     if (!user) return;
     let oldImage = '';
@@ -55,6 +72,17 @@ export async function updateUser(updates: { [key: string]: any }): Promise<void>
         .eq('id', user.id);
     if (error) throw error;
     if (oldImage) destroyImage(oldImage);
+    if (userRoles) {
+        const { error: roleDeleteError } = await supabaseAdmin
+            .from('user_roles')
+            .delete()
+            .eq('user_id', user.id);
+        if (roleDeleteError) throw roleDeleteError;
+        const { error: roleError } = await supabaseAdmin
+            .from('user_roles')
+            .insert({ ...userRoles, user_id: user.id });
+        if (roleError) throw roleError;
+    }
 }
 
 export async function getFollowing(userId: string, followId: string, type: Followee): Promise<boolean | null> {
@@ -99,7 +127,7 @@ export async function setFollowing(userId: string, followId: string, type: Follo
     if (type === 'team') revalidatePath(`/teams/${followId}`, 'layout');
 }
 
-export async function saveUser(user: User): Promise<void> {
+export async function saveUser(user: User, userRoles?: { [role: string]: boolean }): Promise<void> {
     const { error } = await supabaseAdmin
         .from('users')
         .insert({
@@ -117,4 +145,10 @@ export async function saveUser(user: User): Promise<void> {
             image: user.image,
         });
     if (error) throw error;
+    if (userRoles) {
+        const { error: roleError } = await supabaseAdmin
+        .from('user_roles')
+        .insert({ ...userRoles, user_id: user.id });
+        if (roleError) throw roleError;
+    }
 }

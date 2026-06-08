@@ -5,11 +5,12 @@ import Image from 'next/image';
 import Button from './button';
 import CoverPhoto from '../cover-photo';
 
-export default function ImagePicker({ label = 'Image', name = 'image', square = false, currentImage }: {
+export default function ImagePicker({ label = 'Image', name = 'image', square = false, currentImage, onChange }: {
     label?: string;
     name?: string;
     square?: boolean;
     currentImage?: string | null;
+    onChange?: () => void;
 }) {
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
@@ -37,6 +38,7 @@ export default function ImagePicker({ label = 'Image', name = 'image', square = 
         } else {
             setSelectedImage(null);
         }
+        if (onChange) onChange();
     }
 
     return (

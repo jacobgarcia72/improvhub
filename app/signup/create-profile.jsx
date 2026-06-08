@@ -5,6 +5,8 @@ import Form from '@/components/form/form';
 import Autocomplete from '@/components/form/autocomplete';
 import { createUser } from '@/actions/auth-actions';
 import UsernameInput from './username-input';
+import Checkbox from '@/components/form/checkbox';
+import { capitalize } from '@/lib/helper-functions';
 
 export default function CreateProfileForm() {
     return (
@@ -26,6 +28,16 @@ export default function CreateProfileForm() {
                     <Input label="First Name" name="firstName" maxLength={20} required />
                     <Input label="Last Name" name="lastName" maxLength={20} required />
                     <Autocomplete options={pronouns} name="pronouns" maxLength={20} label="Pronouns" />
+                </div>
+                <div className="grid gap-4 sm:grid-cols-5">
+                    {['player', 'tech', 'director', 'musician', 'coach'].map((role) => (
+                        <Checkbox
+                            key={role}
+                            defaultChecked={role === 'player'}
+                            name={role}
+                            label={capitalize(role)}
+                        />
+                    ))}
                 </div>
             </Form>
         </section>

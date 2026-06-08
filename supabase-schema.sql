@@ -24,6 +24,15 @@ create table if not exists sessions (
   expires_at integer not null
 );
 
+create table if not exists user_roles (
+  user_id text not null references users(id) on delete cascade,
+  player boolean,
+  tech boolean,
+  director boolean,
+  musician boolean,
+  coach boolean
+);
+
 create table if not exists shows (
   id text primary key,
   creator_id text not null,
@@ -90,8 +99,23 @@ create table if not exists team_members (
 );
 
 create table if not exists follows (
-  user_id text not null,
+  user_id text not null references users(id) on delete cascade,
   follow_id text not null,
   type text not null,
   following boolean not null
 );
+
+-- Grant privileges on sessions table
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.sessions TO service_role;
+
+-- Grant privileges on other tables your app writes to
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.shows TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.showings TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.showing_cast TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.teams TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.team_members TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.follows TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.user_roles TO service_role;
+
+-- Grant sequence privileges for auto-incrementing IDs (if used)
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO service_role;

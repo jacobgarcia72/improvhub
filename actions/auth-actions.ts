@@ -41,9 +41,12 @@ export async function createUser(prevState: void | { message?: string }, formDat
         lastName,
         pronouns: formData.get('pronouns') as string,
     }
-
+    const userRoles: { [role: string]: boolean } = { };
+    ['player', 'tech', 'director', 'musician', 'coach'].forEach((role) => {
+        userRoles[role] = Boolean(formData.get(role));
+    });
     try {
-        await saveUser(user);
+        await saveUser(user, userRoles);
         await createAuthSession(username);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
@@ -81,32 +84,35 @@ export async function logout() {
     redirect('/login');
 }
 
-export async function updateUserInfo(prevState: void | { message?: string }, formData: FormData) {
+export async function updateUserInfo(prevState: void | { message?: string }, formData: FormData, updateImage: boolean) {
     const firstName = (formData.get('firstName') as string).trim();
     const lastName = (formData.get('lastName') as string).trim();
 
     if (!firstName) return { message: 'First Name is required' };
     if (!lastName) return { message: 'Last Name is required' };
-
-    const imageFile = formData.get('image') as File;
-    let imageUrl = '';
-    if (imageFile && imageFile.size) {
-        if (imageFile.size > 5 * 1024 * 1024) { // 5MB limit
-            return { message: 'Image file size exceeds 5MB limit' };
-        }
-        try {
-            imageUrl = await uploadImage(imageFile, 'users');
-        } catch {
-            throw new Error('Image upload failed');
-        }
-    }
     const userUpdates: Partial<User> = {
-        image: imageUrl,
         firstName,
         lastName,
         pronouns: formData.get('pronouns') as string,
+    };
+    if (updateImage) {
+        const imageFile = formData.get('image') as File;
+        if (imageFile && imageFile.size) {
+            if (imageFile.size > 5 * 1024 * 1024) { // 5MB limit
+                return { message: 'Image file size exceeds 5MB limit' };
+            }
+            try {
+                userUpdates.image = await uploadImage(imageFile, 'users');
+            } catch {
+                throw new Error('Image upload failed');
+            }
+        }
     }
-    await updateUser(userUpdates);
+    const userRoles: { [role: string]: boolean } = { };
+    ['player', 'tech', 'director', 'musician', 'coach'].forEach((role) => {
+        userRoles[role] = Boolean(formData.get(role));
+    });
+    await updateUser(userUpdates, userRoles);
     revalidatePath(`/profile`, 'layout');
 }
 export async function updateUserBio(prevState: void | { message?: string }, formData: FormData) {

@@ -17,6 +17,7 @@ export default function FormSubmit({ caption = 'Submit', cancel }: { caption?: s
                 style="link"
                 caption="Cancel"
                 onClick={cancel}
+                disabled={pending}
             />}
         </div>
     )
