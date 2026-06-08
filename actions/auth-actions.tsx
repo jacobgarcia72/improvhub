@@ -3,8 +3,9 @@
 import { createAuthSession, destroySession } from "@/lib/auth";
 import { uploadImage } from "@/lib/cloudinary";
 import { hashUserPassword, verifyPassword } from "@/lib/hash";
-import { getUser, saveUser } from "@/lib/users";
+import { getUser, saveUser, updateUser } from "@/lib/users";
 import { User } from "@/types";
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 export async function createUser(prevState: void | { message?: string }, formData: FormData) {
@@ -78,4 +79,43 @@ export async function login(redirectRoute = '/', prevState: void | { message?: s
 export async function logout() {
     await destroySession();
     redirect('/login');
+}
+
+export async function updateUserInfo(prevState: void | { message?: string }, formData: FormData) {
+    const firstName = (formData.get('firstName') as string).trim();
+    const lastName = (formData.get('lastName') as string).trim();
+
+    if (!firstName) return { message: 'First Name is required' };
+    if (!lastName) return { message: 'Last Name is required' };
+
+    const imageFile = formData.get('image') as File;
+    let imageUrl = '';
+    if (imageFile && imageFile.size) {
+        if (imageFile.size > 5 * 1024 * 1024) { // 5MB limit
+            return { message: 'Image file size exceeds 5MB limit' };
+        }
+        try {
+            imageUrl = await uploadImage(imageFile, 'users');
+        } catch {
+            throw new Error('Image upload failed');
+        }
+    }
+    const userUpdates: Partial<User> = {
+        image: imageUrl,
+        firstName,
+        lastName,
+        pronouns: formData.get('pronouns') as string,
+    }
+    await updateUser(userUpdates);
+    revalidatePath(`/profile`, 'layout');
+}
+export async function updateUserBio(prevState: void | { message?: string }, formData: FormData) {
+    const bio = (formData.get('bio') as string).trim().replace(/\r\n/g, '<br>').replace(/\n/g, '<br>').replace(/\r/g, '<br>');
+    await updateUser({ bio });
+    revalidatePath(`/profile`, 'layout');
+}
+export async function updateUserWebsite(prevState: void | { message?: string }, formData: FormData) {
+    const website = (formData.get('website') as string).trim();
+    await updateUser({ website });
+    revalidatePath(`/profile`, 'layout');
 }

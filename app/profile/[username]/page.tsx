@@ -2,10 +2,8 @@ import { logout } from "@/actions/auth-actions";
 import Loader from "@/components/loader";
 import Button from "@/components/form/button";
 import { isSignedIn, verifyAuth } from "@/lib/auth";
-import { optimizeImage } from "@/lib/cloudinary";
 import { getUser } from "@/lib/users";
 import { User } from "@/types";
-import Image from "next/image";
 import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 import Link from "next/link";
@@ -14,6 +12,10 @@ import MiniCard from "@/components/mini-card";
 import CommunityOptions from "./community-options";
 import CommunityDetails from "./community-details";
 import OpenToCheckbox from "./open-to-checkbox";
+import UserDetails from "./user-details";
+import UserOptions from "./user-options";
+import WebsiteOptions from "./website-options";
+import BioOptions from "./bio-options";
 
 function LayoutCard({
     children, className, header
@@ -41,37 +43,20 @@ export default async function UserProfilePage({ params }: { params: Promise<{use
 
     const isCurrentUser = username === (await verifyAuth()).user?.id;
 
-    let displayName = user.firstName;
-    let initials = user.firstName[0];
-    if (user.lastName) {
-        displayName += ` ${user.lastName}`
-        initials += user.lastName[0];
-    }
-
     const teams = await getTeamsByUser(username);
-    // let theatres = user.theatre || '';
-    // if (theatres && user.secondaryTheatre) theatres += `, ${user.secondaryTheatre}`
-
     return (
         <Suspense fallback={<Loader />}>
-            <LayoutCard className="flex flex-row">
-                <div className="pl-4">
-                    {user.image ? (
-                        <Image loading="eager" className="object-cover rounded-xl w-32 h-32"
-                            src={optimizeImage(user.image, 320, 320, null, true)} alt={displayName} width={120} height={120} />
-                    ) : (
-                        <div className="h-full w-full">{initials}</div>
-                    )}
-                </div>
-                <div className="pl-2 flex flex-col justify-end pl-4">
-                    <h1 className="text-xl">{displayName}{user.pronouns && <span className="text-sm">&nbsp;({user.pronouns})</span>}</h1>
-                    {user.headline && <h2>{user.headline}</h2>}
-                </div>
+            <LayoutCard>
+                {isCurrentUser ? (
+                    <UserOptions user={user} />
+                ) : <UserDetails user={user} />}
             </LayoutCard>
-            <LayoutCard header="Bio">
-                {user.bio}
+            <LayoutCard header={user.bio ? "Bio" : ''}>
+                {isCurrentUser ? (
+                    <BioOptions user={user} />
+                ) : user.bio && user.bio.split('<br>').map((line, i) => <p key={i} className="min-h-3">{line || '  '}</p>)}
             </LayoutCard>
-            <LayoutCard header="Community">
+            <LayoutCard header={user.state || user.city || user.theatres ? "Community" : ''}>
                 {isCurrentUser ? (
                     <CommunityOptions user={user} />
                 ) : (
@@ -80,9 +65,6 @@ export default async function UserProfilePage({ params }: { params: Promise<{use
                     ) : null
                 )}
             </LayoutCard>
-            {/* <LayoutCard header="Theatres">
-                {theatres}
-            </LayoutCard> */}
             <LayoutCard header="Teams">
                 {teams.length ? (
                     <div className="flex flex-row flex-wrap justify-center">
@@ -106,8 +88,10 @@ export default async function UserProfilePage({ params }: { params: Promise<{use
                     </div>
                 </>}
             </LayoutCard>
-            <LayoutCard header="Website">
-                {user.website && <a href={user.website}>{user.website}</a>}
+            <LayoutCard header={user.website ? "Website" : ''}>
+                {isCurrentUser ? (
+                    <WebsiteOptions user={user} />
+                ) : user.website && <a className="link" target="_blank" href={user.website}>{user.website}</a>}
             </LayoutCard>
             <LayoutCard>
                 {isCurrentUser && <div className="w-full flex flex-row justify-center">

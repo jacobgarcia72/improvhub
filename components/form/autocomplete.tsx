@@ -13,6 +13,7 @@ type AutocompleteProps = {
   label?: string;
   name?: string;
   required?: boolean;
+  maxLength?: number;
   startingValue?: InputOption
 };
 
@@ -24,6 +25,7 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
     label,
     name = 'autocomplete',
     required,
+    maxLength,
     startingValue
 }) => {
   const [value, setValue] = useState<InputOption>(startingValue || '');
@@ -116,6 +118,7 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
         onBlur={() => setTimeout(() => setShowOptions(false), 100)}
         onKeyDown={handleKeyDown}
         autoComplete="off"
+        maxLength={maxLength}
       />
     {typeof value === 'object' && value.id ? (
       <input className='hidden' name={`${name}-id`} value={value.id} onChange={() => null} />

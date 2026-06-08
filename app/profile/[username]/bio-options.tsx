@@ -3,16 +3,15 @@
 import Button from "@/components/form/button";
 import { User } from "@/types";
 import { useState } from "react";
-import LocationInputs from "@/components/form/location-inputs";
 import Form from "@/components/form/form";
-import { updateUserCommunityOptions } from "@/actions";
-import CommunityDetails from "./community-details";
+import Text from "@/components/form/text";
+import { updateUserBio } from "@/actions/auth-actions";
 
-export default function CommunityOptions({ user }: { user: User }) {
+export default function BioOptions({ user }: { user: User }) {
     const [makeChanges, setMakeChanges] = useState(false);
     
     const handleSubmit = async (prevState: void | { message?: string }, formData: FormData) => {
-        await updateUserCommunityOptions(prevState, formData);
+        await updateUserBio(prevState, formData);
         setMakeChanges(false);
     }
     
@@ -23,22 +22,16 @@ export default function CommunityOptions({ user }: { user: User }) {
                 buttonCaption="Save Changes"
                 cancel={() => setMakeChanges(false)}
             >
-                <LocationInputs
-                    user={user}
-                    cityCaption="Nearest improv community:"
-                    theatreCaption="What theatres are you involved with?"
-                />
+                <Text label="Bio" name="bio" value={user.bio?.replaceAll('<br>', '\n') || ''} />
             </Form>
         )
     }
     return (
         <>
-            <CommunityDetails user={user} />
+            {user.bio && user.bio.split('<br>').map((line, i) => <p key={i} className="min-h-3">{line || '  '}</p>)}
             <div className="flex flex-row justify-center">
                 <Button style="link"
-                    caption={(
-                        user.city || user.state || user.theatres?.length
-                    ) ? "Edit Community Details" :"Add City and Theatres"}
+                    caption={user.bio ? 'Edit Bio' : 'Add Bio'}
                     onClick={() => setMakeChanges(true)}
                 />
             </div>

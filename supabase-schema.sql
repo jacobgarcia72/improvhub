@@ -7,7 +7,6 @@ create table if not exists users (
   first_name text not null,
   last_name text,
   pronouns text,
-  headline text,
   bio text,
   theatres text[],
   city text,

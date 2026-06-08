@@ -6,6 +6,7 @@ import { supabaseAdmin } from "./supabase-server";
 import { verifyAuth } from "./auth";
 import { revalidatePath } from "next/cache";
 import { camelCaseObject, snakeCaseObject } from "./helper-functions";
+import { destroyImage } from "./cloudinary";
 
 export async function getUser(username: string, includePassword = false): Promise<User | null> {
     const { data } = await supabaseAdmin
@@ -46,11 +47,14 @@ export async function getCurrentUser(): Promise<User | null> {
 export async function updateUser(updates: { [key: string]: any }): Promise<void> {
     const user = (await verifyAuth()).user;
     if (!user) return;
+    let oldImage = '';
+    if (updates.image && user.image) oldImage = user.image;
     const { error } = await supabaseAdmin
         .from('users')
         .update(snakeCaseObject(updates))
         .eq('id', user.id);
     if (error) throw error;
+    if (oldImage) destroyImage(oldImage);
 }
 
 export async function getFollowing(userId: string, followId: string, type: Followee): Promise<boolean | null> {
@@ -105,7 +109,6 @@ export async function saveUser(user: User): Promise<void> {
             first_name: user.firstName,
             last_name: user.lastName,
             pronouns: user.pronouns,
-            headline: user.headline,
             bio: user.bio,
             theatres: user.theatres,
             city: user.city,

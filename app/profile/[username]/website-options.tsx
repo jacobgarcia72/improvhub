@@ -3,16 +3,15 @@
 import Button from "@/components/form/button";
 import { User } from "@/types";
 import { useState } from "react";
-import LocationInputs from "@/components/form/location-inputs";
 import Form from "@/components/form/form";
-import { updateUserCommunityOptions } from "@/actions";
-import CommunityDetails from "./community-details";
+import Input from "@/components/form/input";
+import { updateUserWebsite } from "@/actions/auth-actions";
 
-export default function CommunityOptions({ user }: { user: User }) {
+export default function WebsiteOptions({ user }: { user: User }) {
     const [makeChanges, setMakeChanges] = useState(false);
     
     const handleSubmit = async (prevState: void | { message?: string }, formData: FormData) => {
-        await updateUserCommunityOptions(prevState, formData);
+        await updateUserWebsite(prevState, formData);
         setMakeChanges(false);
     }
     
@@ -23,22 +22,16 @@ export default function CommunityOptions({ user }: { user: User }) {
                 buttonCaption="Save Changes"
                 cancel={() => setMakeChanges(false)}
             >
-                <LocationInputs
-                    user={user}
-                    cityCaption="Nearest improv community:"
-                    theatreCaption="What theatres are you involved with?"
-                />
+                <Input value={user.website || ''} type="url" label="Website" name="website" maxLength={50} />
             </Form>
         )
     }
     return (
         <>
-            <CommunityDetails user={user} />
+            {user.website && <a className="link" target="_blank" href={user.website}>{user.website}</a>}
             <div className="flex flex-row justify-center">
                 <Button style="link"
-                    caption={(
-                        user.city || user.state || user.theatres?.length
-                    ) ? "Edit Community Details" :"Add City and Theatres"}
+                    caption={user.website ? 'Edit Website' : 'Add Website'}
                     onClick={() => setMakeChanges(true)}
                 />
             </div>

@@ -94,7 +94,6 @@ export interface User {
     firstName: string;
     lastName: string;
     pronouns?: string;
-    headline?: string;
     bio?: string;
     theatres?: string[];
     city?: string;
