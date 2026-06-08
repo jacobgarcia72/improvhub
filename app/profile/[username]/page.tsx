@@ -9,11 +9,11 @@ import Image from "next/image";
 import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 import Link from "next/link";
-import Checkbox from "@/components/form/checkbox";
 import { getTeamsByUser } from "@/lib/teams";
 import MiniCard from "@/components/mini-card";
 import CommunityOptions from "./community-options";
 import CommunityDetails from "./community-details";
+import OpenToCheckbox from "./open-to-checkbox";
 
 function LayoutCard({
     children, className, header
@@ -93,16 +93,18 @@ export default async function UserProfilePage({ params }: { params: Promise<{use
                         <p className="label">No teams to display</p>
                     </div>
                 )}
-                {isCurrentUser && ( 
-                    <div className="pl-3 pt-1">
-                        <Checkbox defaultChecked={user.openToJoinTeam} name="lookingForTeam" label="Open to joining teams" />
+                {isCurrentUser && <>
+                    <OpenToCheckbox
+                        user={user}
+                        openToKey="openToJoinTeam"
+                        label="Open to joining teams"
+                    />
+                    <div className="w-full flex flex-row justify-center">
+                        <Link href="/create/team">
+                            <Button caption="New Team" style="link" className="w-48" />
+                        </Link>
                     </div>
-                )}
-                {isCurrentUser && <div className="w-full flex flex-row justify-center">
-                    <Link href="/create/team">
-                        <Button caption="New Team" style="link" className="w-48" />
-                    </Link>
-                </div>}
+                </>}
             </LayoutCard>
             <LayoutCard header="Website">
                 {user.website && <a href={user.website}>{user.website}</a>}

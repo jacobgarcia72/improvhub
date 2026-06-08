@@ -180,7 +180,8 @@ const nouns = [
     'Pot Pie',
     'Whisker',
     'Earthworm',
-    'Penguin'
+    'Penguin',
+    'Tuesday'
 ];
 
 const formats = [

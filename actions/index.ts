@@ -374,7 +374,7 @@ export async function updateUserCommunityOptions(prevState: void | { message?: s
             .filter(key => key.startsWith('added-theatre-') && Boolean((data[key] as string).trim()))
             .map(key => data[key] as string);
         const theatres = [...new Set(checkedTheatres.concat(addedTheatres))].join(',');
-        await updateUser(userId, { city, state, theatres });
+        await updateUser({ city, state, theatres });
         revalidatePath(`/profile/${userId}`);
         return;
     } catch (error) {

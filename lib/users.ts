@@ -43,11 +43,13 @@ export async function getCurrentUser(): Promise<User | null> {
     return getUser(user.id);
 }
 
-export async function updateUser(userId: string, updates: {[key: string]: string | null}): Promise<void> {
+export async function updateUser(updates: { [key: string]: any }): Promise<void> {
+    const user = (await verifyAuth()).user;
+    if (!user) return;
     const { error } = await supabaseAdmin
         .from('users')
         .update(snakeCaseObject(updates))
-        .eq('id', userId);
+        .eq('id', user.id);
     if (error) throw error;
 }
 
