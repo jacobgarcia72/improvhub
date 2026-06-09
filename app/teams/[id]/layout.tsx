@@ -6,7 +6,7 @@ import { Suspense } from "react";
 import type { Metadata } from 'next'
 import Loader from "@/components/loader";
 import { getTeam, getTeamMembers } from "@/lib/teams";
-import { getCurrentUser, getFollowerCount, getFollowing, getUser } from "@/lib/users";
+import { getCurrentUser, getFollowing, getUser } from "@/lib/users";
 import Link from "next/link";
 import TeamInvitationOptions from "../team-invitation-options";
 import FollowButton from "@/components/follow-button";
@@ -54,8 +54,6 @@ export default async function TeamLayout({ params, children }: Props) {
     const inviters = await Promise.all(openInvitations.map((invite) => getUser(invite.addedBy)));
     const following = currentUser ? (await getFollowing(currentUser.id, id, 'team')) || false : false;
 
-    const followerCount = await getFollowerCount(id, 'team');
-
     return (
         <Suspense fallback={<Loader />}>
             <section>
@@ -86,9 +84,7 @@ export default async function TeamLayout({ params, children }: Props) {
                     {team.description?.split('<br>').map((line, i) => <P key={i}>{line}</P>)}
                 </div>
             </section>
-            <section>
-                {children}
-            </section>
+            {children}
             {(team.city && team.state) || team.theatres.length > 0 ? (
                 <section>
                     <div className="px-8">
@@ -111,11 +107,6 @@ export default async function TeamLayout({ params, children }: Props) {
                             </P>
                         ))}
                     </div>
-                </section>
-            ) : null}
-            {followerCount ? (
-                <section>
-                    <p className="pl-8">{`${followerCount} Followers`}</p>
                 </section>
             ) : null}
             {isMember ? (

@@ -93,6 +93,22 @@ export async function getFollowing(userId: string, followId: string, type: Follo
     return Boolean(data?.following);
 }
 
+export async function getFollows(followId: string, type: Followee): Promise<{ name: string, id: string, image?: string }[]> {
+    const { data: followerData } = await supabaseAdmin
+        .from('follows')
+        .select('user_id')
+        .eq('following', true)
+        .eq('follow_id', followId)
+        .eq('type', type);
+    if (!followerData) return [];
+    const userIds = followerData.map((row) => row.user_id)
+    const { data } = await supabaseAdmin
+        .from('users')
+        .select('first_name, last_name, id, image')
+        .in('id', userIds);
+    return data ? data.map(({ first_name, last_name, id, image }) => ({ name: `${first_name} ${last_name}`, id, image })) : [];
+}
+
 export async function getFollowerCount(followId: string, type: Followee): Promise<number | null> {
     const { count, error } = await supabaseAdmin
         .from('follows')

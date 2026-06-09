@@ -1,8 +1,9 @@
 import { getTeamMembers } from "@/lib/teams";
 import CastList from "@/components/cast-list";
-import { getCurrentUser } from "@/lib/users";
+import { getCurrentUser, getFollowerCount } from "@/lib/users";
 import Link from "next/link";
 import Button from "@/components/form/button";
+import { pluralize } from "@/lib/helper-functions";
 
 type Props = {
     params: Promise<{ id: string }>
@@ -14,18 +15,28 @@ export default async function TeamPage({ params }: Props) {
     const isMemberNotCoach = currentUser && members.some(
         (member) => member.id === currentUser.id && member.confirmed && member.role !== 'coach'
     );
+    const followerCount = await getFollowerCount(id, 'team');
 
-    return <>
-        {isMemberNotCoach ? (
-            <div className="flex flex-row gap-2 justify-center mb-2">
-                <Link href={`/teams/${id}/manage-members`}>
-                    <Button caption="Manage Members" />
+    return <>         
+        {followerCount ? (
+            <section>
+                <Link href={`/teams/${id}/followers`} className="link ml-8">
+                    {`${followerCount} ${pluralize('Follower', followerCount)}`}
                 </Link>
-                <Link href={`/manage/team/${id}`}>
-                    <Button caption="Manage Team Details" />
-                </Link>
-            </div>
+            </section>
         ) : null}
-        <CastList castMembers={members} />
+        <section>
+            {isMemberNotCoach ? (
+                <div className="flex flex-row gap-2 justify-center mb-2">
+                    <Link href={`/teams/${id}/manage-members`}>
+                        <Button caption="Manage Members" />
+                    </Link>
+                    <Link href={`/manage/team/${id}`}>
+                        <Button caption="Manage Team Details" />
+                    </Link>
+                </div>
+            ) : null}
+            <CastList castMembers={members} />
+        </section>
     </>
 }
