@@ -12,7 +12,7 @@ export default function OpenToCheckbox({ user, openToKey, label }: {
 }) {
     const [pending, setPending] = useState(false);
     return (
-        <div className="pl-3 pt-1">
+        <div className="pl-3 pt-2">
             <Checkbox
                 disabled={pending}
                 defaultChecked={Boolean(user[openToKey as keyof User])}
