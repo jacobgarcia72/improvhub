@@ -73,29 +73,24 @@ export async function updateUser(updates: { [key: string]: any }, userRoles?: { 
     if (error) throw error;
     if (oldImage) destroyImage(oldImage);
     if (userRoles) {
-        const { error: roleDeleteError } = await supabaseAdmin
-            .from('user_roles')
-            .delete()
-            .eq('user_id', user.id);
-        if (roleDeleteError) throw roleDeleteError;
         const { error: roleError } = await supabaseAdmin
             .from('user_roles')
-            .insert({ ...userRoles, user_id: user.id });
+            .upsert({ ...userRoles, user_id: user.id }, { onConflict: 'user_id' });
         if (roleError) throw roleError;
     }
 }
 
-export async function getFollowing(userId: string, followId: string, type: Followee): Promise<boolean | null> {
+export async function getFollowing(userId: string, followId: string, type: Followee): Promise<boolean> {
     const { data, error } = await supabaseAdmin
         .from('follows')
         .select('following')
         .eq('user_id', userId)
         .eq('follow_id', followId)
         .eq('type', type)
+        .limit(1)
         .maybeSingle();
     if (error) throw error;
-    if (!data || typeof data.following !== 'number') return null;
-    return Boolean(data.following);
+    return Boolean(data?.following);
 }
 
 export async function getFollowerCount(followId: string, type: Followee): Promise<number | null> {
@@ -108,23 +103,16 @@ export async function getFollowerCount(followId: string, type: Followee): Promis
     return count ?? 0;
 }
 
-export async function setFollowing(userId: string, followId: string, type: Followee): Promise<void> {
-    const currentFollowStatus = await getFollowing(userId, followId, type);
-    if (currentFollowStatus === null) {
-        const { error } = await supabaseAdmin
-            .from('follows')
-            .insert({ user_id: userId, follow_id: followId, type, following: true });
-        if (error) throw error;
-    } else {
-        const { error } = await supabaseAdmin
-            .from('follows')
-            .update({ following: !currentFollowStatus })
-            .eq('user_id', userId)
-            .eq('follow_id', followId)
-            .eq('type', type);
-        if (error) throw error;
-    }
+export async function setFollowing(userId: string, followId: string, type: Followee, following: boolean): Promise<void> {
+    const { error } = await supabaseAdmin
+        .from('follows')
+        .upsert(
+            { user_id: userId, follow_id: followId, following, type },
+            { onConflict: 'user_id, follow_id, type' }
+        );
+    if (error) throw error;
     if (type === 'team') revalidatePath(`/teams/${followId}`, 'layout');
+    if (type === 'user') revalidatePath(`/profile/${followId}`, 'layout');
 }
 
 export async function saveUser(user: User, userRoles?: { [role: string]: boolean }): Promise<void> {

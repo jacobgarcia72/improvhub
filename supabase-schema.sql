@@ -102,7 +102,8 @@ create table if not exists follows (
   user_id text not null references users(id) on delete cascade,
   follow_id text not null,
   type text not null,
-  following boolean not null
+  following boolean not null,
+  primary key (user_id, follow_id, type)
 );
 
 -- Grant privileges on sessions table

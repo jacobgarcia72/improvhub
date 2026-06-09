@@ -9,22 +9,26 @@ export default function FollowButton({
     followId,
     type,
     following,
-    mini
+    mini,
+    caption
 } : {
     userId: string;
     followId: string;
     type: Followee;
     following: boolean | null;
-    mini?: boolean
+    mini?: boolean;
+    caption? :string | null;
 }) {
     const [pending, setPending] = useState(false);
+    const [showFollowing, setShowFollowing] = useState(following);
     return (
         <Button
-            caption={following ? 'Following' : 'Follow'}
-            className={`${following ? 'green ' : ''}${mini ? 'small ' : ''}w-28`}
+            caption={caption || (showFollowing ? 'Following' : 'Follow')}
+            className={`${showFollowing ? 'green ' : ''}${mini ? 'small ' : ''}w-28`}
             onClick={async () => {
+                setShowFollowing(!following)
                 setPending(true);
-                await setFollowing(userId, followId, type);
+                await setFollowing(userId, followId, type, !following);
                 setPending(false);
             }}
             disabled={pending}

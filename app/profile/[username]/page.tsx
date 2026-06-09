@@ -2,12 +2,12 @@ import { logout } from "@/actions/auth-actions";
 import Loader from "@/components/loader";
 import Button from "@/components/form/button";
 import { isSignedIn, verifyAuth } from "@/lib/auth";
-import { getUser, getUserRoles } from "@/lib/users";
+import { getFollowing, getUser, getUserRoles } from "@/lib/users";
 import { User } from "@/types";
 import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 import Link from "next/link";
-import { getTeam, getTeamMembershipsByUser, getTeamsByUser } from "@/lib/teams";
+import { getTeam, getTeamMembershipsByUser } from "@/lib/teams";
 import MiniCard from "@/components/mini-card";
 import CommunityOptions from "./community-options";
 import CommunityDetails from "./community-details";
@@ -16,6 +16,7 @@ import UserDetails from "./user-details";
 import UserOptions from "./user-options";
 import WebsiteOptions from "./website-options";
 import BioOptions from "./bio-options";
+import FollowButton from "@/components/follow-button";
 
 function LayoutCard({
     children, className, header
@@ -41,16 +42,28 @@ export default async function UserProfilePage({ params }: { params: Promise<{use
         redirect(`/login?reroute=profile%2F${username}`);
     }
 
-    const authUser = await verifyAuth();
-    const isCurrentUser = username === authUser.user?.id;
+    const currentUserId = (await verifyAuth()).user?.id;
+    const isCurrentUser = username === currentUserId;
     const userRoles = (await getUserRoles(username)) ?? undefined;
+
+    const following = isCurrentUser ? null : await getFollowing(currentUserId, username, 'user');
+    const mutualFollowing = following && await getFollowing(username, currentUserId, 'user');
 
     const teamMemberships = await getTeamMembershipsByUser(username);
     const teams = (await Promise.all([...new Set(teamMemberships.filter((m) => m.role !== 'coach').map((m) => m.team))].map(getTeam))).filter((t) => t !== null);
     const coachedTeams = (await Promise.all([...new Set(teamMemberships.filter((m) => m.role === 'coach').map((m) => m.team))].map(getTeam))).filter((t) => t !== null);
     return (
         <Suspense fallback={<Loader />}>
-            <LayoutCard>
+            <LayoutCard className="relative">
+                {!isCurrentUser && <div className="absolute right-3 top-2">
+                    <FollowButton
+                        userId={currentUserId}
+                        followId={username}
+                        type="user"
+                        following={following}
+                        caption={mutualFollowing ? 'Friends' : null}
+                    />
+                </div>}
                 {isCurrentUser ? (
                     <UserOptions user={user} userRoles={userRoles} />
                 ) : <UserDetails user={user} userRoles={userRoles} />}
