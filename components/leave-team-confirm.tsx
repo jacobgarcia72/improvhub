@@ -25,7 +25,7 @@ export default function LeaveTeamConfirm({ caption = 'Leave Team' }: { caption?:
             }
         } catch {}
         if (!form) form = forms[forms.length - 1] as HTMLFormElement | null;
-        if (form) form.submit();
+        if (form) form.requestSubmit();
         setOpen(false);
     }
 

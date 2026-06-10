@@ -24,15 +24,17 @@ export default async function TeamManagePage({ params }: Props) {
     }
 
     const { lookingForPlayers, lookingForCoach, lookingForMusician } = team;
-    return <Form onSubmit={updateTeam.bind(null, id)} cancel={cancel}>
-        <CastingInputs
-            roles={['player', 'coach', 'musician']}
-            currentCast={members}
-            lookingFors={{
-                lookingForPlayers,
-                lookingForCoach,
-                lookingForMusician
-            }}
-        />
-    </Form>
+    return <section>
+        <Form onSubmit={updateTeam.bind(null, id)} cancel={cancel}>
+            <CastingInputs
+                roles={['player', 'coach', 'musician']}
+                currentCast={members}
+                lookingFors={{
+                    lookingForPlayers,
+                    lookingForCoach,
+                    lookingForMusician
+                }}
+            />
+        </Form>
+    </section>
 }

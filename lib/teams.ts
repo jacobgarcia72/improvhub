@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use server';
 
-import { Team, Role, TeamMember } from "@/types";
+import { Team, Role, TeamMember, User } from "@/types";
 import { supabaseAdmin } from './supabase-server';
 import { getCitiesWithinRange } from "./location";
 import { camelCaseObject, removeLeadingArticles, snakeCaseObject } from "./helper-functions";
@@ -39,6 +39,72 @@ export async function getTeamsByTheatre(theatre: string) {
         .or(`theatres.text.ilike.%${removeLeadingArticles(theatre)}%`);
     if (error) throw error;
     return (data || []).map(camelCaseObject);
+}
+
+export async function getOpenTeams(user: User, role: Role): Promise<Team[]> {
+    // Map role to the looking_for_* field
+    const roleFieldMap: Record<Role, string | null> = {
+        'player': 'looking_for_players',
+        'coach': 'looking_for_coach',
+        'musician': 'looking_for_musician',
+        'director': null,
+        'tech': null,
+    };
+
+    const lookingForField = roleFieldMap[role];
+    if (!lookingForField) return []; // Role not applicable for teams
+
+    // Get all teams
+    const { data: allTeams, error: teamsError } = await supabaseAdmin
+        .from('teams')
+        .select('*');
+    if (teamsError) throw teamsError;
+    if (!allTeams || !allTeams.length) return [];
+
+    const { id: userId, theatres, state, city } = user;
+
+    // Get confirmed memberships for this user
+    const { data: userMemberships, error: membershipsError } = await supabaseAdmin
+        .from('team_members')
+        .select('team')
+        .eq('id', userId)
+        .eq('confirmed', true);
+    if (membershipsError) throw membershipsError;
+
+    const userTeamIds = new Set(userMemberships?.map((m: any) => m.team) || []);
+
+    // Normalize input for case-insensitive comparison
+    const normalizedCity = city?.toLowerCase();
+    const normalizedState = state?.toLowerCase();
+    const normalizedTheatres = theatres?.map(t => removeLeadingArticles(t).toLowerCase());
+
+    // Filter teams
+    const openTeams = (allTeams || [])
+        .filter((team: any) => {
+            // Don't return teams where user is already a confirmed member
+            if (userTeamIds.has(team.id)) return false;
+
+            // Check if team is looking for this role
+            if (!team[lookingForField]) return false;
+
+            // Check location match (city AND state)
+            const cityStateMatch = team.city && team.state &&
+                team.city.toLowerCase() === normalizedCity &&
+                team.state.toLowerCase() === normalizedState;
+
+            // Check theatre match (at least one theatre)
+            const teamTheatres = (team.theatres || []).map((t: string) => removeLeadingArticles(t).toLowerCase());
+            const theatreMatch = normalizedTheatres?.length && normalizedTheatres.some((theatre: string) =>
+                teamTheatres.some((teamTheatre: string) =>
+                    teamTheatre.includes(theatre) || theatre.includes(teamTheatre)
+                )
+            );
+
+            return cityStateMatch || theatreMatch;
+        })
+        .map(camelCaseObject);
+
+    return openTeams as Team[];
 }
 
 export async function getTeamsInRange(cityOrZipcode: string, miles: number) {
