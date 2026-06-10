@@ -1,6 +1,6 @@
 import { getTeamMembers } from "@/lib/teams";
 import CastList from "@/components/cast-list";
-import { getCurrentUser, getFollowerCount } from "@/lib/users";
+import { getCurrentUser, getFollowCount } from "@/lib/users";
 import Link from "next/link";
 import Button from "@/components/form/button";
 import { pluralize } from "@/lib/helper-functions";
@@ -15,9 +15,9 @@ export default async function TeamPage({ params }: Props) {
     const isMemberNotCoach = currentUser && members.some(
         (member) => member.id === currentUser.id && member.confirmed && member.role !== 'coach'
     );
-    const followerCount = await getFollowerCount(id, 'team');
+    const followerCount = await getFollowCount(id, 'team');
 
-    return <>         
+    return <>
         {followerCount ? (
             <section>
                 <Link href={`/teams/${id}/followers`} className="link ml-8">

@@ -109,11 +109,38 @@ export async function getFollows(followId: string, type: Followee): Promise<{ na
     return data ? data.map(({ first_name, last_name, id, image }) => ({ name: `${first_name} ${last_name}`, id, image })) : [];
 }
 
-export async function getFollowerCount(followId: string, type: Followee): Promise<number | null> {
+export async function getFollowees(userId: string, type: Followee): Promise<{ name: string, id: string, image?: string }[]> {
+    const { data: followeeData } = await supabaseAdmin
+        .from('follows')
+        .select('follow_id')
+        .eq('following', true)
+        .eq('user_id', userId)
+        .eq('type', type);
+    if (!followeeData) return [];
+    const ids = followeeData.map((row) => row.follow_id)
+    switch (type) {
+        case 'user':
+            return (await supabaseAdmin
+                .from(`users`)
+                .select(`first_name, last_name, id, image`)
+                .in('id', ids))?.data?.map((row) => (
+                    { name: `${row.first_name} ${row.last_name}`, id: row.id, image: row.image }
+                )) || [];
+        case 'team':
+            return (await supabaseAdmin
+                .from(`teams`)
+                .select(`name, id, image`)
+                .in('id', ids))?.data || [];
+        default:
+            return [];
+    }
+}
+
+export async function getFollowCount(id: string, type: Followee, getFollowees = false): Promise<number | null> {
     const { count, error } = await supabaseAdmin
         .from('follows')
         .select('*', { count: 'exact', head: true })
-        .eq('follow_id', followId)
+        .eq(getFollowees ? 'user_id' : 'follow_id', id)
         .eq('type', type);
     if (error) throw error;
     return count ?? 0;

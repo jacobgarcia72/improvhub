@@ -8,7 +8,7 @@ export default async function FollowerList({ followers, caption = 'Followers' }:
 }) {
     return <>
         <h3 className="mt-3 font-semibold text-sm">{caption}</h3>
-        <ul className="mt-2 flex flex-row flex-wrap">
+        <ul className="mt-2 flex flex-row flex-wrap min-h-36">
             {followers.map(({ id, name, image }, i) => (
                 <li key={i} className="no-bullets w-1/3 min-w-[200px] mb-1">
                     <Link
