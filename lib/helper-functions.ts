@@ -34,7 +34,21 @@ export const pluralize = (word: string, pluralize: boolean | number = true): str
 
 export const capitalize = (phrase: string): string => (
     phrase.split(' ').map((word) => word[0].toUpperCase() + word.slice(1)).join(' ')
-); 
+);
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function getRandomElements(array: any[], x: number): any[] {
+    if (x > array.length) x = array.length;
+
+    const shuffled = [...array];
+
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+
+    return shuffled.slice(0, x);
+}
 
 export const getText = (option: InputOption): string => typeof option === 'string' ? option : option.text;
 export const filterArrayBySearchTerm = (
