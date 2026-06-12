@@ -36,7 +36,7 @@ export async function getTeamsByTheatre(theatre: string) {
     const { data, error } = await supabaseAdmin
         .from('teams')
         .select('*')
-        .or(`theatres.text.ilike.%${removeLeadingArticles(theatre)}%`);
+        .contains('theatres', [theatre]);
     if (error) throw error;
     return (data || []).map(camelCaseObject);
 }

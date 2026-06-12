@@ -151,6 +151,11 @@ const generateUserAndRoles = (count: number): [User, { [role: string]: boolean }
     ]
 }
 
+const generateShow = (users: { name: string, id: string, image?: string }[]) => {
+    const creatorId = users[rnd(users.length - 1)].id;
+    const admins = [creatorId];
+}
+
 const generateTeam = (users: { name: string, id: string, image?: string }[]): [team: Team, members: { name: string, id: string | null, role: Role }[]] => {
     const name = nameGenerator();
     let city: string | null = null;
@@ -246,8 +251,11 @@ export const generateDummyTeams = async (amount: number = 100) => {
         console.log('team ' + i, team)
         console.log('members', members)
         await saveTeam(team, members);
-        members.forEach((member) => {
-            if (member.id && rnd() <= 80) respondToTeamInvitation(team.id, member.id, member.role, true);
-        })
+        for (let i = 0; i < members.length; i++) {
+            const member = members[i];
+            if (member.id && rnd() <= 80) {
+                await respondToTeamInvitation(team.id, member.id, member.role, true);
+            }
+        }
     }
 }

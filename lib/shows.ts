@@ -59,12 +59,11 @@ export async function getShowCast(showId: string, dateTime: string): Promise<Sho
 }
 
 export async function getShowsByTheatre(theatre: string) {
-    const { data, error } = await supabaseAdmin
+    const { data } = await supabaseAdmin
         .from('shows')
         .select('*')
-        .ilike('theatre', `%${removeLeadingArticles(theatre)}%`);
-    if (error) throw error;
-    return (data || []).map(camelCaseObject);
+        .ilike('theatre', theatre);
+    return (data || []).map(camelCaseObject) as Event[];
 }
 
 export async function getShowsInRange(cityOrZipcode: string, miles: number) {
@@ -76,7 +75,7 @@ export async function getShowsInRange(cityOrZipcode: string, miles: number) {
     if (error) throw error;
     return (data || [])
         .filter((show: any) => show.city && show.state && citiesInRange.includes(`${show.city} ${show.state}`))
-        .map(camelCaseObject);
+        .map(camelCaseObject) as Event[];
 }
 
 export async function saveShow(show: Event, showings: Showing[] | null): Promise<string> {
