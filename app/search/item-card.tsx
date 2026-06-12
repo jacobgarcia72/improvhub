@@ -36,17 +36,17 @@ export default async function ItemCard({
             {showFollowButton ? <div className="absolute right-2 top-2">
                 <FollowButton mini userId={userId || ''} followId={'id' in item ? item.id : ''} type="team" following={following} />
             </div> : null}
-            <Link href={link}>
+            <Link href={link} className="h-full">
                 {image ? (
                     <div className="h-[120px] w-full bg-gray-300">
                         <Image src={image} alt={name} width={120} height={120} className="object-cover h-[120px] w-full" />
                     </div>
                 ) : (
-                    <div className="h-[15px] w-full" />
+                    <div className="h-[35px] w-full" />
                 )}
-                <div className={`w-full h-[${image ? 180 : 285}px] pb-1 px-4 pt-2`}>
+                <div className={`w-full ${image ? 'h-[180px]' : 'h-[265px]'} pb-1 px-4 pt-2`}>
                     <h2 className="leading-none text-lg pt-1 pb-1 text-slate-900">{name}</h2>
-                    <div className="h-full fade-out text-sm text-gray-700 overflow-hidden text-ellipsis flex flex-col gap-1 pt-1">
+                    <div className="h-full fade-out text-sm text-gray-800 overflow-hidden text-ellipsis flex flex-col gap-1 pt-1">
                         {time ? (
                             <time className="mt-[-6px] text-sm text-slate-700">{formatTime(time)}</time>
                         ) : null}
