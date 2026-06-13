@@ -68,7 +68,7 @@ export default async function TeamLayout({ params, children }: Props) {
                         if (invite.role === 'coach') joinVerb = 'coach';
                         if (invite.role === 'musician') joinVerb = 'accompany';
                         return (
-                            <div key={i} className="p-4 pl-8 my-2 bg-slate-100 border border-slate-200 rounded">
+                            <div key={i} className="p-4 pl-8 my-2 bg-slate-100 div div-slate-200 rounded">
                                 <p>
                                     {`You have been invited by `}
                                     <Link className="link" href={`profile/${inviters[i].id}`}>{`${inviters[i].firstName} ${inviters[i].lastName}`}</Link>
@@ -80,6 +80,19 @@ export default async function TeamLayout({ params, children }: Props) {
                     })}
                 </div>
                 {team.image && <CoverPhoto src={team.image} alt={team.name} photoCredit={team.photoCredit} />}
+                    {!isMember && (
+                        <div className="flex flex-row flex-wrap gap-2 pt-2 px-7">
+                            {currentUser?.openToJoinTeam && team.lookingForPlayers ? (
+                                <div className="bg-slate-100 rounded border border-gray-700 py-0.5 px-2">Looking for Players!</div>
+                            ) : null}
+                            {currentUser?.openToAccompanyTeam && team.lookingForMusician ? (
+                                <div className="bg-slate-100 rounded border border-gray-700 py-0.5 px-2">Looking for Musician!</div>
+                            ) : null}
+                            {currentUser?.openToCoachTeam && team.lookingForCoach ? (
+                                <div className="bg-slate-100 rounded border border-gray-700 py-0.5 px-2">Looking for Coach!</div>
+                            ) : null}
+                        </div>
+                    )}
                 <div className="px-8 pt-2">
                     {team.description?.split('<br>').map((line, i) => <P key={i}>{line}</P>)}
                 </div>
