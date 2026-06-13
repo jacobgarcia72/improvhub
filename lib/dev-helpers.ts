@@ -228,9 +228,9 @@ const generateTeam = (users: { name: string, id: string, image?: string }[]): [t
         id: slugify(removeLeadingArticles(name), { lower: true, trim: true }),
         photoCredit: rnd() <= 20 ? `${rnd() <= 50 ? getGirlName() : getBoyName()} ${getLastName()}` : null,
         city, state, theatres,
-        lookingForPlayers: rnd() < (295 / (players.length * 2 + 1)),
-        lookingForMusician: rnd() <= 10,
-        lookingForCoach: rnd() <= (coaches.length ? 5 : 75),
+        lookingForPlayers: true, // rnd() < (295 / (players.length * 2 + 1)),
+        lookingForMusician: true, // rnd() <= 10,
+        lookingForCoach: true, // rnd() <= (coaches.length ? 5 : 75),
         description: rnd() <= 35 ? getLoremIpsum(rnd(200) + 15) : null,
         image: rnd() <= 90 ? images[rnd(images.length - 1)] : null
     }

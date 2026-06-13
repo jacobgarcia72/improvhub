@@ -10,6 +10,7 @@ export default async function TeamsPage() {
     const user = await getCurrentUser();
     if (!user) return null;
     const teamMemberships = await getTeamMembershipsByUser(user.id);
+    console.log(user.openToJoinTeam)
     return <>
         <TeamInvitations />
         <TeamsSection teamMemberships={teamMemberships} header="My Teams" roles={['player', 'musician']} />

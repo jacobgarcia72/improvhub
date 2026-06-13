@@ -53,7 +53,6 @@ export async function getOpenTeams(user: User, role: Role): Promise<Team[]> {
 
     const lookingForField = roleFieldMap[role];
     if (!lookingForField) return []; // Role not applicable for teams
-
     // Get all teams
     const { data: allTeams, error: teamsError } = await supabaseAdmin
         .from('teams')
@@ -72,12 +71,10 @@ export async function getOpenTeams(user: User, role: Role): Promise<Team[]> {
     if (membershipsError) throw membershipsError;
 
     const userTeamIds = new Set(userMemberships?.map((m: any) => m.team) || []);
-
     // Normalize input for case-insensitive comparison
     const normalizedCity = city?.toLowerCase();
     const normalizedState = state?.toLowerCase();
     const normalizedTheatres = theatres?.map(t => removeLeadingArticles(t).toLowerCase());
-
     // Filter teams
     const openTeams = (allTeams || [])
         .filter((team: any) => {
@@ -86,12 +83,10 @@ export async function getOpenTeams(user: User, role: Role): Promise<Team[]> {
 
             // Check if team is looking for this role
             if (!team[lookingForField]) return false;
-
             // Check location match (city AND state)
             const cityStateMatch = team.city && team.state &&
                 team.city.toLowerCase() === normalizedCity &&
                 team.state.toLowerCase() === normalizedState;
-
             // Check theatre match (at least one theatre)
             const teamTheatres = (team.theatres || []).map((t: string) => removeLeadingArticles(t).toLowerCase());
             const theatreMatch = normalizedTheatres?.length && normalizedTheatres.some((theatre: string) =>
@@ -99,7 +94,6 @@ export async function getOpenTeams(user: User, role: Role): Promise<Team[]> {
                     teamTheatre.includes(theatre) || theatre.includes(teamTheatre)
                 )
             );
-
             return cityStateMatch || theatreMatch;
         })
         .map(camelCaseObject);
@@ -191,10 +185,13 @@ export async function saveTeam(team: Team, members: { name: string, id: string |
     let teamId = baseId;
     let counter = 1;
     let existingTeam = await getTeam(teamId);
+    if (existingTeam) console.log('******EXISTS', teamId)
     while (existingTeam) {
         counter++;
         teamId = `${baseId}-${counter}`;
+        console.log('teamId', teamId)
         existingTeam = await getTeam(teamId);
+        console.log(existingTeam)
     }
     team.id = teamId;
     const { error: teamInsertError } = await supabaseAdmin

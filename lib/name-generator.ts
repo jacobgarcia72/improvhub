@@ -122,7 +122,7 @@ const nouns = [
     'Pal',
     'Friend',
     'Neighbor',
-    'Knuckle',
+    'Goose',
     'Hamster',
     'Pigeon',
     'Lightning',

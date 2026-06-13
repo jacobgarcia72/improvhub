@@ -21,7 +21,7 @@ export default async function TeamsSection({
     return (
         <section>
             <h2 className="px-3">{header}</h2>
-            <div className="flex flex-row">
+            <div className="flex flex-row flex-wrap">
                 {teams.map((team, i) => <MiniCard key={i} item={team} type="team" />)}
             </div>
         </section>

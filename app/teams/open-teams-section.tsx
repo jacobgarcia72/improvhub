@@ -15,7 +15,7 @@ export default async function OpenTeamsSection({
     return (
         <section>
             <h2 className="px-3">{`Teams looking for ${pluralize(role)}`}</h2>
-            <div className="flex flex-row">
+            <div className="flex flex-row flex-wrap">
                 {teams.map((team, i) => <MiniCard key={i} item={team} type="team" />)}
             </div>
         </section>
