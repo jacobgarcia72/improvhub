@@ -1,6 +1,6 @@
 import { Border } from "@/components/border";
 import FollowButton from "@/components/follow-button";
-import { optimizeImage } from "@/lib/cloudinary";
+import { optimizeImage } from "@/lib/optimize-image";
 import { formatTime } from "@/lib/dates";
 import { removeLeadingArticles } from "@/lib/helper-functions";
 import { theatres } from "@/lib/theatres";

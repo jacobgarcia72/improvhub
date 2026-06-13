@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { Suspense } from "react";
-import { optimizeImage } from "@/lib/cloudinary";
+import { optimizeImage } from "@/lib/optimize-image";
 import Loader from "@/components/loader";
 import { getUser } from "@/lib/users";
 import Link from "next/link";

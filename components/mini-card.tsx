@@ -1,4 +1,4 @@
-import { optimizeImage } from "@/lib/cloudinary";
+import { optimizeImage } from "@/lib/optimize-image";
 import { removeLeadingArticles } from "@/lib/helper-functions";
 import { theatres } from "@/lib/theatres";
 import { Event, Team } from "@/types";
@@ -17,7 +17,7 @@ export default function MiniCard({ item, type }: { item: Event | Team, type: str
     const name = 'name' in item ? item.name : 'title' in item ? item.title : '';
     return (
         <Link href={`/${type}s/${item.id}`}>
-            <Border className="flex flex-row h-[132px] w-[300px] m-2 w-44 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
+            <Border className="flex flex-row h-[132px] w-[226px] m-2 w-44 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
                 {image ? (
                     <div className="w-[132px] h-full bg-gray-300">
                         <div className="flex h-full w-full items-center justify-center">

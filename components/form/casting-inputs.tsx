@@ -1,6 +1,6 @@
 import Checkbox from "@/components/form/checkbox";
 import InputList from "@/components/form/input-list";
-import { optimizeImage } from "@/lib/cloudinary";
+import { optimizeImage } from "@/lib/optimize-image";
 import { capitalize, pluralize } from "@/lib/helper-functions";
 import { getAllTeams } from "@/lib/teams";
 import { getAllUsers, getCurrentUser } from "@/lib/users";

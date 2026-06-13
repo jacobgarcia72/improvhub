@@ -360,7 +360,6 @@ export async function leaveTeam(teamId: string): Promise<void> {
 }
 
 export async function updateUserCommunityOptions(prevState: void | { message?: string }, formData: FormData) {
-    console.log(formData)
     try {
         const data = Object.fromEntries(formData.entries());
         const userId = (await getCurrentUser())?.id;
@@ -375,8 +374,6 @@ export async function updateUserCommunityOptions(prevState: void | { message?: s
             .filter(key => key.startsWith('added-theatre-') && Boolean((data[key] as string).trim()))
             .map(key => data[key] as string);
         const theatres = [...new Set(checkedTheatres.concat(addedTheatres))];
-        console.log('USER UPDATES: **********')
-        console.log({ city, state, theatres, data })
         await updateUser({ city, state, theatres });
         revalidatePath(`/profile/${userId}`);
         return;

@@ -4,7 +4,7 @@
 import { Team, Role, TeamMember, User } from "@/types";
 import { supabaseAdmin } from './supabase-server';
 import { getCitiesWithinRange } from "./location";
-import { camelCaseObject, removeLeadingArticles, snakeCaseObject } from "./helper-functions";
+import { camelCaseObject, getRandomElements, removeLeadingArticles, snakeCaseObject } from "./helper-functions";
 import { getCurrentUser } from "./users";
 import { destroyImage } from "./cloudinary";
 import { revalidatePath } from "next/cache";
@@ -98,7 +98,7 @@ export async function getOpenTeams(user: User, role: Role): Promise<Team[]> {
         })
         .map(camelCaseObject);
 
-    return openTeams as Team[];
+    return openTeams ? getRandomElements(openTeams, 6) : [] as Team[];
 }
 
 export async function getTeamsInRange(cityOrZipcode: string, miles: number) {

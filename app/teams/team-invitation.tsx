@@ -1,5 +1,5 @@
 import { Border } from "@/components/border";
-import { optimizeImage } from "@/lib/cloudinary";
+import { optimizeImage } from "@/lib/optimize-image";
 import { getPronounForm } from "@/lib/demographics";
 import { getTeam } from "@/lib/teams";
 import { getUser } from "@/lib/users";
