@@ -105,6 +105,8 @@ export interface User {
     openToCoachTeam?: boolean;
 }
 
+export interface AbbrevUser { id: string, name: string, image?: string };
+
 export type Followee = 'team' | 'theatre' | 'user';
 export interface Follow {
     userId: string;

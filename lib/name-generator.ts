@@ -142,7 +142,6 @@ const nouns = [
     'Crow',
     'Raven',
     'Pelican',
-    'Pine Tree',
     'Duckling',
     'Puppy',
     'Woodchuck',

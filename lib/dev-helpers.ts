@@ -1,5 +1,5 @@
 import { Role, Team, User } from "@/types";
-import { getAllUsers, saveUser } from "./users";
+import { getAllUsersAbbreviated, saveUser } from "./users";
 import { respondToTeamInvitation, saveTeam } from "./teams";
 import nameGenerator from "./name-generator";
 import slugify from 'slugify';
@@ -238,14 +238,15 @@ const generateTeam = (users: { name: string, id: string, image?: string }[]): [t
 }
 
 export const generateDummyUsers = async (amount: number = 100) => {
-    for (let i = 1; i <= amount; i++) {
+    const userCount = (await getAllUsersAbbreviated()).length;
+    for (let i = userCount; i <= userCount + amount; i++) {
         const [user, roles] = generateUserAndRoles(i);
         await saveUser(user, roles);
     }
 }
 
 export const generateDummyTeams = async (amount: number = 100) => {
-    const users = await getAllUsers();
+    const users = await getAllUsersAbbreviated();
     for (let i = 1; i <= amount; i++) {
         const [team, members] = generateTeam(users);
         console.log('team ' + i, team)

@@ -3,7 +3,7 @@ import InputList from "@/components/form/input-list";
 import { optimizeImage } from "@/lib/optimize-image";
 import { capitalize, pluralize } from "@/lib/helper-functions";
 import { getAllTeams } from "@/lib/teams";
-import { getAllUsers, getCurrentUser } from "@/lib/users";
+import { getAllUsersAbbreviated, getCurrentUser } from "@/lib/users";
 import { CastMember, Role } from "@/types";
 
 export default async function CastingInputs({
@@ -18,7 +18,7 @@ export default async function CastingInputs({
     creatorAsDefaultPlayer?: boolean
 }) {
     const user = await getCurrentUser();
-    const allUsers = (await getAllUsers()).map(({ id, name, image}) => {
+    const allUsers = (await getAllUsersAbbreviated()).map(({ id, name, image}) => {
         return { id, image: image ? optimizeImage(image, 50, 50, 80, true, true) : undefined, text: name };
     });
     const allTeams = roles.includes('team') ? (

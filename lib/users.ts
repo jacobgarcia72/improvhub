@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use server';
 
-import { Followee, User } from "@/types";
+import { AbbrevUser, Followee, User } from "@/types";
 import { supabaseAdmin } from "./supabase-server";
 import { verifyAuth } from "./auth";
 import { revalidatePath } from "next/cache";
@@ -43,7 +43,18 @@ export async function getUserName(username: string): Promise<string | null> {
     return null;
 }
 
-export async function getAllUsers(): Promise<{ name: string, id: string, image?: string }[]> {
+export async function getAllUsers(): Promise<User[]> {
+    const { data, error } = await supabaseAdmin
+        .from('users')
+        .select('*');
+    if (error) throw error;
+    return (data || []).map((row) => camelCaseObject({
+        ...row,
+        password: '',
+    })) as User[];
+}
+
+export async function getAllUsersAbbreviated(): Promise<AbbrevUser[]> {
     const { data, error } = await supabaseAdmin
         .from('users')
         .select('first_name, last_name, id, image');
@@ -174,6 +185,9 @@ export async function saveUser(user: User, userRoles?: { [role: string]: boolean
             state: user.state,
             website: user.website,
             image: user.image,
+            open_to_join_team: user.openToJoinTeam,
+            open_to_accompany_team: user.openToAccompanyTeam,
+            open_to_coach_team: user.openToJoinTeam
         });
     if (error) throw error;
     if (userRoles) {

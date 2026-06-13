@@ -5,7 +5,7 @@ import { Team, Role, TeamMember, User } from "@/types";
 import { supabaseAdmin } from './supabase-server';
 import { getCitiesWithinRange } from "./location";
 import { camelCaseObject, getRandomElements, removeLeadingArticles, snakeCaseObject } from "./helper-functions";
-import { getCurrentUser } from "./users";
+import { getAllUsers, getCurrentUser, getUser } from "./users";
 import { destroyImage } from "./cloudinary";
 import { revalidatePath } from "next/cache";
 
@@ -101,6 +101,65 @@ export async function getOpenTeams(user: User, role: Role): Promise<Team[]> {
     return openTeams ? getRandomElements(openTeams, 6) : [] as Team[];
 }
 
+export async function getSuggestionsForTeam(team: Team | string, role: Role): Promise<User[]> {
+    // Map role to the looking_for_* field
+    const roleFieldMap: Record<Role, string | null> = {
+        'player': 'openToJoinTeam',
+        'coach': 'openToCoachTeam',
+        'musician': 'openToAccompanyTeam',
+        'director': null,
+        'tech': null,
+    };
+
+    const openToField = roleFieldMap[role];
+    if (!openToField) return []; // Role not applicable for teams
+    const users = await getAllUsers();
+    if (!users?.length) return [];
+
+    const teamObject = typeof team === 'string' ? await getTeam(team) : team;
+    if (!teamObject) return [];
+    const { id: teamId, theatres, state, city } = teamObject;
+
+    // Get confirmed memberships for this team
+    const { data: teamMemberships } = await supabaseAdmin
+        .from('team_members')
+        .select('team')
+        .eq('id', teamId)
+        .eq('confirmed', true);
+
+    const teamMemberIds = new Set(teamMemberships?.map((m: any) => m.id) || []);
+    // Normalize input for case-insensitive comparison
+    const normalizedCity = city?.toLowerCase();
+    const normalizedState = state?.toLowerCase();
+    const normalizedTheatres = theatres?.map(t => removeLeadingArticles(t).toLowerCase());
+    // Filter users
+    const availableUsers = (users || [])
+        .filter((user: any) => {
+            // Don't return teams where user is already a confirmed member
+            if (teamMemberIds.has(user.id)) return false;
+
+            // Check if user is looking for this role
+            if (!user[openToField]) return false;
+            // Check location match (city AND state)
+            const cityStateMatch = user.city && user.state &&
+                user.city.toLowerCase() === normalizedCity &&
+                user.state.toLowerCase() === normalizedState;
+            // Check theatre match (at least one theatre)
+            const userTheatres = (user.theatres || []).map((t: string) => removeLeadingArticles(t).toLowerCase());
+            const theatreMatch = normalizedTheatres?.length && normalizedTheatres.some((theatre: string) =>
+                userTheatres.some((userTheatre: string) =>
+                    userTheatre.includes(theatre) || theatre.includes(userTheatre)
+                )
+            );
+            return cityStateMatch || theatreMatch;
+        })
+        .map(camelCaseObject);
+
+    return availableUsers ? getRandomElements(
+        await Promise.all(availableUsers.map((user) => getUser(user.id))), 6
+    ) : [] as User[];
+}
+
 export async function getTeamsInRange(cityOrZipcode: string, miles: number) {
     const citiesInRange = getCitiesWithinRange(cityOrZipcode, miles);
     if (!citiesInRange.length) return [];
@@ -185,13 +244,10 @@ export async function saveTeam(team: Team, members: { name: string, id: string |
     let teamId = baseId;
     let counter = 1;
     let existingTeam = await getTeam(teamId);
-    if (existingTeam) console.log('******EXISTS', teamId)
     while (existingTeam) {
         counter++;
         teamId = `${baseId}-${counter}`;
-        console.log('teamId', teamId)
         existingTeam = await getTeam(teamId);
-        console.log(existingTeam)
     }
     team.id = teamId;
     const { error: teamInsertError } = await supabaseAdmin

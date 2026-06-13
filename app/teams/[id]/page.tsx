@@ -1,9 +1,10 @@
-import { getTeamMembers } from "@/lib/teams";
+import { getTeam, getTeamMembers } from "@/lib/teams";
 import CastList from "@/components/cast-list";
 import { getCurrentUser, getFollowCount } from "@/lib/users";
 import Link from "next/link";
 import Button from "@/components/form/button";
 import { pluralize } from "@/lib/helper-functions";
+import AvailableUsersSection from "../available-users-section";
 
 type Props = {
     params: Promise<{ id: string }>
@@ -16,6 +17,7 @@ export default async function TeamPage({ params }: Props) {
         (member) => member.id === currentUser.id && member.confirmed && member.role !== 'coach'
     );
     const followerCount = await getFollowCount(id, 'team');
+    const team = await getTeam(id);
 
     return <>
         {followerCount ? (
@@ -26,7 +28,7 @@ export default async function TeamPage({ params }: Props) {
             </section>
         ) : null}
         <section>
-            {isMemberNotCoach ? (
+            {isMemberNotCoach ? <>
                 <div className="flex flex-row gap-2 justify-center mb-2">
                     <Link href={`/teams/${id}/manage-members`}>
                         <Button caption="Manage Members" />
@@ -35,8 +37,13 @@ export default async function TeamPage({ params }: Props) {
                         <Button caption="Manage Team Details" />
                     </Link>
                 </div>
-            ) : null}
+            </> : null}
             <CastList castMembers={members} />
         </section>
+        {isMemberNotCoach ? <>
+            {team?.lookingForPlayers && <AvailableUsersSection role="player" team={team} />}
+            {team?.lookingForMusician && <AvailableUsersSection role="coach" team={team} />}
+            {team?.lookingForCoach && <AvailableUsersSection role="musician" team={team} />}
+        </> : null}
     </>
 }

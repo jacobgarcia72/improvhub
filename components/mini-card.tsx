@@ -1,12 +1,12 @@
 import { optimizeImage } from "@/lib/optimize-image";
 import { removeLeadingArticles } from "@/lib/helper-functions";
 import { theatres } from "@/lib/theatres";
-import { Event, Team } from "@/types";
+import { Event, Team, User } from "@/types";
 import Image from "next/image";
 import Link from "next/link";
 import { Border } from "./border";
 
-export default function MiniCard({ item, type }: { item: Event | Team, type: string }) {
+export default function MiniCard({ item, type }: { item: Event | Team | User, type: string }) {
     const image = (
         item.image && optimizeImage(item.image, 300, null, 80)
     ) || (
@@ -15,8 +15,9 @@ export default function MiniCard({ item, type }: { item: Event | Team, type: str
         )?.image
     );
     const name = 'name' in item ? item.name : 'title' in item ? item.title : '';
+    const url = type === 'user' ? 'profile' : `${type}s`;
     return (
-        <Link href={`/${type}s/${item.id}`}>
+        <Link href={`/${url}/${item.id}`}>
             <Border className="flex flex-row h-[132px] w-[226px] m-2 w-44 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
                 {image ? (
                     <div className="w-[132px] h-full bg-gray-300">
@@ -30,7 +31,7 @@ export default function MiniCard({ item, type }: { item: Event | Team, type: str
                 <div className="w-full h-full pr-2 pb-1 pt-3 pl-2">
                     <h2 className="leading-none text-lg pt-1 pb-1 text-slate-900 overflow-hidden text-ellipsis">{name}</h2>
                     <div className="h-full fade-out text-sm text-gray-700 overflow-hidden text-ellipsis flex flex-col gap-1 pt-1">
-                        {item.description ? (
+                        {'description' in item && item.description ? (
                             <p>{item.description.replaceAll('<br>', '\n')}</p>
                         ) : null}
                         {'theatre' in item && item.theatre ? (
