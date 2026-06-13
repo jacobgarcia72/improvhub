@@ -159,7 +159,6 @@ const nouns = [
     'Feather',
     'Unicorn',
     'Lantern',
-    'Castle',
     'Garden',
     'Horizon',
     'Pie',
