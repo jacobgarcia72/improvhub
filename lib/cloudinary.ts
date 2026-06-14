@@ -1,25 +1,31 @@
-import { v2 as cloudinary } from 'cloudinary';
+import { v2 as cloudinaryLib } from 'cloudinary';
 import { appName } from "@/lib/app-info";
 
-if (!process.env.CLOUDINARY_CLOUD_NAME) {
-    throw new Error('CLOUDINARY_CLOUD_NAME is not set');
-}
+let _cloudinary: any | null = null;
 
-if (!process.env.CLOUDINARY_API_KEY) {
-    throw new Error('CLOUDINARY_API_KEY is not set');
+function getCloudinary() {
+    if (_cloudinary) return _cloudinary;
+    if (!process.env.CLOUDINARY_CLOUD_NAME) {
+        throw new Error('CLOUDINARY_CLOUD_NAME is not set');
+    }
+    if (!process.env.CLOUDINARY_API_KEY) {
+        throw new Error('CLOUDINARY_API_KEY is not set');
+    }
+    if (!process.env.CLOUDINARY_API_SECRET) {
+        throw new Error('CLOUDINARY_API_SECRET is not set');
+    }
+    const cloudinary = cloudinaryLib;
+    cloudinary.config({
+        cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+        api_key: process.env.CLOUDINARY_API_KEY,
+        api_secret: process.env.CLOUDINARY_API_SECRET,
+    });
+    _cloudinary = cloudinary;
+    return _cloudinary;
 }
-
-if (!process.env.CLOUDINARY_API_SECRET) {
-    throw new Error('CLOUDINARY_API_SECRET is not set');
-}
-
-cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
-});
 
 export async function uploadImage(image: File, folder: string): Promise<string> {
+    const cloudinary = getCloudinary();
     const imageData = await image.arrayBuffer();
     const mime = image.type;
     const encoding = 'base64';
@@ -49,10 +55,9 @@ function getPublicIdFromUrl(imageUrl: string): string | null {
 
 export async function destroyImage(imageUrl: string | null | undefined): Promise<void> {
     if (!imageUrl) return;
-
+    const cloudinary = getCloudinary();
     const publicId = getPublicIdFromUrl(imageUrl);
     if (!publicId) return;
-
     await cloudinary.uploader.destroy(publicId);
 }
 

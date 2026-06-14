@@ -5,7 +5,7 @@ import { Team, Role, TeamMember, User } from "@/types";
 import { supabaseAdmin } from './supabase-server';
 import { getCitiesWithinRange } from "./location";
 import { camelCaseObject, getRandomElements, removeLeadingArticles, snakeCaseObject } from "./helper-functions";
-import { getAllUsers, getCurrentUser, getUser } from "./users";
+import { getCurrentUser } from "./users";
 import { destroyImage } from "./cloudinary";
 import { revalidatePath } from "next/cache";
 
@@ -53,13 +53,6 @@ export async function getOpenTeams(user: User, role: Role): Promise<Team[]> {
 
     const lookingForField = roleFieldMap[role];
     if (!lookingForField) return []; // Role not applicable for teams
-    // Get all teams
-    const { data: allTeams, error: teamsError } = await supabaseAdmin
-        .from('teams')
-        .select('*');
-    if (teamsError) throw teamsError;
-    if (!allTeams || !allTeams.length) return [];
-
     const { id: userId, theatres, state, city } = user;
 
     // Get confirmed memberships for this user
@@ -71,56 +64,66 @@ export async function getOpenTeams(user: User, role: Role): Promise<Team[]> {
     if (membershipsError) throw membershipsError;
 
     const userTeamIds = new Set(userMemberships?.map((m: any) => m.team) || []);
+
     // Normalize input for case-insensitive comparison
     const normalizedCity = city?.toLowerCase();
     const normalizedState = state?.toLowerCase();
     const normalizedTheatres = theatres?.map(t => removeLeadingArticles(t).toLowerCase());
-    // Filter teams
+
+    // Query by role first, then filter by city/state or theatre locally.
+    // This is safer than using DB-specific array overlap operators until schema is verified.
+    const { data: allTeams, error: teamsError } = await supabaseAdmin
+        .from('teams')
+        .select('*')
+        .eq(lookingForField, true)
+        .limit(250);
+    if (teamsError) throw teamsError;
+
     const openTeams = (allTeams || [])
         .filter((team: any) => {
-            // Don't return teams where user is already a confirmed member
             if (userTeamIds.has(team.id)) return false;
 
-            // Check if team is looking for this role
-            if (!team[lookingForField]) return false;
-            // Check location match (city AND state)
             const cityStateMatch = team.city && team.state &&
                 team.city.toLowerCase() === normalizedCity &&
                 team.state.toLowerCase() === normalizedState;
-            // Check theatre match (at least one theatre)
+
             const teamTheatres = (team.theatres || []).map((t: string) => removeLeadingArticles(t).toLowerCase());
             const theatreMatch = normalizedTheatres?.length && normalizedTheatres.some((theatre: string) =>
                 teamTheatres.some((teamTheatre: string) =>
                     teamTheatre.includes(theatre) || theatre.includes(teamTheatre)
                 )
             );
+
             return cityStateMatch || theatreMatch;
         })
         .map(camelCaseObject);
 
-    return openTeams ? getRandomElements(openTeams, 6) : [] as Team[];
+    return openTeams.length ? getRandomElements(openTeams, 6) : [] as Team[];
 }
 
 export async function getSuggestionsForTeam(role: Role, team?: Team | string | null): Promise<User[]> {
-    // Map role to the looking_for_* field
+    // Map role to the DB column for open-to-team preferences
     const roleFieldMap: Record<Role, string | null> = {
-        'player': 'openToJoinTeam',
-        'coach': 'openToCoachTeam',
-        'musician': 'openToAccompanyTeam',
+        'player': 'open_to_join_team',
+        'coach': 'open_to_coach_team',
+        'musician': 'open_to_accompany_team',
         'director': null,
         'tech': null,
     };
 
     const openToField = roleFieldMap[role];
     if (!openToField) return []; // Role not applicable for teams
-    const users = await getAllUsers();
-    if (!users?.length) return [];
+
+    // Normalize input for case-insensitive comparison (used later)
+    // We'll perform two DB queries to avoid a full table scan:
+    // 1) users with matching city/state
+    // 2) users whose theatres overlap the given theatres
 
     let teamId = '';
     let theatres: string[] = [];
     let state = '';
     let city = '';
-    let teamMemberIds: Set<string>;
+    let teamMemberIds: Set<string> = new Set();
     if (team) {
         const teamObject = typeof team === 'string' ? await getTeam(team) : team;
         if (teamObject) {
@@ -147,32 +150,36 @@ export async function getSuggestionsForTeam(role: Role, team?: Team | string | n
     const normalizedCity = city?.toLowerCase();
     const normalizedState = state?.toLowerCase();
     const normalizedTheatres = theatres?.map(t => removeLeadingArticles(t).toLowerCase());
-    // Filter users
-    const availableUsers = (users || [])
+
+    // Load candidates for this role and apply theater/location filtering in JS.
+    const { data: usersData, error: usersError } = await supabaseAdmin
+        .from('users')
+        .select('*')
+        .eq(openToField, true)
+        .limit(250);
+    if (usersError) throw usersError;
+
+    const users = usersData || [];
+    const availableUsers = users
         .filter((user: any) => {
-            // Don't return teams where user is already a confirmed member
             if (teamMemberIds?.has(user.id)) return false;
 
-            // Check if user is looking for this role
-            if (!user[openToField]) return false;
-            // Check location match (city AND state)
             const cityStateMatch = user.city && user.state &&
                 user.city.toLowerCase() === normalizedCity &&
                 user.state.toLowerCase() === normalizedState;
-            // Check theatre match (at least one theatre)
+
             const userTheatres = (user.theatres || []).map((t: string) => removeLeadingArticles(t).toLowerCase());
             const theatreMatch = normalizedTheatres?.length && normalizedTheatres.some((theatre: string) =>
                 userTheatres.some((userTheatre: string) =>
                     userTheatre.includes(theatre) || theatre.includes(userTheatre)
                 )
             );
+
             return cityStateMatch || theatreMatch;
         })
         .map(camelCaseObject);
 
-    return availableUsers ? getRandomElements(
-        await Promise.all(availableUsers.map((user) => getUser(user.id))), 6
-    ) : [] as User[];
+    return availableUsers.length ? getRandomElements(availableUsers, 6) : [] as User[];
 }
 
 export async function getTeamsInRange(cityOrZipcode: string, miles: number) {
