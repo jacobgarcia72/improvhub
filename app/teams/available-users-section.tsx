@@ -7,11 +7,11 @@ export default async function AvailableUsersSection({
     team
 } : {
     role: Role,
-    team: Team
+    team?: Team
 }) {
-    const users = await getSuggestionsForTeam(team, role);
+    const users = await getSuggestionsForTeam(role, team);
     if (!users?.length) return null;
     return (
-        <UserSuggestionsClient initialUsers={users} role={role} teamId={team.id} />
+        <UserSuggestionsClient initialUsers={users} role={role} teamId={team?.id} />
     )
 }

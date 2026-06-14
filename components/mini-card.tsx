@@ -14,7 +14,8 @@ export default function MiniCard({ item, type }: { item: Event | Team | User, ty
             theatres.find((t) => removeLeadingArticles(t.name) === removeLeadingArticles(item.theatre || ''))
         )?.image
     );
-    const name = 'name' in item ? item.name : 'title' in item ? item.title : '';
+    let name = 'name' in item ? item.name : 'title' in item ? item.title : '';
+    if (!name && 'firstName' in item && 'lastName' in item) name = `${item.firstName} ${item.lastName}`;
     const url = type === 'user' ? 'profile' : `${type}s`;
     return (
         <Link href={`/${url}/${item.id}`}>

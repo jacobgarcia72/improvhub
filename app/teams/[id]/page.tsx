@@ -42,8 +42,8 @@ export default async function TeamPage({ params }: Props) {
         </section>
         {isMemberNotCoach ? <>
             {team?.lookingForPlayers && <AvailableUsersSection role="player" team={team} />}
-            {team?.lookingForMusician && <AvailableUsersSection role="coach" team={team} />}
-            {team?.lookingForCoach && <AvailableUsersSection role="musician" team={team} />}
+            {team?.lookingForMusician && <AvailableUsersSection role="musician" team={team} />}
+            {team?.lookingForCoach && <AvailableUsersSection role="coach" team={team} />}
         </> : null}
     </>
 }

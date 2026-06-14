@@ -101,7 +101,7 @@ export async function getOpenTeams(user: User, role: Role): Promise<Team[]> {
     return openTeams ? getRandomElements(openTeams, 6) : [] as Team[];
 }
 
-export async function getSuggestionsForTeam(team: Team | string, role: Role): Promise<User[]> {
+export async function getSuggestionsForTeam(role: Role, team?: Team | string | null): Promise<User[]> {
     // Map role to the looking_for_* field
     const roleFieldMap: Record<Role, string | null> = {
         'player': 'openToJoinTeam',
@@ -116,18 +116,33 @@ export async function getSuggestionsForTeam(team: Team | string, role: Role): Pr
     const users = await getAllUsers();
     if (!users?.length) return [];
 
-    const teamObject = typeof team === 'string' ? await getTeam(team) : team;
-    if (!teamObject) return [];
-    const { id: teamId, theatres, state, city } = teamObject;
+    let teamId = '';
+    let theatres: string[] = [];
+    let state = '';
+    let city = '';
+    let teamMemberIds: Set<string>;
+    if (team) {
+        const teamObject = typeof team === 'string' ? await getTeam(team) : team;
+        if (teamObject) {
+            teamId = teamObject?.id;
+            theatres = teamObject?.theatres;
+            state = teamObject?.state || '';
+            city = teamObject?.city || '';
+            // Get confirmed memberships for this team
+            const { data: teamMemberships } = await supabaseAdmin
+                .from('team_members')
+                .select('team')
+                .eq('id', teamId)
+                .eq('confirmed', true);
+            teamMemberIds = new Set(teamMemberships?.map((m: any) => m.id as string) || []);
+        }
+    } else {
+        const currentUser = await getCurrentUser();
+        theatres = currentUser?.theatres || [];
+        state = currentUser?.state || '';
+        city = currentUser?.city || '';
+    }
 
-    // Get confirmed memberships for this team
-    const { data: teamMemberships } = await supabaseAdmin
-        .from('team_members')
-        .select('team')
-        .eq('id', teamId)
-        .eq('confirmed', true);
-
-    const teamMemberIds = new Set(teamMemberships?.map((m: any) => m.id) || []);
     // Normalize input for case-insensitive comparison
     const normalizedCity = city?.toLowerCase();
     const normalizedState = state?.toLowerCase();
@@ -136,7 +151,7 @@ export async function getSuggestionsForTeam(team: Team | string, role: Role): Pr
     const availableUsers = (users || [])
         .filter((user: any) => {
             // Don't return teams where user is already a confirmed member
-            if (teamMemberIds.has(user.id)) return false;
+            if (teamMemberIds?.has(user.id)) return false;
 
             // Check if user is looking for this role
             if (!user[openToField]) return false;

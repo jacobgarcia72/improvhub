@@ -7,7 +7,6 @@ export async function GET(req: Request) {
     const roleParam = url.searchParams.get('role') as Role | null;
     if (!roleParam) return NextResponse.json([], { status: 200 });
     const teamParam = url.searchParams.get('team') as string | null;
-    if (!teamParam) return NextResponse.json([], { status: 200 });
-    const users = await getSuggestionsForTeam(teamParam, roleParam);
+    const users = await getSuggestionsForTeam(roleParam, teamParam);
     return NextResponse.json(users || []);
 }
