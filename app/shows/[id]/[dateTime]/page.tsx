@@ -24,11 +24,10 @@ export default async function ShowDatePage({ params } : {
     return (
         <div className="flex flex-col pb-3">
             <div className="pt-1 px-6">
-                <h3 className="font-semibold font-lg pb-2">{formatDateTimeForDisplay(showDate)}</h3>
+                <h3 className="font-semibold font-lg py-2">{`Show Date: ${formatDateTimeForDisplay(showDate)}`}</h3>
                 {(isAdmin || isDirector) ? (
                     <CastingTools id={id}
                         showDate={showDate}
-                        buttonCaption={showCast.length ? 'Edit Cast' : 'Cast Show'}
                     />
                 ) : null}
             </div>

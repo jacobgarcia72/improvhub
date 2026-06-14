@@ -4,7 +4,7 @@ import CastingInputs from "@/components/form/casting-inputs";
 import Form from "@/components/form/form";
 import { getShow, getShowing } from "@/lib/shows";
 import { getCurrentUser } from "@/lib/users";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 export default async function ShowCastPage({ params } : {
     params: Promise<{ id: string, dateTime: string }>
@@ -17,9 +17,15 @@ export default async function ShowCastPage({ params } : {
     const isAdmin = user && parentShow?.admins.includes(user.id);
     if (!showing || !parentShow || !isAdmin) notFound();
 
+    const onCancel = async () => {
+        'use server'
+        redirect(`/shows/${id}/${dateTime}`);
+    }
+
     return <Border className="py-2 px-4 my-1">
         <Form
             buttonCaption="Save Cast"
+            cancel={onCancel}
             onSubmit={postShowCast.bind(null, id, dateTime)}>
             <CastingInputs roles={['director', 'tech', 'team', 'player', 'musician']} />
         </Form>
