@@ -20,6 +20,19 @@ export async function getUser(username: string, includePassword = false): Promis
     }) as User : null;
 }
 
+export async function getUserAbbreviated(username: string): Promise<AbbrevUser | null> {
+    const { data: user } = await supabaseAdmin
+        .from('users')
+        .select('first_name, last_name, id, image')
+        .eq('id', username)
+        .maybeSingle();
+    return user ? {
+        name: `${user.first_name}${user.last_name ? ` ${user.last_name}` : ''}`,
+        id: user.id,
+        image: user.image || undefined
+    } : null;
+}
+
 export async function getUserRoles(userId: string): Promise<{ [role: string]: boolean } | null> {
     const { data, error } = await supabaseAdmin
         .from('user_roles')
@@ -48,7 +61,7 @@ export async function getAllUsers(): Promise<User[]> {
         .from('users')
         .select('*');
     if (error) throw error;
-    return (data || []).map((row) => camelCaseObject({
+    return (data || []).map((row: { [key: string]: any; }) => camelCaseObject({
         ...row,
         password: '',
     })) as User[];
@@ -112,12 +125,12 @@ export async function getFollows(followId: string, type: Followee): Promise<{ na
         .eq('follow_id', followId)
         .eq('type', type);
     if (!followerData) return [];
-    const userIds = followerData.map((row) => row.user_id)
+    const userIds = followerData.map((row: { user_id: any; }) => row.user_id)
     const { data } = await supabaseAdmin
         .from('users')
         .select('first_name, last_name, id, image')
         .in('id', userIds);
-    return data ? data.map(({ first_name, last_name, id, image }) => ({ name: `${first_name} ${last_name}`, id, image })) : [];
+    return data ? data.map((row: { first_name: string; last_name: string; id: string; image?: string }) => ({ name: `${row.first_name} ${row.last_name}`, id: row.id, image: row.image })) : [];
 }
 
 export async function getFollowees(userId: string, type: Followee): Promise<{ name: string, id: string, image?: string }[]> {
@@ -128,13 +141,13 @@ export async function getFollowees(userId: string, type: Followee): Promise<{ na
         .eq('user_id', userId)
         .eq('type', type);
     if (!followeeData) return [];
-    const ids = followeeData.map((row) => row.follow_id)
+    const ids = followeeData.map((row: { follow_id: any; }) => row.follow_id)
     switch (type) {
         case 'user':
             return (await supabaseAdmin
                 .from(`users`)
                 .select(`first_name, last_name, id, image`)
-                .in('id', ids))?.data?.map((row) => (
+                .in('id', ids))?.data?.map((row: { first_name: any; last_name: any; id: any; image: any; }) => (
                     { name: `${row.first_name} ${row.last_name}`, id: row.id, image: row.image }
                 )) || [];
         case 'team':
