@@ -136,7 +136,7 @@ export async function updateShowing(showId: string, dateTime: string, updates: P
         .eq('date_time', dateTime);
     if (updateError) throw updateError;
 
-    if (cast?.length) {
+    if (cast) {
         const castRows = cast.map((castMember) => ({
             name: castMember.name,
             id: castMember.id,
@@ -144,10 +144,14 @@ export async function updateShowing(showId: string, dateTime: string, updates: P
             show_id: showId,
             date_time: dateTime
         }));
-        const { error: castInsertError } = await supabaseAdmin
+        await supabaseAdmin
             .from('showing_cast')
-            .insert(castRows);
-        if (castInsertError) throw castInsertError;
+            .delete()
+            .eq('show_id', showId)
+            .eq('date_time', dateTime);
+        await supabaseAdmin
+            .from('showing_cast')
+            .upsert(castRows);
     }
     return true;
 }

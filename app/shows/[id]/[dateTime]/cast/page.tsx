@@ -2,7 +2,7 @@ import { postShowCast } from "@/actions";
 import { Border } from "@/components/border";
 import CastingInputs from "@/components/form/casting-inputs";
 import Form from "@/components/form/form";
-import { getShow, getShowing } from "@/lib/shows";
+import { getShow, getShowCast, getShowing } from "@/lib/shows";
 import { getCurrentUser } from "@/lib/users";
 import { notFound, redirect } from "next/navigation";
 
@@ -17,6 +17,8 @@ export default async function ShowCastPage({ params } : {
     const isAdmin = user && parentShow?.admins.includes(user.id);
     if (!showing || !parentShow || !isAdmin) notFound();
 
+    const cast = await getShowCast(id, dateTime);
+
     const onCancel = async () => {
         'use server'
         redirect(`/shows/${id}/${dateTime}`);
@@ -27,7 +29,10 @@ export default async function ShowCastPage({ params } : {
             buttonCaption="Save Cast"
             cancel={onCancel}
             onSubmit={postShowCast.bind(null, id, dateTime)}>
-            <CastingInputs roles={['director', 'tech', 'team', 'player', 'musician']} />
+            <CastingInputs
+                currentCast={cast}
+                roles={['director', 'tech', 'team', 'player', 'musician']}
+            />
         </Form>
     </Border>
 }
