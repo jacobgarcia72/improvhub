@@ -85,6 +85,12 @@ export async function getCurrentUser(): Promise<User | null> {
     return getUser(user.id);
 }
 
+export async function getCurrentUserId(): Promise<string | null> {
+    const user = (await verifyAuth()).user;
+    if (!user) return null;
+    return user.id;
+}
+
 export async function updateUser(updates: { [key: string]: any }, userRoles?: { [role: string]: boolean }): Promise<void> {
     const user = (await verifyAuth()).user;
     if (!user) return;

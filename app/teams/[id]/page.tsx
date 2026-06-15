@@ -1,6 +1,6 @@
 import { getTeam, getTeamMembers } from "@/lib/teams";
 import CastList from "@/components/cast-list";
-import { getCurrentUser, getFollowCount } from "@/lib/users";
+import { getCurrentUserId, getFollowCount } from "@/lib/users";
 import Link from "next/link";
 import Button from "@/components/form/button";
 import { pluralize } from "@/lib/helper-functions";
@@ -12,9 +12,9 @@ type Props = {
 export default async function TeamPage({ params }: Props) {
     const { id } = await params;
     const members = await getTeamMembers(id);
-    const currentUser = await getCurrentUser();
-    const isMemberNotCoach = currentUser && members.some(
-        (member) => member.id === currentUser.id && member.confirmed && member.role !== 'coach'
+    const currentUserId = await getCurrentUserId();
+    const isMemberNotCoach = currentUserId && members.some(
+        (member) => member.id === currentUserId && member.confirmed && member.role !== 'coach'
     );
     const followerCount = await getFollowCount(id, 'team');
     const team = await getTeam(id);

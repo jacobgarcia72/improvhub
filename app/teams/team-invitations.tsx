@@ -1,11 +1,11 @@
 import { getTeamInvitations } from "@/lib/teams"
-import { getCurrentUser } from "@/lib/users"
+import { getCurrentUserId } from "@/lib/users"
 import TeamInvitation from "./team-invitation";
 
 export default async function TeamInvitations() {
-    const user = await getCurrentUser();
-    if (!user) return null;
-    const invitations = await getTeamInvitations(user.id);
+    const userId = await getCurrentUserId();
+    if (!userId) return null;
+    const invitations = await getTeamInvitations(userId);
     if (!invitations.length) return null;
     return (
         <section>

@@ -7,7 +7,7 @@ import { getTeamsByTheatre, getTeamsInRange } from '@/lib/teams';
 import ItemCard from './item-card';
 import { Suspense } from 'react';
 import Loader from '@/components/loader';
-import { getCurrentUser } from '@/lib/users';
+import { getCurrentUserId } from '@/lib/users';
 
 export default async function SearchResults({ params }: { params: {
     theatre?: string;
@@ -55,7 +55,7 @@ export default async function SearchResults({ params }: { params: {
         const results = (await handleSearchParams()).filter(Boolean);
         const hasNoResults = hasActiveQuery && results?.length === 0;
 
-        const user = await getCurrentUser();
+        const userId = await getCurrentUserId();
 
     return (
         <section className="flex flex-row flex-wrap px-4 pb-4 justify-evenly min-h-[calc(100vh-220px)]">
@@ -72,7 +72,7 @@ export default async function SearchResults({ params }: { params: {
             ) : <>
                 {hasNoResults && <p className="text-gray-500 mt-4">No results found.</p>}
                 {results?.map((result, i) => result ? (
-                    <ItemCard key={i} item={result} type={searchFor || ''} userId={user?.id || null} />
+                    <ItemCard key={i} item={result} type={searchFor || ''} userId={userId || null} />
                 ) : null)}
             </>}
             </Suspense>

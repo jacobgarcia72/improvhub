@@ -5,7 +5,7 @@ import { Team, Role, TeamMember, User } from "@/types";
 import { supabaseAdmin } from './supabase-server';
 import { getCitiesWithinRange } from "./location";
 import { camelCaseObject, getRandomElements, removeLeadingArticles, snakeCaseObject } from "./helper-functions";
-import { getCurrentUser } from "./users";
+import { getCurrentUser, getCurrentUserId } from "./users";
 import { destroyImage } from "./cloudinary";
 import { revalidatePath } from "next/cache";
 
@@ -289,7 +289,7 @@ export async function saveTeam(team: Team, members: { name: string, id: string |
         });
     if (teamInsertError) console.error(teamInsertError);
 
-    const creator = (await getCurrentUser())?.id;
+    const creatorId = await getCurrentUserId();
     const timestamp = new Date().toISOString();
     const memberRows = members.map(({ name, id, role }) => ({
         team: team.id,
@@ -297,8 +297,8 @@ export async function saveTeam(team: Team, members: { name: string, id: string |
         id,
         role,
         date_added: timestamp,
-        added_by: creator,
-        confirmed: id ? id === creator : null
+        added_by: creatorId,
+        confirmed: id ? id === creatorId : null
     }));
     if (memberRows.length) {
         const { error: memberInsertError } = await supabaseAdmin

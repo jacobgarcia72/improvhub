@@ -9,7 +9,7 @@ export interface Theatre {
 
 export type Candence = '1' | '2' | '3' | '4' | '5' | '13' | '24' |'135' | '12345' | 'last';
 
-export const CadenceText: Record<Candence, string> = {
+export const CadenceText: { [cadence: string]: string } = {
     '1': 'First X of every month',
     '2': 'Second X of every month',
     '3': 'Third X of every month',

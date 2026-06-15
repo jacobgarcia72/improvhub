@@ -9,11 +9,11 @@ import { capitalize, removeLeadingArticles } from "@/lib/helper-functions";
 import { Team } from '@/types';
 import { destroyImage, uploadImage } from '@/lib/cloudinary';
 import { getTeam, getTeamMembers, leaveTeam as leaveTeamRecord, saveTeam, updateTeam as updateTeamRecord, updateTeamDetails as updateTeamDetailsRecord } from '@/lib/teams';
-import { getCurrentUser, updateUser } from "@/lib/users";
+import { getCurrentUserId, updateUser } from "@/lib/users";
 import { revalidatePath } from 'next/cache';
 
 export async function postShow(prevState: void | { message?: string }, formData: FormData) {
-    const creatorId = (await getCurrentUser())?.id;
+    const creatorId = await getCurrentUserId();
     if (!creatorId) throw new Error('You must be logged in to continue');
 
     const title = (formData.get('title') as string)?.trim() || null;
@@ -119,7 +119,7 @@ export async function postShow(prevState: void | { message?: string }, formData:
 }
 
 export async function postShowCast(showId: string, showDateTime: string, prevState: void | { message?: string }, formData: FormData) {
-    const creatorId = (await getCurrentUser())?.id;
+    const creatorId = await getCurrentUserId();
     if (!creatorId) throw new Error('You must be logged in to continue');
 
     const data = Object.fromEntries(formData.entries());
@@ -162,7 +162,7 @@ export async function postShowCast(showId: string, showDateTime: string, prevSta
 }
 
 export async function postTeam(prevState: void | { message?: string }, formData: FormData) {
-    const creatorId = (await getCurrentUser())?.id;
+    const creatorId = await getCurrentUserId();
     if (!creatorId) throw new Error('You must be logged in to continue');
 
     const data = Object.fromEntries(formData.entries());
@@ -238,7 +238,7 @@ export async function postTeam(prevState: void | { message?: string }, formData:
 }
 
 export async function updateTeam(teamId: string, prevState: void | { message?: string }, formData: FormData) {
-    const userId = (await getCurrentUser())?.id;
+    const userId = await getCurrentUserId();
     if (!userId) throw new Error('You must be logged in to continue');
 
     const team = await getTeam(teamId);
@@ -283,7 +283,7 @@ export async function updateTeam(teamId: string, prevState: void | { message?: s
 }
 
 export async function updateTeamDetails(teamId: string, prevState: void | { message?: string }, formData: FormData) {
-    const userId = (await getCurrentUser())?.id;
+    const userId = await getCurrentUserId();
     if (!userId) throw new Error('You must be logged in to continue');
 
     const team = await getTeam(teamId);
@@ -347,7 +347,7 @@ export async function updateTeamDetails(teamId: string, prevState: void | { mess
 }
 
 export async function leaveTeam(teamId: string): Promise<void> {
-    const userId = (await getCurrentUser())?.id;
+    const userId = await getCurrentUserId();
     if (!userId) throw new Error('You must be logged in to continue');
 
     const result = await leaveTeamRecord(teamId, userId);
@@ -362,7 +362,7 @@ export async function leaveTeam(teamId: string): Promise<void> {
 export async function updateUserCommunityOptions(prevState: void | { message?: string }, formData: FormData) {
     try {
         const data = Object.fromEntries(formData.entries());
-        const userId = (await getCurrentUser())?.id;
+        const userId = await getCurrentUserId();
         if (!userId) throw new Error('You must be logged in to continue');
         const city = (data.city as string).trim() || null;
         const state = (data.state as string).trim() || null;

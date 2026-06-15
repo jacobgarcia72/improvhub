@@ -3,7 +3,7 @@ import { Border } from "@/components/border";
 import CastingInputs from "@/components/form/casting-inputs";
 import Form from "@/components/form/form";
 import { getShow, getShowCast, getShowing } from "@/lib/shows";
-import { getCurrentUser } from "@/lib/users";
+import { getCurrentUserId } from "@/lib/users";
 import { notFound, redirect } from "next/navigation";
 
 export default async function ShowCastPage({ params } : {
@@ -13,8 +13,8 @@ export default async function ShowCastPage({ params } : {
     const showDate = dateTime.replace('%20', ' ').replace('%3A', ':');
     const showing = id ? await getShowing(id, showDate) : null;
     const parentShow = id ? await getShow(id) : null;
-    const user = await getCurrentUser();
-    const isAdmin = user && parentShow?.admins.includes(user.id);
+    const userId = await getCurrentUserId();
+    const isAdmin = userId && parentShow?.admins.includes(userId);
     if (!showing || !parentShow || !isAdmin) notFound();
 
     const cast = await getShowCast(id, dateTime);

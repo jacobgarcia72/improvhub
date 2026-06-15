@@ -1,6 +1,6 @@
 import TeamForm from "@/components/form/team-form";
 import { getTeam, getTeamMembers } from "@/lib/teams";
-import { getCurrentUser } from "@/lib/users";
+import { getCurrentUserId } from "@/lib/users";
 import { notFound } from "next/navigation";
 
 type Props = {
@@ -12,10 +12,10 @@ export default async function ManageTeam({ params }: Props) {
     const team = await getTeam(id);
     if (!team) notFound();
 
-    const currentUser = await getCurrentUser();
+    const userId = await getCurrentUserId();
     const members = await getTeamMembers(id);
-    const canManageTeam = currentUser && members.some((member) => (
-        member.id === currentUser.id &&
+    const canManageTeam = userId && members.some((member) => (
+        member.id === userId &&
         member.confirmed &&
         member.role !== 'coach'
     ));

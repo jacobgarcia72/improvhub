@@ -2,7 +2,7 @@ import { updateTeam } from "@/actions";
 import CastingInputs from "@/components/form/casting-inputs";
 import Form from "@/components/form/form";
 import { getTeam, getTeamMembers } from "@/lib/teams";
-import { getCurrentUser } from "@/lib/users";
+import { getCurrentUserId } from "@/lib/users";
 import { notFound, redirect } from "next/navigation";
 
 type Props = {
@@ -11,10 +11,10 @@ type Props = {
 export default async function TeamManagePage({ params }: Props) {
     const { id } = await params;
     const members = await getTeamMembers(id);
-    const currentUser = await getCurrentUser();
+    const userId = await getCurrentUserId();
     const team = await getTeam(id);
-    const isMemberNotCoach = currentUser && members.some(
-        (member) => member.id === currentUser.id && member.confirmed && member.role !== 'coach'
+    const isMemberNotCoach = userId && members.some(
+        (member) => member.id === userId && member.confirmed && member.role !== 'coach'
     );
     if (!isMemberNotCoach || !team) notFound();
 

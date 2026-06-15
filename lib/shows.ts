@@ -8,14 +8,14 @@ import { camelCaseObject, removeLeadingArticles, snakeCaseObject } from './helpe
 import { supabaseAdmin } from './supabase-server';
 import { getCitiesWithinRange } from './location';
 
-export async function getShow(id: string) {
+export async function getShow(id: string): Promise<Event | null> {
     const { data, error } = await supabaseAdmin
         .from('shows')
         .select('*')
         .eq('id', id)
         .maybeSingle();
     if (error) throw error;
-    return data ? camelCaseObject(data) : null;
+    return data ? camelCaseObject(data) as Event : null;
 }
 
 export async function getShowings(eventId: string): Promise<Showing[]> {
