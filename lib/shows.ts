@@ -128,6 +128,13 @@ export async function saveShow(show: Event, showings: Showing[] | null): Promise
     return show.id;
 }
 
+export async function updateShowAdmins(showId: string, admins: string[]) {
+    await supabaseAdmin
+        .from('shows')
+        .update({ admins })
+        .eq('id', showId);
+}
+
 export async function updateShowing(showId: string, dateTime: string, updates: Partial<Showing>, cast?: Partial<ShowCastMember>[]): Promise<boolean> {
     const { error: updateError } = await supabaseAdmin
         .from('showings')

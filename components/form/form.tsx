@@ -17,7 +17,7 @@ export default function Form({ children, buttonCaption = 'Submit', onSubmit, can
     const [formState, formAction] = useActionState(onSubmit, initialState);
 
     return (
-        <form action={formAction} className={`${className} flex flex-col gap-4 mx-auto mb-1`}>
+        <form action={formAction} className={`${className} flex flex-col ${className?.includes('gap-') ? '' : `gap-4`} mx-auto mb-1`}>
             {children}
             <div className='flex flex-col'>
                 <FormSubmit caption={buttonCaption} cancel={cancel} />

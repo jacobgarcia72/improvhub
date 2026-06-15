@@ -36,7 +36,7 @@ create table if not exists user_roles (
 create table if not exists shows (
   id text primary key,
   creator_id text not null,
-  admins text not null,
+  admins text[] not null,
   title text not null,
   recurring_day text,
   recurring_time text,

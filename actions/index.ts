@@ -1,7 +1,7 @@
 'use server';
 import slugify from 'slugify';
 import { redirect } from "next/navigation";
-import { saveShow, updateShowing } from "@/lib/shows";
+import { saveShow, updateShowAdmins, updateShowing } from "@/lib/shows";
 import { Candence, Event, Showing, Role, ShowCastMember } from "@/types";
 import { sortDates } from "@/lib/dates";
 import { theatres } from "@/lib/theatres";
@@ -159,6 +159,22 @@ export async function postShowCast(showId: string, showDateTime: string, prevSta
     await updateShowing(showId, showDateTime, updates, cast);
     revalidatePath(`/shows/${showId}/${showDateTime}`);
     redirect(`/shows/${showId}/${showDateTime}`);
+}
+
+export async function postShowAdmins(showId: string, prevState: void | { message?: string }, formData: FormData) {
+    const data = Object.fromEntries(formData.entries());
+
+    const admins = Object.keys(data)
+        .filter((key) => (
+            (key.split('-')[0] === 'admin') &&
+            (key.split('-')[2] !== 'id') &&
+            Boolean((data[key] as string).trim())
+        ))
+        .map((key) => (data[`${key}-id`] as string)?.trim());
+    if (!admins.length) return { message: 'Shows must have at least one admin' };
+    await updateShowAdmins(showId, admins);
+    revalidatePath(`/shows/${showId}/`);
+    redirect(`/shows/${showId}/`);
 }
 
 export async function postTeam(prevState: void | { message?: string }, formData: FormData) {
