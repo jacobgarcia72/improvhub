@@ -26,7 +26,6 @@ export async function postShow(existingShow: Event | null = null, prevState: voi
     }
 
     const imageFile = formData.get('image') as File || null;
-    console.log('imageFile', imageFile)
     let imageUrl = existingShow?.image || '';
     if (imageFile && imageFile.size) {
         if (imageFile.size > 5 * 1024 * 1024) { // 5MB limit

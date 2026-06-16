@@ -227,10 +227,9 @@ export default function DateInputs({ existingShow, existingShowDates }: {
         existingShow.recurringDay ||
         existingShowDates?.length
     ))
-    console.log(existingShow)
     const [datesTBD, setDatesTBD] = useState<boolean>(existingShowDatesTBD);
     const [isRecurring, setIsRecurring] = useState<boolean>(Boolean(existingShow?.recurringDay));
-    console.log('tbd', datesTBD)
+
     return (
         <>
             <p className='-mb-1 label'>Show Dates</p>
