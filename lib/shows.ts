@@ -8,6 +8,36 @@ import { camelCaseObject, removeLeadingArticles, snakeCaseObject } from './helpe
 import { supabaseAdmin } from './supabase-server';
 import { getCitiesWithinRange } from './location';
 
+function getWeekdayOccurrence(dateString: string): number {
+    const [, , day] = dateString.split('-').map(Number);
+    return Math.floor((day - 1) / 7) + 1;
+}
+
+function isLastOfMonth(dateString: string): boolean {
+    const [year, month, day] = dateString.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
+    const nextWeek = new Date(date);
+    nextWeek.setDate(nextWeek.getDate() + 7);
+    return nextWeek.getMonth() !== date.getMonth();
+}
+
+function showingMatchesRecurringSchedule(
+    showing: Showing,
+    recurringDay: number | null,
+    cadence: string | null,
+    recurringTime: string | null
+): boolean {
+    if (recurringDay === null || recurringDay === undefined || !cadence) return false;
+    const [dateString, time] = showing.dateTime.split(' ');
+    if (!dateString) return false;
+    const [year, month, day] = dateString.split('-').map(Number);
+    const weekday = new Date(year, month - 1, day).getDay();
+    if (weekday !== recurringDay) return false;
+    if (recurringTime && time !== recurringTime) return false;
+    const occurrence = getWeekdayOccurrence(dateString);
+    return cadence.includes(`${occurrence}`) || (cadence === 'last' && isLastOfMonth(dateString));
+}
+
 export async function getShow(id: string): Promise<Event | null> {
     const { data, error } = await supabaseAdmin
         .from('shows')
@@ -153,12 +183,27 @@ export async function updateShow(showId: string, show: Event, showings: Showing[
 
     const existingShowings = await getShowings(showId);
     if ((show.recurringDay || show.recurringDay === 0) && existingShowings.length) {
-        // if going from a scheduled show to a recurring show, delete show schedule from db
-        // TODO: Change this behavior to keep shows that align with recurring schedule
-        await supabaseAdmin
-            .from('showings')
-            .delete()
-            .eq('event_id', showId)
+        const showingsToKeep = existingShowings.filter((existingShowing) => (
+            showingMatchesRecurringSchedule(
+                existingShowing,
+                show.recurringDay,
+                show.cadence,
+                show.recurringTime
+            )
+        ));
+        const showingsToDelete = existingShowings.filter((existingShowing) => (
+            !showingsToKeep.some((keeping) => keeping.dateTime === existingShowing.dateTime)
+        ));
+
+        if (showingsToDelete.length) {
+            for (let i = 0; i < showingsToDelete.length; i++) {
+                await supabaseAdmin
+                    .from('showings')
+                    .delete()
+                    .eq('event_id', showId)
+                    .eq('date_time', showingsToDelete[i].dateTime);
+            }
+        }
     } else if (showings?.length) {
         const newShowings = showings
             .filter((showing) => !existingShowings
