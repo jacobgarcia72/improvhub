@@ -6,6 +6,7 @@ import CastList from "@/components/cast-list";
 import { formatDateTimeForDisplay } from "@/lib/dates";
 import { ShowCastMember } from "@/types";
 import Link from "next/link";
+import CastRoleBanner from "./cast-role-banner";
 
 export default async function ShowDatePage({ params } : {
     params: Promise<{ id: string, dateTime: string }>
@@ -20,11 +21,23 @@ export default async function ShowDatePage({ params } : {
     const isAdmin = userId && parentShow?.admins.includes(userId);
 
     const showCast: ShowCastMember[] = await getShowCast(id, dateTime);
-    const isDirector = Boolean(userId && showCast.find((c) => c.id === userId && c.role === 'director'));
-    // const isInCast = Boolean(userId && showCast.find((c) => c.id === userId));
+    const userRoles = userId ? (
+        showCast.filter((c) => c.id === userId).map((c) => c.role)
+    ) : null;
+    const isDirector = userRoles?.includes('director');
 
     return (
         <div className="flex flex-col pb-3">
+            {userRoles?.length ? userRoles.map((role) => (
+                <CastRoleBanner
+                    showTitle={parentShow.title}
+                    userId={userId}
+                    showId={id}
+                    dateTime={dateTime}
+                    role={role}
+                    key={role}
+                />
+            )) : null}
             <div className="pt-1 px-6">
                 <div>
                     <h3 className="font-semibold font-lg pt-2 pb-0">{`Show Date: ${formatDateTimeForDisplay(showDate)}`}</h3>

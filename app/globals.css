@@ -28,6 +28,7 @@ image {
 
 header {
   background-color: var(--color-blue-500);
+  opacity: 95%;
   color: #ffffff;
   position: fixed;
 }
@@ -51,6 +52,7 @@ button {
 
 button.small {
   padding: 1px 14px !important;
+  font-size: 0.95em !important;
 }
 
 button.green {

@@ -3,10 +3,11 @@
 
 import slugify from 'slugify';
 
-import { Event, ShowCastMember, Showing } from "@/types";
+import { Event, Role, ShowCastMember, Showing } from "@/types";
 import { camelCaseObject, removeLeadingArticles, snakeCaseObject } from './helper-functions';
 import { supabaseAdmin } from './supabase-server';
 import { getCitiesWithinRange } from './location';
+import { revalidatePath } from 'next/cache';
 
 function getWeekdayOccurrence(dateString: string): number {
     const [, , day] = dateString.split('-').map(Number);
@@ -269,4 +270,15 @@ export async function updateShowing(showId: string, dateTime: string, updates: P
             .upsert(castRows);
     }
     return true;
+}
+
+export async function removeCastMember(showId: string, dateTime: string, userId: string, role: Role | 'team'): Promise<void> {
+    await supabaseAdmin
+        .from('showing_cast')
+        .delete()
+        .eq('show_id', showId)
+        .eq('date_time', dateTime)
+        .eq('id', userId)
+        .eq('role', role);
+    revalidatePath(`/shows/${showId}/${dateTime}/`, 'layout');
 }
