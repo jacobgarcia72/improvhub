@@ -13,11 +13,17 @@ export default async function ShowCastPage({ params } : {
     const showDate = dateTime.replaceAll('%20', ' ').replaceAll('%3A', ':');
     const showing = id ? await getShowing(id, showDate) : null;
     const parentShow = id ? await getShow(id) : null;
-    const userId = await getCurrentUserId();
-    const isAdmin = userId && parentShow?.admins.includes(userId);
-    if (!showing || !parentShow || !isAdmin) notFound();
 
+    if (!showing || !parentShow) notFound();
+
+    const userId = await getCurrentUserId();
     const cast = await getShowCast(id, dateTime);
+
+    const isAdmin = userId && parentShow?.admins.includes(userId);
+    const isDirector = userId && (
+        cast.find((c) => c.id === userId && c.role === 'director')
+    );
+    if (!(isAdmin || isDirector)) notFound();
 
     const onCancel = async () => {
         'use server'
