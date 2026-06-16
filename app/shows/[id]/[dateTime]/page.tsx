@@ -20,7 +20,8 @@ export default async function ShowDatePage({ params } : {
     const isAdmin = userId && parentShow?.admins.includes(userId);
 
     const showCast: ShowCastMember[] = await getShowCast(id, dateTime);
-    const isDirector = Boolean(userId && showCast.find((c) => c.id === userId));
+    const isDirector = Boolean(userId && showCast.find((c) => c.id === userId && c.role === 'director'));
+    // const isInCast = Boolean(userId && showCast.find((c) => c.id === userId));
 
     return (
         <div className="flex flex-col pb-3">
