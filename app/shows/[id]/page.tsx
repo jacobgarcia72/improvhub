@@ -16,7 +16,12 @@ export default async function ShowDetailsPage({ params }: {params: Promise<{ id:
     const isAdmin = userId && admins.includes(userId);
 
     return isAdmin ? <>
-        <div className="flex flex-row gap-2 justify-center my-4">
+        <div className="flex flex-row-reverse flex-wrap gap-2 justify-center my-4">
+            <div>
+                <Link href={`/manage/show/${id}`}>
+                    <Button caption="Manage Show Details" className="w-54" />
+                </Link>
+            </div>
             <div>
                 <Link href={`/shows/${id}/admins`}>
                     <Button caption="Manage Admins" className="w-54" />
@@ -25,11 +30,6 @@ export default async function ShowDetailsPage({ params }: {params: Promise<{ id:
                 {admins.map((admin, i) => (
                     <UserLink key={i} userId={admin} />
                 ))}
-            </div>
-            <div>
-                <Link href={`/manage/show/${id}`}>
-                    <Button caption="Manage Show Details" className="w-54" />
-                </Link>
             </div>
         </div>
     </> : null;

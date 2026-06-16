@@ -8,9 +8,9 @@ import { formatDateTimeForDisplay, formatTime, removePastDates, sortDates, weekd
 import Button from "@/components/form/button";
 import Loader from "@/components/loader";
 import { CadenceText } from "@/types";
-// import { getCurrentUser } from "@/lib/users";
 import Link from "next/link";
 import CoverPhoto from "@/components/cover-photo";
+import ShowingSelection from "./showing-selection";
 
 type Props = {
     params: Promise<{ id: string }>;
@@ -20,10 +20,7 @@ type Props = {
 export async function generateMetadata(
     { params }: Props,
 ): Promise<Metadata> {
-    // read route params
-        const { id } = await params
-
-    // fetch data
+    const { id } = await params
     const show = await getShow(id);
 
     return {
@@ -90,11 +87,6 @@ export default async function ShowDetailsLayout({ params, children }: Props) {
                             <h1 className="text-2xl">{show.title}</h1>
                             {show.theatre && <h2 className="mb-3">{show.theatre}</h2>}
                         </div>
-                        {/* {isAdmin ? <div>
-                            <Link href={`/shows/${id}/manage`} >
-                                <Button caption="Manage" />
-                            </Link>
-                        </div> : null} */}
                     </div>
                     {imageUrl && <CoverPhoto src={imageUrl} alt={show.title} photoCredit={show.photoCredit} />}
 
@@ -102,7 +94,7 @@ export default async function ShowDetailsLayout({ params, children }: Props) {
 
                     {show.description?.split('<br>').map((line, i) => <P key={i}>{line}</P>)}
                     <div className="flex flex-row flex-wrap">
-                        <div className="w-1/2">
+                        <div className="w-1/2 min-w-[200px]">
                             {recurringSchedule && <Header>Show Schedule:</Header>}
                             <P>{recurringSchedule}</P>
                             {upcomingShows?.length > 1 && <Header>Upcoming Shows</Header>}
@@ -116,8 +108,14 @@ export default async function ShowDetailsLayout({ params, children }: Props) {
                                     </Link>
                                 ))}
                             </ul>}
+                            {showings.length > upcomingShows.length && (
+                                <ShowingSelection
+                                    showId={id}
+                                    dateTimes={showings.map((showing) => showing.dateTime)}
+                                />
+                            )}
                         </div>
-                        <div className="w-1/2">
+                        <div className="w-1/2 min-w-[200px]">
                             {runtime && <Header>Approximate runtime:</Header>}
                             <P>{runtime}</P>
                             {ticketInfo && <Header>Ticket Price:</Header>}
