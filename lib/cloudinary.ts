@@ -1,7 +1,7 @@
 import { v2 as cloudinaryLib } from 'cloudinary';
 import { appName } from "@/lib/app-info";
 
-let _cloudinary: any | null = null;
+let _cloudinary: typeof cloudinaryLib | null = null;
 
 function getCloudinary() {
     if (_cloudinary) return _cloudinary;

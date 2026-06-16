@@ -15,15 +15,22 @@ export default async function ShowDetailsPage({ params }: {params: Promise<{ id:
     const userId = await getCurrentUserId();
     const isAdmin = userId && admins.includes(userId);
 
-    return isAdmin ? (
-        <div className="mb-4">
-            <h3 className="mt-3 mb-1 font-semibold text-sm">Show Page Admins</h3>
-            {admins.map((admin, i) => (
-                <UserLink key={i} userId={admin} />
-            ))}
-            <Link href={`/shows/${id}/admins`}>
-                <Button caption="Manage Admins" />
-            </Link>
+    return isAdmin ? <>
+        <div className="flex flex-row gap-2 justify-center my-4">
+            <div>
+                <Link href={`/shows/${id}/admins`}>
+                    <Button caption="Manage Admins" className="w-54" />
+                </Link>
+                <h3 className="mt-3 mb-1 font-semibold text-sm">Show Page Admins</h3>
+                {admins.map((admin, i) => (
+                    <UserLink key={i} userId={admin} />
+                ))}
+            </div>
+            <div>
+                <Link href={`/manage/show/${id}`}>
+                    <Button caption="Manage Show Details" className="w-54" />
+                </Link>
+            </div>
         </div>
-    ) : null;
+    </> : null;
 }

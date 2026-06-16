@@ -4,12 +4,15 @@ import Checkbox from '@/components/form/checkbox';
 import Input from '@/components/form/input';
 import XButton from '@/components/form/x';
 import { addDays, addOrdinal, findNextOrdinalWeekday, formatDate, getDayOfWeek, getWeekdayOccurence, newDate, weekdays } from '@/lib/dates';
-import { Candence } from '@/types';
+import { Candence, Event } from '@/types';
 import { useState } from 'react';
 
-function RecurringOptions() {
-    const [weekday, setWeekday] = useState<number>(0);
-    const [cadence, setCadence] = useState<Candence>('12345');
+function RecurringOptions({ existingShow }: {
+    existingShow?: Event
+}) {
+    const [weekday, setWeekday] = useState<number>(existingShow?.recurringDay || 0);
+    const [cadence, setCadence] = useState<Candence>(existingShow?.cadence || '12345');
+
     return (
         <>
             <div className="flex flex-row flex-wrap">
@@ -37,7 +40,11 @@ function RecurringOptions() {
             </div>
             <div className="w-1/2 pr-2">
                 <Input
-                    label='Time' name='regularTime' type='time' required
+                    value={existingShow?.recurringTime || ''}
+                    label='Time' 
+                    name='regularTime' 
+                    type='time' 
+                    required
                 />
             </div>
         </>
@@ -76,11 +83,19 @@ function DateAndTime({ label = 'Day', index = 0, date, time, onDateChange, onTim
     )
 }
 
-function ScheduleOptions() {
-    const [numberOfShowings, setNumberOfShowings] = useState<number>(1);
+function ScheduleOptions({ existingShowDates }: {
+    existingShowDates?: string[]
+}) {
+    const [numberOfShowings, setNumberOfShowings] = useState<number>(
+        existingShowDates?.length || 1
+    );
     const [autofillSelection, setAutofillSelection] = useState<number>(0);
-    const [dates, setDates] = useState<string[]>([]);
-    const [times, setTimes] = useState<string[]>([]);
+    const [dates, setDates] = useState<string[]>(
+        existingShowDates?.map((dateTime) => dateTime.split(' ')[0]) || []
+    );
+    const [times, setTimes] = useState<string[]>(
+        existingShowDates?.map((dateTime) => dateTime.split(' ')[1]) || []
+    );
 
     const handleSetDate = (date: string, index: number) => {
         const newDates = dates.slice();
@@ -204,22 +219,40 @@ function ScheduleOptions() {
     </>
 }
 
-export default function DateInputs() {
-    const [datesTBD, setDatesTBD] = useState<boolean>(false);
-    const [isRecurring, setIsRecurring] = useState<boolean>(false);
-
+export default function DateInputs({ existingShow, existingShowDates }: {
+    existingShow?: Event,
+    existingShowDates?: string[]
+}) {
+    const existingShowDatesTBD = Boolean(existingShow && !(
+        existingShow.recurringDay ||
+        existingShowDates?.length
+    ))
+    console.log(existingShow)
+    const [datesTBD, setDatesTBD] = useState<boolean>(existingShowDatesTBD);
+    const [isRecurring, setIsRecurring] = useState<boolean>(Boolean(existingShow?.recurringDay));
+    console.log('tbd', datesTBD)
     return (
         <>
             <p className='-mb-1 label'>Show Dates</p>
-            <Checkbox name="tbd" label='Dates TBD' onChange={(checked) => {
-                setDatesTBD(checked);
-                if (checked) setIsRecurring(false);
-            }} />
+            <Checkbox
+                defaultChecked={datesTBD}
+                name="tbd"
+                label='Dates TBD'
+                onChange={(checked) => {
+                    setDatesTBD(checked);
+                    if (checked) setIsRecurring(false);
+                }}
+            />
             {!datesTBD && (
-                <Checkbox name="recurring" label='Ongoing show' onChange={setIsRecurring} />
+                <Checkbox
+                    defaultChecked={isRecurring}
+                    name="recurring"
+                    label='Ongoing show'
+                    onChange={setIsRecurring}
+                />
             )}
-            {!datesTBD && isRecurring && <RecurringOptions />}
-            {!(datesTBD || isRecurring) && <ScheduleOptions />}
+            {!datesTBD && isRecurring && <RecurringOptions existingShow={existingShow} />}
+            {!(datesTBD || isRecurring) && <ScheduleOptions existingShowDates={existingShowDates} />}
         </>
     )
 }

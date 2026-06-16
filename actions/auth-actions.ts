@@ -116,7 +116,7 @@ export async function updateUserInfo(prevState: void | { message?: string }, for
     revalidatePath(`/profile`, 'layout');
 }
 export async function updateUserBio(prevState: void | { message?: string }, formData: FormData) {
-    const bio = (formData.get('bio') as string).trim().replace(/\r\n/g, '<br>').replace(/\n/g, '<br>').replace(/\r/g, '<br>');
+    const bio = (formData.get('bio') as string).trim().replaceAll(/\r\n/g, '<br>').replaceAll(/\n/g, '<br>').replaceAll(/\r/g, '<br>');
     await updateUser({ bio });
     revalidatePath(`/profile`, 'layout');
 }

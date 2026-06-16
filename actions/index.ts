@@ -1,7 +1,7 @@
 'use server';
 import slugify from 'slugify';
 import { redirect } from "next/navigation";
-import { saveShow, updateShowAdmins, updateShowing } from "@/lib/shows";
+import { saveShow, updateShow, updateShowAdmins, updateShowing } from "@/lib/shows";
 import { Candence, Event, Showing, Role, ShowCastMember } from "@/types";
 import { sortDates } from "@/lib/dates";
 import { theatres } from "@/lib/theatres";
@@ -12,7 +12,7 @@ import { getTeam, getTeamMembers, leaveTeam as leaveTeamRecord, saveTeam, update
 import { getCurrentUserId, updateUser } from "@/lib/users";
 import { revalidatePath } from 'next/cache';
 
-export async function postShow(prevState: void | { message?: string }, formData: FormData) {
+export async function postShow(existingShow: Event | null = null, prevState: void | { message?: string }, formData: FormData) {
     const creatorId = await getCurrentUserId();
     if (!creatorId) throw new Error('You must be logged in to continue');
 
@@ -26,16 +26,22 @@ export async function postShow(prevState: void | { message?: string }, formData:
     }
 
     const imageFile = formData.get('image') as File || null;
-    let imageUrl = '';
+    console.log('imageFile', imageFile)
+    let imageUrl = existingShow?.image || '';
     if (imageFile && imageFile.size) {
         if (imageFile.size > 5 * 1024 * 1024) { // 5MB limit
             return { message: 'Image file size exceeds 5MB limit' };
         }
         try {
-            imageUrl = await uploadImage(imageFile, 'teams');
+            imageUrl = await uploadImage(imageFile, 'shows');
+            if (existingShow?.image && existingShow?.image !== imageUrl) {
+                await destroyImage(existingShow.image);
+            }
         } catch {
             throw new Error('Image upload failed');
         }
+    } else if (!imageFile) {
+        imageUrl = '';
     }
 
     let dateTimes: string[] | null = null;
@@ -87,10 +93,10 @@ export async function postShow(prevState: void | { message?: string }, formData:
     const notes = (formData.get('notes') as string)?.trim() || null;
 
     let description = formData.get('description') as string || null;
-    if (description) description = description.replace(/\r\n/g, '<br>').replace(/\n/g, '<br>').replace(/\r/g, '<br>');
+    if (description) description = description.replaceAll(/\r\n/g, '<br>').replaceAll(/\n/g, '<br>').replaceAll(/\r/g, '<br>');
 
     const show: Event = {
-        id: '',
+        id: existingShow?.id || '',
         creatorId,
         admins: [creatorId],
         title,
@@ -114,7 +120,13 @@ export async function postShow(prevState: void | { message?: string }, formData:
         dateTime
     }))) || null;
 
-    const showId = await saveShow(show, showings);
+    let showId = '';
+    if (existingShow?.id) {
+        showId = existingShow.id;
+        await updateShow(showId, show, showings);
+    } else {
+        showId = await saveShow(show, showings);
+    }
     redirect(`/shows/${showId}`);
 }
 
@@ -200,7 +212,7 @@ export async function postTeam(prevState: void | { message?: string }, formData:
     }
 
     let description = data.description as string || null;
-    if (description) description = description.replace(/\r\n/g, '<br>').replace(/\n/g, '<br>').replace(/\r/g, '<br>');
+    if (description) description = description.replaceAll(/\r\n/g, '<br>').replaceAll(/\n/g, '<br>').replaceAll(/\r/g, '<br>');
 
     const checkedTheatres = Object.keys(data)
         .filter(key => key.startsWith('theatre-') && Boolean((data[key] as string).trim()))
@@ -347,7 +359,7 @@ export async function updateTeamDetails(teamId: string, prevState: void | { mess
     if (city) city = capitalize(city);
 
     let description = data.description as string || null;
-    if (description) description = description.replace(/\r\n/g, '<br>').replace(/\n/g, '<br>').replace(/\r/g, '<br>');
+    if (description) description = description.replaceAll(/\r\n/g, '<br>').replaceAll(/\n/g, '<br>').replaceAll(/\r/g, '<br>');
 
     await updateTeamDetailsRecord(teamId, {
         name,

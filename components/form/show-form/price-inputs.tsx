@@ -2,11 +2,14 @@
 
 import Input from "@/components/form/input"
 import { validateInputValue } from "@/lib/helper-functions";
+import { Event } from "@/types";
 import { useState } from "react";
 
-export default function PriceInputs() {
-    const [price, setPrice] = useState('');
-    const [doorPrice, setDoorPrice] = useState('');
+export default function PriceInputs({ existingShow }: {
+    existingShow?: Event
+}) {
+    const [price, setPrice] = useState(existingShow?.price?.toString() ?? '');
+    const [doorPrice, setDoorPrice] = useState(existingShow?.doorPrice?.toString() ?? '');
     return (
         <div className="flex flex-row flex-wrap">
             <div className="w-1/2 pr-2">

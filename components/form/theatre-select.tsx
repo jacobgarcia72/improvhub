@@ -4,10 +4,13 @@ import Autocomplete from "./autocomplete";
 import Input from "./input";
 import { useState } from "react";
 import StateSelect from "./state-select";
+import { Event } from "@/types";
 
-export default function TheatreSelect() {
-    const [city, setCity] = useState<string>('');
-    const [state, setState] = useState<string>();
+export default function TheatreSelect({ existingShow }: {
+    existingShow?: Event
+}) {
+    const [city, setCity] = useState<string>(existingShow?.city || '');
+    const [state, setState] = useState<string>(existingShow?.state || '');
     const theatreNames = getTheatreNames();
 
     const autoFillCityAndState = (theatreName: string) => {
@@ -20,7 +23,13 @@ export default function TheatreSelect() {
     return (
         <div className="flex flex-row flex-wrap">
             <div className="w-[250px] pr-2">
-                <Autocomplete label="Theatre" name="theatre" options={theatreNames} onChange={(value) => autoFillCityAndState(value as string)} />
+                <Autocomplete
+                    startingValue={existingShow?.theatre || undefined}
+                    label="Theatre"
+                    name="theatre"
+                    options={theatreNames}
+                    onChange={(value) => autoFillCityAndState(value as string)}
+                />
             </div>
             <div className="w-[166px] pr-2">
                 <Input label="City"

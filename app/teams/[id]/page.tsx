@@ -31,10 +31,10 @@ export default async function TeamPage({ params }: Props) {
             {isMemberNotCoach ? <>
                 <div className="flex flex-row gap-2 justify-center mb-2">
                     <Link href={`/teams/${id}/manage-members`}>
-                        <Button caption="Manage Members" />
+                        <Button caption="Manage Members" className="w-54" />
                     </Link>
                     <Link href={`/manage/team/${id}`}>
-                        <Button caption="Manage Team Details" />
+                        <Button caption="Manage Team Details" className="w-54" />
                     </Link>
                 </div>
             </> : null}

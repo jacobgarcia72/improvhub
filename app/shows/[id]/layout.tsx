@@ -46,9 +46,6 @@ export default async function ShowDetailsLayout({ params, children }: Props) {
 
     if (!show) notFound();
 
-    // const user = await getCurrentUser();
-    // const isAdmin = user && show.admins.includes(user.id);
-
     const theatre = theatres.find(t => t.name === show.theatre);
     const imageUrl = show.image || theatre?.image;
 
@@ -62,8 +59,8 @@ export default async function ShowDetailsLayout({ params, children }: Props) {
     }
 
     let recurringSchedule = null;
-    if (typeof show.recurringDay === 'number' && show.cadence) {
-        const day = weekdays[show.recurringDay];
+    if ((show.recurringDay || show.recurringDay === 0) && show.cadence) {
+        const day = weekdays[Number(show.recurringDay)];
         let text = CadenceText[show.cadence].replace('X', day);
         if (show.recurringTime) text += ` at ${formatTime(show.recurringTime)}`;
         recurringSchedule = text;

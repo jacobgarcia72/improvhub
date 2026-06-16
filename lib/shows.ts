@@ -28,7 +28,7 @@ export async function getShowings(eventId: string): Promise<Showing[]> {
 }
 
 export async function getShowing(eventId: string, dateTime: string): Promise<Showing | null> {
-    const normalizedDateTime = dateTime.replace('%20', ' ').replace('%3A', ':');
+    const normalizedDateTime = dateTime.replaceAll('%20', ' ').replaceAll('%3A', ':');
     const { data, error } = await supabaseAdmin
         .from('showings')
         .select('*')
@@ -126,6 +126,69 @@ export async function saveShow(show: Event, showings: Showing[] | null): Promise
     }
 
     return show.id;
+}
+
+export async function updateShow(showId: string, show: Event, showings: Showing[] | null): Promise<void> {
+    const { error: showInsertError } = await supabaseAdmin
+        .from('shows')
+        .update({
+            title: show.title,
+            recurring_day: show.recurringDay,
+            recurring_time: show.recurringTime,
+            cadence: show.cadence,
+            description: show.description,
+            theatre: show.theatre,
+            city: show.city,
+            state: show.state,
+            price: show.price,
+            door_price: show.doorPrice,
+            tickets_url: show.ticketsUrl,
+            image: show.image,
+            photo_credit: show.photoCredit,
+            runtime: show.runtime,
+            notes: show.notes
+        })
+        .eq('id', showId);
+    if (showInsertError) throw showInsertError;
+
+    const existingShowings = await getShowings(showId);
+    if ((show.recurringDay || show.recurringDay === 0) && existingShowings.length) {
+        // if going from a scheduled show to a recurring show, delete show schedule from db
+        // TODO: Change this behavior to keep shows that align with recurring schedule
+        await supabaseAdmin
+            .from('showings')
+            .delete()
+            .eq('event_id', showId)
+    } else if (showings?.length) {
+        const newShowings = showings
+            .filter((showing) => !existingShowings
+                .find((existingShowing) => (
+                    showing.dateTime === existingShowing.dateTime
+                ))
+            )
+            .map((showing) => ({
+                event_id: showId,
+                date_time: showing.dateTime
+            }));
+        const showingsToDelete = existingShowings
+            .filter((existingShowing) => !showings
+                .find((showing) => (
+                    showing.dateTime === existingShowing.dateTime
+                ))
+            );
+        if (showingsToDelete.length) {
+            for (let i = 0; i < showingsToDelete.length; i++) {
+                await supabaseAdmin
+                    .from('showings')
+                    .delete()
+                    .eq('event_id', showId)
+                    .eq('date_time', showingsToDelete[i].dateTime);
+            };
+        }
+        await supabaseAdmin
+            .from('showings')
+            .insert(newShowings);
+    }
 }
 
 export async function updateShowAdmins(showId: string, admins: string[]) {

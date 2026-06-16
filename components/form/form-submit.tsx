@@ -8,7 +8,7 @@ export default function FormSubmit({ caption = 'Submit', cancel }: { caption?: s
     return (
         <div className="my-2 w-full flex flex-row">
             <Button
-                className={cancel ? '' : "w-full"}
+                className={"w-48"}
                 submit
                 caption={pending ? 'Pending...' : caption}
                 disabled={pending}

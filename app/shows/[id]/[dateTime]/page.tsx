@@ -11,7 +11,7 @@ export default async function ShowDatePage({ params } : {
     params: Promise<{ id: string, dateTime: string }>
     }) {
     const { id, dateTime } = await params;
-    const showDate = dateTime.replace('%20', ' ').replace('%3A', ':');
+    const showDate = dateTime.replaceAll('%20', ' ').replaceAll('%3A', ':');
     const showing = id ? await getShowing(id, showDate) : null;
     const parentShow = id ? await getShow(id) : null;
     if (!showing || !parentShow) notFound();
