@@ -8,37 +8,7 @@ import { camelCaseObject, removeLeadingArticles, snakeCaseObject } from './helpe
 import { supabaseAdmin } from './supabase-server';
 import { getCitiesWithinRange } from './location';
 import { revalidatePath } from 'next/cache';
-import { normalizeDateTime } from './dates';
-
-function getWeekdayOccurrence(dateString: string): number {
-    const [, , day] = dateString.split('-').map(Number);
-    return Math.floor((day - 1) / 7) + 1;
-}
-
-function isLastOfMonth(dateString: string): boolean {
-    const [year, month, day] = dateString.split('-').map(Number);
-    const date = new Date(year, month - 1, day);
-    const nextWeek = new Date(date);
-    nextWeek.setDate(nextWeek.getDate() + 7);
-    return nextWeek.getMonth() !== date.getMonth();
-}
-
-function showingMatchesRecurringSchedule(
-    showing: Showing,
-    recurringDay: number | null,
-    cadence: string | null,
-    recurringTime: string | null
-): boolean {
-    if (recurringDay === null || recurringDay === undefined || !cadence) return false;
-    const [dateString, time] = showing.dateTime.split(' ');
-    if (!dateString) return false;
-    const [year, month, day] = dateString.split('-').map(Number);
-    const weekday = new Date(year, month - 1, day).getDay();
-    if (weekday !== recurringDay) return false;
-    if (recurringTime && time !== recurringTime) return false;
-    const occurrence = getWeekdayOccurrence(dateString);
-    return cadence.includes(`${occurrence}`) || (cadence === 'last' && isLastOfMonth(dateString));
-}
+import { dateMatchesRecurringSchedule, normalizeDateTime } from './dates';
 
 export async function getShow(id: string): Promise<Event | null> {
     const { data, error } = await supabaseAdmin
@@ -235,8 +205,8 @@ export async function updateShow(showId: string, show: Event, showings: Showing[
     const existingShowings = await getShowings(showId);
     if ((show.recurringDay || show.recurringDay === 0) && existingShowings.length) {
         const showingsToKeep = existingShowings.filter((existingShowing) => (
-            showingMatchesRecurringSchedule(
-                existingShowing,
+            dateMatchesRecurringSchedule(
+                existingShowing.dateTime,
                 show.recurringDay,
                 show.cadence,
                 show.recurringTime

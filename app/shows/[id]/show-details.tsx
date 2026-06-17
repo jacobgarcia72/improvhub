@@ -1,5 +1,5 @@
 import { getShowings } from "@/lib/shows";
-import { formatDateTimeForDisplay, formatTime, removePastDates, sortDates, weekdays } from "@/lib/dates";
+import { formatDateTimeForDisplay, formatTime, removePastDates, sortDates, weekdays, addDays, formatDate, getWeekdayOccurence, isLastOfMonth } from "@/lib/dates";
 import Button from "@/components/form/button";
 import { CadenceText, Event } from "@/types";
 import Link from "next/link";
@@ -31,6 +31,23 @@ export default async function ShowDetails({ show }: {
         let text = CadenceText[show.cadence].replace('X', day);
         if (show.recurringTime) text += ` at ${formatTime(show.recurringTime)}`;
         recurringSchedule = text;
+        // Generate next 4 dates based on recurringDay and cadence
+        let currentDate = new Date();
+        const cadenceOrdinals = show.cadence === 'last' ? [] : show.cadence.split('').map(Number);
+        while (upcomingShows.length < 4) {
+            if (currentDate.getDay() === Number(show.recurringDay)) {
+                const occurrence = getWeekdayOccurence(currentDate);
+                const isMatch = show.cadence === 'last' ? isLastOfMonth(currentDate) : cadenceOrdinals.includes(occurrence);
+                if (isMatch) {
+                    let dateTimeStr = formatDate(currentDate);
+                    if (show.recurringTime) {
+                        dateTimeStr += ` ${show.recurringTime}`;
+                    }
+                    upcomingShows.push(dateTimeStr);
+                }
+            }
+            currentDate = addDays(currentDate, 1);
+        }
     }
 
     let ticketInfo = null;

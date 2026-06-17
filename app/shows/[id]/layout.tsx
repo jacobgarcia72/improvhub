@@ -1,8 +1,6 @@
 import { appName } from "@/lib/app-info";
 import { getShow } from "@/lib/shows";
-import { Suspense } from "react";
 import type { Metadata } from 'next'
-import Loader from "@/components/loader";
 
 type Props = {
     params: Promise<{ id: string }>;
@@ -24,12 +22,10 @@ export async function generateMetadata(
 export default async function ShowDetailsLayout({ children }: Props) {
 
     return (
-        <Suspense fallback={<Loader />}>
-            <section>
-                <div className="px-4">
-                    {children}
-                </div>
-            </section>
-        </Suspense>
+        <section>
+            <div className="px-4">
+                {children}
+            </div>
+        </section>
     )
 }

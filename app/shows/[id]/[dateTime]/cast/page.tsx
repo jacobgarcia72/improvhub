@@ -7,16 +7,20 @@ import { getCurrentUserId } from "@/lib/users";
 import { notFound, redirect } from "next/navigation";
 import ShowHeader from "../../show-header";
 import ShowDate from "../show-date";
+import { dateMatchesRecurringSchedule } from "@/lib/dates";
 
 export default async function ShowCastPage({ params } : {
     params: Promise<{ id: string, dateTime: string }>
     }) {
     const { id, dateTime } = await params;
+    const parentShow = id ? await getShow(id) : null;
+    if (!parentShow) notFound();
     const showDate = dateTime.replaceAll('%20', ' ').replaceAll('%3A', ':');
     const showing = id ? await getShowing(id, showDate) : null;
-    const parentShow = id ? await getShow(id) : null;
-
-    if (!showing || !parentShow) notFound();
+    const { recurringDay, recurringTime, cadence } = parentShow;
+    if (!(showing || (
+        cadence && dateMatchesRecurringSchedule(showDate, recurringDay, cadence, recurringTime)
+    ))) notFound();
 
     const userId = await getCurrentUserId();
     const cast = await getShowCast(id, dateTime);
