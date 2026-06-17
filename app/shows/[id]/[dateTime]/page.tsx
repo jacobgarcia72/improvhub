@@ -60,7 +60,7 @@ export default async function ShowDatePage({ params } : {
             )) : null}
             <div className="pt-1 px-6">
                 <div className="w-full flex flex-row items-center justify-between">
-                    <div>
+                    <div className="mb-3">
                         <h3 className="font-semibold font-lg pt-2 pb-0">{`Show Date: ${formatDateTimeForDisplay(showDate)}`}</h3>
                         <Link className="link pb-2 text-sm mt-[-4px]" href={`/shows/${id}`}>Go to parent show page</Link>
                     </div>

@@ -5,7 +5,7 @@ export default function CastingTools({ id, showDate }: { id: string, showDate: s
     return (
         <>
             <Link href={`/shows/${id}/${showDate}/cast`}>
-                <Button style="link" caption="Manage Cast and Open Positions" />
+                <Button caption="Manage Cast and Open Positions" />
             </Link>
         </>
     )
