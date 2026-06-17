@@ -9,6 +9,7 @@ import Link from "next/link";
 import CastRoleBanner from "./cast-role-banner";
 import { getTeamsByUser } from "@/lib/teams";
 import CancelShowing from "./cancel-showing";
+import ShowDetails from "../show-details";
 
 export default async function ShowDatePage({ params } : {
     params: Promise<{ id: string, dateTime: string }>
@@ -34,7 +35,7 @@ export default async function ShowDatePage({ params } : {
     }
     const isDirector = userRoles?.includes('director');
 
-    return (
+    return <>
         <div className="flex flex-col pb-3 border-b border-gray-400 mb-2">
             {userRoles?.length ? userRoles.map((role) => (
                 <CastRoleBanner
@@ -79,5 +80,6 @@ export default async function ShowDatePage({ params } : {
             </div>
             <CastList castMembers={showCast} noConfirm />
         </div>
-    )
+        <ShowDetails show={parentShow} />
+    </>
 }

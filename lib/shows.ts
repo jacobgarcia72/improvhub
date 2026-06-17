@@ -305,7 +305,7 @@ export async function deleteShow(eventId: string): Promise<void> {
     await supabaseAdmin
         .from('shows')
         .delete()
-        .eq('event_id', eventId)
+        .eq('id', eventId)
     await supabaseAdmin
         .from('showings')
         .delete()
