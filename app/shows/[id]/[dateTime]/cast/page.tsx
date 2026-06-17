@@ -5,6 +5,8 @@ import Form from "@/components/form/form";
 import { getShow, getShowCast, getShowing } from "@/lib/shows";
 import { getCurrentUserId } from "@/lib/users";
 import { notFound, redirect } from "next/navigation";
+import ShowHeader from "../../show-header";
+import ShowDate from "../show-date";
 
 export default async function ShowCastPage({ params } : {
     params: Promise<{ id: string, dateTime: string }>
@@ -30,15 +32,19 @@ export default async function ShowCastPage({ params } : {
         redirect(`/shows/${id}/${dateTime}`);
     }
 
-    return <Border className="py-2 px-4 my-1">
-        <Form
-            buttonCaption="Save Cast"
-            cancel={onCancel}
-            onSubmit={postShowCast.bind(null, id, dateTime)}>
-            <CastingInputs
-                currentCast={cast}
-                roles={['director', 'tech', 'team', 'player', 'musician']}
-            />
-        </Form>
-    </Border>
+    return <>
+        <ShowHeader show={parentShow} showImage={false} />
+        <ShowDate showDate={showDate} />
+        <Border className="py-2 px-4 my-1">
+            <Form
+                buttonCaption="Save Cast"
+                cancel={onCancel}
+                onSubmit={postShowCast.bind(null, id, dateTime)}>
+                <CastingInputs
+                    currentCast={cast}
+                    roles={['director', 'tech', 'team', 'player', 'musician']}
+                />
+            </Form>
+        </Border>
+    </>
 }

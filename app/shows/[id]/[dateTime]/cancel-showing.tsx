@@ -31,7 +31,7 @@ export default function CancelShowing({ dateTime, showTitle, showId }: {
             cancelLabel="No"
         />
         <Button
-            className="small dark"
+            style="link"
             caption="Cancel Show"
             onClick={() => setOpenModal(true)}
         />

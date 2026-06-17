@@ -25,7 +25,7 @@ export default async function ShowForm({ existingShow }: {
             <Form
                 cancel={onCancel}
                 onSubmit={postShow.bind(null, existingShow || null)}
-                buttonCaption={`${existingShow ? 'Update' : 'Create'} Show`}
+                buttonCaption={existingShow ? 'Save Changes' : 'Create Show'}
             >
                 <Input
                     value={existingShow?.title || ''}

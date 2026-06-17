@@ -3,6 +3,7 @@ import AdminsInputs from "@/components/form/admin-inputs";
 import { getShow } from "@/lib/shows";
 import { getCurrentUserId } from "@/lib/users";
 import { notFound, redirect } from "next/navigation";
+import ShowHeader from "../show-header";
 
 export default async function ShowAdminsPage({ params }: {params: Promise<{ id: string }>}) {
     const { id } = await params;
@@ -21,7 +22,8 @@ export default async function ShowAdminsPage({ params }: {params: Promise<{ id: 
         redirect(`/shows/${id}`);
     }
 
-    return (
+    return <>
+        <ShowHeader show={show} />
         <div className="mb-4">
             <h3 className="mt-3 mb-3 font-semibold text-sm">Show Page Admins</h3>
             <AdminsInputs
@@ -30,5 +32,5 @@ export default async function ShowAdminsPage({ params }: {params: Promise<{ id: 
                 cancel={onCancel}
             />
         </div>
-    )
+    </>
 }

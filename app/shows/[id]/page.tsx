@@ -6,6 +6,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import ShowDetails from "./show-details";
 import DeleteShow from "./delete-show";
+import ShowHeader from "./show-header";
 
 export default async function ShowDetailsPage({ params }: {params: Promise<{ id: string }>}) {
     const { id } = await params;
@@ -18,6 +19,7 @@ export default async function ShowDetailsPage({ params }: {params: Promise<{ id:
     const isAdmin = userId && admins.includes(userId);
 
     return <>
+        <ShowHeader show={show} />
         {isAdmin ? <>
             <div className="flex flex-row-reverse flex-wrap gap-2 justify-center my-4">
                 <div>

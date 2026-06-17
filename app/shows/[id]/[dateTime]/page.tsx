@@ -3,13 +3,14 @@ import { getCurrentUserId } from "@/lib/users";
 import { notFound } from "next/navigation";
 import CastingTools from "./casting-tools";
 import CastList from "@/components/cast-list";
-import { formatDateTimeForDisplay } from "@/lib/dates";
 import { ShowCastMember, Team } from "@/types";
 import Link from "next/link";
 import CastRoleBanner from "./cast-role-banner";
 import { getTeamsByUser } from "@/lib/teams";
 import CancelShowing from "./cancel-showing";
 import ShowDetails from "../show-details";
+import ShowHeader from "../show-header";
+import ShowDate from "./show-date";
 
 export default async function ShowDatePage({ params } : {
     params: Promise<{ id: string, dateTime: string }>
@@ -36,6 +37,7 @@ export default async function ShowDatePage({ params } : {
     const isDirector = userRoles?.includes('director');
 
     return <>
+        <ShowHeader show={parentShow} />
         <div className="flex flex-col pb-3 border-b border-gray-400 mb-2">
             {userRoles?.length ? userRoles.map((role) => (
                 <CastRoleBanner
@@ -58,19 +60,12 @@ export default async function ShowDatePage({ params } : {
                     key={team.id}
                 />
             )) : null}
-            <div className="pt-1 px-6">
+            <div className="pt-1 pb-1 px-6">
                 <div className="w-full flex flex-row items-center justify-between">
                     <div className="mb-3">
-                        <h3 className="font-semibold font-lg pt-2 pb-0">{`Show Date: ${formatDateTimeForDisplay(showDate)}`}</h3>
+                        <ShowDate showDate={showDate} />
                         <Link className="link pb-2 text-sm mt-[-4px]" href={`/shows/${id}`}>Go to parent show page</Link>
                     </div>
-                    {isAdmin && (
-                        <CancelShowing
-                            showTitle={parentShow.title}
-                            showId={id}
-                            dateTime={dateTime}
-                        />
-                    )}
                 </div>
                 {(isAdmin || isDirector) ? (
                     <CastingTools id={id}
@@ -79,6 +74,13 @@ export default async function ShowDatePage({ params } : {
                 ) : null}
             </div>
             <CastList castMembers={showCast} noConfirm />
+            {isAdmin && <div className="w-full flex flex-row justify-center pt-6">
+                <CancelShowing
+                    showTitle={parentShow.title}
+                    showId={id}
+                    dateTime={dateTime}
+                />
+            </div>}
         </div>
         <ShowDetails show={parentShow} />
     </>
