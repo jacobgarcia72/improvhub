@@ -80,11 +80,12 @@ export async function getShowingsForEvents(eventIds: string[]): Promise<Showing[
 }
 
 export async function getShowCast(showId: string, dateTime: string): Promise<ShowCastMember[]> {
+    const normalizedDateTime = dateTime.replaceAll('%20', ' ').replaceAll('%3A', ':');
     const { data, error } = await supabaseAdmin
         .from('showing_cast')
         .select('*')
         .eq('show_id', showId)
-        .eq('date_time', dateTime);
+        .eq('date_time', normalizedDateTime);
     if (error) throw error;
     return (data || []).map(camelCaseObject) as ShowCastMember[];
 }
@@ -245,11 +246,12 @@ export async function updateShowAdmins(showId: string, admins: string[]) {
 }
 
 export async function updateShowing(showId: string, dateTime: string, updates: Partial<Showing>, cast?: Partial<ShowCastMember>[]): Promise<boolean> {
+    const normalizedDateTime = dateTime.replaceAll('%20', ' ').replaceAll('%3A', ':');
     const { error: updateError } = await supabaseAdmin
         .from('showings')
         .update(snakeCaseObject(updates))
         .eq('event_id', showId)
-        .eq('date_time', dateTime);
+        .eq('date_time', normalizedDateTime);
     if (updateError) throw updateError;
 
     if (cast) {
@@ -258,13 +260,13 @@ export async function updateShowing(showId: string, dateTime: string, updates: P
             id: castMember.id,
             role: castMember.role,
             show_id: showId,
-            date_time: dateTime
+            date_time: normalizedDateTime
         }));
         await supabaseAdmin
             .from('showing_cast')
             .delete()
             .eq('show_id', showId)
-            .eq('date_time', dateTime);
+            .eq('date_time', normalizedDateTime);
         await supabaseAdmin
             .from('showing_cast')
             .upsert(castRows);
@@ -273,11 +275,12 @@ export async function updateShowing(showId: string, dateTime: string, updates: P
 }
 
 export async function removeCastMember(showId: string, dateTime: string, userId: string, role: Role | 'team'): Promise<void> {
+    const normalizedDateTime = dateTime.replaceAll('%20', ' ').replaceAll('%3A', ':');
     await supabaseAdmin
         .from('showing_cast')
         .delete()
         .eq('show_id', showId)
-        .eq('date_time', dateTime)
+        .eq('date_time', normalizedDateTime)
         .eq('id', userId)
         .eq('role', role);
     revalidatePath(`/shows/${showId}/${dateTime}/`, 'layout');
@@ -294,6 +297,22 @@ export async function deleteShowing(eventId: string, dateTime: string): Promise<
         .from('showing_cast')
         .delete()
         .eq('show_id', eventId)
-        .eq('date_time', dateTime);
+        .eq('date_time', normalizedDateTime);
+    revalidatePath(`/shows/${eventId}/`, 'layout');
+}
+
+export async function deleteShow(eventId: string): Promise<void> {
+    await supabaseAdmin
+        .from('shows')
+        .delete()
+        .eq('event_id', eventId)
+    await supabaseAdmin
+        .from('showings')
+        .delete()
+        .eq('event_id', eventId)
+    await supabaseAdmin
+        .from('showing_cast')
+        .delete()
+        .eq('show_id', eventId)
     revalidatePath(`/shows/${eventId}/`, 'layout');
 }
