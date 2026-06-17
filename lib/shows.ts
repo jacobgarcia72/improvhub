@@ -8,6 +8,7 @@ import { camelCaseObject, removeLeadingArticles, snakeCaseObject } from './helpe
 import { supabaseAdmin } from './supabase-server';
 import { getCitiesWithinRange } from './location';
 import { revalidatePath } from 'next/cache';
+import { normalizeDateTime } from './dates';
 
 function getWeekdayOccurrence(dateString: string): number {
     const [, , day] = dateString.split('-').map(Number);
@@ -57,50 +58,44 @@ export async function getShowsByAdmin(userId: string): Promise<Event[]> {
     return (data || []).map(camelCaseObject) as Event[];
 }
 
-export async function getShowsByCastMember(userId: string): Promise<Event[]> {
+export async function getShowsByCastMember(userId: string): Promise<{ show: Event, dateTimes: string[] }[]> {
     const today = new Date();
     const yyyy = today.getFullYear();
     const mm = String(today.getMonth() + 1).padStart(2, '0');
     const dd = String(today.getDate()).padStart(2, '0');
     const startOfToday = `${yyyy}-${mm}-${dd} 00:00`;
 
-    const { data: castRows, error: castError } = await supabaseAdmin
+    const { data } = await supabaseAdmin
         .from('showing_cast')
         .select('show_id, date_time')
         .eq('id', userId)
+        .neq('role', 'team')
         .gte('date_time', startOfToday);
-    if (castError) throw castError;
 
-    const rows = castRows || [];
-    if (!rows.length) return [];
+    const showDates: { [showId: string]: string[] } = { };
+    const showIds: string[] = [];
 
-    const earliestByEvent: Record<string, string> = {};
-    for (const r of rows) {
-        const showId = r.show_id;
-        const dt = r.date_time;
-        if (!earliestByEvent[showId] || dt < earliestByEvent[showId]) earliestByEvent[showId] = dt;
-    }
-
-    const eventIds = Object.keys(earliestByEvent);
-    if (!eventIds.length) return [];
-
-    const { data: shows, error: showsError } = await supabaseAdmin
-        .from('shows')
-        .select('*')
-        .in('id', eventIds);
-    if (showsError) throw showsError;
-
-    const showsCamel = (shows || []).map(camelCaseObject) as Event[];
-    showsCamel.sort((a, b) => {
-        const aDate = earliestByEvent[a.id] || '';
-        const bDate = earliestByEvent[b.id] || '';
-        if (!aDate && !bDate) return 0;
-        if (!aDate) return 1;
-        if (!bDate) return -1;
-        return aDate < bDate ? -1 : aDate > bDate ? 1 : 0;
+    (data || []).forEach(({ show_id, date_time }: { show_id: string; date_time: string }) => {
+        if (!showDates[show_id]) {
+            showDates[show_id] = [];
+            showIds.push(show_id);
+        }
+        const dateTime = normalizeDateTime(date_time);
+        if (!showDates[show_id].includes(dateTime)) {
+            showDates[show_id].push(dateTime);
+        }
     });
 
-    return showsCamel;
+    const res: { show: Event, dateTimes: string[] }[] = [];
+
+    for (let i = 0; i < showIds.length; i++) {
+        const showId = showIds[i];
+        const show = await getShow(showId);
+        if (show) {
+            res.push({ show, dateTimes: showDates[showId] });
+        }
+    }
+    return res;
 }
 
 export async function getShowings(eventId: string): Promise<Showing[]> {

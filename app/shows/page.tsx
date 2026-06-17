@@ -5,6 +5,8 @@ import Button from "@/components/form/button";
 import { getCurrentUserId } from "@/lib/users";
 import { getShowsByAdmin, getShowsByCastMember } from "@/lib/shows";
 import MiniCard from "@/components/mini-card";
+import { Event } from "@/types";
+import MediumCard from "@/components/medium-card";
 
 
 export const metadata: Metadata = {
@@ -16,6 +18,15 @@ export default async function ShowsPage() {
     const userId = await getCurrentUserId();
     const showsManaged = userId ? await getShowsByAdmin(userId) : null;
     const showsUserIsIn = userId ? await getShowsByCastMember(userId) : null;
+    const showsByDate: { dateTime: string, show: Event }[] = [];
+    showsUserIsIn?.forEach(({ show, dateTimes }) => {
+        dateTimes.forEach((dateTime) => {
+            showsByDate.push({ dateTime, show });
+        })
+    });
+    showsByDate.sort((a, b) => {
+        return new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime();
+    });
     return (
         <>
             <section className="flex flex row gap-2">
@@ -34,11 +45,11 @@ export default async function ShowsPage() {
                     </div>
                 </section>
             ) : null}
-            {showsUserIsIn?.length ? (
+            {showsByDate?.length ? (
                 <section>
                     <h2 className="px-3 font-semibold">Shows I&#39;m In</h2>
                     <div className="flex flex-row flex-wrap">
-                        {showsUserIsIn.map((show, i) => <MiniCard key={i} item={show} type="show" />)}
+                        {showsByDate.map(({ show, dateTime }, i) => <MediumCard key={i} item={show} type="show" dateTime={dateTime} />)}
                     </div>
                 </section>
             ) : null}

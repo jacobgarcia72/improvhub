@@ -7,13 +7,13 @@ import Link from "next/link";
 import { Border } from "./border";
 import { formatDateTimeForDisplay } from "@/lib/dates";
 
-export default function MiniCard({ item, type, dateTime }: {
+export default function MediumCard({ item, type, dateTime }: {
     item: Event | Team | User,
     type: string,
     dateTime?: string
 }) {
     const image = (
-        item.image && optimizeImage(item.image, 300, 300, 80, true)
+        item.image && optimizeImage(item.image, 600, 600, 80, true)
     ) || (
         'theatre' in item && (
             theatres.find((t) => removeLeadingArticles(t.name) === removeLeadingArticles(item.theatre || ''))
@@ -25,9 +25,9 @@ export default function MiniCard({ item, type, dateTime }: {
     if (dateTime) url += `${dateTime}/`;
     return (
         <Link href={url}>
-            <Border className="flex flex-row h-[132px] w-[226px] m-2 w-44 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
+            <Border className="flex flex-row h-[160px] w-[346px] m-2 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
                 {image ? (
-                    <div className="w-[132px] h-full bg-gray-300">
+                    <div className="w-[200px] h-full bg-gray-300">
                         <div className="flex h-full w-full items-center justify-center">
                             <Image src={image} alt={name} width={120} height={120} className="object-cover h-full w-full" />
                         </div>
@@ -35,8 +35,8 @@ export default function MiniCard({ item, type, dateTime }: {
                 ) : (
                     <div className="w-[48px] h-full" />
                 )}
-                <div className="w-full h-full pr-2 pb-1 pt-3 pl-2">
-                    <h2 className={`${dateTime ? 'mt-[-2px]' : ''} leading-none text-[1.005em] pb-0.5 text-slate-900 overflow-hidden text-ellipsis`}>{name}</h2>
+                <div className="w-full h-full pr-2 pb-1 pt-4 pl-2">
+                    <h2 className={`${dateTime ? 'mt-[-2px]' : ''} leading-none text-[1.07em] pb-0.5 text-slate-900 overflow-hidden text-ellipsis`}>{name}</h2>
                     <div className="h-full fade-out text-sm text-gray-700 overflow-hidden text-ellipsis flex flex-col gap-1 pt-0.5">
                         {dateTime ? <p className="text-[0.9em] text-gray-900 font-semibold mt-[-2px] mb-[-3px]">{formatDateTimeForDisplay(dateTime)}</p> : null}
                         {'description' in item && item.description ? (

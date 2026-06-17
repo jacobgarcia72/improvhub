@@ -3,6 +3,8 @@ export const newDate = (dateAsString: string): Date => new Date(`${dateAsString}
 
 export const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
+export const normalizeDateTime = (dateTime: string) => dateTime.replaceAll('%20', ' ').replaceAll('%3A', ':');
+
 export const addOrdinal = (num: number) => `${num}${['st', 'nd', 'rd'][((num + 90) % 100 - 10) % 10 - 1] || 'th'}`;
 
 export const addDays = (date: Date | string, days: number) => {
