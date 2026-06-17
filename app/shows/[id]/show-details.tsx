@@ -18,11 +18,11 @@ export default async function ShowDetails({ show }: {
 }) {
     const showings = await getShowings(show.id);
     const dateTimes = showings.map(({ dateTime }) => dateTime);
-    let upcomingShows: string[] = [];
+    let futureShows: string[] = [];
     if (dateTimes) {
-        upcomingShows = removePastDates(
+        futureShows = removePastDates(
             sortDates(dateTimes)
-        ).slice(0, 4);
+        ).slice(0, 52);
     }
 
     let recurringSchedule = null;
@@ -34,7 +34,7 @@ export default async function ShowDetails({ show }: {
         // Generate next 4 dates based on recurringDay and cadence
         let currentDate = new Date();
         const cadenceOrdinals = show.cadence === 'last' ? [] : show.cadence.split('').map(Number);
-        while (upcomingShows.length < 4) {
+        while (futureShows.length < 52) {
             if (currentDate.getDay() === Number(show.recurringDay)) {
                 const occurrence = getWeekdayOccurence(currentDate);
                 const isMatch = show.cadence === 'last' ? isLastOfMonth(currentDate) : cadenceOrdinals.includes(occurrence);
@@ -43,7 +43,7 @@ export default async function ShowDetails({ show }: {
                     if (show.recurringTime) {
                         dateTimeStr += ` ${show.recurringTime}`;
                     }
-                    upcomingShows.push(dateTimeStr);
+                    futureShows.push(dateTimeStr);
                 }
             }
             currentDate = addDays(currentDate, 1);
@@ -72,21 +72,21 @@ export default async function ShowDetails({ show }: {
                 <div className="w-1/2 min-w-[200px]">
                     {recurringSchedule && <Header>Show Schedule:</Header>}
                     <P>{recurringSchedule}</P>
-                    {upcomingShows?.length > 1 && <Header>Upcoming Shows</Header>}
-                    {upcomingShows?.length === 1 && <Header>Show Date</Header>}
-                    {upcomingShows && <ul className="mt-2">
-                        {upcomingShows.map((date, i) => (
+                    {futureShows?.length > 1 && <Header>Upcoming Shows</Header>}
+                    {futureShows?.length === 1 && <Header>Show Date</Header>}
+                    {futureShows.length ? <ul className="mt-2">
+                        {futureShows.slice(0, 4).map((date, i) => (
                             <Link key={i} href={`/shows/${show.id}/${date}`}>
                                 <li className="no-bullets link ">
                                     {formatDateTimeForDisplay(date)}
                                 </li>
                             </Link>
                         ))}
-                    </ul>}
-                    {showings.length > upcomingShows.length && (
+                    </ul> : null}
+                    {futureShows.length > 4 && (
                         <ShowingSelection
                             showId={show.id}
-                            dateTimes={showings.map((showing) => showing.dateTime)}
+                            dateTimes={futureShows}
                         />
                     )}
                 </div>
