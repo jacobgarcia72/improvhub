@@ -68,7 +68,6 @@ button.red {
 button.red:hover {
   background-color: var(--color-red-700);
 }
-
 button.dark {
   background-color: #333;
 }

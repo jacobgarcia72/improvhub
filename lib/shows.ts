@@ -282,3 +282,18 @@ export async function removeCastMember(showId: string, dateTime: string, userId:
         .eq('role', role);
     revalidatePath(`/shows/${showId}/${dateTime}/`, 'layout');
 }
+
+export async function deleteShowing(eventId: string, dateTime: string): Promise<void> {
+    const normalizedDateTime = dateTime.replaceAll('%20', ' ').replaceAll('%3A', ':');
+    await supabaseAdmin
+        .from('showings')
+        .delete()
+        .eq('event_id', eventId)
+        .eq('date_time', normalizedDateTime);
+    await supabaseAdmin
+        .from('showing_cast')
+        .delete()
+        .eq('show_id', eventId)
+        .eq('date_time', dateTime);
+    revalidatePath(`/shows/${eventId}/`, 'layout');
+}
