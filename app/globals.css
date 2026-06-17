@@ -69,6 +69,13 @@ button.red:hover {
   background-color: var(--color-red-700);
 }
 
+button.dark {
+  background-color: #333;
+}
+button.dark:hover {
+  background-color: #444;
+}
+
 button:disabled {
   cursor: not-allowed;
   opacity: 0.6;

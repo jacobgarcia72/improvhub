@@ -4,9 +4,10 @@ import { notFound } from "next/navigation";
 import CastingTools from "./casting-tools";
 import CastList from "@/components/cast-list";
 import { formatDateTimeForDisplay } from "@/lib/dates";
-import { ShowCastMember } from "@/types";
+import { ShowCastMember, Team } from "@/types";
 import Link from "next/link";
 import CastRoleBanner from "./cast-role-banner";
+import { getTeamsByUser } from "@/lib/teams";
 
 export default async function ShowDatePage({ params } : {
     params: Promise<{ id: string, dateTime: string }>
@@ -24,6 +25,12 @@ export default async function ShowDatePage({ params } : {
     const userRoles = userId ? (
         showCast.filter((c) => c.id === userId).map((c) => c.role)
     ) : null;
+    let userTeams: Team[] = [];
+    if (userId) {
+        const teams = await getTeamsByUser(userId);
+        const teamIds = teams.map((team) => team.id);
+        userTeams = showCast.filter((c) => c.id && c.role === 'team' && teamIds.includes(c.id)).map((c) => teams.find((t) => t.id === c.id)).filter((t) => t !== undefined);
+    }
     const isDirector = userRoles?.includes('director');
 
     return (
@@ -31,11 +38,22 @@ export default async function ShowDatePage({ params } : {
             {userRoles?.length ? userRoles.map((role) => (
                 <CastRoleBanner
                     showTitle={parentShow.title}
-                    userId={userId}
+                    roleId={userId}
                     showId={id}
                     dateTime={dateTime}
                     role={role}
                     key={role}
+                />
+            )) : null}
+            {userTeams?.length ? userTeams.map((team) => (
+                <CastRoleBanner
+                    teamName={team.name}
+                    showTitle={parentShow.title}
+                    roleId={team.id}
+                    showId={id}
+                    dateTime={dateTime}
+                    role='team'
+                    key={team.id}
                 />
             )) : null}
             <div className="pt-1 px-6">
