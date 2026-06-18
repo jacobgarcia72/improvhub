@@ -129,6 +129,47 @@ export async function getShowsInRange(cityOrZipcode: string, miles: number) {
         .map(camelCaseObject) as Event[];
 }
 
+export async function getRsvpStatus(userId: string, showId: string, showDate: string): Promise<string | null> {
+    const { data } = await supabaseAdmin
+        .from('rsvps')
+        .select('status')
+        .eq('user_id', userId)
+        .eq('show_id', showId)
+        .eq('date_time', showDate)
+        .maybeSingle();
+    return data?.status || null;
+}
+
+export async function getRsvpCount(showId: string, showDate: string, status: string): Promise<number> {
+    const { count } = await supabaseAdmin
+        .from('rsvps')
+        .select('*', { count: 'exact', head: true })
+        .eq('show_id', showId)
+        .eq('date_time', showDate)
+        .eq('status', status)
+        .maybeSingle();
+    return count || 0;
+}
+
+export async function setRsvpStatus(userId: string, showId: string, showDate: string, value: string): Promise<void> {
+    await supabaseAdmin
+        .from('rsvps')
+        .delete()
+        .eq('user_id', userId)
+        .eq('show_id', showId)
+        .eq('date_time', showDate);
+    await supabaseAdmin
+        .from('rsvps')
+        .insert({
+            user_id: userId,
+            show_id: showId,
+            date_time: showDate,
+            status: value
+        });
+    revalidatePath(`/shows/${showId}/${showDate}/`)
+}
+
+
 export async function saveShow(show: Event, showings: Showing[] | null): Promise<string> {
     const baseId = slugify(`${show.theatre ? removeLeadingArticles(show.theatre) + ' ' : ''}${removeLeadingArticles(show.title)}`, { lower: true, trim: true });
     let showId = baseId;

@@ -106,12 +106,6 @@ export function dateMatchesRecurringSchedule(
     cadence: string | null,
     recurringTime: string | null
 ): boolean {
-    console.log({
-        dateTime,
-        recurringDay,
-        cadence,
-        recurringTime
-    })
     if (recurringDay === null || recurringDay === undefined || !cadence) return false;
     const [dateString, time] = dateTime.split(' ');
     if (!dateString) return false;

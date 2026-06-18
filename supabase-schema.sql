@@ -73,6 +73,13 @@ create table if not exists showing_cast (
   date_time text not null
 );
 
+create table if not exists rsvps (
+  user_id text not null references users(id) on delete cascade,
+  show_id text not null references shows(id) on delete cascade,
+  date_time text,
+  status text
+);
+
 create table if not exists teams (
   id text primary key,
   name text not null,
@@ -113,6 +120,7 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.sessions TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.shows TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.showings TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.showing_cast TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.rsvps TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.teams TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.team_members TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.follows TO service_role;

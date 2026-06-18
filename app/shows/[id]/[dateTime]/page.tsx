@@ -1,4 +1,4 @@
-import { getShow, getShowCast, getShowing } from "@/lib/shows";
+import { getRsvpCount, getRsvpStatus, getShow, getShowCast, getShowing } from "@/lib/shows";
 import { getCurrentUserId } from "@/lib/users";
 import { notFound } from "next/navigation";
 import CastingTools from "./casting-tools";
@@ -8,6 +8,7 @@ import Link from "next/link";
 import CastRoleBanner from "./cast-role-banner";
 import { getTeamsByUser } from "@/lib/teams";
 import CancelShowing from "./cancel-showing";
+import RSVP from "./rsvp";
 import ShowDetails from "../show-details";
 import ShowHeader from "../show-header";
 import ShowDate from "./show-date";
@@ -43,6 +44,11 @@ export default async function ShowDatePage({ params } : {
     }
     const isDirector = userRoles?.includes('director');
 
+    const rsvp = userId && !userRoles?.length ? await getRsvpStatus(userId, parentShow.id, showDate) : null;
+
+    const goingCount = await getRsvpCount(parentShow.id, showDate, 'g');
+    const interestedCount = await getRsvpCount(parentShow.id, showDate, 'i');
+
     return <>
         <ShowHeader show={parentShow} />
         <div className="flex flex-col pb-3 border-b border-gray-400 mb-2">
@@ -72,6 +78,18 @@ export default async function ShowDatePage({ params } : {
                     <div className="mb-3">
                         <ShowDate showDate={showDate} />
                         <Link className="link pb-2 text-sm mt-[-4px]" href={`/shows/${id}`}>Go to parent show page</Link>
+                    </div>
+                    <div className="flex flex-col items-end">
+                        {userId && !userRoles?.length ? (
+                            <RSVP
+                                userId={userId}
+                                showId={parentShow.id}
+                                showDate={showDate}
+                                rsvp={rsvp}
+                            />
+                        ) : null}
+                        {goingCount > 0 && <p className="label mr-4">{`${goingCount} Going`}</p>}
+                        {interestedCount > 0 && <p className="label mr-4">{`${interestedCount} Interested`}</p>}
                     </div>
                 </div>
                 {(isAdmin || isDirector) ? (

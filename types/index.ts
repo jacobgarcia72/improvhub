@@ -53,6 +53,13 @@ export interface Showing {
     lookingForTech?: boolean;
 }
 
+export interface RsvpStatus {
+    userId: string;
+    showId: string;
+    dateTime: string;
+    rsvp: 'g' | 'n' | 'i' | null;
+}
+
 export interface Team {
     id: string;
     name: string;
