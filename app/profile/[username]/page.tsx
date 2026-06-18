@@ -21,7 +21,8 @@ function LayoutCard({
 }: Readonly<{
     children?: React.ReactNode, className?: string, header?: string
 }>) {
-    if (!children) return null;
+    const content = children?.valueOf();
+    if (!content || (Array.isArray(content) && !content.find(Boolean))) return null;
     return (
         <section className={className}>
             {header && <h2 className="text-slate-700 font-semibold">{header}</h2>}
