@@ -91,14 +91,16 @@ export default async function UserProfilePage({ params }: { params: Promise<{use
                     {userRoles?.player ? <OpenToCheckbox
                         user={user}
                         openToKey="openToJoinTeam"
-                        label="Open to joining teams"
+                        label="Open to Joining Teams"
                     /> : null}
                     {userRoles?.musician ? <OpenToCheckbox
                         user={user}
                         openToKey="openToAccompanyTeam"
-                        label="Open to accompanying musical teams"
+                        label="Open to Accompanying Musical Teams"
                     /> : null}
                 </>}
+                {!isCurrentUser && user.openToJoinTeam && <p className="pt-2">Open to Joining Teams</p>}
+                {!isCurrentUser && user.openToAccompanyTeam && <p className="pt-2">Open to Accompanying Musical Teams</p>}
                 {teamsFollowedCount > 0 && (
                     <div className="w-full flex flex-row justify-center">
                         <Link href={`/profile/${username}/teams-followed`} className="link mt-2 text-sm">
@@ -124,9 +126,10 @@ export default async function UserProfilePage({ params }: { params: Promise<{use
                     <OpenToCheckbox
                         user={user}
                         openToKey="openToCoachTeam"
-                        label="Open to coaching teams"
+                        label="Available to Coach"
                     />
                 </>}
+                {!isCurrentUser && user.openToCoachTeam && <p className="pt-2">Available to Coach</p>}
             </LayoutCard> : null}
             <LayoutCard header={user.website ? "Website" : ''}>
                 {isCurrentUser ? (
