@@ -9,6 +9,7 @@ import { supabaseAdmin } from './supabase-server';
 import { getCitiesWithinRange } from './location';
 import { revalidatePath } from 'next/cache';
 import { dateMatchesRecurringSchedule, normalizeDateTime } from './dates';
+import { getTeamsByUser } from './teams';
 
 export async function getShow(id: string): Promise<Event | null> {
     const { data, error } = await supabaseAdmin
@@ -28,19 +29,23 @@ export async function getShowsByAdmin(userId: string): Promise<Event[]> {
     return (data || []).map(camelCaseObject) as Event[];
 }
 
-export async function getShowsByCastMember(userId: string, roles: (Role | 'team')[] = ['player', 'musician', 'tech', 'director']): Promise<{ show: Event, dateTimes: string[] }[]> {
+export async function getShowsByCastMember(userId: string, roles: (Role | 'team')[] = ['player', 'musician', 'tech', 'director'], includeUsersTeams = false): Promise<{ show: Event, dateTimes: string[] }[]> {
     const today = new Date();
     const yyyy = today.getFullYear();
     const mm = String(today.getMonth() + 1).padStart(2, '0');
     const dd = String(today.getDate()).padStart(2, '0');
     const startOfToday = `${yyyy}-${mm}-${dd} 00:00`;
 
+    let teams: string[] = [];
+    if (includeUsersTeams) {
+        teams = (await getTeamsByUser(userId)).map((team) => team.id);
+    }
     const { data } = await supabaseAdmin
         .from('showing_cast')
         .select('show_id, date_time')
-        .eq('id', userId)
-        .in('role', roles)
+        .or(`and(id.eq.${userId},role.in.(${roles.join(',')})),and(id.in.(${teams.join(',')}),role.eq.team)`)
         .gte('date_time', startOfToday);
+    console.log({teams, data, userId, roles, includeUsersTeams})
 
     const showDates: { [showId: string]: string[] } = { };
     const showIds: string[] = [];

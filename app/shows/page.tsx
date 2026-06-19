@@ -45,7 +45,7 @@ export default async function ShowsPage() {
                     </div>
                 </section>
             ) : null}
-            {userId ? <UserShows label="Shows I'm In" id={userId} /> : null}
+            {userId ? <UserShows includeTeams label="Shows I'm In" id={userId} /> : null}
         </>
     )
 }

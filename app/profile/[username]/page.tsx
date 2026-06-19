@@ -132,7 +132,7 @@ export default async function UserProfilePage({ params }: { params: Promise<{use
                 </>}
                 {!isCurrentUser && user.openToCoachTeam && <p className="pt-2">Available to Coach</p>}
             </LayoutCard> : null}
-            <UpcomingShows id={username} limit={6} />
+            <UpcomingShows includeTeams id={username} limit={6} />
             <LayoutCard header={user.website ? "Website" : ''}>
                 {isCurrentUser ? (
                     <WebsiteOptions user={user} />
