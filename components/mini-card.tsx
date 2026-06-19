@@ -7,10 +7,11 @@ import Link from "next/link";
 import { Border } from "./border";
 import { formatDateTimeForDisplay } from "@/lib/dates";
 
-export default function MiniCard({ item, type, dateTime }: {
+export default function MiniCard({ item, type, dateTime, includeDescription }: {
     item: Event | Team | User,
     type: string,
-    dateTime?: string
+    dateTime?: string,
+    includeDescription?: boolean
 }) {
     const image = (
         item.image && optimizeImage(item.image, 300, 300, 80, true)
@@ -36,10 +37,10 @@ export default function MiniCard({ item, type, dateTime }: {
                     <div className="w-[48px] h-full" />
                 )}
                 <div className="w-full h-full pr-2 pb-1 pt-3 pl-2">
-                    <h2 className={`${dateTime ? 'mt-[-2px]' : ''} leading-none text-[1.005em] pb-0.5 text-slate-900 overflow-hidden text-ellipsis`}>{name}</h2>
+                    <h2 className={`leading-none text-[1.005em] pb-1 text-slate-900 overflow-hidden text-ellipsis`}>{name}</h2>
                     <div className="h-full fade-out text-sm text-gray-700 overflow-hidden text-ellipsis flex flex-col gap-1 pt-0.5">
                         {dateTime ? <p className="text-[0.9em] text-gray-900 font-semibold mt-[-2px] mb-[-3px]">{formatDateTimeForDisplay(dateTime)}</p> : null}
-                        {'description' in item && item.description ? (
+                        {includeDescription && 'description' in item && item.description ? (
                             <p>{item.description.replaceAll('<br>', '\n')}</p>
                         ) : null}
                         {'theatre' in item && item.theatre ? (

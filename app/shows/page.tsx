@@ -6,7 +6,7 @@ import { getCurrentUserId } from "@/lib/users";
 import { getShowsByAdmin, getShowsByCastMember } from "@/lib/shows";
 import MiniCard from "@/components/mini-card";
 import { Event } from "@/types";
-import MediumCard from "@/components/medium-card";
+import UserShows from "./user-shows";
 
 
 export const metadata: Metadata = {
@@ -39,20 +39,13 @@ export default async function ShowsPage() {
             </section>
             {showsManaged?.length ? (
                 <section>
-                    <h2 className="px-3 font-semibold">Shows I Manage</h2>
+                    <h2 className="text-slate-700 font-semibold">Shows I Manage</h2>
                     <div className="flex flex-row flex-wrap">
                         {showsManaged.map((show, i) => <MiniCard key={i} item={show} type="show" />)}
                     </div>
                 </section>
             ) : null}
-            {showsByDate?.length ? (
-                <section>
-                    <h2 className="px-3 font-semibold">Shows I&#39;m In</h2>
-                    <div className="flex flex-row flex-wrap">
-                        {showsByDate.map(({ show, dateTime }, i) => <MediumCard key={i} item={show} type="show" dateTime={dateTime} />)}
-                    </div>
-                </section>
-            ) : null}
+            {userId ? <UserShows userId={userId} /> : null}
         </>
     )
 }

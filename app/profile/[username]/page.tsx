@@ -15,6 +15,7 @@ import OpenToCheckbox from "./open-to-checkbox";
 import WebsiteOptions from "./website-options";
 import BioOptions from "./bio-options";
 import { pluralize } from "@/lib/helper-functions";
+import UserShows from "@/app/shows/user-shows";
 
 function LayoutCard({
     children, className, header
@@ -83,8 +84,8 @@ export default async function UserProfilePage({ params }: { params: Promise<{use
             </LayoutCard>
             <LayoutCard header="Teams">
                 {teams.length ? (
-                    <div className="flex flex-row flex-wrap justify-center">
-                        {teams.map((team) => <MiniCard key={team.id} item={team} type='team' />)}
+                    <div className="flex flex-row flex-wrap">
+                        {teams.map((team) => <MiniCard key={team.id} item={team} type='team' includeDescription />)}
                     </div>
                 ) : null}
                 {isCurrentUser && <>
@@ -118,7 +119,7 @@ export default async function UserProfilePage({ params }: { params: Promise<{use
             </LayoutCard>
             {userRoles?.coach ? <LayoutCard header="Coaching">
                 {coachedTeams.length ? (
-                    <div className="flex flex-row flex-wrap justify-center">
+                    <div className="flex flex-row flex-wrap">
                         {coachedTeams.map((team) => <MiniCard key={team.id} item={team} type='team' />)}
                     </div>
                 ) : null}
@@ -131,6 +132,7 @@ export default async function UserProfilePage({ params }: { params: Promise<{use
                 </>}
                 {!isCurrentUser && user.openToCoachTeam && <p className="pt-2">Available to Coach</p>}
             </LayoutCard> : null}
+            <UserShows userId={username} label="Upcoming Shows" limit={6} />
             <LayoutCard header={user.website ? "Website" : ''}>
                 {isCurrentUser ? (
                     <WebsiteOptions user={user} />

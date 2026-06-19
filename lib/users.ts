@@ -79,6 +79,17 @@ export async function getAllUsersAbbreviated(): Promise<AbbrevUser[]> {
     }));
 }
 
+export async function searchUsers(searchCriteria: Partial<User>): Promise<User[]> {
+    const { data } = await supabaseAdmin
+    .from('users')
+    .select('*')
+    .match(snakeCaseObject(searchCriteria));
+    return (data || []).map((row: { [key: string]: any; }) => camelCaseObject({
+        ...row,
+        password: '',
+    })) as User[];
+}
+
 export async function getCurrentUser(): Promise<User | null> {
     const user = (await verifyAuth()).user;
     if (!user) return null;
