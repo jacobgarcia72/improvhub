@@ -15,7 +15,7 @@ import OpenToCheckbox from "./open-to-checkbox";
 import WebsiteOptions from "./website-options";
 import BioOptions from "./bio-options";
 import { pluralize } from "@/lib/helper-functions";
-import UserShows from "@/app/shows/user-shows";
+import UpcomingShows from "@/components/upcoming-shows";
 
 function LayoutCard({
     children, className, header
@@ -132,7 +132,7 @@ export default async function UserProfilePage({ params }: { params: Promise<{use
                 </>}
                 {!isCurrentUser && user.openToCoachTeam && <p className="pt-2">Available to Coach</p>}
             </LayoutCard> : null}
-            <UserShows userId={username} label="Upcoming Shows" limit={6} />
+            <UpcomingShows id={username} limit={6} />
             <LayoutCard header={user.website ? "Website" : ''}>
                 {isCurrentUser ? (
                     <WebsiteOptions user={user} />

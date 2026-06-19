@@ -5,6 +5,7 @@ import Link from "next/link";
 import Button from "@/components/form/button";
 import { pluralize } from "@/lib/helper-functions";
 import AvailableUsersSection from "../available-users-section";
+import UpcomingShows from "@/components/upcoming-shows";
 
 type Props = {
     params: Promise<{ id: string }>
@@ -40,6 +41,7 @@ export default async function TeamPage({ params }: Props) {
             </> : null}
             <CastList castMembers={members} />
         </section>
+        <UpcomingShows id={id} roles={['team']} limit={6} />
         {isMemberNotCoach ? <>
             {team?.lookingForPlayers && <AvailableUsersSection role="player" team={team} />}
             {team?.lookingForMusician && <AvailableUsersSection role="musician" team={team} />}

@@ -6,7 +6,7 @@ import { getCurrentUserId } from "@/lib/users";
 import { getShowsByAdmin, getShowsByCastMember } from "@/lib/shows";
 import MiniCard from "@/components/mini-card";
 import { Event } from "@/types";
-import UserShows from "./user-shows";
+import UserShows from "@/components/upcoming-shows";
 
 
 export const metadata: Metadata = {
@@ -45,7 +45,7 @@ export default async function ShowsPage() {
                     </div>
                 </section>
             ) : null}
-            {userId ? <UserShows userId={userId} /> : null}
+            {userId ? <UserShows label="Shows I'm In" id={userId} /> : null}
         </>
     )
 }
