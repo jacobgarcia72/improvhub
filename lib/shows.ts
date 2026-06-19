@@ -28,7 +28,7 @@ export async function getShowsByAdmin(userId: string): Promise<Event[]> {
     return (data || []).map(camelCaseObject) as Event[];
 }
 
-export async function getShowsByCastMember(userId: string, roles = ['player', 'musician', 'tech', 'director']): Promise<{ show: Event, dateTimes: string[], roles: (Role | 'team')[] }[]> {
+export async function getShowsByCastMember(userId: string, roles: (Role | 'team')[] = ['player', 'musician', 'tech', 'director']): Promise<{ show: Event, dateTimes: string[] }[]> {
     const today = new Date();
     const yyyy = today.getFullYear();
     const mm = String(today.getMonth() + 1).padStart(2, '0');
