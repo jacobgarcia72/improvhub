@@ -1,7 +1,7 @@
 import EventResults from './event-results';
 import { filterArrayBySearchTerm, matchPattern } from '@/lib/helper-functions';
 import { separateCityAndState } from '@/lib/location';
-import { getTheatreByName, getTheatreNames, getTheatresByCity, getTheatresByState, getTheatresByZipcode } from '@/lib/theatres';
+import { getAllTheatres, getTheatre, getTheatresByCity, getTheatresByState, getTheatresByZipcode } from '@/lib/theatres';
 import { Team } from '@/types';
 import { getTeamsByTheatre, getTeamsInRange } from '@/lib/teams';
 import ItemCard from './item-card';
@@ -32,30 +32,29 @@ export default async function SearchResults({ params }: { params: {
             const cityAndState = separateCityAndState(location);
             state = cityAndState.state;
             city = cityAndState.city;
-
         }
     }
-        const theatreNames = getTheatreNames();
-    
-        const handleSearchParams = async () => {
-            const radius = Number(miles);
-            if (searchFor === 'theatres') {
-                if (theatre) return (filterArrayBySearchTerm(theatreNames, theatre, 20) as string[]).map(getTheatreByName);
-                if (city && state) return getTheatresByCity(city, state, radius);
-                if (state) return getTheatresByState(state);
-                if (zipcode) return getTheatresByZipcode(zipcode, radius || 1);
-            } else if (searchFor === 'teams') {
-                if (theatre) return await getTeamsByTheatre(theatre) as Team[];
-                if (zipcode || (city && state)) return await getTeamsInRange(zipcode || `${city} ${state}`, radius || 0) as Team[];
-            }
-            return [];
-        }
-    
-        const hasActiveQuery = Boolean(theatre || state || zipcode);
-        const results = (await handleSearchParams()).filter(Boolean);
-        const hasNoResults = hasActiveQuery && results?.length === 0;
+    const theatres = await getAllTheatres();
 
-        const userId = await getCurrentUserId();
+    const handleSearchParams = async () => {
+        const radius = Number(miles);
+        if (searchFor === 'theatres') {
+            if (theatre) return Promise.all((filterArrayBySearchTerm(theatres, theatre, 20) as string[]).map(getTheatre));
+            if (city && state) return await getTheatresByCity(city, state, radius);
+            if (state) return await getTheatresByState(state);
+            if (zipcode) return await getTheatresByZipcode(zipcode, radius || 1);
+        } else if (searchFor === 'teams') {
+            if (theatre) return await getTeamsByTheatre(theatre) as Team[];
+            if (zipcode || (city && state)) return await getTeamsInRange(zipcode || `${city} ${state}`, radius || 0) as Team[];
+        }
+        return [];
+    }
+
+    const hasActiveQuery = Boolean(theatre || state || zipcode);
+    const results = (await handleSearchParams()).filter(Boolean);
+    const hasNoResults = hasActiveQuery && results?.length === 0;
+
+    const userId = await getCurrentUserId();
 
     return (
         <section className="flex flex-row flex-wrap px-4 pb-4 justify-evenly min-h-[calc(100vh-220px)]">

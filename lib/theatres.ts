@@ -1,8 +1,10 @@
-import { Theatre } from "@/types";
-import zipcodes from 'zipcodes';
+import { InputOptionObject, Theatre } from "@/types";
 import { abbreviateState, getZipCodesWithinRange } from "./location";
+import { supabaseAdmin } from './supabase-server';
+import { camelCaseObject, removeLeadingArticles } from "./helper-functions";
+import slugify from 'slugify';
 
-export const theatres: Theatre[] = [
+const theatres: Partial<Theatre>[] = [
   {
     name: "Arcade Comedy Theater",
     city: "Pittsburgh",
@@ -879,36 +881,89 @@ export const theatres: Theatre[] = [
   }
 ]
 
-export const getTheatreNames = () => {
-    const nameCounts = theatres.reduce((acc, theatre) => {
-        acc[theatre.name] = (acc[theatre.name] || 0) + 1;
-        return acc;
-    }, {} as Record<string, number>);
+export const populateTheatresInDb = async () => {
+  for (let i = 0; i < theatres.length; i++) {
+    const { name, city, state, zipcode, website, image } = theatres[i];
+    if (!name) return;
+    let id = name;
+    if (theatres.filter((t) => t.name === name).length > 1) {
+      id += ` ${city}`;
+    }
+    await supabaseAdmin
+      .from('theatres')
+      .insert({
+        id: slugify(removeLeadingArticles(id), { lower: true, trim: true }),
+        name,
+        city,
+        state,
+        zipcode,
+        website: website || null,
+        image: image || null 
+      });
+  }
+}
+
+export const getAllTheatres = async (): Promise<InputOptionObject[]> => {
+  const { data } = await supabaseAdmin
+    .from('theatres')
+    .select('*');
+  if (!data?.length) {
+    await populateTheatresInDb();
+    const theatres = await getAllTheatres();
+    return theatres;
+  } else {
+    return (data as Theatre[]).map(({ name, image, id }) => ({ text: name, image, id }));
+  }
+}
+
+export const getTheatre = async (idOrName: string): Promise<Theatre | null> => {
+  const { data } = await supabaseAdmin
+    .from('theatres')
+    .select('*')
+    .or(`id.eq.${idOrName},name.ilike.${idOrName}`)
+    .maybeSingle();
+  return data ? camelCaseObject(data) as Theatre : null;
+}
+
+// export const getTheatreNames = () => {
+//     const nameCounts = theatres.reduce((acc, theatre) => {
+//         acc[theatre.name] = (acc[theatre.name] || 0) + 1;
+//         return acc;
+//     }, {} as Record<string, number>);
     
-    return theatres.map(theatre => {
-        const name = theatre.name;
-        if (nameCounts[name] > 1) {
-            return `${name} (${theatre.city})`;
-        }
-        return name;
-    });
+//     return theatres.map(theatre => {
+//         const name = theatre.name;
+//         if (nameCounts[name] > 1) {
+//             return `${name} (${theatre.city})`;
+//         }
+//         return name;
+//     });
+// }
+
+// export const getTheatreByName = (name: string) => theatres.find((t) => t.name === name) || theatres.find((t) => `${t.name} (${t.city})` === name);
+
+export const getTheatresByCity = async (city: string, state: string, miles?: number): Promise<Theatre[]> => {
+  const zipcodesInRange = miles ? getZipCodesWithinRange(`${city} ${state}`, miles) : [];
+  const { data } = await supabaseAdmin
+    .from('theatres')
+    .select('*')
+    .or(`and(state.ilike.${abbreviateState(state)},city.ilike.${city}),zipcode.in.(${zipcodesInRange.join(',')})`);
+  return data ? data.map(camelCaseObject) as Theatre[] : [];
 }
 
-export const getTheatreByName = (name: string) => theatres.find((t) => t.name === name) || theatres.find((t) => `${t.name} (${t.city})` === name);
-
-export const getTheatresByCity = (city: string, state: string, miles?: number) => {
-  const zipcodesInRange = miles ? getZipCodesWithinRange(`${city} ${state}`, miles) : null;
-  return theatres.filter((t) => (
-    (
-      t.state.toLowerCase() === abbreviateState(state).toLowerCase() &&
-      t.city.toLowerCase() === city.toLowerCase()
-    ) || zipcodesInRange?.includes(t.zipcode)
-  ));
+export const getTheatresByState = async (state: string): Promise<Theatre[]> => {
+  const { data } = await supabaseAdmin
+    .from('theatres')
+    .select('*')
+    .ilike('state', abbreviateState(state));
+  return data ? data.map(camelCaseObject) as Theatre[] : [];
 }
 
-export const getTheatresByState = (state: string) => theatres.filter((t) => t.state.toLowerCase() === abbreviateState(state).toLowerCase());
-
-export const getTheatresByZipcode = (zipcode: string, miles: number) => {
-    const zipcodesInRange = zipcodes.radius(zipcode, miles, false).map((z) => typeof z === 'string' ? z : z.zip);
-    return theatres.filter((theatre) => zipcodesInRange.includes(theatre.zipcode))
+export const getTheatresByZipcode = async (zipcode: string, miles?: number): Promise<Theatre[]> => {
+  const zipcodesInRange = miles ? getZipCodesWithinRange(zipcode, miles) : [zipcode];
+  const { data } = await supabaseAdmin
+    .from('theatres')
+    .select('*')
+    .in('zipcode', zipcodesInRange);
+  return data ? data.map(camelCaseObject) as Theatre[] : [];
 }

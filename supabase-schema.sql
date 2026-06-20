@@ -33,6 +33,17 @@ create table if not exists user_roles (
   coach boolean
 );
 
+create table if not exists theatres (
+  id text primary key,
+  name text not null,
+  address text,
+  city text not null,
+  state text not null,
+  zipcode text not null,
+  website text,
+  image text
+);
+
 create table if not exists shows (
   id text primary key,
   creator_id text not null,
@@ -117,6 +128,7 @@ create table if not exists follows (
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.sessions TO service_role;
 
 -- Grant privileges on other tables your app writes to
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.theatres TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.shows TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.showings TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.showing_cast TO service_role;

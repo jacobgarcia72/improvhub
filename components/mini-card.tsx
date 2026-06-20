@@ -1,13 +1,12 @@
 import { optimizeImage } from "@/lib/optimize-image";
-import { removeLeadingArticles } from "@/lib/helper-functions";
-import { theatres } from "@/lib/theatres";
 import { Event, Team, User } from "@/types";
 import Image from "next/image";
 import Link from "next/link";
 import { Border } from "./border";
 import { formatDateTimeForDisplay } from "@/lib/dates";
+import { getTheatre } from "@/lib/theatres";
 
-export default function MiniCard({ item, type, dateTime, includeDescription }: {
+export default async function MiniCard({ item, type, dateTime, includeDescription }: {
     item: Event | Team | User,
     type: string,
     dateTime?: string,
@@ -16,8 +15,8 @@ export default function MiniCard({ item, type, dateTime, includeDescription }: {
     const image = (
         item.image && optimizeImage(item.image, 300, 300, 80, true)
     ) || (
-        'theatre' in item && (
-            theatres.find((t) => removeLeadingArticles(t.name) === removeLeadingArticles(item.theatre || ''))
+        'theatre' in item && item.theatre && (
+            await getTheatre(item.theatre)
         )?.image
     );
     let name = 'name' in item ? item.name : 'title' in item ? item.title : '';

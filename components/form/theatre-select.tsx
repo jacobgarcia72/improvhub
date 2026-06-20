@@ -1,20 +1,29 @@
 'use client';
-import { getTheatreByName, getTheatreNames } from "@/lib/theatres";
+import { getTheatre } from "@/lib/theatres";
 import Autocomplete from "./autocomplete";
 import Input from "./input";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import StateSelect from "./state-select";
-import { Event } from "@/types";
+import { Event, InputOptionObject } from "@/types";
 
 export default function TheatreSelect({ existingShow }: {
     existingShow?: Event
 }) {
+    const [theatres, setTheatres] = useState<InputOptionObject[]>([]);
     const [city, setCity] = useState<string>(existingShow?.city || '');
     const [state, setState] = useState<string>(existingShow?.state || '');
-    const theatreNames = getTheatreNames();
+    useEffect(() => {
+        const fetchTheatres = async () => {
+            const res = await fetch('/api/theatres');
+            if (!res.ok) return;
+            const ts: InputOptionObject[] = await res.json();
+            setTheatres(ts);
+        };
+        fetchTheatres();
+    }, []);
 
-    const autoFillCityAndState = (theatreName: string) => {
-        const theatre = getTheatreByName(theatreName);
+    const autoFillCityAndState = async (theatreName: string) => {
+        const theatre = await getTheatre(theatreName);
         if (theatre) {
             setCity(theatre.city);
             setState(theatre.state)
@@ -27,7 +36,7 @@ export default function TheatreSelect({ existingShow }: {
                     startingValue={existingShow?.theatre || undefined}
                     label="Theatre"
                     name="theatre"
-                    options={theatreNames}
+                    options={theatres}
                     onChange={(value) => autoFillCityAndState(value as string)}
                 />
             </div>

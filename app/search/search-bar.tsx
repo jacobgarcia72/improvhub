@@ -3,9 +3,7 @@
 import { useState } from "react";
 import DistanceSelect from "@/components/form/distance-select";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import Autocomplete from "@/components/form/autocomplete";
-import { getTheatreNames } from "@/lib/theatres";
-import { capitalize } from "@/lib/helper-functions";
+import TheatreSearchBar from "./theatre-search-bar";
 
 export default function SearchBar() {
     const searchTypes = ['theatre', 'location', 'miles'];
@@ -54,14 +52,7 @@ export default function SearchBar() {
                     startingMiles={miles ? Number(miles) : undefined}
                 />
             case 'theatre':
-                return <div className="w-[358px]">
-                    <Autocomplete
-                        startingValue={theatre ? capitalize(theatre.replaceAll('+', ' ')) : undefined}
-                        onStopTyping={(value) => handleSearch('theatre', value)}
-                        options={getTheatreNames()}
-                        label="Theatre Name"
-                    />
-                    </div>
+                return <TheatreSearchBar search={theatre} onSearch={(value) => handleSearch('theatre', value)} />
             default:
                 return null;
         }

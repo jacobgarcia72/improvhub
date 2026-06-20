@@ -1,9 +1,11 @@
 export interface Theatre {
+    id: string;
     name: string;
+    address?: string;
     city: string;
     state: string;
     zipcode: string;
-    website: string;
+    website?: string;
     image?: string;
 }
 

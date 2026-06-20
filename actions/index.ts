@@ -4,13 +4,13 @@ import { redirect } from "next/navigation";
 import { saveShow, updateShow, updateShowAdmins, updateShowing } from "@/lib/shows";
 import { Candence, Event, Showing, Role, ShowCastMember } from "@/types";
 import { sortDates } from "@/lib/dates";
-import { theatres } from "@/lib/theatres";
 import { capitalize, removeLeadingArticles } from "@/lib/helper-functions";
 import { Team } from '@/types';
 import { destroyImage, uploadImage } from '@/lib/cloudinary';
 import { getTeam, getTeamMembers, leaveTeam as leaveTeamRecord, saveTeam, updateTeam as updateTeamRecord, updateTeamDetails as updateTeamDetailsRecord } from '@/lib/teams';
 import { getCurrentUserId, updateUser } from "@/lib/users";
 import { revalidatePath } from 'next/cache';
+import { getTheatre } from '@/lib/theatres';
 
 export async function postShow(existingShow: Event | null = null, prevState: void | { message?: string }, formData: FormData) {
     const creatorId = await getCurrentUserId();
@@ -69,9 +69,7 @@ export async function postShow(existingShow: Event | null = null, prevState: voi
     const theatre = (formData.get('theatre') as string)?.trim() || null;
 
     if (theatre && (!city || !state)) {
-        const matchingTheatre = theatres.find((t) => (
-            removeLeadingArticles(t.name.toLowerCase()) === removeLeadingArticles(theatre.toLowerCase())
-        ));
+        const matchingTheatre = await getTheatre(theatre);
         if (matchingTheatre) {
             if (!city) city = matchingTheatre.city;
             if (!state) state = matchingTheatre.state;
@@ -213,16 +211,7 @@ export async function postTeam(prevState: void | { message?: string }, formData:
     let description = data.description as string || null;
     if (description) description = description.replaceAll(/\r\n/g, '<br>').replaceAll(/\n/g, '<br>').replaceAll(/\r/g, '<br>');
 
-    const checkedTheatres = Object.keys(data)
-        .filter(key => key.startsWith('theatre-') && Boolean((data[key] as string).trim()))
-        .map(key => data[key] as string);
-
-    const addedTheatres = Object.keys(data)
-        .filter(key => key.startsWith('added-theatre-') && Boolean((data[key] as string).trim()))
-        .map(key => data[key] as string);
-
-    const theatres = [...new Set(checkedTheatres.concat(addedTheatres))];
-
+    const theatres = getTheatresFromInputs(formData);
     let city = (data.city as string).trim() || null;
     if (city) city = capitalize(city);
 
@@ -344,16 +333,7 @@ export async function updateTeamDetails(teamId: string, prevState: void | { mess
         }
     }
 
-    const checkedTheatres = Object.keys(data)
-        .filter(key => key.startsWith('theatre-') && Boolean((data[key] as string).trim()))
-        .map(key => data[key] as string);
-
-    const addedTheatres = Object.keys(data)
-        .filter(key => key.startsWith('added-theatre-') && Boolean((data[key] as string).trim()))
-        .map(key => data[key] as string);
-
-    const theatres = [...new Set(checkedTheatres.concat(addedTheatres))];
-
+    const theatres = getTheatresFromInputs(formData);
     let city = (data.city as string)?.trim() || null;
     if (city) city = capitalize(city);
 
@@ -393,14 +373,7 @@ export async function updateUserCommunityOptions(prevState: void | { message?: s
         if (!userId) throw new Error('You must be logged in to continue');
         const city = (data.city as string).trim() || null;
         const state = (data.state as string).trim() || null;
-        const checkedTheatres = Object.keys(data)
-            .filter(key => key.startsWith('theatre-') && Boolean((data[key] as string).trim()))
-            .map(key => data[key] as string);
-
-        const addedTheatres = Object.keys(data)
-            .filter(key => key.startsWith('added-theatre-') && Boolean((data[key] as string).trim()))
-            .map(key => data[key] as string);
-        const theatres = [...new Set(checkedTheatres.concat(addedTheatres))];
+        const theatres = getTheatresFromInputs(formData);
         await updateUser({ city, state, theatres });
         revalidatePath(`/profile/${userId}`);
         return;
@@ -408,4 +381,24 @@ export async function updateUserCommunityOptions(prevState: void | { message?: s
         console.error('Error updating user community options:', error);
         return { message: 'Something went wrong. Please try again later.' };
     }
+}
+
+function getTheatresFromInputs(formData: FormData): string[] {
+    const data = Object.fromEntries(formData.entries());
+    const checkedTheatres = Object.keys(data)
+        .filter(key => key.startsWith('theatre-') && Boolean((data[key] as string).trim()))
+        .map(key => data[key] as string);
+    const addedTheatres: string[] = [];
+    for (let i = 0; true; i++) {
+        const key = `added-theatre-${i}`;
+        let theatreName = data[key];
+        if (typeof theatreName === 'string') {
+            theatreName = theatreName.trim();
+        } else {
+            break;
+        }
+        const theatreId = data[`${key}-id`] as string | undefined;
+        addedTheatres.push(theatreId || theatreName);
+    }
+    return [...new Set(checkedTheatres.concat(addedTheatres))];
 }

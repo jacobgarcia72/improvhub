@@ -45,7 +45,6 @@ export async function getShowsByCastMember(userId: string, roles: (Role | 'team'
         .select('show_id, date_time')
         .or(`and(id.eq.${userId},role.in.(${roles.join(',')})),and(id.in.(${teams.join(',')}),role.eq.team)`)
         .gte('date_time', startOfToday);
-    console.log({teams, data, userId, roles, includeUsersTeams})
 
     const showDates: { [showId: string]: string[] } = { };
     const showIds: string[] = [];
