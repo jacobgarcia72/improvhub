@@ -1,10 +1,9 @@
 'use client';
-import { getTheatre } from "@/lib/theatres";
 import Autocomplete from "./autocomplete";
 import Input from "./input";
 import { useEffect, useState } from "react";
 import StateSelect from "./state-select";
-import { Event, InputOptionObject } from "@/types";
+import { Event, InputOptionObject, Theatre } from "@/types";
 
 export default function TheatreSelect({ existingShow }: {
     existingShow?: Event
@@ -22,11 +21,13 @@ export default function TheatreSelect({ existingShow }: {
         fetchTheatres();
     }, []);
 
-    const autoFillCityAndState = async (theatreName: string) => {
-        const theatre = await getTheatre(theatreName);
-        if (theatre) {
-            setCity(theatre.city);
-            setState(theatre.state)
+    const autoFillCityAndState = async (theatre: string) => {
+        const res = await fetch(`/api/theatre?idOrName=${encodeURIComponent(theatre)}`);
+        if (!res.ok) return;
+        const foundTheatre: Theatre | null = await res.json();
+        if (foundTheatre) {
+            setCity(foundTheatre.city);
+            setState(foundTheatre.state)
         }
     }
     return (
@@ -37,7 +38,11 @@ export default function TheatreSelect({ existingShow }: {
                     label="Theatre"
                     name="theatre"
                     options={theatres}
-                    onChange={(value) => autoFillCityAndState(value as string)}
+                    onChange={(value) => {
+                        if (typeof value !== 'string') {
+                            autoFillCityAndState(value.id.toString());
+                        }
+                    }}
                 />
             </div>
             <div className="w-[166px] pr-2">

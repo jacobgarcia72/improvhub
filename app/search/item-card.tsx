@@ -2,12 +2,11 @@ import { Border } from "@/components/border";
 import FollowButton from "@/components/follow-button";
 import { optimizeImage } from "@/lib/optimize-image";
 import { formatTime } from "@/lib/dates";
-import { removeLeadingArticles } from "@/lib/helper-functions";
-import { theatres } from "@/lib/theatres";
 import { getFollowing } from "@/lib/users";
 import { Event, Team, Theatre } from "@/types";
 import Image from "next/image";
 import Link from "next/link";
+import { getTheatre } from "@/lib/theatres";
 
 export default async function ItemCard({
     item, type, time, date, userId
@@ -17,9 +16,7 @@ export default async function ItemCard({
     const image = (
         item.image && optimizeImage(item.image, 300, 300, 90, true)
     ) || (
-        'theatre' in item && (
-            theatres.find((t) => t.name && removeLeadingArticles(t.name) === removeLeadingArticles(item.theatre || ''))
-        )?.image
+        'theatre' in item && item.theatre && (await getTheatre(item.theatre))?.image
     );
     const name = 'name' in item ? item.name : 'title' in item ? item.title : '';
     let link = 'id' in item ? `/${type}/${item.id}` : `/search?for=shows&theatre=${(item.name || '').toLowerCase().split(" ").join("+")}`;
@@ -32,7 +29,7 @@ export default async function ItemCard({
         showFollowButton = true;
     }
     return (
-        <Border className="relative flex flex-col h-[300px] w-[222px] m-2 w-44 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
+        <Border className="relative flex flex-col h-[300px] w-[212px] m-2 w-44 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
             {showFollowButton ? <div className="absolute right-2 top-2">
                 <FollowButton mini userId={userId || ''} followId={'id' in item && item.id ? item.id : ''} type="team" following={following} />
             </div> : null}

@@ -92,7 +92,7 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
   const getImage = (option: InputOption) => {
     if (typeof option === 'string' || !option.image) return null;
     return (
-      <div className='mr-2' style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)' }}>
+      <div className='mr-2' style={{ position: 'absolute', left: '10px', top: '49%', transform: 'translateY(-50%)' }}>
         <Image src={option.image} alt={option.text} width={25} height={25} />
       </div>
     )
@@ -103,23 +103,25 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
   return (
     <div className="flex flex-col relative w-full">
       {label && <label htmlFor={name}>{inputLabel}</label>}
-      {getImage(value)}
-      <input
-        style={typeof value === 'object' &&  value.image ? {paddingLeft: '42px'} : undefined}
-        name={name}
-        id={name}
-        required={required}
-        type="text"
-        value={getText(value)}
-        data-id={typeof value === 'string' ? value : value.id}
-        placeholder={placeholder}
-        onChange={handleInputChange}
-        onFocus={() => setShowOptions(value !== '')}
-        onBlur={() => setTimeout(() => setShowOptions(false), 100)}
-        onKeyDown={handleKeyDown}
-        autoComplete="off"
-        maxLength={maxLength}
-      />
+      <div className='flex flex-col relative w-full'>
+        {getImage(value)}
+        <input
+          style={typeof value === 'object' &&  value.image ? {paddingLeft: '42px'} : undefined}
+          name={name}
+          id={name}
+          required={required}
+          type="text"
+          value={getText(value)}
+          data-id={typeof value === 'string' ? value : value.id}
+          placeholder={placeholder}
+          onChange={handleInputChange}
+          onFocus={() => setShowOptions(value !== '')}
+          onBlur={() => setTimeout(() => setShowOptions(false), 100)}
+          onKeyDown={handleKeyDown}
+          autoComplete="off"
+          maxLength={maxLength}
+        />
+      </div>
     {typeof value === 'object' && value.id ? (
       <input className='hidden' name={`${name}-id`} value={value.id} onChange={() => null} />
     ) : null}

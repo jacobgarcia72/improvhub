@@ -925,23 +925,6 @@ export const getTheatre = async (idOrName: string): Promise<Theatre | null> => {
   return data ? camelCaseObject(data) as Theatre : null;
 }
 
-// export const getTheatreNames = () => {
-//     const nameCounts = theatres.reduce((acc, theatre) => {
-//         acc[theatre.name] = (acc[theatre.name] || 0) + 1;
-//         return acc;
-//     }, {} as Record<string, number>);
-    
-//     return theatres.map(theatre => {
-//         const name = theatre.name;
-//         if (nameCounts[name] > 1) {
-//             return `${name} (${theatre.city})`;
-//         }
-//         return name;
-//     });
-// }
-
-// export const getTheatreByName = (name: string) => theatres.find((t) => t.name === name) || theatres.find((t) => `${t.name} (${t.city})` === name);
-
 export const getTheatresByCity = async (city: string, state: string, miles?: number): Promise<Theatre[]> => {
   const zipcodesInRange = miles ? getZipCodesWithinRange(`${city} ${state}`, miles) : [];
   const { data } = await supabaseAdmin

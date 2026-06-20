@@ -1,13 +1,12 @@
 import { optimizeImage } from "@/lib/optimize-image";
-import { removeLeadingArticles } from "@/lib/helper-functions";
-import { theatres } from "@/lib/theatres";
 import { Event, Team, User } from "@/types";
 import Image from "next/image";
 import Link from "next/link";
 import { Border } from "./border";
 import { formatDateTimeForDisplay } from "@/lib/dates";
+import { getTheatre } from "@/lib/theatres";
 
-export default function MediumCard({ item, type, dateTime }: {
+export default async function MediumCard({ item, type, dateTime }: {
     item: Event | Team | User,
     type: string,
     dateTime?: string
@@ -15,9 +14,7 @@ export default function MediumCard({ item, type, dateTime }: {
     const image = (
         item.image && optimizeImage(item.image, 600, 600, 80, true)
     ) || (
-        'theatre' in item && (
-            theatres.find((t) => removeLeadingArticles(t.name) === removeLeadingArticles(item.theatre || ''))
-        )?.image
+            'theatre' in item && item.theatre && (await getTheatre(item.theatre))?.image
     );
     let name = 'name' in item ? item.name : 'title' in item ? item.title : '';
     if (!name && 'firstName' in item && 'lastName' in item) name = `${item.firstName} ${item.lastName}`;

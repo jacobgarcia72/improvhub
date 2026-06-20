@@ -11,6 +11,8 @@ import Link from "next/link";
 import TeamInvitationOptions from "../team-invitation-options";
 import FollowButton from "@/components/follow-button";
 import CoverPhoto from "@/components/cover-photo";
+import { TheatreLink } from "@/components/theatre-link";
+import { getTheatre } from "@/lib/theatres";
 
 type Props = {
     params: Promise<{ id: string }>
@@ -53,6 +55,11 @@ export default async function TeamLayout({ params, children }: Props) {
     const openInvitations = members.filter((member) => member.id === currentUser?.id && !member.confirmed);
     const inviters = await Promise.all(openInvitations.map((invite) => getUser(invite.addedBy)));
     const following = currentUser ? (await getFollowing(currentUser.id, id, 'team')) || false : false;
+
+    const theatres = team.theatres?.length ? (
+        await Promise.all(team.theatres.map(async (t) => await getTheatre(t) || t))
+    ).filter(t => t)
+    .map(t => typeof t === 'string' ? t : ({ text: t.name, id: t.id, image: t.image })) : [];
 
     return (
         <Suspense fallback={<Loader />}>
@@ -98,7 +105,7 @@ export default async function TeamLayout({ params, children }: Props) {
                 </div>
             </section>
             {children}
-            {(team.city && team.state) || team.theatres.length > 0 ? (
+            {(team.city && team.state) || theatres.length > 0 ? (
                 <section>
                     <div className="px-8">
                         {team.city && team.state ? <>
@@ -110,14 +117,9 @@ export default async function TeamLayout({ params, children }: Props) {
                                 >{`${team.city}, ${team.state}`}</Link>
                             </P>
                         </> : null}
-                        {team.theatres.length > 0 && <Header>Theatres</Header>}
-                        {team.theatres.map((theatre, i) => (
-                            <P key={i}>
-                                <Link
-                                    href={`/search?for=teams&theatre=${theatre.toLowerCase().split(' ').join('+')}`}
-                                    className="link"
-                                >{theatre}</Link>
-                            </P>
+                        {theatres.length > 0 && <Header>Theatres</Header>}
+                        {theatres.map((theatre, i) => (
+                            <TheatreLink key={i} theatre={theatre} />
                         ))}
                     </div>
                 </section>

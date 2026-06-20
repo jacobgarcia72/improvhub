@@ -1,6 +1,7 @@
-import { theatres } from "@/lib/theatres";
 import CoverPhoto from "@/components/cover-photo";
+import { getTheatre } from "@/lib/theatres";
 import { Event } from "@/types";
+import Link from "next/link";
 
 export default async function ShowHeader({ children, show, showImage = true }: {
     children?: React.ReactNode,
@@ -8,16 +9,23 @@ export default async function ShowHeader({ children, show, showImage = true }: {
     showImage?: boolean
 }) {
 
-    const theatre = theatres.find(t => t.name === show.theatre);
+    const theatre = show.theatre ? await getTheatre(show.theatre) : null;
     const imageUrl = show.image || theatre?.image;
-
     return (
         <>
             <div className="w-full flex flex-row items-center">
                 <div className="w-full flex flex-row justify-between flex-wrap">
                     <div>
                         <h1 className="text-2xl">{show.title}</h1>
-                        {show.theatre && <h2 className="mb-3">{show.theatre}</h2>}
+                        {show.theatre ? (
+                            theatre?.id ? (
+                                <Link href={`/theatres/${theatre.id}`}>
+                                    <h2 className="mb-3 link">{show.theatre}</h2>
+                                </Link>
+                            ) : (
+                                <h2 className="mb-3">{show.theatre}</h2>
+                            )
+                        ) : null}
                     </div>
                     <div>
                         {children}
