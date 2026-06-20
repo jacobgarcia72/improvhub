@@ -41,7 +41,8 @@ create table if not exists theatres (
   state text not null,
   zipcode text not null,
   website text,
-  image text
+  image text,
+  admins text[]
 );
 
 create table if not exists shows (
