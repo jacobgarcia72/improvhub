@@ -197,6 +197,7 @@ export async function setFollowing(userId: string, followId: string, type: Follo
     if (error) throw error;
     if (type === 'team') revalidatePath(`/teams/${followId}`, 'layout');
     if (type === 'user') revalidatePath(`/profile/${followId}`, 'layout');
+    if (type === 'theatre') revalidatePath(`/theatres/${followId}`, 'layout');
 }
 
 export async function saveUser(user: User, userRoles?: { [role: string]: boolean }): Promise<void> {

@@ -3,7 +3,7 @@
 
 import slugify from 'slugify';
 
-import { Event, Role, ShowCastMember, Showing } from "@/types";
+import { Event, Role, ShowCastMember, Showing, Theatre } from "@/types";
 import { camelCaseObject, removeLeadingArticles, snakeCaseObject } from './helper-functions';
 import { supabaseAdmin } from './supabase-server';
 import { getCitiesWithinRange } from './location';
@@ -29,7 +29,7 @@ export async function getShowsByAdmin(userId: string): Promise<Event[]> {
     return (data || []).map(camelCaseObject) as Event[];
 }
 
-export async function getShowsByCastMember(userId: string, roles: (Role | 'team')[] = ['player', 'musician', 'tech', 'director'], includeUsersTeams = false): Promise<{ show: Event, dateTimes: string[] }[]> {
+export async function getUpcomingShowsByCastMember(userId: string, roles: (Role | 'team')[] = ['player', 'musician', 'tech', 'director'], includeUsersTeams = false): Promise<{ show: Event, dateTimes: string[] }[]> {
     const today = new Date();
     const yyyy = today.getFullYear();
     const mm = String(today.getMonth() + 1).padStart(2, '0');
@@ -57,6 +57,49 @@ export async function getShowsByCastMember(userId: string, roles: (Role | 'team'
         const dateTime = normalizeDateTime(date_time);
         if (!showDates[show_id].includes(dateTime)) {
             showDates[show_id].push(dateTime);
+        }
+    });
+
+    const res: { show: Event, dateTimes: string[] }[] = [];
+
+    for (let i = 0; i < showIds.length; i++) {
+        const showId = showIds[i];
+        const show = await getShow(showId);
+        if (show) {
+            res.push({ show, dateTimes: showDates[showId] });
+        }
+    }
+    return res;
+}
+
+export async function getUpcomingShowsByTheatre(theatre: Theatre): Promise<{ show: Event, dateTimes: string[] }[]> {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    const startOfToday = `${yyyy}-${mm}-${dd} 00:00`;
+    const { data: showData } = await supabaseAdmin
+        .from('shows')
+        .select('id')
+        .or(`theatre.eq.${theatre.id},theatre.ilike.${theatre.name},theatre.ilike.${removeLeadingArticles(theatre.name)}`);
+    const showsAtTheatre = showData || [];
+    const { data } = await supabaseAdmin
+        .from('showings')
+        .select('event_id, date_time')
+        .in('event_id', showsAtTheatre.map(({ id }: { id: string }) => id))
+        .gte('date_time', startOfToday);
+
+    const showDates: { [showId: string]: string[] } = { };
+    const showIds: string[] = [];
+
+    (data || []).forEach(({ event_id, date_time }: { event_id: string; date_time: string }) => {
+        if (!showDates[event_id]) {
+            showDates[event_id] = [];
+            showIds.push(event_id);
+        }
+        const dateTime = normalizeDateTime(date_time);
+        if (!showDates[event_id].includes(dateTime)) {
+            showDates[event_id].push(dateTime);
         }
     });
 

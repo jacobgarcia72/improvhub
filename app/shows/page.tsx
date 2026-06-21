@@ -3,7 +3,7 @@ import { Metadata } from "next";
 import Link from "next/link";
 import Button from "@/components/form/button";
 import { getCurrentUserId } from "@/lib/users";
-import { getShowsByAdmin, getShowsByCastMember } from "@/lib/shows";
+import { getShowsByAdmin, getUpcomingShowsByCastMember } from "@/lib/shows";
 import MiniCard from "@/components/mini-card";
 import { Event } from "@/types";
 import UserShows from "@/components/upcoming-shows";
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 export default async function ShowsPage() {
     const userId = await getCurrentUserId();
     const showsManaged = userId ? await getShowsByAdmin(userId) : null;
-    const showsUserIsIn = userId ? await getShowsByCastMember(userId) : null;
+    const showsUserIsIn = userId ? await getUpcomingShowsByCastMember(userId) : null;
     const showsByDate: { dateTime: string, show: Event }[] = [];
     showsUserIsIn?.forEach(({ show, dateTimes }) => {
         dateTimes.forEach((dateTime) => {

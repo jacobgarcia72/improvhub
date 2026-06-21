@@ -1,9 +1,9 @@
-import { getShowsByCastMember } from "@/lib/shows";
+import { getUpcomingShowsByCastMember } from "@/lib/shows";
 import { Event, Role } from "@/types";
 import MiniCard from "@/components/mini-card";
 
 export default async function UpcomingShows({ id, label = "Upcoming Shows", limit, roles, includeTeams }: { id: string, label?: string, limit?: number, roles?: (Role | 'team')[], includeTeams?: boolean }) {
-    const showsUserIsIn = id ? await getShowsByCastMember(id, roles, includeTeams) : [];
+    const showsUserIsIn = id ? await getUpcomingShowsByCastMember(id, roles, includeTeams) : [];
     let showsByDate: { dateTime: string, show: Event }[] = [];
     showsUserIsIn?.forEach(({ show, dateTimes }) => {
         dateTimes.forEach((dateTime) => {
