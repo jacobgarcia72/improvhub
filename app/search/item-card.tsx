@@ -19,14 +19,19 @@ export default async function ItemCard({
         'theatre' in item && item.theatre && (await getTheatre(item.theatre))?.image
     );
     const name = 'name' in item ? item.name : 'title' in item ? item.title : '';
-    let link = 'id' in item ? `/${type}/${item.id}` : `/search?for=shows&theatre=${(item.name || '').toLowerCase().split(" ").join("+")}`;
+    let link = `/${type}/${item.id}`;
     if (date && time) link += `/${date}%20${time}`;
 
     let following = false;
     let showFollowButton = false;
-    if (userId && (type === 'teams') && ('id' in item)) {
-        following = item.id && await getFollowing(userId, item.id, 'team') || false;
-        showFollowButton = true;
+    if (userId && 'id' in item) {
+        if (type === 'teams') {
+            following = item.id && await getFollowing(userId, item.id, 'team') || false;
+            showFollowButton = true;
+        } else if (type === 'theatres') {
+            following = item.id && await getFollowing(userId, item.id, 'theatre') || false;
+            showFollowButton = true;
+        }
     }
     return (
         <Border className="relative flex flex-col h-[300px] w-[212px] m-2 w-44 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
