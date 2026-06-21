@@ -13,6 +13,7 @@ import ShowDetails from "../show-details";
 import ShowHeader from "../show-header";
 import ShowDate from "./show-date";
 import { dateMatchesRecurringSchedule } from "@/lib/dates";
+import AddToCalendarButton from "./add-to-calendar";
 
 export default async function ShowDatePage({ params } : {
     params: Promise<{ id: string, dateTime: string }>
@@ -77,6 +78,7 @@ export default async function ShowDatePage({ params } : {
                 <div className="w-full flex flex-row items-center justify-between">
                     <div className="mb-3">
                         <ShowDate showDate={showDate} />
+                        <AddToCalendarButton />
                         <Link className="link pb-2 text-sm mt-[-4px]" href={`/shows/${id}`}>Go to parent show page</Link>
                     </div>
                     <div className="flex flex-col items-end">
