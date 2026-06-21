@@ -1,7 +1,7 @@
 import CoverPhoto from "@/components/cover-photo";
+import { TheatreLink } from "@/components/theatre-link";
 import { getTheatre } from "@/lib/theatres";
 import { Event } from "@/types";
-import Link from "next/link";
 
 export default async function ShowHeader({ children, show, showImage = true }: {
     children?: React.ReactNode,
@@ -18,13 +18,7 @@ export default async function ShowHeader({ children, show, showImage = true }: {
                     <div>
                         <h1 className="text-2xl">{show.title}</h1>
                         {show.theatre ? (
-                            theatre?.id ? (
-                                <Link href={`/theatres/${theatre.id}`}>
-                                    <h2 className="mb-3 link">{show.theatre}</h2>
-                                </Link>
-                            ) : (
-                                <h2 className="mb-3">{show.theatre}</h2>
-                            )
+                            <TheatreLink theatre={theatre && ({ text: theatre.name, image: theatre.image, id: theatre.id }) || show.theatre} />
                         ) : null}
                     </div>
                     <div>

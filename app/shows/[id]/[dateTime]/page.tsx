@@ -78,13 +78,13 @@ export default async function ShowDatePage({ params } : {
                 />
             )) : null}
             <div className="pt-1 pb-1 px-6">
-                <div className="w-full flex flex-row items-center justify-between">
+                <div className="w-full flex flex-row items-center justify-between items-start">
                     <div className="mb-3">
                         <ShowDate showDate={showDate} />
                         <AddToCalendarButton show={parentShow} date={showDate} location={location} />
                         <Link className="link pb-2 text-sm mt-[-4px]" href={`/shows/${id}`}>Go to parent show page</Link>
                     </div>
-                    <div className="flex flex-col items-end">
+                    <div className="flex flex-col items-end pt-1">
                         {userId && !userRoles?.length ? (
                             <RSVP
                                 userId={userId}
