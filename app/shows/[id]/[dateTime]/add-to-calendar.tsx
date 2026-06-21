@@ -1,8 +1,10 @@
 'use client'
+import { getEndDateAndTimeFromRuntime } from '@/lib/dates';
+import { Event } from '@/types';
 import { AddToCalendarButton } from 'add-to-calendar-button-react';
 import { useEffect, useState } from 'react';
 
-export default function AddToCalendar() {
+export default function AddToCalendar({ show, date, location }: { show: Event, date: string, location?: string }) {
     const [isMounted, setIsMounted] = useState(false);
 
     useEffect(() => {
@@ -14,17 +16,25 @@ export default function AddToCalendar() {
     if (!isMounted) {
         return null; 
     }
-
+    const [startDate, startTime] = date.split(' ');
+    const [endDate, endTime] = getEndDateAndTimeFromRuntime(startDate, startTime, show.runtime);
+    const timezone =  Intl.DateTimeFormat().resolvedOptions().timeZone;
     return (
         <AddToCalendarButton
-            name="Test-Event"
-            startDate="2023-05-22"
+            name={show.title}
+            description={show.description || undefined}
+            timeZone={timezone}
+            location={location}
+            startDate={startDate}
+            startTime={startTime}
+            endTime={endTime || startTime}
+            endDate={endDate || startDate}
             options={['Apple','Google', 'Microsoft365','iCal']}
             size="5"
             hideBackground
             hideBranding
             hideCheckmark
-            useUserTZ
+            trigger='click'
         ></AddToCalendarButton>
     )
 }

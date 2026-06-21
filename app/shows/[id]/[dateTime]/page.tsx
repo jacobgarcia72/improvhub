@@ -14,6 +14,7 @@ import ShowHeader from "../show-header";
 import ShowDate from "./show-date";
 import { dateMatchesRecurringSchedule } from "@/lib/dates";
 import AddToCalendarButton from "./add-to-calendar";
+import { getTheatre } from "@/lib/theatres";
 
 export default async function ShowDatePage({ params } : {
     params: Promise<{ id: string, dateTime: string }>
@@ -50,6 +51,8 @@ export default async function ShowDatePage({ params } : {
     const goingCount = await getRsvpCount(parentShow.id, showDate, 'g');
     const interestedCount = await getRsvpCount(parentShow.id, showDate, 'i');
 
+    let location = parentShow.theatre && (await getTheatre(parentShow.theatre))?.name || undefined;
+    if (location && parentShow.city && parentShow.state) location += `, ${parentShow.city} ${parentShow.state}`;
     return <>
         <ShowHeader show={parentShow} />
         <div className="flex flex-col pb-3 border-b border-gray-400 mb-2">
@@ -78,7 +81,7 @@ export default async function ShowDatePage({ params } : {
                 <div className="w-full flex flex-row items-center justify-between">
                     <div className="mb-3">
                         <ShowDate showDate={showDate} />
-                        <AddToCalendarButton />
+                        <AddToCalendarButton show={parentShow} date={showDate} location={location} />
                         <Link className="link pb-2 text-sm mt-[-4px]" href={`/shows/${id}`}>Go to parent show page</Link>
                     </div>
                     <div className="flex flex-col items-end">

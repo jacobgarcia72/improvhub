@@ -116,3 +116,22 @@ export function dateMatchesRecurringSchedule(
     const occurrence = getWeekdayOccurence(dateTime);
     return cadence.includes(`${occurrence}`) || (cadence === 'last' && isLastOfMonth(dateTime));
 }
+
+export function getEndDateAndTimeFromRuntime(startDate: string, startTime: string, runtime?: string | null): [string | undefined, string | undefined] {
+    if (!runtime) return [undefined, undefined];
+
+    const [hoursPart, minutesPart] = runtime.split('h');
+    const runtimeHours = Number(hoursPart) || 0;
+    const runtimeMinutes = Number(minutesPart) || 0;
+
+    const [y, m, d] = startDate.split('-').map((s) => Number(s));
+    const [hh, mm] = (startTime || '').split(':').map((s) => Number(s) || 0);
+    const start = new Date(y, m - 1, d, hh || 0, mm || 0);
+    const durationMinutes = (runtimeHours * 60) + runtimeMinutes;
+    const end = new Date(start.getTime() + durationMinutes * 60000);
+
+    const pad = (n: number) => String(n).padStart(2, '0');
+    const endDate = `${end.getFullYear()}-${pad(end.getMonth() + 1)}-${pad(end.getDate())}`;
+    const endTime = `${pad(end.getHours())}:${pad(end.getMinutes())}`;
+    return [endDate, endTime];
+}
