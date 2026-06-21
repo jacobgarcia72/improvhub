@@ -1,6 +1,8 @@
+import Loader from "@/components/loader";
 import MiniCard from "@/components/mini-card";
 import { getTeam } from "@/lib/teams";
 import { Role, TeamMember } from "@/types";
+import { Suspense } from "react";
 
 export default async function TeamsSection({
     roles, header, teamMemberships
@@ -19,11 +21,13 @@ export default async function TeamsSection({
 
     if (!teams?.length) return null;
     return (
-        <section>
-            <h2 className="px-3 font-semibold">{header}</h2>
-            <div className="flex flex-row flex-wrap">
-                {teams.map((team, i) => <MiniCard key={i} item={team} type="team" />)}
-            </div>
-        </section>
+        <Suspense fallback={<Loader />}>
+            <section>
+                <h2 className="px-3 font-semibold">{header}</h2>
+                <div className="flex flex-row flex-wrap">
+                    {teams.map((team, i) => <MiniCard key={i} item={team} type="team" />)}
+                </div>
+            </section>
+        </Suspense>
     )
 }

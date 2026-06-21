@@ -7,6 +7,8 @@ import { getShowsByAdmin, getUpcomingShowsByCastMember } from "@/lib/shows";
 import MiniCard from "@/components/mini-card";
 import { Event } from "@/types";
 import UserShows from "@/components/upcoming-shows";
+import { Suspense } from "react";
+import Loader from "@/components/loader";
 
 
 export const metadata: Metadata = {
@@ -37,15 +39,19 @@ export default async function ShowsPage() {
                     <Button caption="Find Shows" />
                 </Link>
             </section>
-            {showsManaged?.length ? (
-                <section>
-                    <h2 className="text-slate-700 font-semibold">Shows I Manage</h2>
-                    <div className="flex flex-row flex-wrap">
-                        {showsManaged.map((show, i) => <MiniCard key={i} item={show} type="show" />)}
-                    </div>
-                </section>
-            ) : null}
-            {userId ? <UserShows includeTeams label="Shows I'm In" id={userId} /> : null}
+            <Suspense fallback={<Loader />}>
+                {showsManaged?.length ? (
+                    <section>
+                        <h2 className="text-slate-700 font-semibold">Shows I Manage</h2>
+                        <div className="flex flex-row flex-wrap">
+                            {showsManaged.map((show, i) => <MiniCard key={i} item={show} type="show" />)}
+                        </div>
+                    </section>
+                ) : null}
+            </Suspense>
+            <Suspense fallback={<Loader />}>
+                {userId ? <UserShows includeTeams label="Shows I'm In" id={userId} /> : null}
+            </Suspense>
         </>
     )
 }

@@ -1,6 +1,8 @@
 import { getUpcomingShowsByCastMember } from "@/lib/shows";
 import { Event, Role } from "@/types";
 import MiniCard from "@/components/mini-card";
+import { Suspense } from "react";
+import Loader from "./loader";
 
 export default async function UpcomingShows({ id, label = "Upcoming Shows", limit, roles, includeTeams }: { id: string, label?: string, limit?: number, roles?: (Role | 'team')[], includeTeams?: boolean }) {
     const showsUserIsIn = id ? await getUpcomingShowsByCastMember(id, roles, includeTeams) : [];
@@ -15,7 +17,7 @@ export default async function UpcomingShows({ id, label = "Upcoming Shows", limi
     });
     if (limit) showsByDate = showsByDate.slice(0, limit);
     return (
-        <>
+        <Suspense fallback={<Loader />}>
             {showsByDate?.length ? (
                 <section>
                     <h2 className="text-slate-700 font-semibold">{label}</h2>
@@ -24,6 +26,6 @@ export default async function UpcomingShows({ id, label = "Upcoming Shows", limi
                     </div>
                 </section>
             ) : null}
-        </>
+        </Suspense>
     )
 }

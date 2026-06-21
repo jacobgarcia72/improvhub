@@ -1,6 +1,8 @@
 import { getUpcomingShowsByTheatre } from "@/lib/shows";
 import { Event, Theatre } from "@/types";
 import MediumCard from "@/components/medium-card";
+import { Suspense } from "react";
+import Loader from "@/components/loader";
 
 export default async function UpcomingShows({ theatre }: { theatre: Theatre }) {
     const shows = theatre ? await getUpcomingShowsByTheatre(theatre) : [];
@@ -15,7 +17,7 @@ export default async function UpcomingShows({ theatre }: { theatre: Theatre }) {
     });
     showsByDate = showsByDate.slice(0, 72);
     return (
-        <>
+        <Suspense fallback={<Loader />}>
             {showsByDate?.length ? (
                 <section>
                     <h2 className="text-slate-700 font-semibold">Upcoming Shows</h2>
@@ -24,6 +26,6 @@ export default async function UpcomingShows({ theatre }: { theatre: Theatre }) {
                     </div>
                 </section>
             ) : null}
-        </>
+        </Suspense>
     )
 }
