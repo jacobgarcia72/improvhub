@@ -4,9 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { Border } from "./border";
 import { formatDateTimeForDisplay } from "@/lib/dates";
-import { getTheatre } from "@/lib/theatres";
 
-export default async function MiniCard({ item, type, dateTime, includeDescription }: {
+export default function MiniCard({ item, type, dateTime, includeDescription }: {
     item: Event | Team | User,
     type: string,
     dateTime?: string,
@@ -14,10 +13,6 @@ export default async function MiniCard({ item, type, dateTime, includeDescriptio
 }) {
     const image = (
         item.image && optimizeImage(item.image, 300, 300, 80, true)
-    ) || (
-        'theatre' in item && item.theatre && (
-            await getTheatre(item.theatre)
-        )?.image
     );
     let name = 'name' in item ? item.name : 'title' in item ? item.title : '';
     if (!name && 'firstName' in item && 'lastName' in item) name = `${item.firstName} ${item.lastName}`;

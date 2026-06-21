@@ -10,7 +10,7 @@ export default function UserSuggestionsClient({ initialUsers, role, teamId }: { 
     const [users, setUsers] = useState<User[]>(initialUsers || []);
     const [loading, setLoading] = useState(false);
 
-    async function refresh() {
+    const refresh = async () => {
         try {
             setLoading(true);
             let apiRoute = `/api/user-suggestions?role=${encodeURIComponent(role)}`;
