@@ -19,8 +19,12 @@ export default function AddToCalendar() {
         <AddToCalendarButton
             name="Test-Event"
             startDate="2023-05-22"
-            options={['Apple','Google','Yahoo','iCal']}
-            timeZone="America/Los_Angeles"
+            options={['Apple','Google', 'Microsoft365','iCal']}
+            size="5"
+            hideBackground
+            hideBranding
+            hideCheckmark
+            useUserTZ
         ></AddToCalendarButton>
     )
 }
