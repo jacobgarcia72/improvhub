@@ -14,6 +14,7 @@ export default function NavLink({ link, onClick }: {
             <div className="flex flex-row min-w-18 px-1 justify-center">
                 {{
                     'Feed': 'Live Feed',
+                    'Search': 'Find',
                     'Messages': 'Discussion'
                 }[link] || link}
             </div>
