@@ -3,14 +3,15 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-export default function NavLink({ link }: {
+export default function NavLink({ link, onClick }: {
     link: string,
+    onClick?: () => void
 }) {
     const path = usePathname();
     const href = `/${link.toLowerCase()}`;
     return (
-        <Link href={href} className={path.startsWith(href) ? 'active' : ''}>
-            <div>
+        <Link onClick={onClick || undefined} href={href} className={path.startsWith(href) ? 'active' : ''}>
+            <div className="flex flex-row min-w-18 px-1 justify-center">
                 {link}
             </div>
         </Link>

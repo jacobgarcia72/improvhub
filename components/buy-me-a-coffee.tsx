@@ -13,15 +13,16 @@ export default function BuyMeACoffee() {
         script.setAttribute("data-name", "BMC-Widget");
         script.setAttribute("data-cfasync", "false");
         script.setAttribute("data-id", "jacobgarcia25");
-        script.setAttribute("data-description", "Thank you for supporting!");
+        script.setAttribute("data-description", "Buy me a coffee so I can continue developing this site!");
         script.setAttribute(
             "data-message",
-            "Buy me a coffee so I can continue developing this site!"
+            "Support the site! >"
         );
         script.setAttribute("data-color", "#5F7FFF");
         script.setAttribute("data-position", "Right");
         script.setAttribute("data-x_margin", "18");
         script.setAttribute("data-y_margin", "18");
+        script.setAttribute("data-transform", "scale(0.5)");
 
         script.onload = function () {
             const event = new Event('DOMContentLoaded', { bubbles: true, cancelable: true });

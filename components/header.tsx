@@ -1,20 +1,19 @@
 import Link from "next/link";
-import NavLink from "./nav-link";
 import ProfileImage from "./profile-image";
-
-const links = ['Create', 'Search', 'Shows', 'Jams', 'Teams', 'Messages'];
+import NavLinks from "./nav-links";
+import { appName } from "@/lib/app-info";
 
 export default function Header() {
     return (
-        <header className="relative z-50 h-12 w-full flex flex-row justify-between items-stretch">
+        <header className="px-6 text-[0.95em] relative z-50 h-11 w-full flex flex-row justify-between items-stretch">
             <Link href="/">
-                <div>Improv Hub</div>
+                <div className="hidden sm:flex font-semibold px-2 w-24 flex-row justify-center">
+                    {appName}
+                </div>
             </Link>
-            <nav className="flex flex-row">
-                {links.map((link) => <ul key={link}><NavLink link={link}/></ul>)}
-            </nav>
-            <div className="flex flex-row">
-                <Link href="/profile">
+            <NavLinks />
+            <div>
+                <Link href="/profile" className="flex flex-row w-12 justify-center items-center">
                     <ProfileImage />
                 </Link>
             </div>
