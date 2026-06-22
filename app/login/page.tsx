@@ -2,10 +2,16 @@ import { login } from "@/actions/auth-actions";
 import Button from "@/components/form/button";
 import Form from "@/components/form/form";
 import Input from "@/components/form/input";
+import { getCurrentUserId } from "@/lib/users";
 import { SearchParams } from "next/dist/server/request/search-params";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
+    const userId = await getCurrentUserId();
+    if (userId) {
+        redirect(`/profile/${userId}`);
+    }
     const reroute = (await searchParams)?.reroute || '';
     let caption = 'Sign In';
     if (reroute) {
