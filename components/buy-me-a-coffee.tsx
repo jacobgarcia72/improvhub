@@ -16,9 +16,9 @@ export default function BuyMeACoffee() {
         script.setAttribute("data-description", "Buy me a coffee so I can continue developing this site!");
         script.setAttribute(
             "data-message",
-            "Support the site! >"
+            "Support the site!"
         );
-        script.setAttribute("data-color", "#5F7FFF");
+        script.setAttribute("data-color", "#2098dd");
         script.setAttribute("data-position", "Right");
         script.setAttribute("data-x_margin", "18");
         script.setAttribute("data-y_margin", "18");
