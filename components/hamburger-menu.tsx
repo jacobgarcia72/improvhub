@@ -12,7 +12,7 @@ export default function HamburgerMenu({ links }: { links: string[] }) {
                 className="z-0 cursor-pointer w-full h-full bg-black opacity-90 fixed left-0 top-0">
             </div>
             <div className="z-100 hamburger-dropdown bg-[#556f8d] border-[#556f8d] border-3 text-[1.1em] fixed top-11 w-64 flex flex-col">
-                {links.map((link, i) => (
+                {['Feed', ...links].map((link, i) => (
                     <NavLink onClick={() => setIsOpen(false)} key={i} link={link} />
                 ))}
             </div>

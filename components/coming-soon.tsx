@@ -1,7 +1,7 @@
 export default function ComingSoon() {
     return (
         <section className="small-section flex flex-col gap-3">
-            <h1 className="text-xl mb-1">This section is coming soon!</h1>
+            <h1 className="text-xl mb-1">This page is coming soon!</h1>
             <p>In the meantime, your support will allow me to continue working on this site.</p>
             <ul>
                 <li className="ml-4 mt-1 mb-3">

@@ -12,7 +12,10 @@ export default function NavLink({ link, onClick }: {
     return (
         <Link onClick={onClick || undefined} href={href} className={path.startsWith(href) ? 'active' : ''}>
             <div className="flex flex-row min-w-18 px-1 justify-center">
-                {link === 'Messages' ? 'Discussion' : link}
+                {{
+                    'Feed': 'Live Feed',
+                    'Messages': 'Discussion'
+                }[link] || link}
             </div>
         </Link>
     )
