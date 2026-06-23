@@ -3,13 +3,14 @@ import { optimizeImage } from "@/lib/optimize-image";
 import { InputOptionObject } from "@/types";
 import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-export default function ChatRoomSelect({ chatRooms }: {
+export default function ChatRoomSelect({ chatRooms, onSelect }: {
     chatRooms: {
         theatres: InputOptionObject[],
         teams: InputOptionObject[]
-    }
+    },
+    onSelect: (id: string | null) => void;
 }) {
     const searchParams = useSearchParams();
     const pathname = usePathname();
@@ -29,6 +30,12 @@ export default function ChatRoomSelect({ chatRooms }: {
             replace(`${pathname}?${params.toString()}`);
         }
     }
+
+    useEffect(() => {
+        if (!room) handleSelect('global');
+        onSelect(room);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [room, onSelect]);
 
     const getChatRoomObject = (id: string): InputOptionObject | null => {
         if (id === 'global') return globalChatRoom;

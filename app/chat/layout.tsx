@@ -1,7 +1,7 @@
 import { getChatRooms } from "@/lib/chat"
 import { getCurrentUserId } from "@/lib/users";
 import { redirect } from "next/navigation";
-import ChatRoomSelect from "./chat-room-select";
+import MessagesHeader from "./header";
 
 export default async function MessagesLayout() {
     const userId = await getCurrentUserId();
@@ -10,10 +10,6 @@ export default async function MessagesLayout() {
     }
     const chatRooms = await getChatRooms(userId);
     return (
-        <section>
-            <div className="flex flex-row">
-                <ChatRoomSelect chatRooms={chatRooms} />
-            </div>
-        </section>
+        <MessagesHeader chatRooms={chatRooms} />
     )
 }
