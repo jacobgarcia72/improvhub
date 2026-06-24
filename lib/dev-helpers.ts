@@ -142,7 +142,7 @@ const generateUserAndRoles = (count: number): [User, { [role: string]: boolean }
         roles.coach = true;
         openToCoachTeam = rnd() <= 90;
     }
-    const joinDate =new Date().toISOString();
+    const joinDate = new Date().toISOString();
     return [
         {
             id, password, joinDate, firstName, lastName, pronouns, bio, theatres, city, state, website, image, openToJoinTeam, openToAccompanyTeam, openToCoachTeam
@@ -151,10 +151,10 @@ const generateUserAndRoles = (count: number): [User, { [role: string]: boolean }
     ]
 }
 
-const generateShow = (users: { name: string, id: string, image?: string }[]) => {
-    const creatorId = users[rnd(users.length - 1)].id;
-    const admins = [creatorId];
-}
+// const generateShow = (users: { name: string, id: string, image?: string }[]) => {
+//     const creatorId = users[rnd(users.length - 1)].id;
+//     const admins = [creatorId];
+// }
 
 const generateTeam = (users: { name: string, id: string, image?: string }[]): [team: Team, members: { name: string, id: string | null, role: Role }[]] => {
     const name = nameGenerator();

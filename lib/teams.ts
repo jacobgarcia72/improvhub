@@ -9,7 +9,6 @@ import { getCurrentUser, getCurrentUserId } from "./users";
 import { destroyImage } from "./cloudinary";
 import { revalidatePath } from "next/cache";
 
-
 export async function getTeam(id: string): Promise<Team | null> {
     const { data, error } = await supabaseAdmin
         .from('teams')

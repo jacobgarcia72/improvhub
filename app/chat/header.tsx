@@ -5,11 +5,12 @@ import Link from "next/link";
 import { InputOptionObject } from "@/types";
 import { useState } from "react";
 
-export default function MessagesHeader({ chatRooms }: {
+export default function MessagesHeader({ chatRooms, showPostButton }: {
     chatRooms: {
         theatres: InputOptionObject[],
         teams: InputOptionObject[]
-    }
+    },
+    showPostButton?: boolean
 }) {
     const [room, setRoom] = useState<string | null>(null)
     return (
@@ -22,9 +23,11 @@ export default function MessagesHeader({ chatRooms }: {
                         e.preventDefault();
                         }
                     }}
-                    href={`/chat/new/${room}`}
+                    href={`/chat/new-topic?room=${room}`}
                 >
-                    <Button disabled={!room} className="w-40" caption="New Post" />
+                    {showPostButton ? (
+                        <Button disabled={!room} className="w-40" caption="New Topic" />
+                    ) : null}
                 </Link>
             </div>
         </section>

@@ -10,7 +10,7 @@ export default function ChatRoomSelect({ chatRooms, onSelect }: {
         theatres: InputOptionObject[],
         teams: InputOptionObject[]
     },
-    onSelect: (id: string | null) => void;
+    onSelect?: (id: string | null) => void;
 }) {
     const searchParams = useSearchParams();
     const pathname = usePathname();
@@ -33,7 +33,7 @@ export default function ChatRoomSelect({ chatRooms, onSelect }: {
 
     useEffect(() => {
         if (!room) handleSelect('global');
-        onSelect(room);
+        if (onSelect) onSelect(room);
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [room, onSelect]);
 
@@ -55,7 +55,7 @@ export default function ChatRoomSelect({ chatRooms, onSelect }: {
 
     function ChatRoomOption(chatRoom: InputOptionObject) {
         return (
-            <div onClick={() => handleSelect(chatRoom.id.toString())} key={chatRoom.id} className="w-full py-2 px-4 cursor-pointer hover:bg-slate-500 hover:text-white flex flex-row gap-2">
+            <div onClick={() => handleSelect(chatRoom.id.toString())} key={chatRoom.id} className="w-full py-2 px-4 cursor-pointer hover:bg-blue-500 hover:text-white flex flex-row gap-2">
                 {displayNameAndImage(chatRoom)}
             </div>
         )
@@ -76,7 +76,7 @@ export default function ChatRoomSelect({ chatRooms, onSelect }: {
                 </div>
             </> : null}
             <div
-                className="cursor-pointer flex items-center px-4 h-10 w-86 max-w-[90vw] transition-colors mb-0.5 bg-white hover:bg-slate-400 text-gray-700 hover:text-white rounded-md border-1 border-gray-300"
+                className="cursor-pointer flex items-center px-4 h-10 w-86 max-w-[90vw] transition-colors mb-0.5 bg-white hover:bg-blue-500 text-gray-700 hover:text-white rounded-md border-1 border-gray-300"
                 onClick={() => setIsOpen(!isOpen)}
             >
                 <div className="flex flex-row items-center gap-1">{room && displayNameAndImage(getChatRoomObject(room) || globalChatRoom) || 'Select Chat Room'}</div>

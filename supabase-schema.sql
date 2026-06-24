@@ -125,6 +125,39 @@ create table if not exists follows (
   primary key (user_id, follow_id, type)
 );
 
+create table if not exists topics (
+  id text not null,
+  title text not null,
+  room text not null,
+  description text,
+  creator text not null,
+  date text not null,
+  primary key (room, id)
+);
+
+create table if not exists posts (
+  id text not null,
+  room text not null,
+  topic_id text not null,
+  post text not null,
+  creator text not null,
+  date text not null,
+  primary key (room, topic_id, id),
+  foreign key (room, topic_id) references topics(room, id) on delete cascade
+);
+
+create table if not exists comments (
+  id text not null,
+  room text not null,
+  topic_id text not null,
+  post_id text not null,
+  comment text not null,
+  creator text not null,
+  date text not null,
+  primary key (room, topic_id, post_id, id),
+  foreign key (room, topic_id, post_id) references posts(room, topic_id, id) on delete cascade
+);
+
 -- Grant privileges on sessions table
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.sessions TO service_role;
 
@@ -138,6 +171,9 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.teams TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.team_members TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.follows TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.user_roles TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.topics TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.posts TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.comments TO service_role;
 
 -- Grant sequence privileges for auto-incrementing IDs (if used)
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO service_role;

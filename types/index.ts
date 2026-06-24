@@ -125,5 +125,14 @@ export interface Follow {
     following: boolean;
 }
 
+export interface Topic {
+    id: string;
+    room: string;
+    title: string;
+    description: string | null;
+    creator?: string;
+    date?: string;
+}
+
 export type InputOptionObject = { id: string | number, text: string, image?: string };
 export type InputOption = string | InputOptionObject;
