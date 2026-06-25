@@ -26,6 +26,7 @@ export default function ChatRoomSelect({ chatRooms, onSelect }: {
     const handleSelect = (roomId: string) => {
         replace(pathname);
         if (roomId) {
+            params.delete('topic');
             params.set('room', roomId);
             replace(`${pathname}?${params.toString()}`);
         }

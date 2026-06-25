@@ -1,12 +1,12 @@
 'use server';
 
-import { InputOptionObject, Topic } from '@/types';
+import { DiscussionPost, InputOptionObject, Topic } from '@/types';
 import { getTeamsByUser } from './teams';
 import { getTheatre } from './theatres';
 import { getUser } from './users';
 import { supabaseAdmin } from './supabase-server';
 import slugify from 'slugify';
-import { camelCaseObject } from './helper-functions';
+import { camelCaseObject, getRandomNumberString, snakeCaseObject } from './helper-functions';
 
 export async function getChatRooms(userId: string): Promise<{
     theatres: InputOptionObject[],
@@ -42,6 +42,15 @@ export async function getTopics(room: string): Promise<Topic[]> {
     return [...(data || []).map(camelCaseObject), generalTopic];
 }
 
+export async function getPosts(room: string, topicId: string): Promise<DiscussionPost[]> {
+    const { data } = await supabaseAdmin
+        .from('posts')
+        .select('*')
+        .eq('room', room)
+        .eq('topic_id', topicId);
+    return [...(data || []).map(camelCaseObject)];
+}
+
 export async function saveTopic(userId: string, room: string, topic: string, description: string | null): Promise<{ success: boolean, message: string, id: string }> {
     const id = slugify(topic, { lower: true, trim: true });
     const topicExists = Boolean(await getTopic(room, id));
@@ -55,13 +64,35 @@ export async function saveTopic(userId: string, room: string, topic: string, des
         date: new Date().toISOString()
     }
     try {
-        await supabaseAdmin
+        const { error } = await supabaseAdmin
             .from('topics')
             .insert(newTopic);
+        if (error) throw (error);
+        return { success: true, message: 'Success', id };
+    } catch (error) {
+        console.error(error);
+        return { success: false, message: 'Something went wrong', id };
+    }
+}
+
+export async function savePost(userId: string, room: string, topicId: string, post: string): Promise<{ success: boolean, message: string, id: string }> {
+    const id = `${new Date().getTime()}${getRandomNumberString(5)}`;
+    const newPost: DiscussionPost = {
+        room,
+        topicId,
+        post,
+        id,
+        creator: userId,
+        date: new Date().toISOString()
+    }
+    try {
+        const { error } = await supabaseAdmin
+            .from('posts')
+            .insert(snakeCaseObject(newPost));
+        if (error) throw (error);
+        return { success: true, message: 'Success', id };
     } catch (error) {
         console.error(error)
         return { success: false, message: 'Something went wrong', id };
-    } finally {
-        return { success: true, message: 'Success', id };
     }
 }

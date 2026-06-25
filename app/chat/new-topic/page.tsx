@@ -30,7 +30,7 @@ export default async function NewChatPage({ searchParams }: { searchParams: Prom
         <section className="flex flex-col gap-1 w-[410px]! max-w-[calc(90vw+12px)]!">
             <ChatRoomSelect chatRooms={chatRooms} />
             <Form className="gap-1 w-full" onSubmit={postTopic.bind(null, userId, room)} cancel={handleCancel}>
-                <Input name="topic" label="Topic" max={20} required className="w-86 max-w-[90vw]" />
+                <Input autocomplete={false} name="topic" label="Topic" max={20} required className="w-86 max-w-[90vw]" />
                 <Text name="description" label="Description" rows={3} />
             </Form>
         </section>

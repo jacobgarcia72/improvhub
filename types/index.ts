@@ -134,5 +134,14 @@ export interface Topic {
     date?: string;
 }
 
+export interface DiscussionPost {
+    id: string;
+    room: string;
+    topicId: string;
+    post: string;
+    creator?: string;
+    date?: string;
+}
+
 export type InputOptionObject = { id: string | number, text: string, image?: string };
 export type InputOption = string | InputOptionObject;
