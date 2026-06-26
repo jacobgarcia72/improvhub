@@ -2,7 +2,7 @@ import { appName } from "@/lib/app-info";
 import { Metadata } from "next";
 import Link from "next/link";
 import Button from "@/components/form/button";
-import { getCurrentUserId, getUserRoles } from "@/lib/users";
+import { getCurrentUser, getUserRoles } from "@/lib/users";
 import { getShowsByAdmin, getUpcomingShowsByCastMember } from "@/lib/shows";
 import MiniCard from "@/components/mini-card";
 import { Event, Role } from "@/types";
@@ -19,7 +19,8 @@ export const metadata: Metadata = {
 };
 
 export default async function ShowsPage() {
-    const userId = await getCurrentUserId();
+    const user = await getCurrentUser();
+    const userId = user?.id;
     const showsManaged = userId ? await getShowsByAdmin(userId) : null;
     const showsUserIsIn = userId ? await getUpcomingShowsByCastMember(userId) : null;
     const showsByDate: { dateTime: string, show: Event }[] = [];
@@ -56,11 +57,11 @@ export default async function ShowsPage() {
             <Suspense fallback={<Loader />}>
                 {userId ? <UserShows includeTeams label="Shows I'm In" id={userId} /> : null}
             </Suspense>
-            {roles ? Object.keys(roles).filter((key) => roles[key]).map((role) => (
-                <ShowsLookingFor key={role} role={role as Role} limit={24} />
+            {user && roles ? Object.keys(roles).filter((key) => roles[key]).map((role) => (
+                <ShowsLookingFor key={role} role={role as Role} limit={24} user={user} />
             )) : null}
-            {isOnATeam ? (
-                <ShowsLookingFor key='team' role='team' limit={24} />
+            {user && isOnATeam ? (
+                <ShowsLookingFor key='team' role='team' limit={24} user={user} />
             ) : null}
         </>
     )

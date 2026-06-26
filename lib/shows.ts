@@ -3,13 +3,14 @@
 
 import slugify from 'slugify';
 
-import { Event, Role, ShowCastMember, Showing, Theatre } from "@/types";
+import { Event, Role, ShowCastMember, Showing, Theatre, User } from "@/types";
 import { camelCaseObject, removeLeadingArticles, snakeCaseObject } from './helper-functions';
 import { supabaseAdmin } from './supabase-server';
 import { getCitiesWithinRange } from './location';
 import { revalidatePath } from 'next/cache';
 import { dateMatchesRecurringSchedule, normalizeDateTime } from './dates';
 import { getTeamsByUser } from './teams';
+import { getTheatre } from './theatres';
 
 export async function getShow(id: string): Promise<Event | null> {
     const { data, error } = await supabaseAdmin
@@ -29,7 +30,7 @@ export async function getShowsByAdmin(userId: string): Promise<Event[]> {
     return (data || []).map(camelCaseObject) as Event[];
 }
 
-export async function getShowsLookingForRole(role: Role | 'team'): Promise<{ show: Event, dateTimes: string[] }[]> {
+export async function getShowsLookingForRole(role: Role | 'team', user: User): Promise<{ show: Event, dateTimes: string[] }[]> {
     const key = {
         team: 'looking_for_teams',
         player: 'looking_for_players',
@@ -68,7 +69,14 @@ export async function getShowsLookingForRole(role: Role | 'team'): Promise<{ sho
     for (let i = 0; i < showIds.length; i++) {
         const showId = showIds[i];
         const show = await getShow(showId);
-        if (show) {
+        const showIsLocal = show && (
+            (
+                show.city && show.state && show.city === user.city && show.state === user.state
+            ) || (
+                show.theatre && user.theatres?.includes(show.theatre)
+            )
+        )
+        if (showIsLocal) {
             res.push({ show, dateTimes: showDates[showId] });
         }
     }

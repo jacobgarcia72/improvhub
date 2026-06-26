@@ -2,11 +2,11 @@ import Loader from "@/components/loader";
 import MiniCard from "@/components/mini-card";
 import { capitalize, pluralize } from "@/lib/helper-functions";
 import { getShowsLookingForRole } from "@/lib/shows"
-import { Event, Role } from "@/types";
+import { Event, Role, User } from "@/types";
 import { Suspense } from "react";
 
-export default async function ShowsLookingFor({ role, limit } : { role: Role | 'team', limit?: number }) {
-    const shows = await getShowsLookingForRole(role);
+export default async function ShowsLookingFor({ role, limit, user } : { role: Role | 'team', limit?: number, user: User }) {
+    const shows = await getShowsLookingForRole(role, user);
 
     let showsByDate: { dateTime: string, show: Event }[] = [];
     shows?.forEach(({ show, dateTimes }) => {
