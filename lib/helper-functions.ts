@@ -61,7 +61,7 @@ export const filterArrayBySearchTerm = (
     if (!normalized) {
         return options;
     }
-    const results: InputOption[] = options
+    let results: InputOption[] = options
         .filter((option) => getText(option).toLowerCase().includes(normalized))
         .sort((a, b) => {
             const aStarts = getText(a).toLowerCase().startsWith(normalized);
@@ -75,10 +75,9 @@ export const filterArrayBySearchTerm = (
             return getText(a).localeCompare(getText(b));
         });
     if (limit) {
-        return results.slice(0, limit);
-    } else {
-        return results;
+        results = results.slice(0, limit);
     }
+    return results;
 }
 
 export const getRandomNumberString = (digits: number): string => {

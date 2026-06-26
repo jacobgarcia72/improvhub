@@ -39,7 +39,7 @@ export default async function SearchResults({ params }: { params: {
     const handleSearchParams = async () => {
         const radius = Number(miles);
         if (searchFor === 'theatres') {
-            if (theatre) return Promise.all((filterArrayBySearchTerm(theatres, theatre, 20) as string[]).map(getTheatre));
+            if (theatre) return await Promise.all(filterArrayBySearchTerm(theatres, theatre, 24).map(async (res) => await getTheatre(typeof res === 'string' ? res : res.id.toString())));
             if (city && state) return await getTheatresByCity(city, state, radius);
             if (state) return await getTheatresByState(state);
             if (zipcode) return await getTheatresByZipcode(zipcode, radius || 1);
