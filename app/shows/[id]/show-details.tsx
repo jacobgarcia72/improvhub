@@ -97,7 +97,7 @@ export default async function ShowDetails({ show }: {
                     <P>{ticketInfo}</P>
                     {show.ticketsUrl && (
                         <a href={show.ticketsUrl} target="_blank" rel="noopener noreferrer">
-                            <Button caption="Get Tickets" />
+                            <Button className="w-54" caption="Get Tickets" />
                         </a>
                     )}
                 </div>

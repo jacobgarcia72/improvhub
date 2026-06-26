@@ -16,7 +16,7 @@ export default function ShowingSelection({ dateTimes, showId }: {
         <select
             id="date-select"
             name="date-select"
-            className="border border-gray-300 rounded px-3 py-2 mt-1 w-3/4 min-w-[200px]"
+            className="cursor-pointer border border-gray-300 rounded px-3 py-2 mt-1 w-3/4 min-w-[200px]"
             onChange={(e) => handleDateSelection(e.target.value)}
         >
         <option value="">More dates...</option>
