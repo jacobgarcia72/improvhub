@@ -18,7 +18,7 @@ export default async function TheatreForm({
     return (
         <section className="medium-section">
             <Form onSubmit={postTheatre.bind(null, theatre || null)} cancel={handleCancel}>
-                <Input required name="name" label="Name" />
+                <Input required name="name" label="Name" value={theatre?.name} />
                 <ImagePicker currentImage={theatre?.image} label="Logo" square />
                 <Input label="Address"
                     name="address"

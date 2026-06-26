@@ -2,10 +2,11 @@ import Loader from "@/components/loader";
 import UpcomingShows from "./upcoming-shows";
 import { pluralize } from "@/lib/helper-functions";
 import { getTheatre } from "@/lib/theatres";
-import { getFollowCount } from "@/lib/users";
+import { getCurrentUserId, getFollowCount } from "@/lib/users";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import Button from "@/components/form/button";
 
 export default async function TheatreDetailsPage({ params }: {
     params: Promise<{ id: string }>
@@ -23,6 +24,11 @@ export default async function TheatreDetailsPage({ params }: {
         location += zipcode;
     }
     const followerCount = await getFollowCount(id, 'theatre');
+
+    const userId = await getCurrentUserId();
+    const canManage = !theatre.admins?.length || (
+        userId && theatre.admins.includes(userId)
+    );
     return (
         <Suspense fallback={<Loader />}>
             {followerCount ? (
@@ -33,6 +39,11 @@ export default async function TheatreDetailsPage({ params }: {
                 </section>
             ) : null}
             <section>
+                {canManage ? (
+                    <Link href={`/manage/theatre/${id}`}>
+                        <Button caption="Edit Theatre" className="w-54 mb-3" />
+                    </Link>
+                ): null}
                 <div className="px-7 flex flex-col gap-1">
                     <div>
                         {address ? <p className="text-slate-700">{address}</p> : null}
