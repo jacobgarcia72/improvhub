@@ -1,6 +1,6 @@
 'use server';
 
-import { DiscussionPost, InputOptionObject, Topic } from '@/types';
+import { Comment, DiscussionPost, InputOptionObject, Topic } from '@/types';
 import { getTeamsByUser } from './teams';
 import { getTheatre } from './theatres';
 import { getUser } from './users';
@@ -47,6 +47,17 @@ export async function getPosts(room: string, topicId: string): Promise<Discussio
         .from('posts')
         .select('*')
         .eq('room', room)
+        .eq('topic_id', topicId)
+        .order('date', { ascending: false })
+    return [...(data || []).map(camelCaseObject)];
+}
+
+export async function getComments(room: string, topicId: string, postId: string): Promise<Comment[]> {
+    const { data } = await supabaseAdmin
+        .from('comments')
+        .select('*')
+        .eq('room', room)
+        .eq('post_id', postId)
         .eq('topic_id', topicId);
     return [...(data || []).map(camelCaseObject)];
 }
@@ -92,7 +103,30 @@ export async function savePost(userId: string, room: string, topicId: string, po
         if (error) throw (error);
         return { success: true, message: 'Success', id };
     } catch (error) {
-        console.error(error)
+        console.error(error);
+        return { success: false, message: 'Something went wrong', id };
+    }
+}
+
+export async function saveComment(userId: string, room: string, topicId: string, postId: string, comment: string): Promise<{ success: boolean, message: string, id: string }> {
+    const id = `${new Date().getTime()}${getRandomNumberString(6)}`;
+    const newComment: Comment = {
+        room,
+        topicId,
+        postId,
+        comment,
+        id,
+        creator: userId,
+        date: new Date().toISOString()
+    }
+    try {
+        const { error } = await supabaseAdmin
+            .from('comments')
+            .insert(snakeCaseObject(newComment));
+        if (error) throw (error);
+        return { success: true, message: 'Success', id };
+    } catch (error) {
+        console.error(error);
         return { success: false, message: 'Something went wrong', id };
     }
 }

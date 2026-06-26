@@ -139,8 +139,18 @@ export interface DiscussionPost {
     room: string;
     topicId: string;
     post: string;
-    creator?: string;
-    date?: string;
+    creator: string;
+    date: string;
+}
+
+export interface Comment {
+    id: string;
+    room: string;
+    topicId: string;
+    postId: string;
+    comment: string;
+    creator: string;
+    date: string;
 }
 
 export type InputOptionObject = { id: string | number, text: string, image?: string };

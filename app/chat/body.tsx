@@ -12,7 +12,7 @@ export default async function MessagesBody({ user, room, topic }: { user: User, 
     if (!room) {
         return (
             <section>
-                <p>Select Chat Room</p>
+                <p>Select Discussion Board</p>
             </section>
         )
     } else if (topic) {
@@ -22,9 +22,9 @@ export default async function MessagesBody({ user, room, topic }: { user: User, 
                 {user ? (
                     <NewPostForm user={user} room={room} topic={topic} />
                 ): <Link href='/login'>Sign in to create post</Link>}
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-2 items-center">
                     <Suspense fallback={<Loader />}>
-                        {posts.map((p) => <PostCard key={p.id} post={p} />)}
+                        {posts.map((p) => <PostCard key={p.id} post={p} user={user} room={room} topic={topic} />)}
                         {posts.length === 0 && <p className="text-mist-600">No posts found.</p>}
                     </Suspense>
                 </div>
