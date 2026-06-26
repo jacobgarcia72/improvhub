@@ -950,3 +950,47 @@ export const getTheatresByZipcode = async (zipcode: string, miles?: number): Pro
     .in('zipcode', zipcodesInRange);
   return data ? data.map(camelCaseObject) as Theatre[] : [];
 }
+
+export async function saveTheatre(theatre: Theatre): Promise<string> {
+    const baseId = theatre.id;
+    let theatreId = baseId;
+    let counter = 1;
+    let existingTheatre = await getTheatre(theatreId);
+    while (existingTheatre) {
+        counter++;
+        theatreId = `${baseId}-${counter}`;
+        existingTheatre = await getTheatre(theatreId);
+    }
+    theatre.id = theatreId;
+    const { error: theatreInsertError } = await supabaseAdmin
+        .from('theatres')
+        .insert({
+            id: theatre.id,
+            name: theatre.name,
+            image: theatre.image,
+            address: theatre.address,
+            city: theatre.city,
+            state: theatre.state,
+            zipcode: theatre.zipcode,
+            website: theatre.website,
+        });
+    if (theatreInsertError) console.error(theatreInsertError);
+    return theatre.id;
+}
+
+export async function updateTheatre(theatre: Theatre): Promise<string> {
+    const { error } = await supabaseAdmin
+        .from('theatres')
+        .update({
+            name: theatre.name,
+            image: theatre.image,
+            address: theatre.address,
+            city: theatre.city,
+            state: theatre.state,
+            zipcode: theatre.zipcode,
+            website: theatre.website,
+        })
+        .eq('id', theatre.id);
+    if (error) console.error(error);
+    return theatre.id;
+}

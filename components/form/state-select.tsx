@@ -7,12 +7,14 @@ export default function StateSelect({
   name,
   label = 'State',
   onChange,
-  value
+  value,
+  required
 }: {
   name?: string,
   label?: string,
   onChange?: (value: string) => void,
-  value?: string
+  value?: string,
+  required?: boolean
 }) {
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     onChange?.(event.target.value);
@@ -27,6 +29,7 @@ export default function StateSelect({
         className="border border-gray-300 rounded px-3 py-2"
         onChange={handleChange}
         value={value}
+        required={required || false}
       >
         <option value=""></option>
         {states.map((state) => (

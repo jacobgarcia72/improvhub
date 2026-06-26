@@ -2,7 +2,7 @@
 import slugify from 'slugify';
 import { redirect } from "next/navigation";
 import { saveShow, updateShow, updateShowAdmins, updateShowing } from "@/lib/shows";
-import { Candence, Event, Showing, Role, ShowCastMember } from "@/types";
+import { Candence, Event, Showing, Role, ShowCastMember, Theatre } from "@/types";
 import { sortDates } from "@/lib/dates";
 import { capitalize, removeLeadingArticles } from "@/lib/helper-functions";
 import { Team } from '@/types';
@@ -10,7 +10,7 @@ import { destroyImage, uploadImage } from '@/lib/cloudinary';
 import { getTeam, getTeamMembers, leaveTeam as leaveTeamRecord, saveTeam, updateTeam as updateTeamRecord, updateTeamDetails as updateTeamDetailsRecord } from '@/lib/teams';
 import { getCurrentUserId, updateUser } from "@/lib/users";
 import { revalidatePath } from 'next/cache';
-import { getTheatre } from '@/lib/theatres';
+import { getTheatre, saveTheatre, updateTheatre } from '@/lib/theatres';
 
 export async function postShow(existingShow: Event | null = null, prevState: void | { message?: string }, formData: FormData) {
     const creatorId = await getCurrentUserId();
@@ -401,4 +401,54 @@ function getTheatresFromInputs(formData: FormData): string[] {
         addedTheatres.push(theatreId || theatreName);
     }
     return [...new Set(checkedTheatres.concat(addedTheatres))];
+}
+
+export async function postTheatre(existingTheatre: Theatre | null, prevState: void | { message?: string }, formData: FormData) {
+    const data = Object.fromEntries(formData.entries());
+
+    const name = (data.name as string)?.trim() || null;
+    if (!name) return { message: 'Theatre name is required' };
+
+    let city = (data.city as string).trim() || null;
+    if (city) city = capitalize(city);
+    if (!city) return { message: 'City is required' };
+
+    const state = (data.state as string)?.trim() || null;
+    if (!state) return { message: 'State is required' };
+
+    const zipcode = (data.zipcode as string).trim() || null;
+    if (!zipcode) return { message: 'ZIP Code is required' };
+
+    const address = (data.address as string).trim() || undefined;
+    const website = (data.website as string).trim() || undefined;
+    
+    const imageFile = data.image as File;
+    let imageUrl = existingTheatre?.image || '';
+    if (imageFile && imageFile.size) {
+        if (imageFile.size > 5 * 1024 * 1024) {
+            return { message: 'Image file size exceeds 5MB limit' };
+        }
+        try {
+            imageUrl = await uploadImage(imageFile, 'theatres');
+            if (existingTheatre?.image && existingTheatre.image !== imageUrl) {
+                await destroyImage(existingTheatre.image);
+            }
+        } catch {
+            throw new Error('Image upload failed');
+        }
+    }
+
+    const theatre: Theatre = {
+        id: existingTheatre?.id || slugify(removeLeadingArticles(name), { lower: true, trim: true }),
+        name,
+        image: imageUrl,
+        address,
+        city,
+        state,
+        zipcode,
+        website
+    }
+
+    const theatreId = existingTheatre ? await updateTheatre(theatre) : await saveTheatre(theatre);
+    redirect(`/theatres/${theatreId}`);
 }
