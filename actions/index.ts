@@ -66,7 +66,7 @@ export async function postShow(existingShow: Event | null = null, prevState: voi
 
     let city = (formData.get('city') as string)?.trim() || null;
     let state = (formData.get('state') as string)?.trim() || null;
-    const theatre = (formData.get('theatre') as string)?.trim() || null;
+    const theatre = (formData.get('theatre-id') as string)?.trim() || (formData.get('theatre') as string)?.trim() || null;
 
     if (theatre && (!city || !state)) {
         const matchingTheatre = await getTheatre(theatre);

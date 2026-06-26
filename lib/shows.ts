@@ -3,13 +3,14 @@
 
 import slugify from 'slugify';
 
-import { Event, Role, ShowCastMember, Showing, Theatre, User } from "@/types";
+import { Event, NewsFeedItem, Role, ShowCastMember, Showing, Theatre, User } from "@/types";
 import { camelCaseObject, removeLeadingArticles, snakeCaseObject } from './helper-functions';
 import { supabaseAdmin } from './supabase-server';
 import { getCitiesWithinRange } from './location';
 import { revalidatePath } from 'next/cache';
-import { dateMatchesRecurringSchedule, normalizeDateTime } from './dates';
+import { dateMatchesRecurringSchedule, getStartOfToday, normalizeDateTime } from './dates';
 import { getTeamsByUser } from './teams';
+import { createNewsFeedItem } from './news';
 
 export async function getShow(id: string): Promise<Event | null> {
     const { data, error } = await supabaseAdmin
@@ -38,16 +39,11 @@ export async function getShowsLookingForRole(role: Role | 'team', user: User): P
         tech: 'looking_for_tech',
         coach: null
     }[role];
-    const today = new Date();
-    const yyyy = today.getFullYear();
-    const mm = String(today.getMonth() + 1).padStart(2, '0');
-    const dd = String(today.getDate()).padStart(2, '0');
-    const startOfToday = `${yyyy}-${mm}-${dd} 00:00`;
     const { data } = await supabaseAdmin
         .from('showings')
         .select('*')
         .eq(key, true)
-        .gte('date_time', startOfToday);
+        .gte('date_time', getStartOfToday());
 
     const showDates: { [showId: string]: string[] } = { };
     const showIds: string[] = [];
@@ -83,12 +79,6 @@ export async function getShowsLookingForRole(role: Role | 'team', user: User): P
 }
 
 export async function getUpcomingShowsByCastMember(userId: string, roles: (Role | 'team')[] = ['player', 'musician', 'tech', 'director'], includeUsersTeams = false): Promise<{ show: Event, dateTimes: string[] }[]> {
-    const today = new Date();
-    const yyyy = today.getFullYear();
-    const mm = String(today.getMonth() + 1).padStart(2, '0');
-    const dd = String(today.getDate()).padStart(2, '0');
-    const startOfToday = `${yyyy}-${mm}-${dd} 00:00`;
-
     let teams: string[] = [];
     if (includeUsersTeams) {
         teams = (await getTeamsByUser(userId)).map((team) => team.id);
@@ -97,7 +87,7 @@ export async function getUpcomingShowsByCastMember(userId: string, roles: (Role 
         .from('showing_cast')
         .select('show_id, date_time')
         .or(`and(id.eq.${userId},role.in.(${roles.join(',')})),and(id.in.(${teams.join(',')}),role.eq.team)`)
-        .gte('date_time', startOfToday);
+        .gte('date_time', getStartOfToday());
 
     const showDates: { [showId: string]: string[] } = { };
     const showIds: string[] = [];
@@ -126,11 +116,6 @@ export async function getUpcomingShowsByCastMember(userId: string, roles: (Role 
 }
 
 export async function getUpcomingShowsByTheatre(theatre: Theatre): Promise<{ show: Event, dateTimes: string[] }[]> {
-    const today = new Date();
-    const yyyy = today.getFullYear();
-    const mm = String(today.getMonth() + 1).padStart(2, '0');
-    const dd = String(today.getDate()).padStart(2, '0');
-    const startOfToday = `${yyyy}-${mm}-${dd} 00:00`;
     const { data: showData } = await supabaseAdmin
         .from('shows')
         .select('id')
@@ -140,7 +125,7 @@ export async function getUpcomingShowsByTheatre(theatre: Theatre): Promise<{ sho
         .from('showings')
         .select('event_id, date_time')
         .in('event_id', showsAtTheatre.map(({ id }: { id: string }) => id))
-        .gte('date_time', startOfToday);
+        .gte('date_time', getStartOfToday());
 
     const showDates: { [showId: string]: string[] } = { };
     const showIds: string[] = [];
@@ -271,7 +256,7 @@ export async function setRsvpStatus(userId: string, showId: string, showDate: st
 
 
 export async function saveShow(show: Event, showings: Showing[] | null): Promise<string> {
-    const baseId = slugify(`${show.theatre ? removeLeadingArticles(show.theatre) + ' ' : ''}${removeLeadingArticles(show.title)}`, { lower: true, trim: true });
+    const baseId = slugify(`${show.theatre ? show.theatre + ' ' : ''}${removeLeadingArticles(show.title)}`, { lower: true, trim: true });
     let showId = baseId;
     let counter = 1;
     let existingShow = await getShow(showId);
@@ -316,7 +301,9 @@ export async function saveShow(show: Event, showings: Showing[] | null): Promise
             .insert(showingsToInsert);
         if (showingInsertError) throw showingInsertError;
     }
-
+    if (show.theatre) {
+        createNewsFeedItem(new NewsFeedItem('theatre', show.theatre, 'new_show', show.id));
+    }
     return show.id;
 }
 

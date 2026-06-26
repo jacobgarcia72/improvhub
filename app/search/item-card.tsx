@@ -36,7 +36,7 @@ export default async function ItemCard({
     return (
         <Border className="relative flex flex-col h-[300px] w-[212px] m-2 w-44 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
             {showFollowButton ? <div className="absolute right-2 top-2">
-                <FollowButton mini userId={userId || ''} followId={'id' in item && item.id ? item.id : ''} type="team" following={following} />
+                <FollowButton mini userId={userId || ''} followId={'id' in item && item.id ? item.id : ''} type={type === 'teams' ? 'team' : 'theatre'} following={following} />
             </div> : null}
             <Link href={link} className="h-full">
                 {image ? (

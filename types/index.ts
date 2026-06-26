@@ -153,5 +153,33 @@ export interface Comment {
     date: string;
 }
 
+export type NewsType = (
+    'new_show' | 
+    'cast_in_show' | 
+    'going_to_show' | 
+    'new_team' | 
+    'joined_team'
+);
+
+export class NewsFeedItem {
+    followType: Followee;
+    followId: string;
+    newsType: NewsType;
+    newsItemId: string;
+    date: string;
+    constructor(
+        followType: Followee, 
+        followId: string,
+        newsType: NewsType,
+        newsItemId: string
+    ) {
+        this.followType = followType;
+        this.followId = followId;
+        this.newsType = newsType;
+        this.newsItemId = newsItemId;
+        this.date = new Date().toISOString();
+    }
+}
+
 export type InputOptionObject = { id: string | number, text: string, image?: string };
 export type InputOption = string | InputOptionObject;

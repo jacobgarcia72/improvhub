@@ -1,13 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use server';
 
-import { Team, Role, TeamMember, User } from "@/types";
+import { Team, Role, TeamMember, User, NewsFeedItem } from "@/types";
 import { supabaseAdmin } from './supabase-server';
 import { getCitiesWithinRange } from "./location";
 import { camelCaseObject, getRandomElements, removeLeadingArticles, snakeCaseObject } from "./helper-functions";
 import { getCurrentUser, getCurrentUserId } from "./users";
 import { destroyImage } from "./cloudinary";
 import { revalidatePath } from "next/cache";
+import { createNewsFeedItem } from "./news";
 
 export async function getTeam(id: string): Promise<Team | null> {
     const { data, error } = await supabaseAdmin
@@ -246,8 +247,9 @@ export async function respondToTeamInvitation(teamId: string, userId: string, ro
             .eq('team', teamId)
             .eq('id', userId)
             .eq('role', role);
-        revalidatePath('/teams', 'layout')
         if (error) throw error;
+        createNewsFeedItem(new NewsFeedItem('user', userId, "joined_team", teamId));
+        revalidatePath('/teams', 'layout')
     } else {
         const { error } = await supabaseAdmin
             .from('team_members')
@@ -261,6 +263,10 @@ export async function respondToTeamInvitation(teamId: string, userId: string, ro
 }
 
 export async function saveTeam(team: Team, members: { name: string, id: string | null, role: Role }[]): Promise<string> {
+    const creatorId = await getCurrentUserId();
+    if (!creatorId) {
+        throw new Error('You must be logged in to continue')
+    }
     const baseId = team.id;
     let teamId = baseId;
     let counter = 1;
@@ -288,7 +294,6 @@ export async function saveTeam(team: Team, members: { name: string, id: string |
         });
     if (teamInsertError) console.error(teamInsertError);
 
-    const creatorId = await getCurrentUserId();
     const timestamp = new Date().toISOString();
     const memberRows = members.map(({ name, id, role }) => ({
         team: team.id,
@@ -305,6 +310,7 @@ export async function saveTeam(team: Team, members: { name: string, id: string |
             .insert(memberRows);
         if (memberInsertError) throw memberInsertError;
     }
+    createNewsFeedItem(new NewsFeedItem('user', creatorId, 'new_team', teamId));
     return team.id;
 }
 

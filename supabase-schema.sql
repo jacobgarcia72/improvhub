@@ -158,6 +158,14 @@ create table if not exists comments (
   foreign key (room, topic_id, post_id) references posts(room, topic_id, id) on delete cascade
 );
 
+create table if not exists news (
+  follow_type text not null,
+  follow_id text not null,
+  news_type text not null,
+  news_item_id text not null,
+  date text not null
+);
+
 -- Grant privileges on sessions table
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.sessions TO service_role;
 
@@ -174,6 +182,7 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.user_roles TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.topics TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.posts TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.comments TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.news TO service_role;
 
 -- Grant sequence privileges for auto-incrementing IDs (if used)
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO service_role;
