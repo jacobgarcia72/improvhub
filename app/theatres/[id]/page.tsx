@@ -39,11 +39,6 @@ export default async function TheatreDetailsPage({ params }: {
                 </section>
             ) : null}
             <section>
-                {canManage ? (
-                    <Link href={`/manage/theatre/${id}`}>
-                        <Button caption="Edit Theatre" className="w-54 mb-3" />
-                    </Link>
-                ): null}
                 <div className="px-7 flex flex-col gap-1">
                     <div>
                         {address ? <p className="text-slate-700">{address}</p> : null}
@@ -51,6 +46,11 @@ export default async function TheatreDetailsPage({ params }: {
                     </div>
                     {website && <a className="link" target="_blank" href={website}>{website}</a>}
                 </div>
+                {canManage ? (
+                    <Link href={`/manage/theatre/${id}`}>
+                        <Button caption="Edit Theatre" className="w-54 mt-3" />
+                    </Link>
+                ): null}
             </section>
             <UpcomingShows theatre={theatre} />
         </Suspense>
