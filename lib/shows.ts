@@ -10,7 +10,6 @@ import { getCitiesWithinRange } from './location';
 import { revalidatePath } from 'next/cache';
 import { dateMatchesRecurringSchedule, normalizeDateTime } from './dates';
 import { getTeamsByUser } from './teams';
-import { getTheatre } from './theatres';
 
 export async function getShow(id: string): Promise<Event | null> {
     const { data, error } = await supabaseAdmin

@@ -3,7 +3,7 @@
 
 import { AbbrevUser, Followee, User } from "@/types";
 import { supabaseAdmin } from "./supabase-server";
-import { verifyAuth } from "./auth";
+import { destroySession, verifyAuth } from "./auth";
 import { revalidatePath } from "next/cache";
 import { camelCaseObject, snakeCaseObject } from "./helper-functions";
 import { destroyImage } from "./cloudinary";
@@ -227,4 +227,19 @@ export async function saveUser(user: User, userRoles?: { [role: string]: boolean
         .insert({ ...userRoles, user_id: user.id });
         if (roleError) throw roleError;
     }
+}
+
+export async function deleteUser(user: User): Promise<void> {
+    if (user.image) {
+        await destroyImage(user.image);
+    }
+    await supabaseAdmin
+        .from('users')
+        .delete()
+        .eq('id', user.id);
+    await supabaseAdmin
+        .from('user_roles')
+        .delete()
+        .eq('user_id', user.id);
+    await destroySession();
 }

@@ -16,6 +16,7 @@ import WebsiteOptions from "./website-options";
 import BioOptions from "./bio-options";
 import { pluralize } from "@/lib/helper-functions";
 import UpcomingShows from "@/components/upcoming-shows";
+import DeleteAccount from "./delete-account";
 
 function LayoutCard({
     children, className, header
@@ -139,12 +140,13 @@ export default async function UserProfilePage({ params }: { params: Promise<{use
                 ) : user.website && <a className="link" target="_blank" href={user.website}>{user.website}</a>}
             </LayoutCard>
             <LayoutCard>
-                {isCurrentUser && <div className="w-full flex flex-row justify-center">
+                {isCurrentUser && <div className="w-full flex flex-col items-center">
                     <Button
                         caption="Sign Out"
                         onClick={logout}
                         style="link"
                     />
+                    <DeleteAccount user={user} />
                 </div>}
             </LayoutCard>
         </Suspense>

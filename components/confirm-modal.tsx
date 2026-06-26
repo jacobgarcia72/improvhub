@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Button from "./form/button";
 
-export default function ConfirmModal({ open, title, description, onConfirm, onCancel, confirmLabel = 'Confirm', cancelLabel = 'Cancel' }: {
+export default function ConfirmModal({ open, title, description, onConfirm, onCancel, confirmLabel = 'Confirm', cancelLabel = 'Cancel', danger }: {
     open: boolean,
     title?: string,
     description?: string,
@@ -11,6 +11,7 @@ export default function ConfirmModal({ open, title, description, onConfirm, onCa
     onCancel: () => void,
     confirmLabel?: string,
     cancelLabel?: string,
+    danger?: boolean
 }) {
     const [disabled, setDisabled] = useState(false);
     if (!open) return null;
@@ -24,10 +25,15 @@ export default function ConfirmModal({ open, title, description, onConfirm, onCa
                 {description ? <p className="text-sm text-gray-700 mb-4">{description}</p> : null}
                 <div className="flex justify-end">
                     <Button disabled={disabled} style="link" onClick={onCancel} caption={cancelLabel} />
-                    <Button disabled={disabled} onClick={() => {
-                        setDisabled(true);
-                        onConfirm();
-                    }} caption={confirmLabel} />
+                    <Button
+                        disabled={disabled}
+                        onClick={() => {
+                            setDisabled(true);
+                            onConfirm();
+                        }}
+                        caption={confirmLabel}
+                        className={danger ? 'red' : ''}
+                    />
                 </div>
             </div>
         </div>
