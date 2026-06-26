@@ -2,13 +2,15 @@ import { appName } from "@/lib/app-info";
 import { Metadata } from "next";
 import Link from "next/link";
 import Button from "@/components/form/button";
-import { getCurrentUserId } from "@/lib/users";
+import { getCurrentUserId, getUserRoles } from "@/lib/users";
 import { getShowsByAdmin, getUpcomingShowsByCastMember } from "@/lib/shows";
 import MiniCard from "@/components/mini-card";
-import { Event } from "@/types";
+import { Event, Role } from "@/types";
 import UserShows from "@/components/upcoming-shows";
 import { Suspense } from "react";
 import Loader from "@/components/loader";
+import ShowsLookingFor from "./shows-looking-for";
+import { getTeamsByUser } from "@/lib/teams";
 
 
 export const metadata: Metadata = {
@@ -29,6 +31,8 @@ export default async function ShowsPage() {
     showsByDate.sort((a, b) => {
         return new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime();
     });
+    const roles = userId ? await getUserRoles(userId) : null;
+    const isOnATeam = userId ? (await getTeamsByUser(userId)).length > 0 : null;
     return (
         <>
             <section className="flex flex row gap-2">
@@ -52,6 +56,12 @@ export default async function ShowsPage() {
             <Suspense fallback={<Loader />}>
                 {userId ? <UserShows includeTeams label="Shows I'm In" id={userId} /> : null}
             </Suspense>
+            {roles ? Object.keys(roles).filter((key) => roles[key]).map((role) => (
+                <ShowsLookingFor key={role} role={role as Role} limit={24} />
+            )) : null}
+            {isOnATeam ? (
+                <ShowsLookingFor key='team' role='team' limit={24} />
+            ) : null}
         </>
     )
 }

@@ -29,6 +29,52 @@ export async function getShowsByAdmin(userId: string): Promise<Event[]> {
     return (data || []).map(camelCaseObject) as Event[];
 }
 
+export async function getShowsLookingForRole(role: Role | 'team'): Promise<{ show: Event, dateTimes: string[] }[]> {
+    const key = {
+        team: 'looking_for_teams',
+        player: 'looking_for_players',
+        director: 'looking_for_directors',
+        musician: 'looking_for_musician',
+        tech: 'looking_for_tech',
+        coach: null
+    }[role];
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    const startOfToday = `${yyyy}-${mm}-${dd} 00:00`;
+    const { data } = await supabaseAdmin
+        .from('showings')
+        .select('*')
+        .eq(key, true)
+        .gte('date_time', startOfToday);
+
+    const showDates: { [showId: string]: string[] } = { };
+    const showIds: string[] = [];
+
+    (data || []).forEach(({ event_id, date_time }: { event_id: string; date_time: string }) => {
+        if (!showDates[event_id]) {
+            showDates[event_id] = [];
+            showIds.push(event_id);
+        }
+        const dateTime = normalizeDateTime(date_time);
+        if (!showDates[event_id].includes(dateTime)) {
+            showDates[event_id].push(dateTime);
+        }
+    });
+
+    const res: { show: Event, dateTimes: string[] }[] = [];
+
+    for (let i = 0; i < showIds.length; i++) {
+        const showId = showIds[i];
+        const show = await getShow(showId);
+        if (show) {
+            res.push({ show, dateTimes: showDates[showId] });
+        }
+    }
+    return res;
+}
+
 export async function getUpcomingShowsByCastMember(userId: string, roles: (Role | 'team')[] = ['player', 'musician', 'tech', 'director'], includeUsersTeams = false): Promise<{ show: Event, dateTimes: string[] }[]> {
     const today = new Date();
     const yyyy = today.getFullYear();

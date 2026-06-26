@@ -30,7 +30,6 @@ export default function NewCommentForm({ user, room, topic, postId }: { user: Us
                 <div
                     onClick={() => {
                         setActive(true);
-                        console.log({id})
                         setTimeout(() => {
                             document.querySelector<HTMLTextAreaElement>(`#${id} #comment`)?.focus();
                         }, 0);
