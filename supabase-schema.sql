@@ -164,7 +164,7 @@ create table if not exists news (
   news_type text not null,
   news_item_id text not null,
   date text not null,
-  id text primary key AUTOINCREMENT
+  id text primary key
 );
 
 -- Grant privileges on sessions table

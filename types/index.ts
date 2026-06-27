@@ -179,7 +179,7 @@ export class NewsFeedItem {
         this.newsType = newsType;
         this.newsItemId = newsItemId;
         this.date = new Date().toISOString();
-        this.id = ''; // assigned by supabase
+        this.id = `${followType}-${followId}-${newsType}-${newsItemId}`;
     }
 }
 
