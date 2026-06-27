@@ -167,6 +167,7 @@ export class NewsFeedItem {
     newsType: NewsType;
     newsItemId: string;
     date: string;
+    id: string;
     constructor(
         followType: Followee, 
         followId: string,
@@ -178,6 +179,7 @@ export class NewsFeedItem {
         this.newsType = newsType;
         this.newsItemId = newsItemId;
         this.date = new Date().toISOString();
+        this.id = ''; // assigned by supabase
     }
 }
 

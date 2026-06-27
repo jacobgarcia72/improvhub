@@ -163,7 +163,8 @@ create table if not exists news (
   follow_id text not null,
   news_type text not null,
   news_item_id text not null,
-  date text not null
+  date text not null,
+  id text primary key AUTOINCREMENT
 );
 
 -- Grant privileges on sessions table
