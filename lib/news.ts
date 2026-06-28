@@ -1,4 +1,4 @@
-import { Follow, NewsFeedItem } from "@/types";
+import { Follow, Followee, NewsFeedItem, NewsType } from "@/types";
 import { supabaseAdmin } from "./supabase-server";
 import { camelCaseObject, snakeCaseObject } from "./helper-functions";
 import { getStartOfToday } from "./dates";
@@ -33,8 +33,21 @@ export const getNewsFeedItems = async (userId: string): Promise<NewsFeedItem[]> 
         .sort((a: NewsFeedItem, b: NewsFeedItem) => b.date.localeCompare(a.date)) as NewsFeedItem[];
 }
 
-export const createNewsFeedItem = async (newsFeedItem: NewsFeedItem): Promise<void> => {
+export const createNewsFeedItem = async (followType: Followee, followId: string, newsType: NewsType, newsItemId: string, otherData?: string): Promise<void> => {
+    const newsFeedItem = new NewsFeedItem(followType, followId, newsType, newsItemId, otherData || null);
     await supabaseAdmin
         .from('news')
         .insert(snakeCaseObject(newsFeedItem));
+}
+
+export const deleteNewsFeedItem = async (followType: Followee, followId: string, newsType: NewsType, newsItemId: string, otherData?: string): Promise<void> => {
+    const { data, error } = await supabaseAdmin
+        .from('news')
+        .delete()
+        .eq('follow_type', followType)
+        .eq('follow_id', followId)
+        .eq('news_type', newsType)
+        .eq('news_item_id', newsItemId)
+        .eq('other_data', otherData || null);
+    console.log({ data, error })
 }

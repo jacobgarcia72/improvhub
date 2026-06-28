@@ -1,3 +1,4 @@
+import { formatDateForDisplay, formatDateTimeForDisplay } from "@/lib/dates";
 import { getNewsFeedItems } from "@/lib/news"
 import { optimizeImage } from "@/lib/optimize-image";
 import { getShow } from "@/lib/shows";
@@ -48,7 +49,7 @@ export default async function FeedPage() {
                         const showGoer = await getUserAbbreviated(item.followId);
                         const showGoingTo = await getShow(item.newsItemId);
                         if (!showGoer || !showGoingTo) return null;
-                        content = <p><Link className="link" href={`/profile/${showGoer.id}`}>{showGoer.name}</Link> is going to <Link className="link" href={`/shows/${showGoingTo.id}`}>{showGoingTo.title}</Link>.</p>
+                        content = <p><Link className="link" href={`/profile/${showGoer.id}`}>{showGoer.name}</Link> is going to <Link className="link" href={`/shows/${showGoingTo.id}/${item.otherData}`}>{showGoingTo.title}</Link>{item.otherData ? ` on ${formatDateForDisplay(item.otherData.split(' ')[0])}` : ''}.</p>
                         image = showGoer.image || showGoingTo.image;
                         break;
                     case 'new_team':
@@ -62,17 +63,18 @@ export default async function FeedPage() {
                         const teamMember = await getUserAbbreviated(item.followId);
                         const teamJoined = await getTeam(item.newsItemId);
                         if (!teamMember || !teamJoined) return null;
-                        content = <p><Link className="link" href={`/profile/${teamMember.id}`}>{teamMember.name}</Link> has joined a team! <Link className="link" href={`/teams/${teamJoined.id}`}>{teamJoined.name}</Link></p>
+                        content = <p><Link className="link" href={`/profile/${teamMember.id}`}>{teamMember.name}</Link> is now a team member of <Link className="link" href={`/teams/${teamJoined.id}`}>{teamJoined.name}</Link>!</p>
                         image = teamMember.image || teamJoined.image;
                         break;
                     default:
                         return;
                 }
                 return (
-                    <div key={i} className="flex flex-row gap-2 items-center">
+                    <div key={i} className="flex flex-row gap-2 items-center mb-1">
                         {getImage(image)}
-                        <div className="pb-2">
+                        <div className="pb-1">
                             {content}
+                            <p className="ml-1 text-xs text-mist-500">{formatDateTimeForDisplay(item.date)}</p>
                         </div>
                     </div>
                 )

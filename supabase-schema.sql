@@ -159,12 +159,13 @@ create table if not exists comments (
 );
 
 create table if not exists news (
+  id text primary key,
+  date text not null,
   follow_type text not null,
   follow_id text not null,
   news_type text not null,
   news_item_id text not null,
-  date text not null,
-  id text primary key
+  other_data text
 );
 
 -- Grant privileges on sessions table

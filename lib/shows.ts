@@ -3,14 +3,14 @@
 
 import slugify from 'slugify';
 
-import { Event, NewsFeedItem, Role, ShowCastMember, Showing, Theatre, User } from "@/types";
+import { Event, Role, ShowCastMember, Showing, Theatre, User } from "@/types";
 import { camelCaseObject, removeLeadingArticles, snakeCaseObject } from './helper-functions';
 import { supabaseAdmin } from './supabase-server';
 import { getCitiesWithinRange } from './location';
 import { revalidatePath } from 'next/cache';
 import { dateMatchesRecurringSchedule, getStartOfToday, normalizeDateTime } from './dates';
 import { getTeamsByUser } from './teams';
-import { createNewsFeedItem } from './news';
+import { createNewsFeedItem, deleteNewsFeedItem } from './news';
 
 export async function getShow(id: string): Promise<Event | null> {
     const { data, error } = await supabaseAdmin
@@ -251,7 +251,12 @@ export async function setRsvpStatus(userId: string, showId: string, showDate: st
             date_time: showDate,
             status: value
         });
-    revalidatePath(`/shows/${showId}/${showDate}/`)
+    revalidatePath(`/shows/${showId}/${showDate}/`);
+    if (value === 'g') {
+        createNewsFeedItem('user', userId, 'going_to_show', showId, showDate);
+    } else {
+        deleteNewsFeedItem('user', userId, 'going_to_show', showId, showDate);
+    }
 }
 
 
@@ -302,7 +307,7 @@ export async function saveShow(show: Event, showings: Showing[] | null): Promise
         if (showingInsertError) throw showingInsertError;
     }
     if (show.theatre) {
-        createNewsFeedItem(new NewsFeedItem('theatre', show.theatre, 'new_show', show.id));
+        createNewsFeedItem('theatre', show.theatre, 'new_show', show.id);
     }
     return show.id;
 }

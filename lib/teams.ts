@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use server';
 
-import { Team, Role, TeamMember, User, NewsFeedItem } from "@/types";
+import { Team, Role, TeamMember, User } from "@/types";
 import { supabaseAdmin } from './supabase-server';
 import { getCitiesWithinRange } from "./location";
 import { camelCaseObject, getRandomElements, removeLeadingArticles, snakeCaseObject } from "./helper-functions";
@@ -248,7 +248,7 @@ export async function respondToTeamInvitation(teamId: string, userId: string, ro
             .eq('id', userId)
             .eq('role', role);
         if (error) throw error;
-        createNewsFeedItem(new NewsFeedItem('user', userId, "joined_team", teamId));
+        createNewsFeedItem('user', userId, "joined_team", teamId);
         revalidatePath('/teams', 'layout')
     } else {
         const { error } = await supabaseAdmin
@@ -310,7 +310,7 @@ export async function saveTeam(team: Team, members: { name: string, id: string |
             .insert(memberRows);
         if (memberInsertError) throw memberInsertError;
     }
-    createNewsFeedItem(new NewsFeedItem('user', creatorId, 'new_team', teamId));
+    createNewsFeedItem('user', creatorId, 'new_team', teamId);
     return team.id;
 }
 

@@ -162,24 +162,27 @@ export type NewsType = (
 );
 
 export class NewsFeedItem {
+    id: string;
+    date: string;
     followType: Followee;
     followId: string;
     newsType: NewsType;
     newsItemId: string;
-    date: string;
-    id: string;
+    otherData: string | null;
     constructor(
         followType: Followee, 
         followId: string,
         newsType: NewsType,
-        newsItemId: string
+        newsItemId: string,
+        otherData?: string | null
     ) {
+        this.date = new Date().toISOString();
+        this.id = `${followType}-${followId}-${newsType}-${newsItemId}`;
         this.followType = followType;
         this.followId = followId;
         this.newsType = newsType;
         this.newsItemId = newsItemId;
-        this.date = new Date().toISOString();
-        this.id = `${followType}-${followId}-${newsType}-${newsItemId}`;
+        this.otherData = otherData || null;
     }
 }
 

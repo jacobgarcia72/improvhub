@@ -23,7 +23,7 @@ export default function RSVP({ showId, showDate, userId, rsvp }: {
                 name="rsvp"
                 value={rsvp || ''}
                 disabled={pending}
-                className="w-full border border-gray-300 rounded px-3 py-2"
+                className="cursor-pointer w-full border border-gray-300 rounded px-3 py-2"
                 onChange={(e) => handleRsvp(e.target.value)}
             >
                 <option value="">RSVP</option>
