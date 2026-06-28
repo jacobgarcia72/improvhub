@@ -11,10 +11,11 @@ export default async function MediumCard({ item, type, dateTime }: {
     type: string,
     dateTime?: string
 }) {
+    const theatre = 'theatre' in item && item.theatre && (await getTheatre(item.theatre)) || null;
     const image = (
         item.image && optimizeImage(item.image, 600, 600, 80, true)
     ) || (
-            'theatre' in item && item.theatre && (await getTheatre(item.theatre))?.image
+            theatre?.image
     );
     let name = 'name' in item ? item.name : 'title' in item ? item.title : '';
     if (!name && 'firstName' in item && 'lastName' in item) name = `${item.firstName} ${item.lastName}`;
@@ -39,8 +40,8 @@ export default async function MediumCard({ item, type, dateTime }: {
                         {'description' in item && item.description ? (
                             <p>{item.description.replaceAll('<br>', '\n')}</p>
                         ) : null}
-                        {'theatre' in item && item.theatre ? (
-                            <p>{item.theatre}</p>
+                        {theatre ? (
+                            <p>{theatre.name}</p>
                         ) : null}
                         {'city' in item && item.city && 'state' in item && item.state ? (
                             <p>{`${item.city}, ${item.state}`}</p>

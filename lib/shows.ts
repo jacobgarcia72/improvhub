@@ -253,9 +253,9 @@ export async function setRsvpStatus(userId: string, showId: string, showDate: st
         });
     revalidatePath(`/shows/${showId}/${showDate}/`);
     if (value === 'g') {
-        createNewsFeedItem('user', userId, 'going_to_show', showId, showDate);
+        await createNewsFeedItem('user', userId, 'going_to_show', showId, showDate);
     } else {
-        deleteNewsFeedItem('user', userId, 'going_to_show', showId, showDate);
+        await deleteNewsFeedItem('user', userId, 'going_to_show', showId, showDate);
     }
 }
 
@@ -307,7 +307,7 @@ export async function saveShow(show: Event, showings: Showing[] | null): Promise
         if (showingInsertError) throw showingInsertError;
     }
     if (show.theatre) {
-        createNewsFeedItem('theatre', show.theatre, 'new_show', show.id);
+        await createNewsFeedItem('theatre', show.theatre, 'new_show', show.id, null, show.admins[0]);
     }
     return show.id;
 }
@@ -414,6 +414,9 @@ export async function updateShowing(showId: string, dateTime: string, updates: P
             show_id: showId,
             date_time: normalizedDateTime
         }));
+        const currentCast = await getShowCast(showId, normalizedDateTime);
+        const newCastMembers = cast.filter((member) => !currentCast.find(({ id, role}) => id === member.id && role === member.role));
+        const removedCastMembers = currentCast.filter((member) => !cast.find(({ id, role}) => id === member.id && role === member.role));
         await supabaseAdmin
             .from('showing_cast')
             .delete()
@@ -422,6 +425,14 @@ export async function updateShowing(showId: string, dateTime: string, updates: P
         await supabaseAdmin
             .from('showing_cast')
             .upsert(castRows);
+        for (let i = 0; i < newCastMembers.length; i++) {
+            const { id, role } = newCastMembers[i];
+            if (id) await createNewsFeedItem(role === 'team' ? 'team' : 'user', id, 'cast_in_show', showId, normalizedDateTime, role);
+        }
+        for (let i = 0; i < removedCastMembers.length; i++) {
+            const { id, role } = removedCastMembers[i];
+            if (id) await deleteNewsFeedItem(role === 'team' ? 'team' : 'user', id, 'cast_in_show', showId, normalizedDateTime, role);
+        }
     }
     return true;
 }
@@ -436,6 +447,7 @@ export async function removeCastMember(showId: string, dateTime: string, userId:
         .eq('id', userId)
         .eq('role', role);
     revalidatePath(`/shows/${showId}/${dateTime}/`, 'layout');
+    await deleteNewsFeedItem(role === 'team' ? 'team' : 'user', userId, 'cast_in_show', showId, normalizedDateTime, role);
 }
 
 export async function deleteShowing(eventId: string, dateTime: string): Promise<void> {

@@ -1,3 +1,5 @@
+import { getRandomNumberString } from "@/lib/helper-functions";
+
 export interface Theatre {
     id: string;
     name: string;
@@ -154,6 +156,7 @@ export interface Comment {
 }
 
 export type NewsType = (
+    'new_theatre' |
     'new_show' | 
     'cast_in_show' | 
     'going_to_show' | 
@@ -164,24 +167,27 @@ export type NewsType = (
 export class NewsFeedItem {
     id: string;
     date: string;
-    followType: Followee;
+    followType: Followee | 'city';
     followId: string;
     newsType: NewsType;
     newsItemId: string;
+    newsItemDate: string | null;
     otherData: string | null;
     constructor(
-        followType: Followee, 
+        followType: Followee | 'city', 
         followId: string,
         newsType: NewsType,
         newsItemId: string,
+        newsItemDate?: string | null,
         otherData?: string | null
     ) {
         this.date = new Date().toISOString();
-        this.id = `${followType}-${followId}-${newsType}-${newsItemId}`;
+        this.id = `${followType}-${followId}-${newsType}-${newsItemId}-${getRandomNumberString(10)}`;
         this.followType = followType;
         this.followId = followId;
         this.newsType = newsType;
         this.newsItemId = newsItemId;
+        this.newsItemDate = newsItemDate || null;
         this.otherData = otherData || null;
     }
 }

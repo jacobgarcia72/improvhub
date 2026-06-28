@@ -165,6 +165,7 @@ create table if not exists news (
   follow_id text not null,
   news_type text not null,
   news_item_id text not null,
+  news_item_date text,
   other_data text
 );
 

@@ -2,6 +2,7 @@ import { Follow, Followee, NewsFeedItem, NewsType } from "@/types";
 import { supabaseAdmin } from "./supabase-server";
 import { camelCaseObject, snakeCaseObject } from "./helper-functions";
 import { getStartOfToday } from "./dates";
+import { getUser } from "./users";
 
 export const getNewsFeedItems = async (userId: string): Promise<NewsFeedItem[]> => {
     const { data } = await supabaseAdmin
@@ -22,32 +23,53 @@ export const getNewsFeedItems = async (userId: string): Promise<NewsFeedItem[]> 
         .filter((follow) => follow.type === 'theatre' && follow.following)
         .map((follow) => follow.followId);
 
+    const user = await getUser(userId);
+    const city = user?.city;
+    const state = user?.state;
+
+    const followQueries: string[] = [];
+
+    if (usersFollowed.length) {
+        followQueries.push(`and(follow_type.eq.user,follow_id.in.(${usersFollowed.join(',')}))`);
+    }
+    if (teamsFollowed.length) {
+        followQueries.push(`and(follow_type.eq.team,follow_id.in.(${teamsFollowed.join(',')}))`);
+    }
+    if (theatresFollowed.length) {
+        followQueries.push(`and(follow_type.eq.theatre,follow_id.in.(${theatresFollowed.join(',')}))`);
+    }
+    if (city && state) {
+        followQueries.push(`and(follow_type.eq.city,follow_id.ilike.${`${city} ${state}`})`);
+    }
+    if (!followQueries.length) {
+        return [];
+    }
     const { data: newsData } = await supabaseAdmin
         .from('news')
         .select('*')
-        .or(`and(follow_type.eq.user,follow_id.in.(${usersFollowed.join(',')})),and(follow_type.eq.team,follow_id.in.(${teamsFollowed.join(',')})),and(follow_type.eq.theatre,follow_id.in.(${theatresFollowed.join(',')}))`)
+        .or(followQueries.join(','))
         .gte('date', getStartOfToday());
 
-    return (newsData || [])
+    return (newsData || []) 
         .map(camelCaseObject)
         .sort((a: NewsFeedItem, b: NewsFeedItem) => b.date.localeCompare(a.date)) as NewsFeedItem[];
 }
 
-export const createNewsFeedItem = async (followType: Followee, followId: string, newsType: NewsType, newsItemId: string, otherData?: string): Promise<void> => {
-    const newsFeedItem = new NewsFeedItem(followType, followId, newsType, newsItemId, otherData || null);
+export const createNewsFeedItem = async (followType: Followee | 'city', followId: string, newsType: NewsType, newsItemId: string, newsItemDate?: string | null, otherData?: string | null): Promise<void> => {
+    const newsFeedItem = new NewsFeedItem(followType, followId, newsType, newsItemId, newsItemDate, otherData || null);
     await supabaseAdmin
         .from('news')
         .insert(snakeCaseObject(newsFeedItem));
 }
 
-export const deleteNewsFeedItem = async (followType: Followee, followId: string, newsType: NewsType, newsItemId: string, otherData?: string): Promise<void> => {
-    const { data, error } = await supabaseAdmin
+export const deleteNewsFeedItem = async (followType: Followee | 'city', followId: string, newsType: NewsType, newsItemId: string, newsItemDate?: string | null, otherData?: string | null): Promise<void> => {
+    await supabaseAdmin
         .from('news')
         .delete()
         .eq('follow_type', followType)
         .eq('follow_id', followId)
         .eq('news_type', newsType)
         .eq('news_item_id', newsItemId)
+        .eq('news_item_date', newsItemDate || null)
         .eq('other_data', otherData || null);
-    console.log({ data, error })
 }

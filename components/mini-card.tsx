@@ -4,8 +4,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { Border } from "./border";
 import { formatDateTimeForDisplay } from "@/lib/dates";
+import { getTheatre } from "@/lib/theatres";
 
-export default function MiniCard({ item, type, dateTime, includeDescription }: {
+export default async function MiniCard({ item, type, dateTime, includeDescription }: {
     item: Event | Team | User,
     type: string,
     dateTime?: string,
@@ -38,7 +39,7 @@ export default function MiniCard({ item, type, dateTime, includeDescription }: {
                             <p>{item.description.replaceAll('<br>', '\n')}</p>
                         ) : null}
                         {'theatre' in item && item.theatre ? (
-                            <p>{item.theatre}</p>
+                            <p>{(await getTheatre(item.theatre))?.name}</p>
                         ) : null}
                         {'city' in item && item.city && 'state' in item && item.state ? (
                             <p>{`${item.city}, ${item.state}`}</p>

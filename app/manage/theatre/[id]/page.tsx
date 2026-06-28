@@ -13,12 +13,12 @@ export default async function ManageTheatre({ params }: Props) {
     if (!theatre) notFound();
 
     const userId = await getCurrentUserId();
-    const canManage = !theatre.admins?.length || (
-        userId && theatre.admins.includes(userId)
+    const canManage = userId && (
+        !theatre.admins?.length || theatre.admins.includes(userId)
     );
     if (!canManage) notFound();
 
     return (
-        <TheatreForm theatre={theatre} />
+        <TheatreForm theatre={theatre} userId={userId} />
     )
 }

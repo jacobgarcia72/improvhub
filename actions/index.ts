@@ -403,7 +403,7 @@ function getTheatresFromInputs(formData: FormData): string[] {
     return [...new Set(checkedTheatres.concat(addedTheatres))];
 }
 
-export async function postTheatre(existingTheatre: Theatre | null, prevState: void | { message?: string }, formData: FormData) {
+export async function postTheatre(existingTheatre: Theatre | null, userId: string, prevState: void | { message?: string }, formData: FormData) {
     const data = Object.fromEntries(formData.entries());
 
     const name = (data.name as string)?.trim() || null;
@@ -449,6 +449,6 @@ export async function postTheatre(existingTheatre: Theatre | null, prevState: vo
         website
     }
 
-    const theatreId = existingTheatre ? await updateTheatre(theatre) : await saveTheatre(theatre);
+    const theatreId = existingTheatre ? await updateTheatre(theatre) : await saveTheatre(theatre, userId);
     redirect(`/theatres/${theatreId}`);
 }

@@ -7,9 +7,11 @@ import StateSelect from "./state-select";
 import { redirect } from "next/navigation";
 
 export default async function TheatreForm({
-    theatre
+    theatre,
+    userId
 } : {
-    theatre?: Theatre;
+    theatre?: Theatre,
+    userId: string
 }) {
     const handleCancel = async () => {
         'use server';
@@ -17,7 +19,7 @@ export default async function TheatreForm({
     }
     return (
         <section className="medium-section">
-            <Form onSubmit={postTheatre.bind(null, theatre || null)} cancel={handleCancel}>
+            <Form onSubmit={postTheatre.bind(null, theatre || null, userId)} cancel={handleCancel}>
                 <Input required name="name" label="Name" value={theatre?.name} />
                 <ImagePicker currentImage={theatre?.image} label="Logo" square />
                 <Input label="Address"

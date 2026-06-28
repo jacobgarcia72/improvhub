@@ -3,6 +3,7 @@ import { abbreviateState, getZipCodesWithinRange } from "./location";
 import { supabaseAdmin } from './supabase-server';
 import { camelCaseObject, removeLeadingArticles } from "./helper-functions";
 import slugify from 'slugify';
+import { createNewsFeedItem } from "./news";
 
 const theatres: Partial<Theatre>[] = [
   {
@@ -951,7 +952,7 @@ export const getTheatresByZipcode = async (zipcode: string, miles?: number): Pro
   return data ? data.map(camelCaseObject) as Theatre[] : [];
 }
 
-export async function saveTheatre(theatre: Theatre): Promise<string> {
+export async function saveTheatre(theatre: Theatre, userId: string): Promise<string> {
     const baseId = theatre.id;
     let theatreId = baseId;
     let counter = 1;
@@ -974,7 +975,11 @@ export async function saveTheatre(theatre: Theatre): Promise<string> {
             zipcode: theatre.zipcode,
             website: theatre.website,
         });
-    if (theatreInsertError) console.error(theatreInsertError);
+    if (theatreInsertError) {
+      console.error(theatreInsertError);
+    } else if (theatre.city && theatre.state) {
+      createNewsFeedItem('city', `${theatre.city} ${theatre.state}`, 'new_theatre', theatre.id, null, userId);
+    }
     return theatre.id;
 }
 
