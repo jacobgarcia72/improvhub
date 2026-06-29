@@ -26,6 +26,7 @@ export default async function FeedPage() {
     }
     return (
         <section>
+            <h1 className="text-xl mb-4">News Feed</h1>
             {await Promise.all(newsFeedItems.map(async (item, i) => {
                 let content: React.ReactNode;
                 let image: string | null | undefined = null;
@@ -36,7 +37,7 @@ export default async function FeedPage() {
                         const theatreCreator = otherData ? await getUserAbbreviated(otherData) : null;
                         const city = capitalize(followId.split(' ').slice(0, -1).join(' '));
                         if (!newTheatre || !theatreCreator || !city) return null;
-                        content = <p>{city} has a page for a new theatre, <Link className="link" href={`/theatres/${newTheatre.id}`}>{newTheatre.name}</Link>, created by <Link className="link" href={`/profile/${theatreCreator.id}`}>{theatreCreator.name}</Link>.</p>
+                        content = <p><Link className="link" href={`/theatres/${newTheatre.id}`}>{newTheatre.name}</Link> has just landed in {city}! Theatre page created by <Link className="link" href={`/profile/${theatreCreator.id}`}>{theatreCreator.name}</Link>.</p>
                         image = newTheatre.image;
                         break;
                     case 'new_show':
@@ -86,7 +87,7 @@ export default async function FeedPage() {
                         return;
                 }
                 return (
-                    <div key={i} className="flex flex-row gap-2 items-center mb-3">
+                    <div key={i} className="flex flex-row gap-2 items-center mb-4">
                         {getImage(image)}
                         <div className="pb-1">
                             {content}

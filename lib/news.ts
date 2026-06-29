@@ -1,7 +1,6 @@
 import { Follow, Followee, NewsFeedItem, NewsType } from "@/types";
 import { supabaseAdmin } from "./supabase-server";
 import { camelCaseObject, snakeCaseObject } from "./helper-functions";
-import { getStartOfToday } from "./dates";
 import { getFriendIds, getUser } from "./users";
 
 export const getNewsFeedItems = async (userId: string): Promise<NewsFeedItem[]> => {
@@ -48,11 +47,11 @@ export const getNewsFeedItems = async (userId: string): Promise<NewsFeedItem[]> 
         .from('news')
         .select('*')
         .or(followQueries.join(','))
-        .gte('date', getStartOfToday());
+        .order('date', { ascending: false })
+        .limit(100)
 
     return (newsData || []) 
-        .map(camelCaseObject)
-        .sort((a: NewsFeedItem, b: NewsFeedItem) => b.date.localeCompare(a.date)) as NewsFeedItem[];
+        .map(camelCaseObject) as NewsFeedItem[];
 }
 
 export const createNewsFeedItem = async (followType: Followee | 'city' | 'friend', followId: string, newsType: NewsType, newsItemId: string, newsItemDate?: string | null, otherData?: string | null): Promise<void> => {
