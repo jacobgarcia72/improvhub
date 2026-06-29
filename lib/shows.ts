@@ -174,6 +174,15 @@ export async function getShowing(eventId: string, dateTime: string): Promise<Sho
     return data ? camelCaseObject(data) as Showing : null;
 }
 
+export async function getIsASeries(eventId: string): Promise<boolean> {
+    const { count, error } = await supabaseAdmin
+        .from('showings')
+        .select('*', { count: 'exact', head: true })
+        .eq('event_id', eventId);
+    if (error) throw error;
+    return count > 1;
+}
+
 export async function getShowingsForEvents(eventIds: string[]): Promise<Showing[]> {
     const { data, error } = await supabaseAdmin
         .from('showings')

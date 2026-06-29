@@ -17,6 +17,7 @@ export default async function ShowDetails({ show }: {
     show: Event
 }) {
     const showings = await getShowings(show.id);
+    const isASeries = showings.length > 1 || show.recurringTime;
     const dateTimes = showings.map(({ dateTime }) => dateTime);
     let futureShows: string[] = [];
     if (dateTimes) {
@@ -68,29 +69,32 @@ export default async function ShowDetails({ show }: {
     return (
         <div className="pb-2">
             {show.description?.split('<br>').map((line, i) => <P key={i}>{line}</P>)}
-            <div className="flex flex-row flex-wrap">
-                <div className="w-1/2 min-w-[200px]">
-                    {recurringSchedule && <Header>Show Schedule:</Header>}
-                    <P>{recurringSchedule}</P>
-                    {futureShows?.length > 1 && <Header>Upcoming Shows</Header>}
-                    {futureShows?.length === 1 && <Header>Show Date</Header>}
-                    {futureShows.length ? <ul className="mt-2">
-                        {futureShows.slice(0, 4).map((date, i) => (
-                            <Link key={i} href={`/shows/${show.id}/${date}`}>
-                                <li className="no-bullets link ">
-                                    {formatDateTimeForDisplay(date)}
-                                </li>
-                            </Link>
-                        ))}
-                    </ul> : null}
-                    {futureShows.length > 4 && (
-                        <ShowingSelection
-                            showId={show.id}
-                            dateTimes={futureShows}
-                        />
-                    )}
-                </div>
-                <div className="w-1/2 min-w-[200px]">
+            <div className="flex flex-row flex-wrap gap-2">
+                {isASeries && (
+                    <div className="grow-2 min-w-[200px]">
+                        {recurringSchedule && <Header>Show Schedule:</Header>}
+                        <P>{recurringSchedule}</P>
+                        {futureShows.length ? <>
+                            <Header>Upcoming Shows:</Header>
+                            <ul className="mt-2">
+                                {futureShows.slice(0, 4).map((date, i) => (
+                                    <Link key={i} href={`/shows/${show.id}/${date}`}>
+                                        <li className="no-bullets link ">
+                                            {formatDateTimeForDisplay(date)}
+                                        </li>
+                                    </Link>
+                                ))}
+                            </ul>
+                        </> : null}
+                        {futureShows.length > 4 && (
+                            <ShowingSelection
+                                showId={show.id}
+                                dateTimes={futureShows}
+                            />
+                        )}
+                    </div>
+                )}
+                <div className="grow-1 min-w-[200px]">
                     {runtime && <Header>Approximate runtime:</Header>}
                     <P>{runtime}</P>
                     {ticketInfo && <Header>Ticket Price:</Header>}

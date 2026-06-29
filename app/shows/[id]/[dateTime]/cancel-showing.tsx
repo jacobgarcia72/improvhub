@@ -23,7 +23,7 @@ export default function CancelShowing({ dateTime, showTitle, showId }: {
     return <>
         <ConfirmModal
             open={openModal}
-            title="Cancel show?"
+            title="Cancel showing?"
             description={`Are you sure you want to cancel ${show}?`}
             onCancel={() => setOpenModal(false)}
             onConfirm={handleConfirm}
@@ -32,7 +32,7 @@ export default function CancelShowing({ dateTime, showTitle, showId }: {
         />
         <Button
             style="link"
-            caption="Cancel Show"
+            caption="Cancel Showing"
             onClick={() => setOpenModal(true)}
         />
     </>

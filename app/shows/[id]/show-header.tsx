@@ -18,7 +18,7 @@ export default async function ShowHeader({ children, show, showImage = true }: {
                     <div>
                         <h1 className="text-2xl">{show.title}</h1>
                         {show.theatre ? (
-                            <TheatreLink theatre={theatre && ({ text: theatre.name, image: theatre.image, id: theatre.id }) || show.theatre} />
+                            <TheatreLink theatre={theatre && ({ text: theatre.name, image: theatre.image, id: theatre.id }) || show.theatre} removePadding />
                         ) : null}
                     </div>
                     <div>

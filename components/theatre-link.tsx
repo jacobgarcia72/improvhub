@@ -3,7 +3,7 @@ import { InputOption } from "@/types";
 import Image from "next/image";
 import Link from "next/link";
 
-export function TheatreLink({ theatre }: {theatre: InputOption}) {
+export function TheatreLink({ theatre, removePadding }: {theatre: InputOption, removePadding?: boolean }) {
     if (typeof theatre === 'string') {
         return (
             <p className="mb-2 mt-2">{theatre}</p>
@@ -11,7 +11,7 @@ export function TheatreLink({ theatre }: {theatre: InputOption}) {
     }
     return (
         <Link
-            className="link flex flex-row gap-2 items-center w-fit py-2"
+            className={"link flex flex-row gap-2 items-center w-fit" + (removePadding ? '' : ' py-2')}
             href={`/theatres/${theatre.id}`}
         >
             {theatre.image ? (

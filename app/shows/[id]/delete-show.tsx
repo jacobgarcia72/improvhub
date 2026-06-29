@@ -5,9 +5,10 @@ import { deleteShow } from "@/lib/shows";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-export default function DeleteShow({ showTitle, showId }: {
+export default function DeleteShow({ showTitle, showId, isASeries }: {
     showTitle: string,
     showId: string,
+    isASeries: boolean
 }) {
     const router = useRouter();
     const [openModal, setOpenModal] = useState<boolean>(false);
@@ -29,7 +30,7 @@ export default function DeleteShow({ showTitle, showId }: {
         />
         <Button
             style='link'
-            caption="Delete Show"
+            caption={`Delete ${isASeries ? 'Series' : 'Show'}`}
             onClick={() => setOpenModal(true)}
         />
     </div>

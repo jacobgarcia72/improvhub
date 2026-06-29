@@ -17,7 +17,7 @@ export default function RSVP({ showId, showDate, userId, rsvp }: {
     }
 
     return (
-        <div className="min-w-[140px] max-w-[200px] mr-3 mb-1">
+        <div className="min-w-[140px] max-w-[200px] mb-1">
             <select
                 id="rsvp"
                 name="rsvp"
