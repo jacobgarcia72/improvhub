@@ -53,7 +53,7 @@ export default async function UserProfilePage({ params }: { params: Promise<{use
             {friendCount ? (
                 <LayoutCard className="flex flex-row justify-center">
                     <div className="w-full flex flex-row justify-center">
-                        <Link href={`/profile/${username}/friends`} className="link mt-2 text-sm">
+                        <Link href={`/profile/${username}/friends`} className="link text-sm">
                             {`${friendCount} ${pluralize('Friend', friendCount)}`}
                         </Link>
                     </div>

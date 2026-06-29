@@ -2,6 +2,7 @@
 import Button from "./form/button"
 import { acceptFriendRequest, createFriendRequest, deleteFriendRequest, unfriend } from "@/lib/users"
 import { useState } from "react";
+import ConfirmModal from "./confirm-modal";
 
 export default function FriendsButton({
     yourId,
@@ -10,15 +11,19 @@ export default function FriendsButton({
     theySentRequest,
     friends,
     mini,
+    theirName
 } : {
     yourId: string,
     theirId: string,
+    theirName: string
     youSentRequest: boolean,
     theySentRequest: boolean,
     friends: boolean,
-    mini?: boolean
+    mini?: boolean,
 }) {
     const [pending, setPending] = useState(false);
+    const [openModal, setOpenModal] = useState<boolean>(false);
+
     if (theySentRequest && !friends) {
         return (
             <div className="flex flex-col items-center">
@@ -49,20 +54,31 @@ export default function FriendsButton({
         )
     }
     if (friends) {
-        
-    return <div className="flex flex-col items-center">
-        <p className="font-semibold text-lg mb-1">Your Friend</p>
-        <Button
-            caption="Remove Friend"
-            className={`small w-34`}
-            onClick={async () => {
-                setPending(true);
-                await unfriend(yourId, theirId);
-                setPending(false);
-            }}
-            disabled={pending}
-        />
-    </div>
+        return <>
+            <ConfirmModal
+                open={openModal}
+                title={`Remove ${theirName} as a friend?`}
+                description={`Are you sure you no longer want to be friends with ${theirName}?`}
+                onCancel={() => setOpenModal(false)}
+                onConfirm={async () => {
+                    setPending(true);
+                    await unfriend(yourId, theirId);
+                    setOpenModal(false);
+                    setPending(false);
+                }}
+                confirmLabel="Confirm"
+                cancelLabel="Cancel"
+            />
+            <div className="flex flex-col items-center">
+                <p className="font-semibold text-lg mb-1">Your Friend</p>
+                <Button
+                    caption="Remove"
+                    className={`small w-22`}
+                    onClick={() => setOpenModal(true)}
+                    disabled={pending}
+                />
+            </div>
+        </>
     }
     return <div className="flex flex-col items-center">
         {youSentRequest ? (

@@ -30,7 +30,7 @@ export const getNewsFeedItems = async (userId: string): Promise<NewsFeedItem[]> 
     const followQueries: string[] = [];
 
     if (friendIds.length) {
-        followQueries.push(`and(follow_type.eq.user,follow_id.in.(${friendIds.join(',')}))`);
+        followQueries.push(`and(follow_type.eq.friend,follow_id.in.(${friendIds.join(',')}))`);
     }
     if (teamsFollowed.length) {
         followQueries.push(`and(follow_type.eq.team,follow_id.in.(${teamsFollowed.join(',')}))`);

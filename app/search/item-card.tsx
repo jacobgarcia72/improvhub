@@ -40,7 +40,7 @@ export default async function ItemCard({
             </div> : null}
             <Link href={link} className="h-full">
                 {image ? (
-                    <div className={`h-[${type === 'theatres' ? 180 : 120}px] w-full bg-gray-300`}>
+                    <div className={`${type === 'theatres' ? 'h-[180px]' : 'h-[120px]'} w-full bg-gray-300`}>
                         <Image src={image} alt={name || type} width={120} height={type === 'theatres' ? 180 : 120} className={`object-cover h-[${type === 'theatres' ? 180 : 120}px] w-full`} />
                     </div>
                 ) : (

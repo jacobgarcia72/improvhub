@@ -45,6 +45,7 @@ export default async function UserProfilePage({ params, children }: { params: Pr
                     <FriendsButton
                         yourId={currentUserId}
                         theirId={username}
+                        theirName={user.firstName}
                         friends={friendship?.accepted || false}
                         youSentRequest={friendship?.user1Id === currentUserId}
                         theySentRequest={friendship?.user1Id === username}
