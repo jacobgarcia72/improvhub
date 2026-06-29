@@ -253,9 +253,9 @@ export async function setRsvpStatus(userId: string, showId: string, showDate: st
         });
     revalidatePath(`/shows/${showId}/${showDate}/`);
     if (value === 'g') {
-        await createNewsFeedItem('user', userId, 'going_to_show', showId, showDate);
+        await createNewsFeedItem('friend', userId, 'going_to_show', showId, showDate);
     } else {
-        await deleteNewsFeedItem('user', userId, 'going_to_show', showId, showDate);
+        await deleteNewsFeedItem('friend', userId, 'going_to_show', showId, showDate);
     }
 }
 
@@ -427,11 +427,11 @@ export async function updateShowing(showId: string, dateTime: string, updates: P
             .upsert(castRows);
         for (let i = 0; i < newCastMembers.length; i++) {
             const { id, role } = newCastMembers[i];
-            if (id) await createNewsFeedItem(role === 'team' ? 'team' : 'user', id, 'cast_in_show', showId, normalizedDateTime, role);
+            if (id) await createNewsFeedItem(role === 'team' ? 'team' : 'friend', id, 'cast_in_show', showId, normalizedDateTime, role);
         }
         for (let i = 0; i < removedCastMembers.length; i++) {
             const { id, role } = removedCastMembers[i];
-            if (id) await deleteNewsFeedItem(role === 'team' ? 'team' : 'user', id, 'cast_in_show', showId, normalizedDateTime, role);
+            if (id) await deleteNewsFeedItem(role === 'team' ? 'team' : 'friend', id, 'cast_in_show', showId, normalizedDateTime, role);
         }
     }
     return true;
@@ -447,7 +447,7 @@ export async function removeCastMember(showId: string, dateTime: string, userId:
         .eq('id', userId)
         .eq('role', role);
     revalidatePath(`/shows/${showId}/${dateTime}/`, 'layout');
-    await deleteNewsFeedItem(role === 'team' ? 'team' : 'user', userId, 'cast_in_show', showId, normalizedDateTime, role);
+    await deleteNewsFeedItem(role === 'team' ? 'team' : 'friend', userId, 'cast_in_show', showId, normalizedDateTime, role);
 }
 
 export async function deleteShowing(eventId: string, dateTime: string): Promise<void> {

@@ -248,7 +248,7 @@ export async function respondToTeamInvitation(teamId: string, userId: string, ro
             .eq('id', userId)
             .eq('role', role);
         if (error) throw error;
-        createNewsFeedItem('user', userId, "joined_team", teamId);
+        createNewsFeedItem('friend', userId, "joined_team", teamId);
         revalidatePath('/teams', 'layout')
     } else {
         const { error } = await supabaseAdmin
@@ -310,7 +310,7 @@ export async function saveTeam(team: Team, members: { name: string, id: string |
             .insert(memberRows);
         if (memberInsertError) throw memberInsertError;
     }
-    createNewsFeedItem('user', creatorId, 'new_team', teamId);
+    createNewsFeedItem('friend', creatorId, 'new_team', teamId);
     return team.id;
 }
 

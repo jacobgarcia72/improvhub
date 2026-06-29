@@ -119,12 +119,18 @@ export interface User {
 
 export interface AbbrevUser { id: string, name: string, image?: string };
 
-export type Followee = 'team' | 'theatre' | 'user';
+export type Followee = 'team' | 'theatre';
 export interface Follow {
     userId: string;
     followId: string;
     type: Followee;
     following: boolean;
+}
+
+export interface Friendship {
+    user1Id: string;
+    user2Id: string;
+    accepted: boolean;
 }
 
 export interface Topic {
@@ -167,14 +173,14 @@ export type NewsType = (
 export class NewsFeedItem {
     id: string;
     date: string;
-    followType: Followee | 'city';
+    followType: Followee | 'city' | 'friend';
     followId: string;
     newsType: NewsType;
     newsItemId: string;
     newsItemDate: string | null;
     otherData: string | null;
     constructor(
-        followType: Followee | 'city', 
+        followType: Followee | 'city' | 'friend', 
         followId: string,
         newsType: NewsType,
         newsItemId: string,

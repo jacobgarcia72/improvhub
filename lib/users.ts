@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use server';
 
-import { AbbrevUser, Followee, User } from "@/types";
+import { AbbrevUser, Followee, Friendship, User } from "@/types";
 import { supabaseAdmin } from "./supabase-server";
 import { destroySession, verifyAuth } from "./auth";
 import { revalidatePath } from "next/cache";
@@ -160,16 +160,14 @@ export async function getFollowees(userId: string, type: Followee): Promise<{ na
     if (!followeeData) return [];
     const ids = followeeData.map((row: { follow_id: any; }) => row.follow_id)
     switch (type) {
-        case 'user':
-            return (await supabaseAdmin
-                .from(`users`)
-                .select(`first_name, last_name, id, image`)
-                .in('id', ids))?.data?.map((row: { first_name: any; last_name: any; id: any; image: any; }) => (
-                    { name: `${row.first_name} ${row.last_name}`, id: row.id, image: row.image }
-                )) || [];
         case 'team':
             return (await supabaseAdmin
                 .from(`teams`)
+                .select(`name, id, image`)
+                .in('id', ids))?.data || [];
+        case 'theatre':
+            return (await supabaseAdmin
+                .from(`theatres`)
                 .select(`name, id, image`)
                 .in('id', ids))?.data || [];
         default:
@@ -196,8 +194,103 @@ export async function setFollowing(userId: string, followId: string, type: Follo
         );
     if (error) throw error;
     if (type === 'team') revalidatePath(`/teams/${followId}`, 'layout');
-    if (type === 'user') revalidatePath(`/profile/${followId}`, 'layout');
     if (type === 'theatre') revalidatePath(`/theatres/${followId}`, 'layout');
+}
+
+export async function createFriendRequest(senderId: string, receiverId: string): Promise<void> {
+    const { error } = await supabaseAdmin
+        .from('friendships')
+        .insert(
+            { user1_id: senderId, user2_id: receiverId, accepted: false }
+        );
+    if (error) throw error;
+    revalidatePath(`/profile/${receiverId}`, 'layout');
+    revalidatePath(`/search`, 'layout');
+}
+
+export async function acceptFriendRequest(senderId: string, receiverId: string): Promise<void> {
+    const { error } = await supabaseAdmin
+        .from('friendships')
+        .update({ 'accepted': true })
+        .eq('user1_id', senderId)
+        .eq('user2_id', receiverId)
+    if (error) throw error;
+    revalidatePath(`/profile/${senderId}`, 'layout');
+    revalidatePath(`/profile/${receiverId}`, 'layout');
+    revalidatePath(`/search`, 'layout');
+}
+
+export async function deleteFriendRequest(senderId: string, receiverId: string): Promise<void> {
+    const { error } = await supabaseAdmin
+        .from('friendships')
+        .delete()
+        .eq('user1_id', senderId)
+        .eq('user2_id', receiverId)
+    if (error) throw error;
+    revalidatePath(`/profile/${senderId}`, 'layout');
+    revalidatePath(`/profile/${receiverId}`, 'layout');
+    revalidatePath(`/search`, 'layout');
+}
+
+export async function unfriend(yourId: string, theirId: string): Promise<void> {
+    const { error } = await supabaseAdmin
+        .from('friendships')
+        .delete()
+        .or(`and(user1_id.eq.${yourId},user2_id.eq.${theirId}),and(user1_id.eq.${theirId},user2_id.eq.${yourId})`)
+    if (error) throw error;
+    revalidatePath(`/profile/${yourId}`, 'layout');
+    revalidatePath(`/profile/${theirId}`, 'layout');
+    revalidatePath(`/search`, 'layout');
+}
+
+export async function getFriendship(yourId: string, theirId: string): Promise<Friendship | null> {
+    const { data } = await supabaseAdmin
+        .from('friendships')
+        .select('*')
+        .or(`and(user1_id.eq.${yourId},user2_id.eq.${theirId}),and(user1_id.eq.${theirId},user2_id.eq.${yourId})`)
+        .maybeSingle();
+    return data ? camelCaseObject(data) as Friendship : null;
+}
+export async function getFriendCount(userId: string): Promise<number> {
+    const { count } = await supabaseAdmin
+        .from('friendships')
+        .select('*', { count: 'exact', head: true })
+        .eq('accepted', true)
+        .or(`user1_id.eq.${userId},user2_id.eq.${userId}`);
+    return count ?? 0;
+}
+
+export async function getFriends(userId: string): Promise<AbbrevUser[]> {
+    const { data } = await supabaseAdmin
+        .from('friendships')
+        .select('user1_id,user2_id')
+        .eq('accepted', true)
+        .or(`user1_id.eq.${userId},user2_id.eq.${userId}`);
+    if (!data) return [];
+    const res: AbbrevUser[] = [];
+    for (let i = 0; i < data.length; i++) {
+        const { user1_id: user1Id, user2_id: user2Id } = data[i];
+        const friendId = userId === user1Id ? user2Id : user1Id;
+        const friend = await getUserAbbreviated(friendId);
+        if (friend) res.push(friend);
+    }
+    return res;
+}
+
+export async function getFriendIds(userId: string): Promise<string[]> {
+    const { data } = await supabaseAdmin
+        .from('friendships')
+        .select('user1_id,user2_id')
+        .eq('accepted', true)
+        .or(`user1_id.eq.${userId},user2_id.eq.${userId}`);
+    if (!data) return [];
+    const res: string[] = [];
+    for (let i = 0; i < data.length; i++) {
+        const { user1_id: user1Id, user2_id: user2Id } = data[i];
+        const friendId = userId === user1Id ? user2Id : user1Id;
+        if (friendId) res.push(friendId);
+    }
+    return res;
 }
 
 export async function saveUser(user: User, userRoles?: { [role: string]: boolean }): Promise<void> {

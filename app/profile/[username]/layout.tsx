@@ -1,12 +1,12 @@
 import Loader from "@/components/loader";
 import { isSignedIn, verifyAuth } from "@/lib/auth";
-import { getFollowing, getUser, getUserRoles } from "@/lib/users";
+import { getFriendship, getUser, getUserRoles } from "@/lib/users";
 import { User } from "@/types";
 import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 import UserDetails from "./user-details";
 import UserOptions from "./user-options";
-import FollowButton from "@/components/follow-button";
+import FriendsButton from "@/components/friends-button";
 
 function LayoutCard({
     children, className, header
@@ -36,19 +36,18 @@ export default async function UserProfilePage({ params, children }: { params: Pr
     const isCurrentUser = username === currentUserId;
     const userRoles = (await getUserRoles(username)) ?? undefined;
 
-    const following = isCurrentUser ? null : await getFollowing(currentUserId, username, 'user');
-    const mutualFollowing = following && await getFollowing(username, currentUserId, 'user');
+    const friendship = isCurrentUser ? null : await getFriendship(currentUserId, username);
 
     return (
         <Suspense fallback={<Loader />}>
             <LayoutCard className="relative">
-                {!isCurrentUser && <div className="absolute right-3 top-2">
-                    <FollowButton
-                        userId={currentUserId}
-                        followId={username}
-                        type="user"
-                        following={following}
-                        caption={mutualFollowing ? 'Friends' : null}
+                {!isCurrentUser && <div className="absolute right-5 top-3">
+                    <FriendsButton
+                        yourId={currentUserId}
+                        theirId={username}
+                        friends={friendship?.accepted || false}
+                        youSentRequest={friendship?.user1Id === currentUserId}
+                        theySentRequest={friendship?.user1Id === username}
                     />
                 </div>}
                 {isCurrentUser ? (

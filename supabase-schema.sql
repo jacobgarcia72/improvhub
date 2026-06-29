@@ -125,6 +125,13 @@ create table if not exists follows (
   primary key (user_id, follow_id, type)
 );
 
+create table if not exists friendships (
+  user1_id text not null references users(id) on delete cascade,
+  user2_id text not null references users(id) on delete cascade,
+  accepted boolean not null,
+  primary key (user1_id, user2_id)
+);
+
 create table if not exists topics (
   id text not null,
   title text not null,
@@ -181,6 +188,7 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.rsvps TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.teams TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.team_members TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.follows TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.friendships TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.user_roles TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.topics TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.posts TO service_role;
