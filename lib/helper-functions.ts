@@ -53,6 +53,9 @@ export function getRandomElements(array: any[], x: number): any[] {
     return shuffled.slice(0, x);
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const shuffle = (array: any[]): any[] => array.sort(() => Math.random() - 0.5);
+
 export const getText = (option: InputOption): string => typeof option === 'string' ? option : option.text;
 export const filterArrayBySearchTerm = (
     options: InputOption[], searchTerm: string, limit?: number

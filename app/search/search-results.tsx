@@ -1,5 +1,5 @@
 import EventResults from './event-results';
-import { filterArrayBySearchTerm, matchPattern } from '@/lib/helper-functions';
+import { filterArrayBySearchTerm, matchPattern, shuffle } from '@/lib/helper-functions';
 import { separateCityAndState } from '@/lib/location';
 import { getAllTheatres, getTheatre, getTheatresByCity, getTheatresByState, getTheatresByZipcode } from '@/lib/theatres';
 import { Team } from '@/types';
@@ -44,8 +44,8 @@ export default async function SearchResults({ params }: { params: {
             if (state) return await getTheatresByState(state);
             if (zipcode) return await getTheatresByZipcode(zipcode, radius || 1);
         } else if (searchFor === 'teams') {
-            if (theatre) return await getTeamsByTheatre(theatre) as Team[];
-            if (zipcode || (city && state)) return await getTeamsInRange(zipcode || `${city} ${state}`, radius || 0) as Team[];
+            if (theatre) return shuffle(await getTeamsByTheatre(theatre) as Team[]);
+            if (zipcode || (city && state)) return shuffle(await getTeamsInRange(zipcode || `${city} ${state}`, radius || 0) as Team[]);
         }
         return [];
     }
