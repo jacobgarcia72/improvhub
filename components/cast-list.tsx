@@ -55,7 +55,7 @@ export default async function CastList({ castMembers, noConfirm }: { castMembers
             <div className="flex flex-row flex-wrap px-6 justify-between">
                 <div className="w-48 grow-2">
                     {players?.length ? <>
-                        <Header>{pluralize('Player', players.length)}</Header>
+                        <Header>Players</Header>
                         <ul className="mt-2">
                             {players.map((player, i) => (
                                 <li key={i} className="no-bullets">{MemberEntry(player, noConfirm)}</li>

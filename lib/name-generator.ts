@@ -93,10 +93,13 @@ const adjectives = [
     'Flying',
     'Frequent',
     'Earnest',
-    'Urgent'
+    'Urgent',
+    'Top',
+    'Bittersweet',
 ];
 
 const nouns = [
+    'Season',
     'Wizard',
     'Gnome',
     'Clover',
