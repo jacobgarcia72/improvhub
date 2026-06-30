@@ -14,7 +14,7 @@ export default async function ItemCard({
     item: Event | Team | Theatre | Partial<Theatre>, type: string, time?: string, date?: string, userId?: string | null
 }) {
     const image = (
-        item.image && optimizeImage(item.image, 300, 300, 90, true)
+        item.image && optimizeImage(item.image, 600, 600, 100, true)
     ) || (
         'theatre' in item && item.theatre && (await getTheatre(item.theatre))?.image
     );
@@ -34,7 +34,7 @@ export default async function ItemCard({
         }
     }
     return (
-        <Border className="relative flex flex-col h-[300px] w-[212px] m-2 w-44 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
+        <Border className="grow-1 max-w-[272px] relative flex flex-col h-[300px] min-w-[212px] m-2 w-44 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
             {showFollowButton ? <div className="absolute right-2 top-2">
                 <FollowButton mini userId={userId || ''} followId={'id' in item && item.id ? item.id : ''} type={type === 'teams' ? 'team' : 'theatre'} following={following} />
             </div> : null}
@@ -47,16 +47,19 @@ export default async function ItemCard({
                     <div className="h-[35px] w-full" />
                 )}
                 <div className={`w-full ${image ? 'h-[180px]' : 'h-[265px]'} pb-1 px-4 pt-2`}>
-                    <h2 className="leading-none text-lg pt-1 pb-1 text-slate-900">{name}</h2>
+                    <h2 className="leading-none text-lg pt-1 pb-1 text-gray-900">{name}</h2>
                     <div className="h-full fade-out text-sm text-gray-800 overflow-hidden text-ellipsis flex flex-col gap-1 pt-1">
                         {time ? (
-                            <time className="mt-[-6px] text-sm text-slate-700">{formatTime(time)}</time>
+                            <time className="mt-[-6px] text-sm text-gray-700">{formatTime(time)}</time>
                         ) : null}
                         {'theatre' in item && item.theatre ? (
-                            <p>{item.theatre}</p>
+                            <p className="font-semibold text-gray-700">{item.theatre}</p>
                         ) : null}
                         {'description' in item && item.description ? (
                             <p>{item.description.replaceAll('<br>', '\n')}</p>
+                        ) : null}
+                        {'address' in item && item.address ? (
+                            <p>{item.address}</p>
                         ) : null}
                         {'city' in item && item.city && 'state' in item && item.state ? (
                             <p>{`${item.city}, ${item.state}`}</p>
