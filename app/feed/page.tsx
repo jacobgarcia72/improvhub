@@ -9,6 +9,12 @@ import { getCurrentUserId, getUserAbbreviated } from "@/lib/users";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Metadata } from "next";
+import { appName } from "@/lib/app-info";
+
+export const metadata: Metadata = {
+    title: `News Feed | ${appName}`
+};
 
 export default async function FeedPage() {
     const userId = await getCurrentUserId();

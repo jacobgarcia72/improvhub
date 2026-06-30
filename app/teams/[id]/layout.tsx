@@ -20,18 +20,22 @@ type Props = {
 }
 
 export async function generateMetadata(
-    { params }: Props,
+    { params }: {
+    params: Promise<{ id: string }>
+},
 ): Promise<Metadata> {
-    // read route params
-        const { id } = await params
-
-    // fetch data
+    const { id } = await params
     const team = await getTeam(id);
-
-    return {
-        title: team?.name || appName,
-        description: team?.description
+    if (!team) return {};
+    const { name, description, image } = team;
+    const title = `${name} | ${appName}`;
+    const metadata: Metadata = { title, description }
+    if (image) {
+        metadata.openGraph = {
+            images: [{ url: image, alt: name }],
+        }
     }
+    return metadata;
 }
 
 function P({ children, className }: { children: React.ReactNode, className?: string }) {

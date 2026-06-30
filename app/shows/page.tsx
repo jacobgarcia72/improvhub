@@ -14,8 +14,7 @@ import { getTeamsByUser } from "@/lib/teams";
 
 
 export const metadata: Metadata = {
-    title: `${appName} | Shows`,
-    description: "Find improv shows near you!",
+    title: `Improv Shows | ${appName}`
 };
 
 export default async function ShowsPage() {

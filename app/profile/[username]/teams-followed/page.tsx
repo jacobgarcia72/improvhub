@@ -11,7 +11,7 @@ export default async function UserTeamFollowees({ params }: {
         <section>
             <div className="px-6">
                 <Link href={`/profile/${username}`} className="link">Back</Link>
-                <FollowerList followers={followees} caption="Teams Followed" />
+                <FollowerList followers={followees} caption="Teams Followed" isTeam />
                 {followees.length > 50 && (
                     <div className="pt-4">
                         <Link href={`/profile/${username}`} className="link">Back</Link>

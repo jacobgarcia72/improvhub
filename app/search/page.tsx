@@ -4,7 +4,8 @@ import SearchBar from "./search-bar";
 import SearchResults from "./search-results";
 
 export const metadata: Metadata = {
-    title: `${appName} | Search`,
+    title: `Search | ${appName}`,
+    description: 'Find improv shows, jams, and theatres near you!'
 };
 
 export default async function SearchPage({ searchParams }: { searchParams: Promise<{ [key: string]: string | undefined }> }) {

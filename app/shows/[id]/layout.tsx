@@ -12,11 +12,16 @@ export async function generateMetadata(
 ): Promise<Metadata> {
     const { id } = await params
     const show = await getShow(id);
-
-    return {
-        title: show?.title || appName,
-        description: show?.description || show?.theatre || 'Show details unavailable'
+    if (!show) return { }
+    const { title: name, description, image } = show;
+    const title = `${name} | ${appName}`;
+    const metadata: Metadata = { title, description }
+    if (image) {
+        metadata.openGraph = {
+            images: [{ url: image, alt: name }],
+        }
     }
+    return metadata;
 }
 
 export default async function ShowDetailsLayout({ children }: Props) {

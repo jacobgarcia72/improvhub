@@ -6,6 +6,12 @@ import { getCurrentUserId } from "@/lib/users";
 import { SearchParams } from "next/dist/server/request/search-params";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Metadata } from "next";
+import { appName } from "@/lib/app-info";
+
+export const metadata: Metadata = {
+    title: `Login | ${appName}`
+};
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
     const userId = await getCurrentUserId();

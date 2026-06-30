@@ -6,13 +6,33 @@ import { getTheatre } from "@/lib/theatres";
 import { getCurrentUserId, getFollowing } from "@/lib/users";
 import Image from "next/image";
 import { optimizeImage } from "@/lib/cloudinary";
+import { appName } from '@/lib/app-info';
+import { Metadata } from 'next';
+
+export async function generateMetadata(
+    { params }: {
+    params: Promise<{ id: string }>
+}): Promise<Metadata> {
+    const { id } = await params
+    const theatre = await getTheatre(id);
+    if (!theatre) return {};
+    const { name, image } = theatre;
+    const title = `${name} | ${appName}`;
+    const metadata: Metadata = { title }
+    if (image) {
+        metadata.openGraph = {
+            images: [{ url: image, alt: name }],
+        }
+    }
+    return metadata;
+}
 
 type Props = {
     params: Promise<{ id: string }>
     children: React.ReactNode;
 }
 
-export default async function TeamLayout({ params, children }: Props) {
+export default async function TheatreLayout({ params, children }: Props) {
     const { id } = await params;
     const theatre = await getTheatre(id);
 

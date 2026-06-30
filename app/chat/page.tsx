@@ -5,6 +5,12 @@
 // import MessagesBody from "./body";
 // import { SearchParams } from "next/dist/server/request/search-params";
 import ComingSoon from "@/components/coming-soon";
+import { Metadata } from "next";
+import { appName } from "@/lib/app-info";
+
+export const metadata: Metadata = {
+    title: `Discussions | ${appName}`
+};
 
 // export default async function ChatPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
 //     const { room, topic } = await searchParams;

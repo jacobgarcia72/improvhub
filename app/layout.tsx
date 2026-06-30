@@ -15,9 +15,23 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const description = "Find improv shows, jams, and theatres. Create and manage improv teams and events and connect with other improvisers!";
 export const metadata: Metadata = {
   title: appName,
-  description: "All things improv in one place!",
+  description,
+  openGraph: {
+    title: appName,
+    description,
+    siteName: appName,
+    // images: [
+    //   {
+    //     url: '/og-image.png', // Pointing to public/og-image.png
+    //     width: 1200,
+    //     height: 630,
+    //     alt: appName,
+    //   },
+    // ],
+  },
 };
 
 export default function RootLayout({

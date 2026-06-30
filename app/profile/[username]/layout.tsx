@@ -1,12 +1,26 @@
 import Loader from "@/components/loader";
 import { isSignedIn, verifyAuth } from "@/lib/auth";
-import { getFriendship, getUser, getUserRoles } from "@/lib/users";
+import { getFriendship, getUser, getUserName, getUserRoles } from "@/lib/users";
 import { User } from "@/types";
 import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 import UserDetails from "./user-details";
 import UserOptions from "./user-options";
 import FriendsButton from "@/components/friends-button";
+import { appName } from '@/lib/app-info';
+import { Metadata } from 'next';
+
+export async function generateMetadata(
+    { params }: {
+    params: Promise<{ id: string }>
+}): Promise<Metadata> {
+    const { id } = await params
+    const name = await getUserName(id);
+    if (!name) return {};
+    return {
+        title: `${name} | ${appName}`
+    }
+}
 
 function LayoutCard({
     children, className, header

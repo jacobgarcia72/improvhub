@@ -6,6 +6,12 @@ import { getCurrentUser } from "@/lib/users";
 import { getTeamMembershipsByUser } from "@/lib/teams";
 import OpenTeamsSection from "./open-teams-section";
 import AvailableUsersSection from "./available-users-section";
+import { appName } from '@/lib/app-info';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+    title: `Improv Teams | ${appName}`
+};
 
 export default async function TeamsPage() {
     const user = await getCurrentUser();

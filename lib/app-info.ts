@@ -1,1 +1,1 @@
-export const appName = "ImprovHub";
+export const appName = "ImprovLink";
