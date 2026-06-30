@@ -57,7 +57,7 @@ export default async function SearchResults({ params }: { params: {
     const userId = await getCurrentUserId();
 
     return (
-        <section className="flex flex-row flex-wrap px-4 pb-4 justify-evenly min-h-[calc(100vh-220px)]">
+        <section className="max-w-[1200px]! flex flex-row flex-wrap px-4 pb-4 justify-evenly min-h-[calc(100vh-220px)]">
             <Suspense fallback={<Loader />}>
             {searchFor && eventTypes.includes(searchFor) ? (
                 <EventResults
