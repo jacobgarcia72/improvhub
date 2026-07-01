@@ -322,6 +322,15 @@ export async function saveUser(user: User, userRoles?: { [role: string]: boolean
     }
 }
 
+export async function updatePassword(userId: string, newPassword: string): Promise<boolean> {
+    const { error } = await supabaseAdmin
+        .from('users')
+        .update({ password: newPassword })
+        .eq('id', userId);
+    if (error) throw error;
+    return true;
+}
+
 export async function deleteUser(user: User): Promise<void> {
     if (user.image) {
         await destroyImage(user.image);

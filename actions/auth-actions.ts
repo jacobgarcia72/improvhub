@@ -1,9 +1,9 @@
 'use server'
 
-import { createAuthSession, destroySession } from "@/lib/auth";
+import { createAuthSession, destroySession, verifyAuth } from "@/lib/auth";
 import { uploadImage } from "@/lib/cloudinary";
 import { hashUserPassword, verifyPassword } from "@/lib/hash";
-import { getUser, saveUser, updateUser } from "@/lib/users";
+import { getUser, saveUser, updatePassword, updateUser } from "@/lib/users";
 import { User } from "@/types";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -115,6 +115,30 @@ export async function updateUserInfo(prevState: void | { message?: string }, for
     await updateUser(userUpdates, userRoles);
     revalidatePath(`/profile`, 'layout');
 }
+export async function updateUserPassword(prevState: void | { message?: string }, formData: FormData) {
+    const currentPassword = formData.get('currentPassword') as string;
+    const newPassword = formData.get('newPassword') as string;
+    const confirmNewPassword = formData.get('confirmNewPassword') as string;
+
+    if (!currentPassword) return { message: 'Current password is required' };
+    if (!newPassword) return { message: 'New password is required' };
+    if (newPassword.length < 8) return { message: 'New password must be at least 8 characters' };
+    if (newPassword !== confirmNewPassword) return { message: 'New passwords do not match' };
+
+    const user = (await verifyAuth()).user;
+    if (!user || !user.password) return { message: 'User not found' };
+
+    const isValidCurrentPassword = verifyPassword(user.password, currentPassword);
+
+    if (!isValidCurrentPassword) return { message: 'Current password is incorrect' };
+
+    const success = await updatePassword(user.id, hashUserPassword(newPassword));
+    if (success) {
+        await createAuthSession(user.id);
+        redirect('/account?passwordChanged=true');
+    }
+}
+
 export async function updateUserBio(prevState: void | { message?: string }, formData: FormData) {
     const bio = (formData.get('bio') as string).trim().replaceAll(/\r\n/g, '<br>').replaceAll(/\n/g, '<br>').replaceAll(/\r/g, '<br>');
     await updateUser({ bio });
