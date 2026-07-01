@@ -2,6 +2,7 @@ import { Follow, Followee, NewsFeedItem, NewsType } from "@/types";
 import { supabaseAdmin } from "./supabase-server";
 import { camelCaseObject, snakeCaseObject } from "./helper-functions";
 import { getFriendIds, getUser } from "./users";
+import { getTeamsByUser } from "./teams";
 
 export const getNewsFeedItems = async (userId: string): Promise<NewsFeedItem[]> => {
     const { data } = await supabaseAdmin
@@ -24,15 +25,16 @@ export const getNewsFeedItems = async (userId: string): Promise<NewsFeedItem[]> 
     const city = user?.city;
     const state = user?.state;
 
+    const userTeams = (await getTeamsByUser(userId)).map((team) => team.id);
+    const teamIds = [...new Set(teamsFollowed.concat(userTeams))];
+
     const theatreIds = [...new Set(theatresFollowed.concat(user?.theatres || []))];
 
     const followQueries: string[] = [];
 
-    if (friendIds.length) {
-        followQueries.push(`and(follow_type.eq.friend,follow_id.in.(${friendIds.join(',')}))`);
-    }
-    if (teamsFollowed.length) {
-        followQueries.push(`and(follow_type.eq.team,follow_id.in.(${teamsFollowed.join(',')}))`);
+    followQueries.push(`and(follow_type.eq.friend,follow_id.in.(${[...friendIds, userId].join(',')}))`);
+    if (teamIds.length) {
+        followQueries.push(`and(follow_type.eq.team,follow_id.in.(${teamIds.join(',')}))`);
     }
     if (theatreIds.length) {
         followQueries.push(`and(follow_type.eq.theatre,follow_id.in.(${theatreIds.join(',')}))`);
