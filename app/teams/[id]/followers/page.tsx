@@ -1,10 +1,13 @@
 import FollowerList from "@/components/follower-list";
-import { getFollows } from "@/lib/users";
+import { getCurrentUserId, getFollows } from "@/lib/users";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 
 export default async function TeamFollowers({ params }: {
     params: Promise<{ id: string }>
 }) {
+    const currentUserId = await getCurrentUserId();
+    if (!currentUserId) notFound();
     const { id: teamId } = await params;
     const followers = await getFollows(teamId, 'team');
     return (

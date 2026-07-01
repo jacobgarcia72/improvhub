@@ -62,6 +62,9 @@ export default async function ShowsPage() {
             {user && isOnATeam ? (
                 <ShowsLookingFor key='team' role='team' limit={24} user={user} />
             ) : null}
+            {!user && <section className="min-h-32 flex flex-col items-center justify-center gap-2">
+                <p className="mb-2"><Link className="link" href="/login">Sign in</Link> to create, manage, and get cast in improv shows!</p>
+            </section>}
         </>
     )
 }

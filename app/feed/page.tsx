@@ -11,12 +11,14 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import { appName } from "@/lib/app-info";
+import { protectRoute } from "@/lib/auth";
 
 export const metadata: Metadata = {
     title: `News Feed | ${appName}`
 };
 
 export default async function FeedPage() {
+    await protectRoute();
     const userId = await getCurrentUserId();
     if (!userId) notFound();
     const newsFeedItems = await getNewsFeedItems(userId);

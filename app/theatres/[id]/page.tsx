@@ -23,12 +23,12 @@ export default async function TheatreDetailsPage({ params }: {
         if (location) location += ' ';
         location += zipcode;
     }
-    const followerCount = await getFollowCount(id, 'theatre');
 
     const userId = await getCurrentUserId();
-    const canManage = !theatre.admins?.length || (
-        userId && theatre.admins.includes(userId)
+    const canManage = userId && (
+        !theatre.admins?.length || theatre.admins.includes(userId)
     );
+    const followerCount = userId ? await getFollowCount(id, 'theatre') : null;
     return (
         <Suspense fallback={<Loader />}>
             {followerCount ? (
