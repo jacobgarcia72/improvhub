@@ -1,7 +1,7 @@
 import { formatDate, formatDateForDisplay } from '@/lib/dates';
-import { arrangeEventsByDate } from '@/lib/helper-functions';
-import { getShowingsForEvents, getShowsByTheatre, getShowsInRange } from '@/lib/shows';
-import { Event, Showing } from '@/types';
+import { arrangeEventsByDate, singularize } from '@/lib/helper-functions';
+import { getOccurrencesForEvents, getEventsByTheatre, getEventsInRange } from '@/lib/shows';
+import { Event, EventOccurrence, EventType } from '@/types';
 import ItemCard from './item-card';
 
 export default async function EventResults({ eventType, city, state, theatre, zipcode, miles }: {
@@ -13,20 +13,16 @@ export default async function EventResults({ eventType, city, state, theatre, zi
     miles?: number;
 }) {
     const handleSearchParams = async () => {
-        switch (eventType) {
-            case 'shows':
-                let shows: Event[] = []
-                if (theatre) {
-                    shows = await getShowsByTheatre(theatre);
-                } else if (zipcode || (city && state)) {
-                    shows = await getShowsInRange(zipcode || `${city} ${state}`, miles || 0);
-                }
-                if (!shows.length) return null;
-                const showDates: Showing[] = await getShowingsForEvents(shows.map(({ id }) => id));
-                return arrangeEventsByDate(showDates, shows);
-            default:
-                return null;
+        const type = singularize(eventType) as EventType;
+        let events: Event[] = []
+        if (theatre) {
+            events = await getEventsByTheatre(theatre, type);
+        } else if (zipcode || (city && state)) {
+            events = await getEventsInRange(zipcode || `${city} ${state}`, miles || 0, type);
         }
+        if (!events.length) return null;
+        const eventDates: EventOccurrence[] = await getOccurrencesForEvents(events.map(({ id }) => id), type);
+        return arrangeEventsByDate(eventDates, events);
     }
 
     const hasActiveQuery = Boolean(theatre || zipcode);

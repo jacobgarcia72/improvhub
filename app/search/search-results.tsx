@@ -13,9 +13,9 @@ export default async function SearchResults({ params }: { params: {
     theatre?: string;
     location?: string;
     miles?: string;
-    for?: 'theatres' | 'shows' | 'jams' | 'teams';
+    for?: 'theatres' | 'shows' | 'jams' | 'teams' | 'classes' | 'workshops';
 }}) {
-    const eventTypes = ['shows', 'jams', 'auditions'];
+    const eventTypes = ['shows', 'jams', 'classes', 'workshops'];
     const theatre = params?.theatre?.trim();
     const location = params?.location?.trim();
     const miles = params?.miles?.trim();

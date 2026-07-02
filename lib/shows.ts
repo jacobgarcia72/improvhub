@@ -191,13 +191,13 @@ export async function getIsASeries(eventId: string, type: EventType): Promise<bo
     return count > 1;
 }
 
-export async function getShowingsForEvents(eventIds: string[]): Promise<Showing[]> {
+export async function getOccurrencesForEvents(eventIds: string[], type: EventType): Promise<EventOccurrence[]> {
     const { data, error } = await supabaseAdmin
-        .from('show_occurrences')
+        .from(`${type}_occurrences`)
         .select('*')
         .in('event_id', eventIds);
     if (error) throw error;
-    return (data || []).map(camelCaseObject) as Showing[];
+    return (data || []).map(camelCaseObject) as EventOccurrence[];
 }
 
 export async function getShowCast(showId: string, dateTime: string): Promise<ShowCastMember[]> {
@@ -211,19 +211,19 @@ export async function getShowCast(showId: string, dateTime: string): Promise<Sho
     return (data || []).map(camelCaseObject) as ShowCastMember[];
 }
 
-export async function getShowsByTheatre(theatre: string) {
+export async function getEventsByTheatre(theatre: string, type: EventType): Promise<Event[]> {
     const { data } = await supabaseAdmin
-        .from('shows')
+        .from(pluralize(type))
         .select('*')
         .ilike('theatre', theatre);
     return (data || []).map(camelCaseObject) as Event[];
 }
 
-export async function getShowsInRange(cityOrZipcode: string, miles: number) {
+export async function getEventsInRange(cityOrZipcode: string, miles: number, type: EventType): Promise<Event[]> {
     const citiesInRange = getCitiesWithinRange(cityOrZipcode, miles);
     if (!citiesInRange.length) return [];
     const { data, error } = await supabaseAdmin
-        .from('shows')
+        .from(pluralize(type))
         .select('*');
     if (error) throw error;
     return (data || [])

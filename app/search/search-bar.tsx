@@ -70,13 +70,13 @@ export default function SearchBar() {
                     }}
                 >
                     <option value=""></option>
-                    {/* <option value="auditions">Auditions</option> */}
-                    {/* <option value="jams">Jams</option> */}
+                    <option value="classes">Classes</option>
+                    <option value="jams">Jams</option>
                     <option value="shows">Shows</option>
                     {/* <option value="performers">Performers</option> */}
                     <option value="teams">Teams</option>
                     <option value="theatres">Theatres</option>
-                    {/* <option value="workshops">Workshops</option> */}
+                    <option value="workshops">Workshops</option>
                 </select>
             </div>
             <div className="flex-1 min-w-[140px] max-w-[200px]">
