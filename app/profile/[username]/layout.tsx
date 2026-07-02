@@ -1,6 +1,6 @@
 import Loader from "@/components/loader";
 import { isSignedIn, verifyAuth } from "@/lib/auth";
-import { getFriendship, getUser, getUserName, getUserRoles } from "@/lib/users";
+import { getFriendship, getUser, getUserAbbreviated, getUserRoles } from "@/lib/users";
 import { User } from "@/types";
 import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
@@ -15,11 +15,17 @@ export async function generateMetadata(
     params: Promise<{ id: string }>
 }): Promise<Metadata> {
     const { id } = await params
-    const name = await getUserName(id);
-    if (!name) return {};
-    return {
-        title: `${name} | ${appName}`
+    const user = await getUserAbbreviated(id);
+    if (!user) return {};
+    const { name, image } = user;
+    const title = `${name} | ${appName}`;
+    const metadata: Metadata = { title }
+    if (image) {
+        metadata.openGraph = {
+            images: [{ url: image, alt: name }],
+        }
     }
+    return metadata;
 }
 
 function LayoutCard({
