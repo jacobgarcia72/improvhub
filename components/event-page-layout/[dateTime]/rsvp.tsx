@@ -1,18 +1,20 @@
 'use client'
 import { setRsvpStatus } from "@/lib/shows";
+import { EventType } from "@/types";
 import { useState } from "react";
 
-export default function RSVP({ showId, showDate, userId, rsvp }: {
-    showId: string,
-    showDate: string,
+export default function RSVP({ eventId, eventDate, userId, rsvp, type }: {
+    eventId: string,
+    eventDate: string,
     userId: string,
-    rsvp: string | null
+    rsvp: string | null,
+    type: EventType
 }) {
     const [pending, setPending] = useState(false);
 
     const handleRsvp = async (value: string) => {
         setPending(true);
-        await setRsvpStatus(userId, showId, showDate, value);
+        await setRsvpStatus(userId, eventId, eventDate, value, type);
         setPending(false);
     }
 

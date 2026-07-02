@@ -1,10 +1,10 @@
 'use server';
 import slugify from 'slugify';
 import { redirect } from "next/navigation";
-import { saveShow, updateShow, updateShowAdmins, updateShowing } from "@/lib/shows";
-import { Candence, Event, Showing, Role, ShowCastMember, Theatre } from "@/types";
+import { saveEvent, updateEventAdmins, updateShowing } from "@/lib/shows";
+import { Candence, Event, Showing, Role, ShowCastMember, Theatre, EventType, EventOccurrence } from "@/types";
 import { sortDates } from "@/lib/dates";
-import { capitalize, removeLeadingArticles } from "@/lib/helper-functions";
+import { capitalize, pluralize, removeLeadingArticles } from "@/lib/helper-functions";
 import { Team } from '@/types';
 import { destroyImage, uploadImage } from '@/lib/cloudinary';
 import { getTeam, getTeamMembers, leaveTeam as leaveTeamRecord, saveTeam, updateTeam as updateTeamRecord, updateTeamDetails as updateTeamDetailsRecord } from '@/lib/teams';
@@ -12,29 +12,29 @@ import { getCurrentUserId, updateUser } from "@/lib/users";
 import { revalidatePath } from 'next/cache';
 import { getTheatre, saveTheatre, updateTheatre } from '@/lib/theatres';
 
-export async function postShow(existingShow: Event | null = null, prevState: void | { message?: string }, formData: FormData) {
+export async function postEvent(type: EventType, existingEvent: Event | null = null, prevState: void | { message?: string }, formData: FormData) {
     const creatorId = await getCurrentUserId();
     if (!creatorId) throw new Error('You must be logged in to continue');
 
     const title = (formData.get('title') as string)?.trim() || null;
     if (!title) return { message: 'Title is required' };
 
-    const ticketsUrl = (formData.get('ticketsUrl') as string)?.trim() || null;
+    const ticketsUrl = type === 'show' && (formData.get('ticketsUrl') as string)?.trim() || null;
     if (ticketsUrl) {
         const isValid = URL.canParse(ticketsUrl);
         if (!isValid) return { message: 'Tickets link must be a valid URL' };
     }
 
     const imageFile = formData.get('image') as File || null;
-    let imageUrl = existingShow?.image || '';
+    let imageUrl = existingEvent?.image || '';
     if (imageFile && imageFile.size) {
         if (imageFile.size > 5 * 1024 * 1024) { // 5MB limit
             return { message: 'Image file size exceeds 5MB limit' };
         }
         try {
-            imageUrl = await uploadImage(imageFile, 'shows');
-            if (existingShow?.image && existingShow?.image !== imageUrl) {
-                await destroyImage(existingShow.image);
+            imageUrl = await uploadImage(imageFile, `${pluralize(type)}`);
+            if (existingEvent?.image && existingEvent?.image !== imageUrl) {
+                await destroyImage(existingEvent.image);
             }
         } catch {
             throw new Error('Image upload failed');
@@ -76,8 +76,8 @@ export async function postShow(existingShow: Event | null = null, prevState: voi
         }
     }
 
-    const price = formData.get('price');
-    const doorPrice = formData.get('doorPrice');
+    const price = type === 'show' ? formData.get('price') : null;
+    const doorPrice = type === 'show' ? formData.get('doorPrice') : null;
 
     const runtimeHours = Number(formData.get('runtimeHours'));
     const runtimeMinutes = Number(formData.get('runtimeMinutes'));
@@ -87,13 +87,13 @@ export async function postShow(existingShow: Event | null = null, prevState: voi
     }
 
     const photoCredit = (formData.get('photoCredit') as string)?.trim() || null;
-    const notes = (formData.get('notes') as string)?.trim() || null;
+    const notes = type === 'show' && (formData.get('notes') as string)?.trim() || null;
 
     let description = formData.get('description') as string || null;
     if (description) description = description.replaceAll(/\r\n/g, '<br>').replaceAll(/\n/g, '<br>').replaceAll(/\r/g, '<br>');
 
-    const show: Event = {
-        id: existingShow?.id || '',
+    let event: Event = {
+        id: existingEvent?.id || '',
         creatorId,
         admins: [creatorId],
         title,
@@ -107,24 +107,23 @@ export async function postShow(existingShow: Event | null = null, prevState: voi
         recurringTime,
         cadence,
         runtime,
-        price: price === '' ? null : Number(price),
-        doorPrice: doorPrice === '' ? null : Number(doorPrice),
-        ticketsUrl,
-        notes
     };
-    const showings: Showing[] | null = dateTimes?.map((dateTime => ({
-        eventId: show.id,
+    if (type === 'show') {
+        event = {
+            price: price === '' ? null : Number(price),
+            doorPrice: doorPrice === '' ? null : Number(doorPrice),
+            ticketsUrl,
+            notes,
+            ...event
+        }
+    }
+    const occurrences: EventOccurrence[] | null = dateTimes?.map((dateTime => ({
+        eventId: event.id,
         dateTime
     }))) || null;
 
-    let showId = '';
-    if (existingShow?.id) {
-        showId = existingShow.id;
-        await updateShow(showId, show, showings);
-    } else {
-        showId = await saveShow(show, showings);
-    }
-    redirect(`/shows/${showId}`);
+    const eventId = await saveEvent(type, event, occurrences);
+    redirect(`/${pluralize(type)}/${eventId}`);
 }
 
 export async function postShowCast(showId: string, showDateTime: string, prevState: void | { message?: string }, formData: FormData) {
@@ -170,7 +169,7 @@ export async function postShowCast(showId: string, showDateTime: string, prevSta
     redirect(`/shows/${showId}/${showDateTime}`);
 }
 
-export async function postShowAdmins(showId: string, prevState: void | { message?: string }, formData: FormData) {
+export async function postEventAdmins(type: EventType, eventId: string, prevState: void | { message?: string }, formData: FormData) {
     const data = Object.fromEntries(formData.entries());
 
     const admins = Object.keys(data)
@@ -180,10 +179,10 @@ export async function postShowAdmins(showId: string, prevState: void | { message
             Boolean((data[key] as string).trim())
         ))
         .map((key) => (data[`${key}-id`] as string)?.trim());
-    if (!admins.length) return { message: 'Shows must have at least one admin' };
-    await updateShowAdmins(showId, admins);
-    revalidatePath(`/shows/${showId}/`);
-    redirect(`/shows/${showId}/`);
+    if (!admins.length) return { message: `${capitalize(pluralize(type))} must have at least one admin` };
+    await updateEventAdmins(type, eventId, admins);
+    revalidatePath(`/${pluralize(type)}/${eventId}/`);
+    redirect(`/${pluralize(type)}/${eventId}/`);
 }
 
 export async function postTeam(prevState: void | { message?: string }, formData: FormData) {

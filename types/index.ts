@@ -27,30 +27,35 @@ export const CadenceText: { [cadence: string]: string } = {
     'last': 'Last X of every month'
 }
 
+export type EventType = 'show' | 'jam' | 'class' | 'workshop';
+
 export interface Event {
     id: string;
     creatorId: string;
     admins: string[];
     title: string;
-    recurringDay: number | null;
-    recurringTime: string | null;
-    cadence: Candence | null;
     description: string | null;
     theatre: string | null;
     city: string | null;
     state: string | null;
-    price: number | null;
-    doorPrice: number | null;
-    ticketsUrl: string | null;
     image: string | null;
     photoCredit: string | null;
     runtime: string | null;
-    notes: string | null;
+    recurringDay?: number | null;
+    recurringTime?: string | null;
+    cadence?: Candence | null;
+    price?: number | null;
+    doorPrice?: number | null;
+    ticketsUrl?: string | null;
+    notes?: string | null;
 }
 
-export interface Showing {
+export interface EventOccurrence {
     eventId: string;
     dateTime: string;
+}
+
+export interface Showing extends EventOccurrence {
     lookingForTeams?: boolean;
     lookingForPlayers?: boolean;
     lookingForDirectors?: boolean;
@@ -164,8 +169,14 @@ export interface Comment {
 export type NewsType = (
     'new_theatre' |
     'new_show' | 
+    'new_jam' | 
+    'new_workshop' | 
+    'new_class' | 
     'cast_in_show' | 
     'going_to_show' | 
+    'going_to_jam' | 
+    'going_to_workshop' | 
+    'going_to_class' | 
     'new_team' | 
     'joined_team'
 );

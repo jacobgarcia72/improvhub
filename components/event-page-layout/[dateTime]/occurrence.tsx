@@ -2,48 +2,48 @@ import { getRsvpCount, getRsvpStatus, getShowCast } from "@/lib/shows";
 import { getCurrentUserId } from "@/lib/users";
 import CastingTools from "./casting-tools";
 import CastList from "@/components/cast-list";
-import { Event, ShowCastMember, Team } from "@/types";
+import { Event, EventType, ShowCastMember, Team } from "@/types";
 import CastRoleBanner from "./cast-role-banner";
 import { getTeamsByUser } from "@/lib/teams";
-import CancelShowing from "./cancel-showing";
+import CancelOccurrence from "./cancel-occurrence";
 import RSVP from "./rsvp";
 import AddToCalendarButton from "./add-to-calendar";
 import { getTheatre } from "@/lib/theatres";
 import { Suspense } from "react";
 import Loader from "@/components/loader";
 
-export default async function Showing({ id, dateTime, parentShow, isASeries } :
-    { id: string, dateTime: string, parentShow: Event, isASeries: boolean }
+export default async function Occurrence({ id, dateTime, parentEvent, isASeries, type } :
+    { id: string, dateTime: string, parentEvent: Event, isASeries: boolean, type: EventType }
 ) {
-    const showDate = dateTime.replaceAll('%20', ' ').replaceAll('%3A', ':');
+    const eventDate = dateTime.replaceAll('%20', ' ').replaceAll('%3A', ':');
 
     const userId = await getCurrentUserId();
-    const isAdmin = userId && parentShow?.admins.includes(userId);
+    const isAdmin = userId && parentEvent?.admins.includes(userId);
 
-    const showCast: ShowCastMember[] = await getShowCast(id, dateTime);
-    const userRoles = userId ? (
+    const showCast: ShowCastMember[] = type === 'show' ? await getShowCast(id, dateTime) : [];
+    const userRoles = (type === 'show' && userId) ? (
         showCast.filter((c) => c.id === userId).map((c) => c.role)
     ) : null;
     let userTeams: Team[] = [];
-    if (userId) {
+    if (type === 'show' && userId) {
         const teams = await getTeamsByUser(userId);
         const teamIds = teams.map((team) => team.id);
         userTeams = showCast.filter((c) => c.id && c.role === 'team' && teamIds.includes(c.id)).map((c) => teams.find((t) => t.id === c.id)).filter((t) => t !== undefined);
     }
     const isDirector = userRoles?.includes('director');
 
-    const rsvp = userId && !userRoles?.length ? await getRsvpStatus(userId, parentShow.id, showDate) : null;
+    const rsvp = userId && !userRoles?.length ? await getRsvpStatus(userId, parentEvent.id, eventDate, type) : null;
 
-    const goingCount = await getRsvpCount(parentShow.id, showDate, 'g');
-    const interestedCount = await getRsvpCount(parentShow.id, showDate, 'i');
+    const goingCount = await getRsvpCount(parentEvent.id, eventDate, 'g', type);
+    const interestedCount = await getRsvpCount(parentEvent.id, eventDate, 'i', type);
 
-    let location = parentShow.theatre && (await getTheatre(parentShow.theatre))?.name || undefined;
-    if (location && parentShow.city && parentShow.state) location += `, ${parentShow.city} ${parentShow.state}`;
+    let location = parentEvent.theatre && (await getTheatre(parentEvent.theatre))?.name || undefined;
+    if (location && parentEvent.city && parentEvent.state) location += `, ${parentEvent.city} ${parentEvent.state}`;
     return <Suspense fallback={<Loader />}>
         <div className="flex flex-col pb-3 border-b border-gray-400 mb-2">
             {userRoles?.length ? userRoles.map((role) => (
                 <CastRoleBanner
-                    showTitle={parentShow.title}
+                    showTitle={parentEvent.title}
                     roleId={userId}
                     showId={id}
                     dateTime={dateTime}
@@ -54,7 +54,7 @@ export default async function Showing({ id, dateTime, parentShow, isASeries } :
             {userTeams?.length ? userTeams.map((team) => (
                 <CastRoleBanner
                     teamName={team.name}
-                    showTitle={parentShow.title}
+                    showTitle={parentEvent.title}
                     roleId={team.id}
                     showId={id}
                     dateTime={dateTime}
@@ -65,15 +65,16 @@ export default async function Showing({ id, dateTime, parentShow, isASeries } :
             <div className="pt-1 pb-1 px-6">
                 <div className="w-full flex flex-row items-center justify-between items-start">
                     <div className="mb-3">
-                        <AddToCalendarButton show={parentShow} date={showDate} location={location} />
+                        <AddToCalendarButton event={parentEvent} date={eventDate} location={location} />
                     </div>
                     <div className="flex flex-col items-end">
                         {userId && !userRoles?.length ? (
                             <RSVP
                                 userId={userId}
-                                showId={parentShow.id}
-                                showDate={showDate}
+                                eventId={parentEvent.id}
+                                eventDate={eventDate}
                                 rsvp={rsvp}
+                                type={type}
                             />
                         ) : null}
                         {goingCount > 0 && <p className="label mr-4">{`${goingCount} Going`}</p>}
@@ -81,19 +82,22 @@ export default async function Showing({ id, dateTime, parentShow, isASeries } :
                     </div>
                 </div>
             </div>
-            <div className="mb-6">
-                <CastList castMembers={showCast} noConfirm />
-            </div>
-            {(isAdmin || isDirector) ? (
-                <CastingTools id={id}
-                    showDate={showDate}
-                />
-            ) : null}
+            {type === 'show' && <>
+                <div className="mb-6">
+                    <CastList castMembers={showCast} noConfirm />
+                </div>
+                {(isAdmin || isDirector) ? (
+                    <CastingTools id={id}
+                        showDate={eventDate}
+                    />
+                ) : null}
+            </>}
             {isAdmin && isASeries && <div className="w-full flex flex-row justify-center mt-2">
-                <CancelShowing
-                    showTitle={parentShow.title}
-                    showId={id}
+                <CancelOccurrence
+                    eventTitle={parentEvent.title}
+                    eventId={id}
                     dateTime={dateTime}
+                    type={type}
                 />
             </div>}
         </div>

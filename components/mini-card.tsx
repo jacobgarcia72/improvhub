@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Border } from "./border";
 import { formatDateTimeForDisplay } from "@/lib/dates";
 import { getTheatre } from "@/lib/theatres";
+import { pluralize } from "@/lib/helper-functions";
 
 export default async function MiniCard({ item, type, dateTime, includeDescription }: {
     item: Event | Team | User,
@@ -17,7 +18,7 @@ export default async function MiniCard({ item, type, dateTime, includeDescriptio
     );
     let name = 'name' in item ? item.name : 'title' in item ? item.title : '';
     if (!name && 'firstName' in item && 'lastName' in item) name = `${item.firstName} ${item.lastName}`;
-    let url = `/${type === 'user' ? 'profile' : `${type}s`}/${item.id}/`;
+    let url = `/${type === 'user' ? 'profile' : `${pluralize(type)}`}/${item.id}/`;
     if (dateTime) url += `${dateTime}/`;
     return (
         <Link href={url}>

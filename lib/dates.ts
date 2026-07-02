@@ -102,9 +102,9 @@ export const sortDates = (dates: string[]): string[] => {
 
 export function dateMatchesRecurringSchedule(
     dateTime: string,
-    recurringDay: number | null,
-    cadence: string | null,
-    recurringTime: string | null
+    recurringDay?: number | null,
+    cadence?: string | null,
+    recurringTime?: string | null
 ): boolean {
     if (recurringDay === null || recurringDay === undefined || !cadence) return false;
     const [dateString, time] = dateTime.split(' ');

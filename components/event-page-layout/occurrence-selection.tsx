@@ -1,15 +1,18 @@
 'use client'
 import { formatDateTimeForDisplay } from "@/lib/dates"
+import { pluralize } from "@/lib/helper-functions"
+import { EventType } from "@/types"
 import { useRouter } from "next/navigation"
 
-export default function ShowingSelection({ dateTimes, showId }: {
+export default function OccurrenceSelection({ dateTimes, eventId, type }: {
     dateTimes: string[],
-    showId: string
+    eventId: string,
+    type: EventType
 }) {
     const router = useRouter()
     const handleDateSelection = (dateTime: string) => {
         if (dateTime) {
-            router.push(`/shows/${showId}/${dateTime}/`, { scroll: true });
+            router.push(`/${pluralize(type)}/${eventId}/${dateTime}/`, { scroll: true });
         }
     }
     return <>

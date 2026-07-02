@@ -2,29 +2,32 @@
 import ConfirmModal from "@/components/confirm-modal";
 import Button from "@/components/form/button";
 import { formatDateTimeForDisplay } from "@/lib/dates";
-import { deleteShowing } from "@/lib/shows";
+import { pluralize } from "@/lib/helper-functions";
+import { deleteOccurrence } from "@/lib/shows";
+import { EventType } from "@/types";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-export default function CancelShowing({ dateTime, showTitle, showId }: {
-    showTitle: string,
-    showId: string,
+export default function CancelOccurrence({ dateTime, eventTitle, eventId, type }: {
+    eventTitle: string,
+    eventId: string,
     dateTime: string,
+    type: EventType
 }) {
     const router = useRouter();
     const [openModal, setOpenModal] = useState<boolean>(false);
 
     const handleConfirm = async () => {
-        await deleteShowing(showId, dateTime);
+        await deleteOccurrence(eventId, dateTime, type);
         setOpenModal(false);
-        router.push(`/shows/${showId}/`, { scroll: true });
+        router.push(`/${pluralize(type)}/${eventId}/`, { scroll: true });
     }
-    const show = `${showTitle}, ${formatDateTimeForDisplay(dateTime.replaceAll('%20', ' ').replaceAll('%3A', ':'))}`;
+    const event = `${eventTitle}, ${formatDateTimeForDisplay(dateTime.replaceAll('%20', ' ').replaceAll('%3A', ':'))}`;
     return <>
         <ConfirmModal
             open={openModal}
-            title="Cancel showing?"
-            description={`Are you sure you want to cancel ${show}?`}
+            title={`Cancel ${type} occurrence?`}
+            description={`Are you sure you want to cancel ${event}?`}
             onCancel={() => setOpenModal(false)}
             onConfirm={handleConfirm}
             confirmLabel="Yes"
@@ -32,7 +35,7 @@ export default function CancelShowing({ dateTime, showTitle, showId }: {
         />
         <Button
             style="link"
-            caption="Cancel Showing"
+            caption="Cancel Occurrence"
             onClick={() => setOpenModal(true)}
         />
     </>

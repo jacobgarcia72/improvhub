@@ -1,5 +1,5 @@
-import ShowForm from '@/components/form/show-form/show-form';
+import Event from '@/components/form/event-form/event-form';
 
 export default function NewShowPage() {
-    return <ShowForm />
+    return <Event type="show" />
 }

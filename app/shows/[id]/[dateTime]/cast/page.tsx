@@ -2,12 +2,12 @@ import { postShowCast } from "@/actions";
 import { Border } from "@/components/border";
 import CastingInputs from "@/components/form/casting-inputs";
 import Form from "@/components/form/form";
-import { getShow, getShowCast, getShowing } from "@/lib/shows";
+import { getShow, getShowCast, getEventOccurrence } from "@/lib/shows";
 import { getCurrentUserId } from "@/lib/users";
 import { notFound, redirect } from "next/navigation";
-import ShowHeader from "../../show-header";
-import ShowDate from "../show-date";
 import { dateMatchesRecurringSchedule } from "@/lib/dates";
+import EventHeader from "@/components/event-page-layout/event-header";
+import EventDate from "@/components/event-page-layout/[dateTime]/event-date";
 
 export default async function ShowCastPage({ params } : {
     params: Promise<{ id: string, dateTime: string }>
@@ -16,7 +16,7 @@ export default async function ShowCastPage({ params } : {
     const parentShow = id ? await getShow(id) : null;
     if (!parentShow) notFound();
     const showDate = dateTime.replaceAll('%20', ' ').replaceAll('%3A', ':');
-    const showing = id ? await getShowing(id, showDate) : null;
+    const showing = id ? await getEventOccurrence(id, showDate, 'show') : null;
     const { recurringDay, recurringTime, cadence } = parentShow;
     if (!(showing || (
         cadence && dateMatchesRecurringSchedule(showDate, recurringDay, cadence, recurringTime)
@@ -37,8 +37,8 @@ export default async function ShowCastPage({ params } : {
     }
 
     return <>
-        <ShowHeader show={parentShow} showImage={false} />
-        <ShowDate showDate={showDate} />
+        <EventHeader event={parentShow} eventImage={false} />
+        <EventDate eventDate={showDate} type="show" />
         <Border className="py-2 px-4 my-1">
             <Form
                 buttonCaption="Save Cast"

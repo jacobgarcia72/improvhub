@@ -5,12 +5,12 @@ import { useEffect, useState } from "react";
 import StateSelect from "./state-select";
 import { Event, InputOptionObject, Theatre } from "@/types";
 
-export default function TheatreSelect({ existingShow }: {
-    existingShow?: Event
+export default function TheatreSelect({ existingEvent }: {
+    existingEvent?: Event
 }) {
     const [theatres, setTheatres] = useState<InputOptionObject[]>([]);
-    const [city, setCity] = useState<string>(existingShow?.city || '');
-    const [state, setState] = useState<string>(existingShow?.state || '');
+    const [city, setCity] = useState<string>(existingEvent?.city || '');
+    const [state, setState] = useState<string>(existingEvent?.state || '');
     useEffect(() => {
         const fetchTheatres = async () => {
             const res = await fetch('/api/theatres');
@@ -34,8 +34,8 @@ export default function TheatreSelect({ existingShow }: {
         <div className="flex flex-row flex-wrap">
             <div className="w-[250px] pr-2">
                 <Autocomplete
-                    startingValue={existingShow?.theatre || undefined}
-                    label="Theatre"
+                    startingValue={existingEvent?.theatre || undefined}
+                    label="Theatre / Venue"
                     name="theatre"
                     options={theatres}
                     onChange={(value) => {

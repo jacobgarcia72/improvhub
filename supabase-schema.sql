@@ -66,7 +66,7 @@ create table if not exists shows (
   notes text
 );
 
-create table if not exists showings (
+create table if not exists show_occurrences (
   event_id text not null references shows(id) on delete cascade,
   date_time text not null,
   looking_for_teams boolean,
@@ -85,9 +85,33 @@ create table if not exists showing_cast (
   date_time text not null
 );
 
+create table if not exists jams (
+  id text primary key,
+  creator_id text not null,
+  admins text[] not null,
+  title text not null,
+  recurring_day text,
+  recurring_time text,
+  cadence text,
+  description text,
+  theatre text,
+  city text,
+  state text,
+  image text,
+  photo_credit text,
+  runtime text
+);
+
+create table if not exists jam_occurrences (
+  event_id text not null references jams(id) on delete cascade,
+  date_time text not null,
+  primary key (event_id, date_time)
+);
+
 create table if not exists rsvps (
   user_id text not null references users(id) on delete cascade,
-  show_id text not null references shows(id) on delete cascade,
+  event_id text not null,
+  type text not null,
   date_time text,
   status text
 );
@@ -182,8 +206,10 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.sessions TO service_role;
 -- Grant privileges on other tables your app writes to
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.theatres TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.shows TO service_role;
-GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.showings TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.show_occurrences TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.showing_cast TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.jams TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.jam_occurrences TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.rsvps TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.teams TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.team_members TO service_role;

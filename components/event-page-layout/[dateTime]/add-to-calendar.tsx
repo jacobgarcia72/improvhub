@@ -4,7 +4,7 @@ import { Event } from '@/types';
 import { AddToCalendarButton } from 'add-to-calendar-button-react';
 import { useEffect, useState } from 'react';
 
-export default function AddToCalendar({ show, date, location }: { show: Event, date: string, location?: string }) {
+export default function AddToCalendar({ event, date, location }: { event: Event, date: string, location?: string }) {
     const [isMounted, setIsMounted] = useState(false);
 
     useEffect(() => {
@@ -17,12 +17,12 @@ export default function AddToCalendar({ show, date, location }: { show: Event, d
         return null; 
     }
     const [startDate, startTime] = date.split(' ');
-    const [endDate, endTime] = getEndDateAndTimeFromRuntime(startDate, startTime, show.runtime);
+    const [endDate, endTime] = getEndDateAndTimeFromRuntime(startDate, startTime, event.runtime);
     const timezone =  Intl.DateTimeFormat().resolvedOptions().timeZone;
     return (
         <AddToCalendarButton
-            name={show.title}
-            description={show.description || undefined}
+            name={event.title}
+            description={event.description || undefined}
             timeZone={timezone}
             location={location}
             startDate={startDate}

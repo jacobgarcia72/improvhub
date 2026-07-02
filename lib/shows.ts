@@ -3,8 +3,8 @@
 
 import slugify from 'slugify';
 
-import { Event, Role, ShowCastMember, Showing, Theatre, User } from "@/types";
-import { camelCaseObject, removeLeadingArticles, snakeCaseObject } from './helper-functions';
+import { Event, EventOccurrence, EventType, Role, ShowCastMember, Showing, Theatre, User } from "@/types";
+import { camelCaseObject, pluralize, removeLeadingArticles, snakeCaseObject } from './helper-functions';
 import { supabaseAdmin } from './supabase-server';
 import { getCitiesWithinRange } from './location';
 import { revalidatePath } from 'next/cache';
@@ -12,14 +12,18 @@ import { dateMatchesRecurringSchedule, getStartOfToday, normalizeDateTime } from
 import { getTeamsByUser } from './teams';
 import { createNewsFeedItem, deleteNewsFeedItem } from './news';
 
-export async function getShow(id: string): Promise<Event | null> {
+export async function getEvent(id: string, type: EventType): Promise<Event | null> {
     const { data, error } = await supabaseAdmin
-        .from('shows')
+        .from(`${pluralize(type)}`)
         .select('*')
         .eq('id', id)
         .maybeSingle();
     if (error) throw error;
     return data ? camelCaseObject(data) as Event : null;
+}
+
+export async function getShow(id: string): Promise<Event | null> {
+    return await getEvent(id, 'show');
 }
 
 export async function getShowsByAdmin(userId: string): Promise<Event[]> {
@@ -40,7 +44,7 @@ export async function getShowsLookingForRole(role: Role | 'team', user: User): P
         coach: null
     }[role];
     const { data } = await supabaseAdmin
-        .from('showings')
+        .from('show_occurrences')
         .select('*')
         .eq(key, true)
         .gte('date_time', getStartOfToday());
@@ -122,7 +126,7 @@ export async function getUpcomingShowsByTheatre(theatre: Theatre): Promise<{ sho
         .or(`theatre.eq.${theatre.id},theatre.ilike.${theatre.name},theatre.ilike.${removeLeadingArticles(theatre.name)}`);
     const showsAtTheatre = showData || [];
     const { data } = await supabaseAdmin
-        .from('showings')
+        .from('show_occurrences')
         .select('event_id, date_time')
         .in('event_id', showsAtTheatre.map(({ id }: { id: string }) => id))
         .gte('date_time', getStartOfToday());
@@ -153,19 +157,23 @@ export async function getUpcomingShowsByTheatre(theatre: Theatre): Promise<{ sho
     return res;
 }
 
-export async function getShowings(eventId: string): Promise<Showing[]> {
+export async function getEventOccurrences(eventId: string, type: EventType): Promise<EventOccurrence[]> {
     const { data, error } = await supabaseAdmin
-        .from('showings')
+        .from(`${type}_occurrences`)
         .select('*')
         .eq('event_id', eventId);
     if (error) throw error;
-    return (data || []).map(camelCaseObject) as Showing[];
+    return (data || []).map(camelCaseObject) as EventOccurrence[];
 }
 
-export async function getShowing(eventId: string, dateTime: string): Promise<Showing | null> {
+export async function getShowings(eventId: string): Promise<Showing[]> {
+    return await getEventOccurrences(eventId, 'show') as Showing[];
+}
+
+export async function getEventOccurrence(eventId: string, dateTime: string, type: EventType): Promise<Showing | null> {
     const normalizedDateTime = dateTime.replaceAll('%20', ' ').replaceAll('%3A', ':');
     const { data, error } = await supabaseAdmin
-        .from('showings')
+        .from(`${type}_occurrences`)
         .select('*')
         .eq('event_id', eventId)
         .eq('date_time', normalizedDateTime)
@@ -174,9 +182,9 @@ export async function getShowing(eventId: string, dateTime: string): Promise<Sho
     return data ? camelCaseObject(data) as Showing : null;
 }
 
-export async function getIsASeries(eventId: string): Promise<boolean> {
+export async function getIsASeries(eventId: string, type: EventType): Promise<boolean> {
     const { count, error } = await supabaseAdmin
-        .from('showings')
+        .from(`${type}_occurrences`)
         .select('*', { count: 'exact', head: true })
         .eq('event_id', eventId);
     if (error) throw error;
@@ -185,7 +193,7 @@ export async function getIsASeries(eventId: string): Promise<boolean> {
 
 export async function getShowingsForEvents(eventIds: string[]): Promise<Showing[]> {
     const { data, error } = await supabaseAdmin
-        .from('showings')
+        .from('show_occurrences')
         .select('*')
         .in('event_id', eventIds);
     if (error) throw error;
@@ -223,193 +231,160 @@ export async function getShowsInRange(cityOrZipcode: string, miles: number) {
         .map(camelCaseObject) as Event[];
 }
 
-export async function getRsvpStatus(userId: string, showId: string, showDate: string): Promise<string | null> {
+export async function getRsvpStatus(userId: string, eventId: string, eventDate: string, type: EventType): Promise<string | null> {
     const { data } = await supabaseAdmin
         .from('rsvps')
         .select('status')
         .eq('user_id', userId)
-        .eq('show_id', showId)
-        .eq('date_time', showDate)
+        .eq('event_id', eventId)
+        .eq('date_time', eventDate)
+        .eq('type', type)
         .maybeSingle();
     return data?.status || null;
 }
 
-export async function getRsvpCount(showId: string, showDate: string, status: string): Promise<number> {
+export async function getRsvpCount(eventId: string, eventDate: string, status: string, type: EventType): Promise<number> {
     const { count } = await supabaseAdmin
         .from('rsvps')
         .select('*', { count: 'exact', head: true })
-        .eq('show_id', showId)
-        .eq('date_time', showDate)
+        .eq('event_id', eventId)
+        .eq('date_time', eventDate)
+        .eq('type', type)
         .eq('status', status)
         .maybeSingle();
     return count || 0;
 }
 
-export async function setRsvpStatus(userId: string, showId: string, showDate: string, value: string): Promise<void> {
+export async function setRsvpStatus(userId: string, eventId: string, eventDate: string, value: string, type: EventType): Promise<void> {
     await supabaseAdmin
         .from('rsvps')
         .delete()
         .eq('user_id', userId)
-        .eq('show_id', showId)
-        .eq('date_time', showDate);
+        .eq('event_id', eventId)
+        .eq('date_time', eventDate)
+        .eq('type', type);
     await supabaseAdmin
         .from('rsvps')
         .insert({
             user_id: userId,
-            show_id: showId,
-            date_time: showDate,
+            event_id: eventId,
+            date_time: eventDate,
+            type: type,
             status: value
         });
-    revalidatePath(`/shows/${showId}/${showDate}/`);
+    revalidatePath(`/${pluralize(type)}/${eventId}/${eventDate}/`);
     if (value === 'g') {
-        await createNewsFeedItem('friend', userId, 'going_to_show', showId, showDate);
+        await createNewsFeedItem('friend', userId, `going_to_${type}`, eventId, eventDate);
     } else {
-        await deleteNewsFeedItem('friend', userId, 'going_to_show', showId, showDate);
+        await deleteNewsFeedItem('friend', userId, `going_to_${type}`, eventId, eventDate);
     }
 }
 
 
-export async function saveShow(show: Event, showings: Showing[] | null): Promise<string> {
-    const baseId = slugify(`${show.theatre ? show.theatre + ' ' : ''}${removeLeadingArticles(show.title)}`, { lower: true, trim: true });
-    let showId = baseId;
-    let counter = 1;
-    let existingShow = await getShow(showId);
-    while (existingShow) {
-        counter++;
-        showId = `${baseId}-${counter}`;
-        existingShow = await getShow(showId);
-    }
-    show.id = showId;
-
-    const { error: showInsertError } = await supabaseAdmin
-        .from('shows')
-        .insert({
-            id: show.id,
-            creator_id: show.creatorId,
-            admins: show.admins,
-            title: show.title,
-            recurring_day: show.recurringDay,
-            recurring_time: show.recurringTime,
-            cadence: show.cadence,
-            description: show.description,
-            theatre: show.theatre,
-            city: show.city,
-            state: show.state,
-            price: show.price,
-            door_price: show.doorPrice,
-            tickets_url: show.ticketsUrl,
-            image: show.image,
-            photo_credit: show.photoCredit,
-            runtime: show.runtime,
-            notes: show.notes
-        });
-    if (showInsertError) throw showInsertError;
-
-    if (showings?.length) {
-        const showingsToInsert = showings.map((showing) => ({
-            event_id: show.id,
-            date_time: showing.dateTime
-        }));
-        const { error: showingInsertError } = await supabaseAdmin
-            .from('showings')
-            .insert(showingsToInsert);
-        if (showingInsertError) throw showingInsertError;
-    }
-    if (show.theatre) {
-        await createNewsFeedItem('theatre', show.theatre, 'new_show', show.id, null, show.admins[0]);
-    }
-    return show.id;
-}
-
-export async function updateShow(showId: string, show: Event, showings: Showing[] | null): Promise<void> {
-    const { error: showInsertError } = await supabaseAdmin
-        .from('shows')
-        .update({
-            title: show.title,
-            recurring_day: show.recurringDay,
-            recurring_time: show.recurringTime,
-            cadence: show.cadence,
-            description: show.description,
-            theatre: show.theatre,
-            city: show.city,
-            state: show.state,
-            price: show.price,
-            door_price: show.doorPrice,
-            tickets_url: show.ticketsUrl,
-            image: show.image,
-            photo_credit: show.photoCredit,
-            runtime: show.runtime,
-            notes: show.notes
-        })
-        .eq('id', showId);
-    if (showInsertError) throw showInsertError;
-
-    const existingShowings = await getShowings(showId);
-    if ((show.recurringDay || show.recurringDay === 0) && existingShowings.length) {
-        const showingsToKeep = existingShowings.filter((existingShowing) => (
-            dateMatchesRecurringSchedule(
-                existingShowing.dateTime,
-                show.recurringDay,
-                show.cadence,
-                show.recurringTime
-            )
-        ));
-        const showingsToDelete = existingShowings.filter((existingShowing) => (
-            !showingsToKeep.some((keeping) => keeping.dateTime === existingShowing.dateTime)
-        ));
-
-        if (showingsToDelete.length) {
-            for (let i = 0; i < showingsToDelete.length; i++) {
-                await supabaseAdmin
-                    .from('showings')
-                    .delete()
-                    .eq('event_id', showId)
-                    .eq('date_time', showingsToDelete[i].dateTime);
-            }
+export async function saveEvent(type: EventType, event: Event, occurrences: EventOccurrence[] | null): Promise<string> {
+    const isNewEvent = !event.id;
+    if (isNewEvent) {
+        const baseId = slugify(`${event.theatre ? event.theatre + ' ' : ''}${removeLeadingArticles(event.title)}`, { lower: true, trim: true });
+        let eventId = baseId;
+        let counter = 1;
+        let existingEvent = await getEvent(eventId, type);
+        while (existingEvent) {
+            counter++;
+            eventId = `${baseId}-${counter}`;
+            existingEvent = await getEvent(eventId, type);
         }
-    } else if (showings?.length) {
-        const newShowings = showings
-            .filter((showing) => !existingShowings
-                .find((existingShowing) => (
-                    showing.dateTime === existingShowing.dateTime
-                ))
-            )
-            .map((showing) => ({
-                event_id: showId,
-                date_time: showing.dateTime
+        event.id = eventId;
+    }
+
+    const { error: insertError } = await supabaseAdmin
+        .from(`${pluralize(type)}`)
+        .upsert(snakeCaseObject(event));
+    if (insertError) throw insertError;
+
+    if (isNewEvent) {
+        if (occurrences?.length) {
+            const occurrencesToInsert = occurrences.map((occurrence) => ({
+                event_id: event.id,
+                date_time: occurrence.dateTime
             }));
-        const showingsToDelete = existingShowings
-            .filter((existingShowing) => !showings
-                .find((showing) => (
-                    showing.dateTime === existingShowing.dateTime
-                ))
-            );
-        if (showingsToDelete.length) {
-            for (let i = 0; i < showingsToDelete.length; i++) {
-                await supabaseAdmin
-                    .from('showings')
-                    .delete()
-                    .eq('event_id', showId)
-                    .eq('date_time', showingsToDelete[i].dateTime);
-            };
+            const { error: occurrenceInsertError } = await supabaseAdmin
+                .from(`${type}_occurrences`)
+                .insert(occurrencesToInsert);
+            if (occurrenceInsertError) throw occurrenceInsertError;
         }
-        await supabaseAdmin
-            .from('showings')
-            .insert(newShowings);
+        if (event.theatre) {
+            await createNewsFeedItem('theatre', event.theatre, `new_${type}`, event.id, null, event.admins[0]);
+        }
+        return event.id;
+    } else {
+        const existingOccurrences = await getEventOccurrences(event.id, type);
+        if ((event.recurringDay || event.recurringDay === 0) && existingOccurrences.length) {
+            const occurrencesToKeep = existingOccurrences.filter((existingOccurrence) => (
+                dateMatchesRecurringSchedule(
+                    existingOccurrence.dateTime,
+                    event.recurringDay as number | null,
+                    event.cadence as string | null,
+                    event.recurringTime as string | null
+                )
+            ));
+            const occurrencesToDelete = existingOccurrences.filter((existingOccurrence) => (
+                !occurrencesToKeep.some((keeping) => keeping.dateTime === existingOccurrence.dateTime)
+            ));
+
+            if (occurrencesToDelete.length) {
+                for (let i = 0; i < occurrencesToDelete.length; i++) {
+                    await supabaseAdmin
+                        .from(`${type}_occurrences`)
+                        .delete()
+                        .eq('event_id', event.id)
+                        .eq('date_time', occurrencesToDelete[i].dateTime);
+                }
+            }
+        } else if (occurrences?.length) {
+            const newOccurrences = occurrences
+                .filter((occurrence) => !existingOccurrences
+                    .find((existingOccurrence) => (
+                        occurrence.dateTime === existingOccurrence.dateTime
+                    ))
+                )
+                .map((occurrence) => ({
+                    event_id: event.id,
+                    date_time: occurrence.dateTime
+                }));
+            const occurrencesToDelete = existingOccurrences
+                .filter((existingOccurrence) => !occurrences
+                    .find((occurrence) => (
+                        occurrence.dateTime === existingOccurrence.dateTime
+                    ))
+                );
+            if (occurrencesToDelete.length) {
+                for (let i = 0; i < occurrencesToDelete.length; i++) {
+                    await supabaseAdmin
+                        .from(`${type}_occurrences`)
+                        .delete()
+                        .eq('event_id', event.id)
+                        .eq('date_time', occurrencesToDelete[i].dateTime);
+                };
+            }
+            await supabaseAdmin
+                .from(`${type}_occurrences`)
+                .insert(newOccurrences);
+        }
+    return event.id;
     }
 }
 
-export async function updateShowAdmins(showId: string, admins: string[]) {
+export async function updateEventAdmins(type: EventType, eventId: string, admins: string[]) {
     await supabaseAdmin
-        .from('shows')
+        .from(pluralize(type))
         .update({ admins })
-        .eq('id', showId);
+        .eq('id', eventId);
 }
 
 export async function updateShowing(showId: string, dateTime: string, updates: Partial<Showing>, cast?: Partial<ShowCastMember>[]): Promise<boolean> {
     const normalizedDateTime = dateTime.replaceAll('%20', ' ').replaceAll('%3A', ':');
     const { error: updateError } = await supabaseAdmin
-        .from('showings')
+        .from('show_occurrences')
         .update(snakeCaseObject(updates))
         .eq('event_id', showId)
         .eq('date_time', normalizedDateTime);
@@ -459,33 +434,37 @@ export async function removeCastMember(showId: string, dateTime: string, userId:
     await deleteNewsFeedItem(role === 'team' ? 'team' : 'friend', userId, 'cast_in_show', showId, normalizedDateTime, role);
 }
 
-export async function deleteShowing(eventId: string, dateTime: string): Promise<void> {
+export async function deleteOccurrence(eventId: string, dateTime: string, type: EventType): Promise<void> {
     const normalizedDateTime = dateTime.replaceAll('%20', ' ').replaceAll('%3A', ':');
     await supabaseAdmin
-        .from('showings')
+        .from(`${type}_occurrences`)
         .delete()
         .eq('event_id', eventId)
         .eq('date_time', normalizedDateTime);
-    await supabaseAdmin
-        .from('showing_cast')
-        .delete()
-        .eq('show_id', eventId)
-        .eq('date_time', normalizedDateTime);
-    revalidatePath(`/shows/${eventId}/`, 'layout');
+    if (type === 'show') {
+        await supabaseAdmin
+            .from('showing_cast')
+            .delete()
+            .eq('show_id', eventId)
+            .eq('date_time', normalizedDateTime);
+    }
+    revalidatePath(`/${pluralize(type)}/${eventId}/`, 'layout');
 }
 
-export async function deleteShow(eventId: string): Promise<void> {
+export async function deleteEvent(eventId: string, type: EventType): Promise<void> {
     await supabaseAdmin
-        .from('shows')
+        .from(`${pluralize(type)}`)
         .delete()
         .eq('id', eventId)
     await supabaseAdmin
-        .from('showings')
+        .from(`${type}_occurrences`)
         .delete()
         .eq('event_id', eventId)
-    await supabaseAdmin
-        .from('showing_cast')
-        .delete()
-        .eq('show_id', eventId)
-    revalidatePath(`/shows/${eventId}/`, 'layout');
+    if (type === 'show') {
+        await supabaseAdmin
+            .from('showing_cast')
+            .delete()
+            .eq('show_id', eventId)
+    }
+    revalidatePath(`/${pluralize(type)}/${eventId}/`, 'layout');
 }
