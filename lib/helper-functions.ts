@@ -35,6 +35,16 @@ export const pluralize = (word: string, pluralize: boolean | number = true): str
     return `${word}s`;
 }
 
+export const singularize = (word: string): string => {
+    if (word.slice(1) === 'eople') return word[0] + 'erson';
+    const last = word[word.length - 1];
+    const last2 = word.slice(word.length - 2);
+    if (last2 === 'es' && ['o', 's', 'x', 'z'].includes(word[word.length - 3])) return word.slice(0, word.length - 2);
+    if (last2 === 'es' && ['ch', 'sh', 'oy', 'uy'].includes(word[word.length - 4] + word[word.length - 3])) return word.slice(0, word.length - 2);
+    if (last === 's') return word.slice(0, word.length - 1);
+    return word;
+}
+
 export const capitalize = (phrase: string): string => (
     phrase.split(' ').map((word) => word[0].toUpperCase() + word.slice(1)).join(' ')
 );

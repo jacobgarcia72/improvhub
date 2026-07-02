@@ -26,9 +26,9 @@ export async function getShow(id: string): Promise<Event | null> {
     return await getEvent(id, 'show');
 }
 
-export async function getShowsByAdmin(userId: string): Promise<Event[]> {
+export async function getEventsByAdmin(userId: string, type: EventType): Promise<Event[]> {
     const { data } = await supabaseAdmin
-        .from('shows')
+        .from(pluralize(type))
         .select('*')
         .contains('admins', [userId]);
     return (data || []).map(camelCaseObject) as Event[];

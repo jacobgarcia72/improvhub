@@ -4,6 +4,7 @@ import Button from "@/components/form/button";
 import { CadenceText, Event, EventType } from "@/types";
 import Link from "next/link";
 import OccurrenceSelection from "./occurrence-selection";
+import { capitalize, pluralize } from "@/lib/helper-functions";
 
 function P({ children, className }: { children: React.ReactNode, className?: string }) {
     return children ? <p className={`mb-4 mt-2 ${className}`}>{children}</p> : null;
@@ -73,13 +74,13 @@ export default async function EventDetails({ event, type }: {
             <div className="flex flex-row flex-wrap gap-2">
                 {isASeries && (
                     <div className="grow-2 min-w-[200px]">
-                        {recurringSchedule && <Header>Event Schedule:</Header>}
+                        {recurringSchedule && <Header>{capitalize(type)} Schedule:</Header>}
                         <P>{recurringSchedule}</P>
                         {futureEvents.length ? <>
-                            <Header>Upcoming Events:</Header>
+                            <Header>Upcoming {capitalize(type)} Dates:</Header>
                             <ul className="mt-2">
                                 {futureEvents.slice(0, 4).map((date, i) => (
-                                    <Link key={i} href={`/events/${event.id}/${date}`}>
+                                    <Link key={i} href={`/${pluralize(type)}/${event.id}/${date}`}>
                                         <li className="no-bullets link ">
                                             {formatDateTimeForDisplay(date)}
                                         </li>

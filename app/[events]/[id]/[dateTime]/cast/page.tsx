@@ -10,9 +10,10 @@ import EventHeader from "@/components/event-page-layout/event-header";
 import EventDate from "@/components/event-page-layout/[dateTime]/event-date";
 
 export default async function ShowCastPage({ params } : {
-    params: Promise<{ id: string, dateTime: string }>
+    params: Promise<{ id: string, dateTime: string, events: string }>
     }) {
-    const { id, dateTime } = await params;
+    const { id, dateTime, events } = await params;
+    if (events !== 'shows') notFound();
     const parentShow = id ? await getShow(id) : null;
     if (!parentShow) notFound();
     const showDate = dateTime.replaceAll('%20', ' ').replaceAll('%3A', ':');
