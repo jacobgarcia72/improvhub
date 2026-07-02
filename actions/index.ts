@@ -117,6 +117,12 @@ export async function postEvent(type: EventType, existingEvent: Event | null = n
             ...event
         }
     }
+    if (type === 'class' || type === 'workshop') {
+        event = {
+            instructors: [creatorId],
+            ...event
+        }
+    }
     const occurrences: EventOccurrence[] | null = dateTimes?.map((dateTime => ({
         eventId: event.id,
         dateTime

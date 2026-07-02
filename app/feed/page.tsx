@@ -1,8 +1,8 @@
 import { formatDateForDisplay, formatDateTimeForDisplay } from "@/lib/dates";
-import { capitalize } from "@/lib/helper-functions";
+import { capitalize, pluralize } from "@/lib/helper-functions";
 import { getNewsFeedItems } from "@/lib/news"
 import { optimizeImage } from "@/lib/optimize-image";
-import { getShow } from "@/lib/shows";
+import { getEvent, getShow } from "@/lib/shows";
 import { getTeam } from "@/lib/teams";
 import { getTheatre } from "@/lib/theatres";
 import { getCurrentUserId, getUserAbbreviated } from "@/lib/users";
@@ -12,6 +12,7 @@ import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import { appName } from "@/lib/app-info";
 import { protectRoute } from "@/lib/auth";
+import { EventType } from "@/types";
 
 export const metadata: Metadata = {
     title: `News Feed | ${appName}`
@@ -49,12 +50,16 @@ export default async function FeedPage() {
                         image = newTheatre.image;
                         break;
                     case 'new_show':
+                    case 'new_jam':
+                    case 'new_class':
+                    case 'new_workshop':
                         const theatre = await getTheatre(followId);
-                        const newShow = await getShow(newsItemId);
-                        const newShowCreator = otherData ? await getUserAbbreviated(otherData) : null;
-                        if (!theatre || !newShow || !newShowCreator) return null;
-                        content = <p><Link className="link" href={`/profile/${newShowCreator.id}`}>{newShowCreator.name}</Link> created a page for a new show, <Link className="link" href={`/shows/${newShow.id}`}>{newShow.title}</Link>, at <Link className="link" href={`/theatres/${theatre.id}`}>{theatre.name}</Link>.</p>
-                        image = newShow.image || theatre.image;
+                        const newEventType = newsType.split('_')[1] as EventType;
+                        const newEvent = await getEvent(newsItemId, newEventType);
+                        const newEventCreator = otherData ? await getUserAbbreviated(otherData) : null;
+                        if (!theatre || !newEvent || !newEventCreator) return null;
+                        content = <p><Link className="link" href={`/profile/${newEventCreator.id}`}>{newEventCreator.name}</Link> posted a new {newEventType}, <Link className="link" href={`/${pluralize(newEventType)}/${newEvent.id}`}>{newEvent.title}</Link>, at <Link className="link" href={`/theatres/${theatre.id}`}>{theatre.name}</Link>.</p>
+                        image = newEvent.image || theatre.image;
                         break;
                     case 'cast_in_show':
                         const cast = followType === 'team' ? (
@@ -71,11 +76,15 @@ export default async function FeedPage() {
                         image = cast.image || showCast.image;
                         break;
                     case 'going_to_show':
-                        const showGoer = await getUserAbbreviated(followId);
-                        const showGoingTo = await getShow(newsItemId);
-                        if (!showGoer || !showGoingTo || !newsItemDate) return null;
-                        content = <p><Link className="link" href={`/profile/${showGoer.id}`}>{showGoer.name}</Link> is going to <Link className="link" href={`/shows/${showGoingTo.id}/${newsItemDate}`}>{showGoingTo.title}</Link> on {formatDateForDisplay(newsItemDate.split(' ')[0])}.</p>
-                        image = showGoer.image || showGoingTo.image;
+                    case 'going_to_jam':
+                    case 'going_to_class':
+                    case 'going_to_workshop':
+                        const eventGoer = await getUserAbbreviated(followId);
+                        const eventGoingType = newsType.split('_')[1] as EventType;
+                        const eventGoingTo = await getEvent(newsItemId, eventGoingType);
+                        if (!eventGoer || !eventGoingTo || !newsItemDate) return null;
+                        content = <p><Link className="link" href={`/profile/${eventGoer.id}`}>{eventGoer.name}</Link> is going to <Link className="link" href={`/${pluralize(eventGoingType)}/${eventGoingTo.id}/${newsItemDate}`}>{eventGoingTo.title}</Link> on {formatDateForDisplay(newsItemDate.split(' ')[0])}.</p>
+                        image = eventGoer.image || eventGoingTo.image;
                         break;
                     case 'new_team':
                         const teamCreator = await getUserAbbreviated(followId);

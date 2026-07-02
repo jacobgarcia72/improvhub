@@ -34,6 +34,41 @@ export async function getEventsByAdmin(userId: string, type: EventType): Promise
     return (data || []).map(camelCaseObject) as Event[];
 }
 
+export async function getUpcomingEventsByRSVP(userId: string, type: EventType, rsvp = 'g'): Promise<{ event: Event, dateTimes: string[] }[]> {
+    const { data } = await supabaseAdmin
+        .from('rsvps')
+        .select('event_id, date_time')
+        .eq('user_id', userId)
+        .eq('status', rsvp)
+        .eq('type', type)
+        .gte('date_time', getStartOfToday());
+
+    const eventDates: { [showId: string]: string[] } = { };
+    const eventIds: string[] = [];
+
+    (data || []).forEach(({ event_id, date_time }: { event_id: string; date_time: string }) => {
+        if (!eventDates[event_id]) {
+            eventDates[event_id] = [];
+            eventIds.push(event_id);
+        }
+        const dateTime = normalizeDateTime(date_time);
+        if (!eventDates[event_id].includes(dateTime)) {
+            eventDates[event_id].push(dateTime);
+        }
+    });
+
+    const res: { event: Event, dateTimes: string[] }[] = [];
+
+    for (let i = 0; i < eventIds.length; i++) {
+        const eventId = eventIds[i];
+        const event = await getEvent(eventId, type);
+        if (event) {
+            res.push({ event, dateTimes: eventDates[eventId] });
+        }
+    }
+    return res;
+}
+
 export async function getShowsLookingForRole(role: Role | 'team', user: User): Promise<{ show: Event, dateTimes: string[] }[]> {
     const key = {
         team: 'looking_for_teams',

@@ -13,6 +13,7 @@ import { getTeamsByUser } from "@/lib/teams";
 import MiniCard from "@/components/mini-card";
 import ShowsLookingFor from "./shows-looking-for";
 import UpcomingShows from "@/components/upcoming-shows";
+import RSVPEvents from "./rsvp-events";
 
 export async function generateMetadata(
     { params }: { params: Promise<{ events: string }> },
@@ -75,6 +76,11 @@ export default async function EventsPage({ params }: { params: Promise<{ events:
                 <Suspense fallback={<Loader />}>
                     {userId ? <UpcomingShows includeTeams label="Shows I'm In" id={userId} /> : null}
                 </Suspense>
+            </>}
+            <Suspense fallback={<Loader />}>
+                {userId ? <RSVPEvents userId={userId} type={type} /> : null}
+            </Suspense>
+            {type === 'show' && <>
                 {user && roles ? Object.keys(roles).filter((key) => roles[key]).map((role) => (
                     <ShowsLookingFor key={role} role={role as Role} limit={24} user={user} />
                 )) : null}

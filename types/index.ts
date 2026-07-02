@@ -48,6 +48,7 @@ export interface Event {
     doorPrice?: number | null;
     ticketsUrl?: string | null;
     notes?: string | null;
+    instructors?: string[] | null;
 }
 
 export interface EventOccurrence {

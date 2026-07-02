@@ -108,6 +108,29 @@ create table if not exists jam_occurrences (
   primary key (event_id, date_time)
 );
 
+create table if not exists workshops (
+  id text primary key,
+  creator_id text not null,
+  admins text[] not null,
+  instructors text[] not null,
+  title text not null,
+  description text,
+  theatre text,
+  city text,
+  state text,
+  price numeric,
+  tickets_url text,
+  image text,
+  photo_credit text,
+  runtime text,
+);
+
+create table if not exists workshop_occurrences (
+  event_id text not null references workshops(id) on delete cascade,
+  date_time text not null,
+  primary key (event_id, date_time)
+);
+
 create table if not exists rsvps (
   user_id text not null references users(id) on delete cascade,
   event_id text not null,
