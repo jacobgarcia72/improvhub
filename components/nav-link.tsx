@@ -11,11 +11,11 @@ export default function NavLink({ link, onClick }: {
     const href = `/${link.toLowerCase()}`;
     return (
         <Link onClick={onClick || undefined} href={href} className={path.startsWith(href) ? 'active' : ''}>
-            <div className="flex flex-row min-w-18 px-1 justify-center">
+            <div className="flex flex-row min-w-14 px-2 justify-center text-[0.9rem]">
                 {{
                     'Feed': 'Live Feed',
                     'Search': 'Find',
-                    'Chat': 'Discussion'
+                    'Chat': 'Discussion',
                 }[link] || link}
             </div>
         </Link>
