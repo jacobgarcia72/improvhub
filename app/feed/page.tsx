@@ -80,11 +80,22 @@ export default async function FeedPage() {
                     case 'going_to_class':
                     case 'going_to_workshop':
                         const eventGoer = await getUserAbbreviated(followId);
-                        const eventGoingType = newsType.split('_')[1] as EventType;
+                        const eventGoingType = newsType.split('_')[2] as EventType;
                         const eventGoingTo = await getEvent(newsItemId, eventGoingType);
                         if (!eventGoer || !eventGoingTo || !newsItemDate) return null;
                         content = <p><Link className="link" href={`/profile/${eventGoer.id}`}>{eventGoer.name}</Link> is going to <Link className="link" href={`/${pluralize(eventGoingType)}/${eventGoingTo.id}/${newsItemDate}`}>{eventGoingTo.title}</Link> on {formatDateForDisplay(newsItemDate.split(' ')[0])}.</p>
                         image = eventGoer.image || eventGoingTo.image;
+                        break;
+                    case 'instructor_for_jam':
+                    case 'instructor_for_workshop':
+                    case 'instructor_for_class':
+                        const instructor = await getUserAbbreviated(followId);
+                        const instructorType = newsType.split('_')[2] as EventType;
+                        const instructorEvent = await getEvent(newsItemId, instructorType);
+                        const instructorTheatre = instructorEvent?.theatre ? await getTheatre(instructorEvent.theatre) : null;
+                        if (!instructor || !instructorEvent) return null;
+                        content = <p><Link className="link" href={`/profile/${instructor.id}`}>{instructor.name}</Link> is {instructorType === 'jam' ? 'leading' : 'teaching'} a {instructorType}, <Link className="link" href={`/${pluralize(instructorType)}/${instructorEvent.id}`}>{instructorEvent.title}</Link>{instructorTheatre ? <>, at <Link className="link" href={`/theatres/${instructorTheatre.id}`}>{instructorTheatre.name}</Link></> : ''}.</p>
+                        image = instructor.image || instructorEvent.image;
                         break;
                     case 'new_team':
                         const teamCreator = await getUserAbbreviated(followId);

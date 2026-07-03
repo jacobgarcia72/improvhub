@@ -10,6 +10,7 @@ import { Event, EventType } from '@/types';
 import { redirect } from 'next/navigation';
 import { getEventOccurrences } from '@/lib/shows';
 import { capitalize, pluralize } from '@/lib/helper-functions';
+import Checkbox from '../checkbox';
 
 export default async function EventForm({ existingEvent, type }: {
     existingEvent?: Event,
@@ -56,11 +57,8 @@ export default async function EventForm({ existingEvent, type }: {
                     existingEventDates={existingEventDates}
                     type={type}
                 />
-                {type === 'show' && <PriceInputs
-                    existingShow={existingEvent}
-                />}
                 <div>
-                    <p className='label'>Approximate Runtime:</p>
+                    <p className='label'>{type === 'class' ? 'Approximate Runtime:' : 'Duration:'}</p>
                     <div className='flex flex-row mt-1'>
                         <Input
                             value={existingEvent?.runtime?.split('h')[0] || ''}
@@ -81,13 +79,19 @@ export default async function EventForm({ existingEvent, type }: {
                         />
                     </div>
                 </div>
-                {type === 'show' && <>
+                {['show', 'workshop', 'class'].includes(type) && <PriceInputs
+                    existingShow={existingEvent}
+                    type={type as 'show' | 'workshop' | 'class'}
+                />}
+                {['show', 'workshop', 'class'].includes(type) && <>
                     <Input
                         value={(existingEvent)?.ticketsUrl || ''}
-                        label="Link to Buy Tickets"
+                        label={`Link to ${type === 'show' ? 'Buy Tickets' : 'Register'}`}
                         name="ticketsUrl"
                         inputMode="url"
                     />
+                </>}
+                {type === 'show' && <>
                     <Input
                         value={(existingEvent)?.notes || ''}
                         label="Notes (Trademark info, etc.)"
@@ -95,6 +99,13 @@ export default async function EventForm({ existingEvent, type }: {
                         maxLength={200}
                     />
                 </>}
+                {!existingEvent && ['jam', 'class', 'workshop'].includes(type) ? (
+                    <Checkbox
+                        name="isInstructor"
+                        label={`I am ${type === 'jam' ? 'leading' : 'the instructor for'} this ${type}`}
+                        defaultChecked={true}
+                    />
+                ) : null}
             </Form>
         </section>
     )

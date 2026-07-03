@@ -179,7 +179,10 @@ export type NewsType = (
     'going_to_workshop' | 
     'going_to_class' | 
     'new_team' | 
-    'joined_team'
+    'joined_team' |
+    `instructor_for_jam` |
+    `instructor_for_workshop` |
+    `instructor_for_class`
 );
 
 export class NewsFeedItem {

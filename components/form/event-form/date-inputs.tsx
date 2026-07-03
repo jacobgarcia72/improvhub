@@ -84,8 +84,9 @@ function DateAndTime({ label = 'Day', index = 0, date, time, onDateChange, onTim
     )
 }
 
-function ScheduleOptions({ existingEventDates }: {
-    existingEventDates?: string[]
+function ScheduleOptions({ existingEventDates, type }: {
+    existingEventDates?: string[],
+    type: EventType
 }) {
     const [numberOfShowings, setNumberOfShowings] = useState<number>(
         existingEventDates?.length || 1
@@ -172,7 +173,7 @@ function ScheduleOptions({ existingEventDates }: {
         <div className="w-1/2 pr-2">
             <Input type='number'
                 name='showings'
-                label='Number of Occurrences'
+                label={`Number of ${capitalize(type)} Dates`}
                 value={`${numberOfShowings}`}
                 onChange={(value) => setNumberOfShowings(Number(value))}
                 min={1}
@@ -181,7 +182,7 @@ function ScheduleOptions({ existingEventDates }: {
         </div>
         <DateAndTime
             index={0}
-            label={numberOfShowings > 1 ? 'Occurrence #1' : 'Date'}
+            label={`${numberOfShowings > 1 ? `Date #1` : 'Date'}`}
             date={dates[0]}
             time={times[0]}
             onDateChange={(date) => handleSetDate(date, 0)}
@@ -212,7 +213,7 @@ function ScheduleOptions({ existingEventDates }: {
                     time={times[index]}
                     onDateChange={(date) => handleSetDate(date, index)}
                     onTimeChange={(time) => handleSetTime(time, index)}
-                    label={`Occurrence #${index + 1}`}
+                    label={`Date #${index + 1}`}
                     removeDateTime={handleRemoveDateTime}
                 />
             })
@@ -234,7 +235,7 @@ export default function DateInputs({ existingEvent, existingEventDates, type }: 
 
     return (
         <>
-            <p className='-mb-1 label'>{capitalize(type)} Dates</p>
+            <p className='-mb-1 label'>Dates</p>
             <Checkbox
                 defaultChecked={datesTBD}
                 name="tbd"
@@ -244,16 +245,16 @@ export default function DateInputs({ existingEvent, existingEventDates, type }: 
                     if (checked) setIsRecurring(false);
                 }}
             />
-            {!datesTBD && (
+            {!datesTBD && (['show', 'jam'].includes(type)) && (
                 <Checkbox
                     defaultChecked={isRecurring}
                     name="recurring"
-                    label={`Ongoing ${type}`}
+                    label={`Ongoing ${capitalize(type)}`}
                     onChange={setIsRecurring}
                 />
             )}
             {!datesTBD && isRecurring && <RecurringOptions existingEvent={existingEvent} />}
-            {!(datesTBD || isRecurring) && <ScheduleOptions existingEventDates={existingEventDates} />}
+            {!(datesTBD || isRecurring) && <ScheduleOptions type={type} existingEventDates={existingEventDates} />}
         </>
     )
 }

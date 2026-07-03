@@ -6,11 +6,13 @@ import Form from "./form";
 export default async function AdminsInputs({
     currentAdmins,
     onSubmit,
-    cancel
+    cancel,
+    label
 }: {
     currentAdmins: string[],
     onSubmit: (prevState: void | { message?: string }, formData: FormData) => Promise<{ message?: string } | void>,
-    cancel?: () => void
+    cancel?: () => void,
+    label?: string
 }) {
     const allUsers = (await getAllUsersAbbreviated()).map(({ id, name, image}) => {
         return { id, image: image ? optimizeImage(image, 50, 50, 80, true, true) : undefined, text: name };
@@ -30,7 +32,7 @@ export default async function AdminsInputs({
             <InputList
                 options={allUsers}
                 name="admin"
-                addLabel="Admin"
+                addLabel={label || "Admin"}
                 startingOptions={startingOptions}
             />
         </Form>

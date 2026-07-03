@@ -1,7 +1,7 @@
 'use server';
 import slugify from 'slugify';
 import { redirect } from "next/navigation";
-import { saveEvent, updateEventAdmins, updateShowing } from "@/lib/shows";
+import { saveEvent, updateEventAdmins, updateEventInstructors, updateShowing } from "@/lib/shows";
 import { Candence, Event, Showing, Role, ShowCastMember, Theatre, EventType, EventOccurrence } from "@/types";
 import { sortDates } from "@/lib/dates";
 import { capitalize, pluralize, removeLeadingArticles } from "@/lib/helper-functions";
@@ -117,9 +117,9 @@ export async function postEvent(type: EventType, existingEvent: Event | null = n
             ...event
         }
     }
-    if (type === 'class' || type === 'workshop') {
+    if (['jam', 'class', 'workshop'].includes(type)) {
         event = {
-            instructors: [creatorId],
+            instructors: formData.get('isInstructor') ? [creatorId] : [],
             ...event
         }
     }
@@ -187,6 +187,21 @@ export async function postEventAdmins(type: EventType, eventId: string, prevStat
         .map((key) => (data[`${key}-id`] as string)?.trim());
     if (!admins.length) return { message: `${capitalize(pluralize(type))} must have at least one admin` };
     await updateEventAdmins(type, eventId, admins);
+    revalidatePath(`/${pluralize(type)}/${eventId}/`);
+    redirect(`/${pluralize(type)}/${eventId}/`);
+}
+
+export async function postEventInstructors(type: EventType, eventId: string, prevState: void | { message?: string }, formData: FormData) {
+    const data = Object.fromEntries(formData.entries());
+
+    const instructors = Object.keys(data)
+        .filter((key) => (
+            (key.split('-')[0] === 'admin') &&
+            (key.split('-')[2] !== 'id') &&
+            Boolean((data[key] as string).trim())
+        ))
+        .map((key) => (data[`${key}-id`] as string)?.trim());
+    await updateEventInstructors(type, eventId, instructors);
     revalidatePath(`/${pluralize(type)}/${eventId}/`);
     redirect(`/${pluralize(type)}/${eventId}/`);
 }

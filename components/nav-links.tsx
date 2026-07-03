@@ -3,7 +3,7 @@ import HamburgerMenu from "./hamburger-menu";
 import NavLink from "./nav-link";
 import { appName } from "@/lib/app-info";
 
-const links = ['Create', 'Search', 'Shows', 'Jams', 'Teams', 'Chat'];
+const links = ['Create', 'Search', 'Shows', 'Jams', 'Classes', 'Workshops', 'Teams', 'Chat'];
 
 export default function NavLinks() {
     return <>

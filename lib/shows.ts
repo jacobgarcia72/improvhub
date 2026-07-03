@@ -3,7 +3,7 @@
 
 import slugify from 'slugify';
 
-import { Event, EventOccurrence, EventType, Role, ShowCastMember, Showing, Theatre, User } from "@/types";
+import { Event, EventOccurrence, EventType, NewsType, Role, ShowCastMember, Showing, Theatre, User } from "@/types";
 import { camelCaseObject, pluralize, removeLeadingArticles, snakeCaseObject } from './helper-functions';
 import { supabaseAdmin } from './supabase-server';
 import { getCitiesWithinRange } from './location';
@@ -334,7 +334,26 @@ export async function saveEvent(type: EventType, event: Event, occurrences: Even
     const { error: insertError } = await supabaseAdmin
         .from(`${pluralize(type)}`)
         .upsert(snakeCaseObject(event));
+
     if (insertError) throw insertError;
+
+    if (event.instructors) {
+        const { instructors } = event;
+        const previousInstructors = isNewEvent ? [] : (await getEvent(event.id, type))?.instructors || [];
+        for (let i = 0; i < instructors.length; i++) {
+            const instructorId = instructors[i];
+            if (isNewEvent || !previousInstructors.includes(instructorId)) {
+                console.log({instructorId})
+                await createNewsFeedItem('friend', instructorId, `instructor_for_${type}` as NewsType, event.id);
+            }
+        }
+        for (let i = 0; i < previousInstructors.length; i++) {
+            const previousInstructorId = previousInstructors[i];
+            if (!instructors.includes(previousInstructorId)) {
+                await deleteNewsFeedItem('friend', previousInstructorId, `instructor_for_${type}` as NewsType, event.id);
+            }
+        }
+    }
 
     if (isNewEvent) {
         if (occurrences?.length) {
@@ -413,6 +432,13 @@ export async function updateEventAdmins(type: EventType, eventId: string, admins
     await supabaseAdmin
         .from(pluralize(type))
         .update({ admins })
+        .eq('id', eventId);
+}
+
+export async function updateEventInstructors(type: EventType, eventId: string, instructors: string[]) {
+    await supabaseAdmin
+        .from(pluralize(type))
+        .update({ instructors })
         .eq('id', eventId);
 }
 

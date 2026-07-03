@@ -1,5 +1,6 @@
 'use client';
 
+import { optimizeImage } from '@/lib/optimize-image';
 import { filterArrayBySearchTerm, getText } from '@/lib/helper-functions';
 import { InputOption } from '@/types';
 import Image from 'next/image';
@@ -93,7 +94,7 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
     if (typeof option === 'string' || !option.image) return null;
     return (
       <div className='mr-2' style={{ position: 'absolute', left: '10px', top: '49%', transform: 'translateY(-50%)' }}>
-        <Image src={option.image} alt={option.text} width={25} height={25} />
+        <Image src={optimizeImage(option.image, 72, 72, 90, true, true)} alt={option.text} width={25} height={25} />
       </div>
     )
   }

@@ -98,7 +98,7 @@ export default async function EventDetails({ event, type }: {
                     </div>
                 )}
                 <div className="grow-1 min-w-[200px]">
-                    {runtime && <Header>Approximate runtime:</Header>}
+                    {runtime && <Header>{type === 'class' ? 'Approximate Runtime:' : 'Duration:'}</Header>}
                     <P>{runtime}</P>
                     {ticketInfo && <Header>Ticket Price:</Header>}
                     <P>{ticketInfo}</P>

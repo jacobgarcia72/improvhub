@@ -8,7 +8,6 @@ export default async function JamDatePage(
 ){
     const { id, events, dateTime } = await params;
     const type = singularize(events);
-    console.log({id, events, dateTime, type})
     if (!['show', 'jam', 'class', 'workshop'].includes(type)) {
         notFound();
     }
