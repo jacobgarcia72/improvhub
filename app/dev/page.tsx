@@ -2,11 +2,9 @@
 import Button from "@/components/form/button";
 import Input from "@/components/form/input";
 import { generateDummyTeams, generateDummyUsers } from "@/lib/dev-helpers";
-import { notFound } from "next/navigation"
 import { useState } from "react";
 
 export default function DevPage() {
-    if (process.env.NODE_ENV === 'production') notFound();
     const [num, setNum] = useState('100');
     const [pending, setPending] = useState(false);
     return (

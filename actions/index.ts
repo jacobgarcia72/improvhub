@@ -11,6 +11,7 @@ import { getTeam, getTeamMembers, leaveTeam as leaveTeamRecord, saveTeam, update
 import { getCurrentUserId, updateUser } from "@/lib/users";
 import { revalidatePath } from 'next/cache';
 import { getTheatre, saveTheatre, updateTheatre } from '@/lib/theatres';
+import { saveFeedback } from '@/lib/feedback';
 
 export async function postEvent(type: EventType, existingEvent: Event | null = null, prevState: void | { message?: string }, formData: FormData) {
     const creatorId = await getCurrentUserId();
@@ -471,4 +472,21 @@ export async function postTheatre(existingTheatre: Theatre | null, userId: strin
 
     const theatreId = existingTheatre ? await updateTheatre(theatre) : await saveTheatre(theatre, userId);
     redirect(`/theatres/${theatreId}`);
+}
+
+export async function submitFeedback(prevState: void | { message?: string }, formData: FormData) {
+    const data = Object.fromEntries(formData.entries());
+    const userId = await getCurrentUserId();
+    if (!userId) return { message: 'You must be logged in to continue' }
+    const feedback = (data.feedback as string).trim();
+    if (!feedback) return { message: 'Feedback required' }
+    const { success } = await saveFeedback(
+        userId,
+        feedback.replaceAll(/\r\n/g, '<br>').replaceAll(/\n/g, '<br>').replaceAll(/\r/g, '<br>')
+    );
+    if (success) {
+        redirect('/feedback?success=true');
+    } else {
+        return { message: 'Something went wrong. Please try again later.' };
+    }
 }
