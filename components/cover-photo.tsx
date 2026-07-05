@@ -8,7 +8,7 @@ export default function CoverPhoto({ src, alt, photoCredit }: {src: string, alt:
     const [fullscreen, setFullscreen] = useState(false);
     return <>
         {fullscreen ? <div className="z-100 fixed w-full h-full top-0 left-0 bg-black/95">
-            <Image src={optimizeImage(src, 600, null, 80)}
+            <Image src={src}
                 onClick={() => setFullscreen(false)}
                 alt={alt}
                 width={600}
@@ -17,7 +17,7 @@ export default function CoverPhoto({ src, alt, photoCredit }: {src: string, alt:
             />
         </div> : null}
         <div className="flex flex-col items-center content-center">
-            <Image src={optimizeImage(src, 600, null, 80)}
+            <Image src={optimizeImage(src, 1000, null, 90)}
                 onClick={() => setFullscreen(true)}
                 alt={alt}
                 width={600}

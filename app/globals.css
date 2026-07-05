@@ -2,6 +2,7 @@
 
 :root {
   --background: #e9eff0;
+  --input-background: #ffffff;
   --section: #ffffff;
   --section-border: #D1D5DB;
   --foreground: #171717;
@@ -17,6 +18,7 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
+    --input-background: #000000;
     --section: #1d1d1d;
     --section-border: #353636;
     --link: #abcfff;
@@ -176,7 +178,7 @@ section.medium-section {
 }
 
 input, select, textarea {
-  background-color: var(--background);
+  background-color: var(--input-background);
   border: 1px solid var(--color-gray-300);
   border-radius: .375rem;
   padding: .5rem .75rem;

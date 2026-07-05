@@ -38,6 +38,7 @@ export default async function EventsPage({ params }: { params: Promise<{ events:
     const userId = user?.id;
 
     const eventsManaged = userId ? await getEventsByAdmin(userId, type) : null;
+    console.log({eventsManaged: eventsManaged?.length})
 
     const showsUserIsIn = (type === 'show' && userId) ? await getUpcomingShowsByCastMember(userId) : null;
     const showsByDate: { dateTime: string, show: Event }[] = [];

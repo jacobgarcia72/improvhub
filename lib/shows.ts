@@ -27,11 +27,20 @@ export async function getShow(id: string): Promise<Event | null> {
 }
 
 export async function getEventsByAdmin(userId: string, type: EventType): Promise<Event[]> {
-    const { data } = await supabaseAdmin
-        .from(pluralize(type))
-        .select('*')
-        .contains('admins', [userId]);
-    return (data || []).map(camelCaseObject) as Event[];
+    if (['jam', 'class', 'workshop'].includes(type)) {
+        const { data } = await supabaseAdmin
+            .from(pluralize(type))
+            .select('*')
+            .or(`admins.cs.{"${userId}"},instructors.cs.{"${userId}"}`);
+        return (data || []).map(camelCaseObject) as Event[];
+    } else {
+        const { data } = await supabaseAdmin
+            .from(pluralize(type))
+            .select('*')
+            .contains('admins', [userId]);
+        console.log({data})
+        return (data || []).map(camelCaseObject) as Event[];
+    }
 }
 
 export async function getUpcomingEventsByRSVP(userId: string, type: EventType, rsvp = 'g'): Promise<{ event: Event, dateTimes: string[] }[]> {
