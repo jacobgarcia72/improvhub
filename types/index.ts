@@ -130,7 +130,6 @@ export interface Follow {
     userId: string;
     followId: string;
     type: Followee;
-    following: boolean;
 }
 
 export interface Friendship {

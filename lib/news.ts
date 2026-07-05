@@ -12,11 +12,11 @@ export const getNewsFeedItems = async (userId: string): Promise<NewsFeedItem[]> 
     const follows: Follow[] = (data || []).map(camelCaseObject);
     
     const teamsFollowed = follows
-        .filter((follow) => follow.type === 'team' && follow.following)
+        .filter((follow) => follow.type === 'team')
         .map((follow) => follow.followId);
     
     const theatresFollowed = follows
-        .filter((follow) => follow.type === 'theatre' && follow.following)
+        .filter((follow) => follow.type === 'theatre')
         .map((follow) => follow.followId);
     
     const friendIds = await getFriendIds(userId);

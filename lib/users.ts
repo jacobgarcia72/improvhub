@@ -122,23 +122,20 @@ export async function updateUser(updates: { [key: string]: any }, userRoles?: { 
 }
 
 export async function getFollowing(userId: string, followId: string, type: Followee): Promise<boolean> {
-    const { data, error } = await supabaseAdmin
+    const { count, error } = await supabaseAdmin
         .from('follows')
-        .select('following')
+        .select('*', { count: 'exact', head: true })
         .eq('user_id', userId)
         .eq('follow_id', followId)
         .eq('type', type)
-        .limit(1)
-        .maybeSingle();
     if (error) throw error;
-    return Boolean(data?.following);
+    return Boolean(count);
 }
 
 export async function getFollows(followId: string, type: Followee): Promise<{ name: string, id: string, image?: string }[]> {
     const { data: followerData } = await supabaseAdmin
         .from('follows')
         .select('user_id')
-        .eq('following', true)
         .eq('follow_id', followId)
         .eq('type', type);
     if (!followerData) return [];
@@ -154,7 +151,6 @@ export async function getFollowees(userId: string, type: Followee): Promise<{ na
     const { data: followeeData } = await supabaseAdmin
         .from('follows')
         .select('follow_id')
-        .eq('following', true)
         .eq('user_id', userId)
         .eq('type', type);
     if (!followeeData) return [];
@@ -186,13 +182,19 @@ export async function getFollowCount(id: string, type: Followee, getFollowees = 
 }
 
 export async function setFollowing(userId: string, followId: string, type: Followee, following: boolean): Promise<void> {
-    const { error } = await supabaseAdmin
+    await supabaseAdmin
         .from('follows')
-        .upsert(
-            { user_id: userId, follow_id: followId, following, type },
-            { onConflict: 'user_id, follow_id, type' }
-        );
-    if (error) throw error;
+        .delete()
+        .eq('user_id', userId)
+        .eq('follow_id', followId)
+        .eq('type', type);
+    if (following) {
+        await supabaseAdmin
+            .from('follows')
+            .insert(
+                { user_id: userId, follow_id: followId, type }
+            );
+    }
     if (type === 'team') revalidatePath(`/teams/${followId}`, 'layout');
     if (type === 'theatre') revalidatePath(`/theatres/${followId}`, 'layout');
 }
