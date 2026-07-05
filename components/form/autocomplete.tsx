@@ -137,7 +137,7 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
             margin: 0,
             padding: 0,
             listStyle: 'none',
-            background: '#fff',
+            background: 'var(--background)',
             border: '1px solid #ccc',
             borderTop: 'none',
             maxHeight: '200px',
@@ -151,7 +151,8 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
               onMouseDown={() => handleOptionSelect(option)}
               style={{
                 padding: '8px 12px',
-                background: index === activeIndex ? '#f0f0f0' : '#fff',
+                color: index === activeIndex ? '#ffffff' : undefined,
+                background: index === activeIndex ? '#0028aa' : 'var(--background)',
                 cursor: 'pointer',
                 paddingLeft: typeof option === 'object' &&  option.image ? '42px' : '12px',
                 position: 'relative'

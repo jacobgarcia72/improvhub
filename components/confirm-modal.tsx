@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Button from "./form/button";
+import { Border } from "./border";
 
 export default function ConfirmModal({ open, title, description, onConfirm, onCancel, confirmLabel = 'Confirm', cancelLabel = 'Cancel', danger }: {
     open: boolean,
@@ -20,9 +21,9 @@ export default function ConfirmModal({ open, title, description, onConfirm, onCa
             <div className="absolute inset-0 bg-black opacity-80" onClick={() => {
                 if (!disabled) onCancel();
             }}></div>
-            <div className="relative bg-white rounded shadow-lg w-11/12 max-w-md p-6">
+            <Border className="relative rounded shadow-lg w-11/12 max-w-md p-6">
                 {title ? <h3 className="mb-2">{title}</h3> : null}
-                {description ? <p className="text-sm text-gray-700 mb-4">{description}</p> : null}
+                {description ? <p className="text-sm text-gray-700 dark:text-gray-400 mb-4">{description}</p> : null}
                 <div className="flex justify-end">
                     <Button disabled={disabled} style="link" onClick={onCancel} caption={cancelLabel} />
                     <Button
@@ -35,7 +36,7 @@ export default function ConfirmModal({ open, title, description, onConfirm, onCa
                         className={danger ? 'red' : ''}
                     />
                 </div>
-            </div>
+            </Border>
         </div>
     )
 }

@@ -26,7 +26,7 @@ function LayoutCard({
     if (!content || (Array.isArray(content) && !content.find(Boolean))) return null;
     return (
         <section className={className}>
-            {header && <h2 className="text-slate-700 font-semibold">{header}</h2>}
+            {header && <h2 className="text-slate-700 dark:text-slate-300 font-semibold">{header}</h2>}
             {children}
         </section>
     )

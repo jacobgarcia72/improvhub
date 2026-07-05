@@ -47,13 +47,13 @@ export default async function ItemCard({
                     <div className="h-[35px] w-full" />
                 )}
                 <div className={`w-full ${image ? 'h-[180px]' : 'h-[265px]'} pb-1 px-4 pt-2`}>
-                    <h2 className="leading-none text-lg pt-1 pb-1 text-gray-900">{name}</h2>
-                    <div className="h-full fade-out text-sm text-gray-800 overflow-hidden text-ellipsis flex flex-col gap-1 pt-1">
+                    <h2 className="leading-none text-lg pt-1 pb-1 text-gray-900 dark:text-gray-100">{name}</h2>
+                    <div className="h-full fade-out text-sm text-gray-800  dark:text-gray-200 overflow-hidden text-ellipsis flex flex-col gap-1 pt-1">
                         {time ? (
-                            <time className="mt-[-6px] text-sm text-gray-700">{formatTime(time)}</time>
+                            <time className="mt-[-6px] text-sm text-gray-700  dark:text-gray-300 dark:text-gray-400">{formatTime(time)}</time>
                         ) : null}
                         {'theatre' in item && item.theatre ? (
-                            <p className="font-semibold text-gray-700">{item.theatre}</p>
+                            <p className="font-semibold text-gray-700  dark:text-gray-300 dark:text-gray-400">{item.theatre}</p>
                         ) : null}
                         {'description' in item && item.description ? (
                             <p>{item.description.replaceAll('<br>', '\n')}</p>

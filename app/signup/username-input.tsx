@@ -35,7 +35,7 @@ export default function UsernameInput() {
                 name="username"
                 maxLength={20}
             />
-            {error && <p className="absolute border border-slate-700 rounded bg-slate-100 px-2 text-slate-900 text-xs ml-1.5">{error}</p>}
+            {error && <p className="absolute border border-slate-700 rounded bg-slate-100 px-2 text-slate-900 dark:text-slate-100 text-xs ml-1.5">{error}</p>}
         </div>
     )
 }

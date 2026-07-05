@@ -39,7 +39,7 @@ async function PlayerImage(id: string, isTeam?: boolean) {
     return <Image
         src={optimizeImage(image, 72, 72, 90, true, true)}
         alt={user.name} width={36} height={36}
-        className="mb-[10px]"
+        className="mb-[10px] rounded-full"
     />
 }
 

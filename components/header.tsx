@@ -5,7 +5,7 @@ import { appName } from "@/lib/app-info";
 
 export default function Header() {
     return (
-        <header className="px-6 text-[0.95em] relative z-50 h-11 w-full flex flex-row justify-between items-stretch">
+        <header className="bg-[#556f8d] dark:bg-[#112247] px-6 text-[0.95em] relative z-50 h-11 w-full flex flex-row justify-between items-stretch">
             <Link href="/">
                 <div className="hidden sm:flex font-semibold px-2 w-24 flex-row justify-center">
                     {appName}

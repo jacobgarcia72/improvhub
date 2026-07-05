@@ -41,8 +41,8 @@ export default async function TheatreDetailsPage({ params }: {
             <section>
                 <div className="px-7 flex flex-col gap-1">
                     <div>
-                        {address ? <p className="text-slate-700">{address}</p> : null}
-                        {location ? <p className="text-slate-700">{location}</p> : null}
+                        {address ? <p className="text-slate-700 dark:text-slate-300">{address}</p> : null}
+                        {location ? <p className="text-slate-700 dark:text-slate-300">{location}</p> : null}
                     </div>
                     {website && <a className="link" target="_blank" href={website}>{website}</a>}
                 </div>

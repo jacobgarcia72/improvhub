@@ -21,7 +21,7 @@ export default function UserDetails({ user, userRoles }: {
                 </div>
             )}
         </div>
-        <div className="pl-3 pb-1 flex flex-col justify-end text-mist-700">
+        <div className="pl-3 pb-1 flex flex-col justify-end text-mist-700 dark:text-mist-300">
             <h1 className="text-2xl font-thin">{displayName}{user.pronouns && <span className="text-sm">&nbsp;&nbsp;({user.pronouns})</span>}</h1>
             {userRoles ? <h2 className="pl-1 flex flex-row text-mist-500">{Object.keys(userRoles).filter((role) => userRoles[role]).map(capitalize).join(`\u2002\u2022\u2002`)}</h2> : null}
         </div>

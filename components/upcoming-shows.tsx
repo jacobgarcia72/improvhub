@@ -20,7 +20,7 @@ export default async function UpcomingShows({ id, label = "Upcoming Shows", limi
         <Suspense fallback={<Loader />}>
             {showsByDate?.length ? (
                 <section>
-                    <h2 className="text-slate-700 font-semibold">{label}</h2>
+                    <h2 className="text-slate-700 dark:text-slate-300 font-semibold">{label}</h2>
                     <div className="flex flex-row flex-wrap">
                         {showsByDate.map(({ show, dateTime }, i) => <MiniCard key={i} item={show} type="show" dateTime={dateTime} />)}
                     </div>

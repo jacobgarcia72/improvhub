@@ -16,7 +16,7 @@ export default function CreateProfileForm() {
                 buttonCaption='Create Profile'
                 className="min-w-3/4"
             >
-                <h1 className='text-slate-700 text-xl m-1'>Create Profile</h1>
+                <h1 className='text-slate-700 dark:text-slate-300 text-xl m-1'>Create Profile</h1>
                 <div className="grid gap-4 sm:grid-cols-2">
                     <UsernameInput />
                     <Input required type='password' label='Password' name="password" />

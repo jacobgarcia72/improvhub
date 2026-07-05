@@ -8,8 +8,8 @@ export default function Button({ caption, disabled = false, submit = false, onCl
 }) {
     let classes = "transition-colors";
     if (className) classes += ` ${className}`;
-    if (style === 'primary') classes += ' mb-0.5 text-center bg-[#296c93] hover:bg-[#2098dd] disabled:bg-gray-300 text-white rounded';
-    if (style === 'link') classes += ' inline-block text-sm font-semibold text-blue-700 hover:text-blue-900 hover:underline';
+    if (style === 'primary') classes += ' mb-0.5 text-center bg-[#296c93] dark:bg-[#123c63] hover:bg-[#2098dd] disabled:bg-gray-300 text-white rounded';
+    if (style === 'link') classes += ' inline-block text-sm font-semibold text-blue-700 hover:text-blue-900 dark:text-mist-300 dark:hover:text-mist-100 hover:underline';
     return (
         <button type={submit ? 'submit' : 'button'} disabled={disabled} onClick={onClick} className={classes}>
             {caption}

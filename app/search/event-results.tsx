@@ -31,11 +31,11 @@ export default async function EventResults({ eventType, city, state, theatre, zi
 
     return (
         <>
-            {hasNoResults && <p className="text-slate-700 mt-4">No results found.</p>}
+            {hasNoResults && <p className="text-slate-700 dark:text-slate-300 mt-4">No results found.</p>}
             {results && Object.keys(results).map((date, i) => (
                 <div key={i} className='flex flex-col w-full px-4'>
                     <div className='mx-3 my-2 px-2 border-b border-slate-300'>
-                        <h2 className='text-slate-900 font-semibold '>{date === formatDate(new Date()) ? 'Today' : formatDateForDisplay(date)}</h2>
+                        <h2 className='text-slate-900 dark:text-slate-100 font-semibold '>{date === formatDate(new Date()) ? 'Today' : formatDateForDisplay(date)}</h2>
                     </div>
                     <div className='flex flex-row flex-wrap'>
                         {results[date].map(({ event, time }, i) => <ItemCard key={i} item={event} time={time} type={eventType} date={date} />)}

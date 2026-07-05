@@ -20,7 +20,7 @@ export default async function UpcomingShows({ theatre }: { theatre: Theatre }) {
         <Suspense fallback={<Loader />}>
             {showsByDate?.length ? (
                 <section>
-                    <h2 className="text-slate-700 font-semibold">Upcoming Shows</h2>
+                    <h2 className="text-slate-700 dark:text-slate-300 font-semibold">Upcoming Shows</h2>
                     <div className="flex flex-row flex-wrap">
                         {showsByDate.map(({ show, dateTime }, i) => <MediumCard key={i} item={show} type="show" dateTime={dateTime} />)}
                     </div>

@@ -22,7 +22,7 @@ export default async function ShowsLookingFor({ role, limit, user } : { role: Ro
         <Suspense fallback={<Loader />}>
             {showsByDate?.length ? (
                 <section>
-                    <h2 className="text-slate-700 font-semibold">{`Shows Looking for ${capitalize(pluralize(role))}`}</h2>
+                    <h2 className="text-slate-700 dark:text-slate-300 font-semibold">{`Shows Looking for ${capitalize(pluralize(role))}`}</h2>
                     <div className="flex flex-row flex-wrap">
                         {showsByDate.map(({ show, dateTime }, i) => <MiniCard key={i} item={show} type="show" dateTime={dateTime} />)}
                     </div>

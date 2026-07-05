@@ -77,7 +77,7 @@ export default function ChatRoomSelect({ chatRooms, onSelect }: {
                 </div>
             </> : null}
             <div
-                className="cursor-pointer flex items-center px-4 h-10 w-86 max-w-[90vw] transition-colors mb-0.5 bg-white hover:bg-blue-500 text-gray-700 hover:text-white rounded-md border-1 border-gray-300"
+                className="cursor-pointer flex items-center px-4 h-10 w-86 max-w-[90vw] transition-colors mb-0.5 bg-white hover:bg-blue-500 text-gray-700 dark:text-gray-400 hover:text-white rounded-md border-1 border-gray-300"
                 onClick={() => setIsOpen(!isOpen)}
             >
                 <div className="flex flex-row items-center gap-1">{room && displayNameAndImage(getChatRoomObject(room) || globalChatRoom) || 'Select Discussion Board'}</div>
