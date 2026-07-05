@@ -3,7 +3,7 @@
 
 import slugify from 'slugify';
 
-import { Event, EventOccurrence, EventType, NewsType, Role, ShowCastMember, Showing, Theatre, User } from "@/types";
+import { AbbrevUser, Event, EventOccurrence, EventType, NewsType, Role, ShowCastMember, Showing, Theatre, User } from "@/types";
 import { camelCaseObject, pluralize, removeLeadingArticles, snakeCaseObject } from './helper-functions';
 import { supabaseAdmin } from './supabase-server';
 import { getCitiesWithinRange } from './location';
@@ -11,6 +11,7 @@ import { revalidatePath } from 'next/cache';
 import { dateMatchesRecurringSchedule, getStartOfToday, normalizeDateTime } from './dates';
 import { getTeamsByUser } from './teams';
 import { createNewsFeedItem, deleteNewsFeedItem } from './news';
+import { getFriendIds, getFriends } from './users';
 
 export async function getEvent(id: string, type: EventType): Promise<Event | null> {
     const { data, error } = await supabaseAdmin
@@ -296,6 +297,43 @@ export async function getRsvpCount(eventId: string, eventDate: string, status: s
         .eq('status', status)
         .maybeSingle();
     return count || 0;
+}
+
+export async function getFriendsRsvpCount(eventId: string, eventDate: string, status: string, type: EventType, userId: string): Promise<number> {
+    const friends = await getFriendIds(userId);
+    if (friends.length) {
+        const { count } = await supabaseAdmin
+            .from('rsvps')
+            .select('*', { count: 'exact', head: true })
+            .eq('event_id', eventId)
+            .eq('date_time', eventDate)
+            .eq('type', type)
+            .eq('status', status)
+            .in('user_id', friends)
+            .maybeSingle();
+        return count || 0;
+    } else {
+        return 0;
+    }
+}
+
+export async function getFriendsRsvp(eventId: string, eventDate: string, status: string, type: EventType, userId: string): Promise<AbbrevUser[]> {
+    const normalizedDateTime = eventDate.replaceAll('%20', ' ').replaceAll('%3A', ':');
+    const friends = await getFriends(userId);
+    if (friends.length) {
+        const { data } = await supabaseAdmin
+            .from('rsvps')
+            .select('user_id')
+            .eq('event_id', eventId)
+            .eq('date_time', normalizedDateTime)
+            .eq('type', type)
+            .eq('status', status)
+            .in('user_id', friends.map((f) => f.id));
+        const friendsRsvped: string[] = (data || []).map((row: { user_id: string }) => row.user_id);
+        return friends.filter((friend) => friendsRsvped.includes(friend.id));
+    } else {
+        return [];
+    }
 }
 
 export async function setRsvpStatus(userId: string, eventId: string, eventDate: string, value: string, type: EventType): Promise<void> {

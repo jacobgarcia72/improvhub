@@ -1,4 +1,4 @@
-import { getRsvpCount, getRsvpStatus, getShowCast } from "@/lib/shows";
+import { getFriendsRsvpCount, getRsvpCount, getRsvpStatus, getShowCast } from "@/lib/shows";
 import { getCurrentUserId } from "@/lib/users";
 import CastingTools from "./casting-tools";
 import CastList from "@/components/cast-list";
@@ -11,6 +11,8 @@ import AddToCalendarButton from "./add-to-calendar";
 import { getTheatre } from "@/lib/theatres";
 import { Suspense } from "react";
 import Loader from "@/components/loader";
+import Link from "next/link";
+import { pluralize } from "@/lib/helper-functions";
 
 export default async function Occurrence({ id, dateTime, parentEvent, isASeries, type } :
     { id: string, dateTime: string, parentEvent: Event, isASeries: boolean, type: EventType }
@@ -36,6 +38,8 @@ export default async function Occurrence({ id, dateTime, parentEvent, isASeries,
 
     const goingCount = await getRsvpCount(parentEvent.id, eventDate, 'g', type);
     const interestedCount = await getRsvpCount(parentEvent.id, eventDate, 'i', type);
+    const friendsGoingCount = (userId && goingCount) ? await getFriendsRsvpCount(parentEvent.id, eventDate, 'g', type, userId) : 0;
+    const friendsInterestedCount = (userId && interestedCount) ? await getFriendsRsvpCount(parentEvent.id, eventDate, 'i', type, userId) : 0;
 
     let location = parentEvent.theatre && (await getTheatre(parentEvent.theatre))?.name || undefined;
     if (location && parentEvent.city && parentEvent.state) location += `, ${parentEvent.city} ${parentEvent.state}`;
@@ -77,8 +81,8 @@ export default async function Occurrence({ id, dateTime, parentEvent, isASeries,
                                 type={type}
                             />
                         ) : null}
-                        {goingCount > 0 && <p className="label mr-4">{`${goingCount} Going`}</p>}
-                        {interestedCount > 0 && <p className="label mr-4">{`${interestedCount} Interested`}</p>}
+                        {goingCount > 0 && <p className="label mr-4">{`${goingCount} Going`}{friendsGoingCount ? <>, including <Link href={`/${pluralize(type)}/${id}/${dateTime}/friends`} className="link">{friendsGoingCount} {pluralize('Friend', friendsGoingCount)}</Link></> : null}</p>}
+                        {interestedCount > 0 && <p className="label mr-4">{`${interestedCount} Interested`}{friendsInterestedCount ? <>, including <Link href={`/${pluralize(type)}/${id}/${dateTime}/friends`} className="link">{friendsInterestedCount} {pluralize('Friend', friendsInterestedCount)}</Link></> : null}</p>}
                     </div>
                 </div>
             </div>
