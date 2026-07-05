@@ -1,5 +1,5 @@
 import Loader from "@/components/loader";
-import UpcomingShows from "./upcoming-shows";
+import UpcomingEvents from "./upcoming-events";
 import { pluralize } from "@/lib/helper-functions";
 import { getTheatre } from "@/lib/theatres";
 import { getCurrentUserId, getFollowCount } from "@/lib/users";
@@ -52,7 +52,8 @@ export default async function TheatreDetailsPage({ params }: {
                     </Link>
                 ): null}
             </section>
-            <UpcomingShows theatre={theatre} />
+            <UpcomingEvents theatre={theatre} type="jam" limit={12} />
+            <UpcomingEvents theatre={theatre} />
         </Suspense>
     );
 }

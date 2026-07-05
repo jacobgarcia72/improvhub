@@ -154,39 +154,39 @@ export async function getUpcomingShowsByCastMember(userId: string, roles: (Role 
     return res;
 }
 
-export async function getUpcomingShowsByTheatre(theatre: Theatre): Promise<{ show: Event, dateTimes: string[] }[]> {
-    const { data: showData } = await supabaseAdmin
-        .from('shows')
+export async function getUpcomingEventsByTheatre(theatre: Theatre, type: EventType = 'show'): Promise<{ event: Event, dateTimes: string[] }[]> {
+    const { data: eventData } = await supabaseAdmin
+        .from(pluralize(type))
         .select('id')
         .or(`theatre.eq.${theatre.id},theatre.ilike.${theatre.name},theatre.ilike.${removeLeadingArticles(theatre.name)}`);
-    const showsAtTheatre = showData || [];
+    const eventsAtTheatre = eventData || [];
     const { data } = await supabaseAdmin
-        .from('show_occurrences')
+        .from(`${type}_occurrences`)
         .select('event_id, date_time')
-        .in('event_id', showsAtTheatre.map(({ id }: { id: string }) => id))
+        .in('event_id', eventsAtTheatre.map(({ id }: { id: string }) => id))
         .gte('date_time', getStartOfToday());
 
-    const showDates: { [showId: string]: string[] } = { };
-    const showIds: string[] = [];
+    const eventDates: { [eventId: string]: string[] } = { };
+    const eventIds: string[] = [];
 
     (data || []).forEach(({ event_id, date_time }: { event_id: string; date_time: string }) => {
-        if (!showDates[event_id]) {
-            showDates[event_id] = [];
-            showIds.push(event_id);
+        if (!eventDates[event_id]) {
+            eventDates[event_id] = [];
+            eventIds.push(event_id);
         }
         const dateTime = normalizeDateTime(date_time);
-        if (!showDates[event_id].includes(dateTime)) {
-            showDates[event_id].push(dateTime);
+        if (!eventDates[event_id].includes(dateTime)) {
+            eventDates[event_id].push(dateTime);
         }
     });
 
-    const res: { show: Event, dateTimes: string[] }[] = [];
+    const res: { event: Event, dateTimes: string[] }[] = [];
 
-    for (let i = 0; i < showIds.length; i++) {
-        const showId = showIds[i];
-        const show = await getShow(showId);
-        if (show) {
-            res.push({ show, dateTimes: showDates[showId] });
+    for (let i = 0; i < eventIds.length; i++) {
+        const eventId = eventIds[i];
+        const event = await getEvent(eventId, type);
+        if (event) {
+            res.push({ event, dateTimes: eventDates[eventId] });
         }
     }
     return res;
