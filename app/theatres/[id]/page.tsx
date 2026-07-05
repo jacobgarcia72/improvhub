@@ -53,6 +53,7 @@ export default async function TheatreDetailsPage({ params }: {
                 ): null}
             </section>
             <UpcomingEvents theatre={theatre} type="jam" limit={12} />
+            <UpcomingEvents theatre={theatre} type="workshop" limit={12} />
             <UpcomingEvents theatre={theatre} />
         </Suspense>
     );
