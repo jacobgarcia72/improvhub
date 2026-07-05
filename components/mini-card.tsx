@@ -1,13 +1,14 @@
+'use client'
 import { optimizeImage } from "@/lib/optimize-image";
-import { Event, Team, User } from "@/types";
+import { Event, Team, Theatre, User } from "@/types";
 import Image from "next/image";
 import Link from "next/link";
 import { Border } from "./border";
 import { formatDateTimeForDisplay } from "@/lib/dates";
-import { getTheatre } from "@/lib/theatres";
 import { pluralize } from "@/lib/helper-functions";
+import { useEffect, useState } from "react";
 
-export default async function MiniCard({ item, type, dateTime, includeDescription }: {
+export default function MiniCard({ item, type, dateTime, includeDescription }: {
     item: Event | Team | User,
     type: string,
     dateTime?: string,
@@ -20,6 +21,22 @@ export default async function MiniCard({ item, type, dateTime, includeDescriptio
     if (!name && 'firstName' in item && 'lastName' in item) name = `${item.firstName} ${item.lastName}`;
     let url = `/${type === 'user' ? 'profile' : `${pluralize(type)}`}/${item.id}/`;
     if (dateTime) url += `${dateTime}/`;
+
+    const [theatreName, setTheatreName] = useState<string>();
+    async function getTheatreName(idOrName: string) {
+        const res = await fetch(`/api/theatre?idOrName=${encodeURIComponent(idOrName)}`);
+        const data: Theatre | null = await res.json();
+        if (data) {
+            setTheatreName(data.name);
+        }
+    }
+    useEffect(() => {
+        if ('theatre' in item && item.theatre) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            getTheatreName(item.theatre);
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
     return (
         <Link href={url}>
             <Border className="flex flex-row h-[132px] w-[226px] m-2 w-44 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
@@ -39,8 +56,8 @@ export default async function MiniCard({ item, type, dateTime, includeDescriptio
                         {includeDescription && 'description' in item && item.description ? (
                             <p>{item.description.replaceAll('<br>', '\n')}</p>
                         ) : null}
-                        {'theatre' in item && item.theatre ? (
-                            <p className="leading-none">{(await getTheatre(item.theatre))?.name}</p>
+                        {theatreName ? (
+                            <p className="leading-none">{theatreName}</p>
                         ) : null}
                         {'city' in item && item.city && 'state' in item && item.state ? (
                             <p className="leading-none">{`${item.city}, ${item.state}`}</p>

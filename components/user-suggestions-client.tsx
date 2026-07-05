@@ -37,7 +37,7 @@ export default function UserSuggestionsClient({ initialUsers, role, teamId }: { 
     return (
         <section>
             <div className="flex items-center justify-between px-3">
-                <h2 className="px-3 font-semibold">{headers[role]}</h2>
+                <h2 className="px-3">{headers[role]}</h2>
                 <Button caption="Refresh" onClick={refresh} style="link" disabled={loading} />
             </div>
             <div className="flex flex-row flex-wrap">

@@ -7,7 +7,6 @@ import { capitalize, pluralize } from "@/lib/helper-functions";
 
 export default async function UpcomingEvents({ theatre, type = 'show', limit = 72 }: { theatre: Theatre, type?: EventType, limit?: number }) {
     const events = theatre ? await getUpcomingEventsByTheatre(theatre, type) : [];
-    console.log({type, events: events.length})
     let eventsByDate: { dateTime: string, event: Event }[] = [];
     events?.forEach(({ event, dateTimes }) => {
         dateTimes.forEach((dateTime) => {

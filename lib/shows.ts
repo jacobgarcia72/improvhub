@@ -38,7 +38,6 @@ export async function getEventsByAdmin(userId: string, type: EventType): Promise
             .from(pluralize(type))
             .select('*')
             .contains('admins', [userId]);
-        console.log({data})
         return (data || []).map(camelCaseObject) as Event[];
     }
 }
@@ -352,7 +351,6 @@ export async function saveEvent(type: EventType, event: Event, occurrences: Even
         for (let i = 0; i < instructors.length; i++) {
             const instructorId = instructors[i];
             if (isNewEvent || !previousInstructors.includes(instructorId)) {
-                console.log({instructorId})
                 await createNewsFeedItem('friend', instructorId, `instructor_for_${type}` as NewsType, event.id);
             }
         }

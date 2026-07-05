@@ -22,7 +22,7 @@ export default async function RSVPEvents({ userId, type, limit } : { userId: str
         <Suspense fallback={<Loader />}>
             {eventsByDate?.length ? (
                 <section>
-                    <h2 className="text-slate-700 dark:text-slate-300 font-semibold">{`${pluralize(capitalize(type))} I've RSVP'ed to`}</h2>
+                    <h2 className="text-slate-700 dark:text-slate-300">{`${pluralize(capitalize(type))} I've RSVP'ed to`}</h2>
                     <div className="flex flex-row flex-wrap">
                         {eventsByDate.map(({ event, dateTime }, i) => <MiniCard key={i} item={event} type={type} dateTime={dateTime} />)}
                     </div>

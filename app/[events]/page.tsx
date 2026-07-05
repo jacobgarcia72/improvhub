@@ -38,7 +38,6 @@ export default async function EventsPage({ params }: { params: Promise<{ events:
     const userId = user?.id;
 
     const eventsManaged = userId ? await getEventsByAdmin(userId, type) : null;
-    console.log({eventsManaged: eventsManaged?.length})
 
     const showsUserIsIn = (type === 'show' && userId) ? await getUpcomingShowsByCastMember(userId) : null;
     const showsByDate: { dateTime: string, show: Event }[] = [];
@@ -66,7 +65,7 @@ export default async function EventsPage({ params }: { params: Promise<{ events:
             <Suspense fallback={<Loader />}>
                 {eventsManaged?.length ? (
                     <section>
-                        <h2 className="text-slate-700 dark:text-slate-300 font-semibold">{capitalize(events)} I Manage</h2>
+                        <h2 className="text-slate-700 dark:text-slate-300">{capitalize(events)} I Manage</h2>
                         <div className="flex flex-row flex-wrap">
                             {eventsManaged.map((event, i) => <MiniCard key={i} item={event} type={type} />)}
                         </div>

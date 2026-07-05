@@ -23,7 +23,7 @@ export default async function TeamsSection({
     return (
         <Suspense fallback={<Loader />}>
             <section>
-                <h2 className="px-3 font-semibold">{header}</h2>
+                <h2 className="px-3">{header}</h2>
                 <div className="flex flex-row flex-wrap">
                     {teams.map((team, i) => <MiniCard key={i} item={team} type="team" />)}
                 </div>
