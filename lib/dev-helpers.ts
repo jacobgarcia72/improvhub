@@ -22,7 +22,6 @@ const getLoremIpsum = (chars: number): string => 'Lorem ipsum dolor sit amet con
 
 const generateUserAndRoles = (count: number): [User, { [role: string]: boolean }] => {
     const id = `test-${count}`;
-    const password = '';
 
     const images = {
         male: [
@@ -145,7 +144,7 @@ const generateUserAndRoles = (count: number): [User, { [role: string]: boolean }
     const joinDate = new Date().toISOString();
     return [
         {
-            id, password, joinDate, firstName, lastName, pronouns, bio, theatres, city, state, website, image, openToJoinTeam, openToAccompanyTeam, openToCoachTeam
+            id, joinDate, firstName, lastName, pronouns, bio, theatres, city, state, website, image, openToJoinTeam, openToAccompanyTeam, openToCoachTeam
         },
         roles
     ]

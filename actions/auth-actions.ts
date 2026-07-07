@@ -2,7 +2,6 @@
 
 import { createAuthSession, destroySession, verifyAuth } from "@/lib/auth";
 import { uploadImage } from "@/lib/cloudinary";
-import { hashUserPassword } from "@/lib/hash";
 import { getUser, saveUser, updateUser } from "@/lib/users";
 import { supabase } from "@/lib/supabase";
 import { supabaseAdmin } from "@/lib/supabase-server";
@@ -38,7 +37,6 @@ export async function createUser(prevState: void | { message?: string }, formDat
     }
     const user: User = {
         id: username,
-        password: hashUserPassword(password),
         joinDate: new Date().toISOString(),
         image: imageUrl,
         firstName,
@@ -58,6 +56,7 @@ export async function createUser(prevState: void | { message?: string }, formDat
             user_metadata: {
                 username,
                 app_user_id: username,
+                display_name: `${firstName} ${lastName}`
             },
         });
 
@@ -100,7 +99,7 @@ export async function login(redirectRoute = '/', prevState: void | { message?: s
         || (data.user.user_metadata?.app_user_id as string | undefined)?.trim().toLowerCase()
         || data.user.email?.split('@')[0] || '';
 
-    const existingUser = await getUser(username, true);
+    const existingUser = await getUser(username);
     if (!existingUser) {
         return { message: 'Your profile has not been set up yet.' };
     }

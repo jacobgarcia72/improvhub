@@ -9,20 +9,17 @@ import { camelCaseObject, snakeCaseObject } from "./helper-functions";
 import { destroyImage } from "./cloudinary";
 import { postNotification } from "./notifications";
 
-export async function getUIDFromUserId(userId): Promise<string> {
+// export async function getUIDFromUserId(userId): Promise<string> {
 
-}
+// }
 
-export async function getUser(username: string, includePassword = false): Promise<User | null> {
+export async function getUser(username: string): Promise<User | null> {
     const { data } = await supabaseAdmin
         .from('users')
         .select('*')
         .eq('id', username)
         .maybeSingle();
-    return data ? camelCaseObject({
-        ...data,
-        password: includePassword ? data.password as string : '',
-    }) as User : null;
+    return data ? camelCaseObject(data) as User : null;
 }
 
 export async function getUserAbbreviated(username: string): Promise<AbbrevUser | null> {
@@ -68,7 +65,6 @@ export async function getAllUsers(): Promise<User[]> {
     if (error) throw error;
     return (data || []).map((row: { [key: string]: any; }) => camelCaseObject({
         ...row,
-        password: '',
     })) as User[];
 }
 
@@ -91,7 +87,6 @@ export async function searchUsers(searchCriteria: Partial<User>): Promise<User[]
     .match(snakeCaseObject(searchCriteria));
     return (data || []).map((row: { [key: string]: any; }) => camelCaseObject({
         ...row,
-        password: '',
     })) as User[];
 }
 
@@ -307,7 +302,6 @@ export async function saveUser(user: User, userRoles?: { [role: string]: boolean
         .from('users')
         .insert({
             id: user.id,
-            password: user.password,
             join_date: user.joinDate,
             first_name: user.firstName,
             last_name: user.lastName,

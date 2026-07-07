@@ -107,7 +107,6 @@ export interface ShowCastMember extends CastMember {
 
 export interface User {
     id: string;
-    password?: string;
     joinDate: string;
     firstName: string;
     lastName: string;

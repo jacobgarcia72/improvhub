@@ -2,7 +2,6 @@
 
 create table if not exists users (
   id text primary key,
-  password text not null,
   join_date text not null,
   first_name text not null,
   last_name text,
