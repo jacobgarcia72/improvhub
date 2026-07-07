@@ -2,8 +2,8 @@
 
 import { createAuthSession, destroySession, verifyAuth } from "@/lib/auth";
 import { uploadImage } from "@/lib/cloudinary";
-import { hashUserPassword, verifyPassword } from "@/lib/hash";
-import { getUser, saveUser, updatePassword, updateUser } from "@/lib/users";
+import { hashUserPassword } from "@/lib/hash";
+import { getUser, saveUser, updateUser } from "@/lib/users";
 import { supabase } from "@/lib/supabase";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { User } from "@/types";
@@ -161,17 +161,29 @@ export async function updateUserPassword(prevState: void | { message?: string },
     if (newPassword !== confirmNewPassword) return { message: 'New passwords do not match' };
 
     const user = (await verifyAuth()).user;
-    if (!user || !user.password) return { message: 'User not found' };
+    if (!user) return { message: 'User not found' };
 
-    const isValidCurrentPassword = verifyPassword(user.password, currentPassword);
+    // Get the user's email from Supabase
+    const { data: { user: authUser }, error: authError } = await supabaseAdmin.auth.admin.getUserById(user.id);
+    if (authError || !authUser?.email) return { message: 'Unable to verify user' };
 
-    if (!isValidCurrentPassword) return { message: 'Current password is incorrect' };
+    // Verify current password by attempting sign in
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: authUser.email,
+        password: currentPassword,
+    });
 
-    const success = await updatePassword(user.id, hashUserPassword(newPassword));
-    if (success) {
-        await createAuthSession(user.id);
-        redirect('/account?passwordChanged=true');
-    }
+    if (signInError) return { message: 'Current password is incorrect' };
+
+    // Update password using Supabase admin API
+    const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(user.id, {
+        password: newPassword,
+    });
+
+    if (updateError) return { message: 'Failed to update password' };
+
+    await createAuthSession(user.id);
+    redirect('/account?passwordChanged=true');
 }
 
 export async function updateUserBio(prevState: void | { message?: string }, formData: FormData) {

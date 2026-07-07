@@ -9,6 +9,10 @@ import { camelCaseObject, snakeCaseObject } from "./helper-functions";
 import { destroyImage } from "./cloudinary";
 import { postNotification } from "./notifications";
 
+export async function getUIDFromUserId(userId): Promise<string> {
+
+}
+
 export async function getUser(username: string, includePassword = false): Promise<User | null> {
     const { data } = await supabaseAdmin
         .from('users')
@@ -327,19 +331,14 @@ export async function saveUser(user: User, userRoles?: { [role: string]: boolean
     }
 }
 
-export async function updatePassword(userId: string, newPassword: string): Promise<boolean> {
-    const { error } = await supabaseAdmin
-        .from('users')
-        .update({ password: newPassword })
-        .eq('id', userId);
-    if (error) throw error;
-    return true;
-}
-
 export async function deleteUser(user: User): Promise<void> {
     if (user.image) {
         await destroyImage(user.image);
     }
+    // Delete Supabase Auth user
+    const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(user.id);
+    if (authError) throw authError;
+    
     await supabaseAdmin
         .from('users')
         .delete()

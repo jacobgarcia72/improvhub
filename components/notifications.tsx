@@ -20,6 +20,7 @@ export default function Notifications({ userId, initialData }: { userId: string,
                     table: "notifications",
                 },
                 (payload) => {
+                    console.log({payload})
                     const newRecord = payload.new as Notification | null;
                     const oldRecord = payload.old as Notification | null;
 

@@ -263,12 +263,11 @@ create table if not exists feedback (
   date text not null
 );
 
--- CREATE POLICY "Allow matching recipients" 
--- ON notifications FOR SELECT 
--- USING (
---   -- Converts UUID to text, then checks if it exists inside the recipients text array
---   auth.uid()::text = ANY(recipients)
--- );
+CREATE POLICY "Allow matching recipients" 
+ON notifications FOR SELECT 
+USING (
+  auth.uid()::text = ANY(recipients)
+);
 
 -- Grant privileges on sessions table
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.sessions TO service_role;
