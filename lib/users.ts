@@ -7,6 +7,7 @@ import { destroySession, verifyAuth } from "./auth";
 import { revalidatePath } from "next/cache";
 import { camelCaseObject, snakeCaseObject } from "./helper-functions";
 import { destroyImage } from "./cloudinary";
+import { postNotification } from "./notifications";
 
 export async function getUser(username: string, includePassword = false): Promise<User | null> {
     const { data } = await supabaseAdmin
@@ -206,6 +207,7 @@ export async function createFriendRequest(senderId: string, receiverId: string):
             { user1_id: senderId, user2_id: receiverId, accepted: false }
         );
     if (error) throw error;
+    postNotification(senderId, [receiverId], 'friend_request');
     revalidatePath(`/profile/${receiverId}`, 'layout');
     revalidatePath(`/search`, 'layout');
 }
@@ -217,6 +219,7 @@ export async function acceptFriendRequest(senderId: string, receiverId: string):
         .eq('user1_id', senderId)
         .eq('user2_id', receiverId)
     if (error) throw error;
+    postNotification(receiverId, [senderId], 'friend_request_accept');
     revalidatePath(`/profile/${senderId}`, 'layout');
     revalidatePath(`/profile/${receiverId}`, 'layout');
     revalidatePath(`/search`, 'layout');
