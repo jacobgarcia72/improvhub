@@ -4,6 +4,8 @@ import { createAuthSession, destroySession, verifyAuth } from "@/lib/auth";
 import { uploadImage } from "@/lib/cloudinary";
 import { hashUserPassword, verifyPassword } from "@/lib/hash";
 import { getUser, saveUser, updatePassword, updateUser } from "@/lib/users";
+import { supabase } from "@/lib/supabase";
+import { supabaseAdmin } from "@/lib/supabase-server";
 import { User } from "@/types";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -11,10 +13,12 @@ import { redirect } from "next/navigation";
 export async function createUser(prevState: void | { message?: string }, formData: FormData) {
     const username = (formData.get('username') as string).trim().toLowerCase();
     const password = formData.get('password') as string;
+    const email = (formData.get('email') as string).trim().toLowerCase();
     const firstName = formData.get('firstName') as string;
     const lastName = formData.get('lastName') as string;
 
     if (!username) return { message: 'Username is required' };
+    if (!email) return { message: 'Email is required' };
     if (!password) return { message: 'Password is required' };
     if (password.length < 8) return { message: 'Password must be at least 8 characters' };
     if (!firstName) return { message: 'First Name is required' };
@@ -45,7 +49,23 @@ export async function createUser(prevState: void | { message?: string }, formDat
     ['player', 'tech', 'director', 'musician', 'coach'].forEach((role) => {
         userRoles[role] = Boolean(formData.get(role));
     });
+
     try {
+        const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+            email,
+            password,
+            email_confirm: true,
+            user_metadata: {
+                username,
+                app_user_id: username,
+            },
+        });
+
+        if (authError || !authData.user) {
+            console.error(authError);
+            return { message: 'Unable to create your account right now.' };
+        }
+
         await saveUser(user, userRoles);
         await createAuthSession(username);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -60,19 +80,29 @@ export async function createUser(prevState: void | { message?: string }, formDat
 }
 
 export async function login(redirectRoute = '/', prevState: void | { message?: string }, formData: FormData) {
-    const username = (formData.get('username') as string).toLowerCase();
+    const email = (formData.get('email') as string).trim().toLowerCase();
     const password = formData.get('password') as string;
 
-    const existingUser = await getUser(username, true);
-
-    if (!existingUser || !existingUser.password) {
-        return { message: 'Invalid credentials.' }
+    if (!email || !password) {
+        return { message: 'Invalid credentials.' };
     }
 
-    const isValidPassword = verifyPassword(existingUser.password, password);
+    const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+    });
 
-    if (!isValidPassword) {
-        return { message: 'Invalid credentials.' }
+    if (error || !data.user) {
+        return { message: 'Invalid credentials.' };
+    }
+
+    const username = (data.user.user_metadata?.username as string | undefined)?.trim().toLowerCase()
+        || (data.user.user_metadata?.app_user_id as string | undefined)?.trim().toLowerCase()
+        || data.user.email?.split('@')[0] || '';
+
+    const existingUser = await getUser(username, true);
+    if (!existingUser) {
+        return { message: 'Your profile has not been set up yet.' };
     }
 
     await createAuthSession(existingUser.id);
@@ -80,6 +110,11 @@ export async function login(redirectRoute = '/', prevState: void | { message?: s
 }
 
 export async function logout() {
+    try {
+        await supabase.auth.signOut();
+    } catch {
+        // Ignore Supabase sign-out issues and fall back to the local session cleanup.
+    }
     await destroySession();
     redirect('/login');
 }

@@ -19,6 +19,9 @@ export default function CreateProfileForm() {
                 <h1 className='text-slate-700 dark:text-slate-300 text-xl m-1'>Create Profile</h1>
                 <div className="grid gap-4 sm:grid-cols-2">
                     <UsernameInput />
+                    <Input required type='email' label='Email' name="email" />
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
                     <Input required type='password' label='Password' name="password" />
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2">

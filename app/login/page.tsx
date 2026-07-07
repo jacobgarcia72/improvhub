@@ -36,7 +36,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
                         <h1 className="text-slate-800 text-lg">
                             {caption}
                         </h1>
-                        <Input required name="username" label="Username" />
+                        <Input required name="email" type="email" label="Email" />
                         <Input required name="password" type="password" label="Password" />
                     </Form>
                     <Link href="signup" className="m-auto">
