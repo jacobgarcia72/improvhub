@@ -2,59 +2,27 @@
 
 import { supabase } from "@/lib/supabase";
 import { Notification } from "@/types";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
-export default function Notifications({ userId, initialData }: { userId: string, initialData: Notification[] }) {
-    const [notifs, setNotifs] = useState<Notification[]>(initialData);
-
+export default function Notifications({ uid, initialData }: { uid: string, initialData: Notification[] }) {
     useEffect(() => {
-        if (!userId) return;
-
         const channel = supabase
-            .channel(`${userId}-notifications`)
+            .channel(`notification_ids_stream:${uid}`)
             .on(
                 "postgres_changes",
-                {
-                    event: "*",
-                    schema: "public",
-                    table: "notifications",
-                },
+                { event: "INSERT", schema: "public", table: "notification_ids", filter: `user_id=eq.${uid}` },
                 (payload) => {
-                    console.log({payload})
-                    const newRecord = payload.new as Notification | null;
-                    const oldRecord = payload.old as Notification | null;
-
-                    setNotifs((current) => {
-                        if (payload.eventType === "INSERT" && newRecord) {
-                            return current.some((notif) => notif.id === newRecord.id)
-                                ? current
-                                : [newRecord, ...current];
-                        }
-
-                        if (payload.eventType === "UPDATE" && newRecord) {
-                            return current.map((notif) => notif.id === newRecord.id ? newRecord : notif);
-                        }
-
-                        if (payload.eventType === "DELETE" && oldRecord) {
-                            return current.filter((notif) => notif.id !== oldRecord.id);
-                        }
-
-                        return current;
-                    });
+                    console.log("NOTIFICATION:", payload);
                 }
             )
-            .subscribe((status) => {
-                console.log("notifications subscription", status);
-            });
+            .subscribe(console.log);
 
-        return () => {
-            supabase.removeChannel(channel);
-        };
-    }, [userId]);
+        return () => { supabase.removeChannel(channel); };
+    }, [uid]);
 
     return (
         <div>
-            {notifs.length}
+            {initialData.length}
         </div>
     );
 }

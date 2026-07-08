@@ -1,13 +1,67 @@
 'use server'
 
-import { createAuthSession, destroySession, verifyAuth } from "@/lib/auth";
+import { destroySession, verifyAuth } from "@/lib/auth";
 import { uploadImage } from "@/lib/cloudinary";
-import { getUser, saveUser, updateUser } from "@/lib/users";
-import { supabase } from "@/lib/supabase";
+import { saveUser, updateUser } from "@/lib/users";
 import { supabaseAdmin } from "@/lib/supabase-server";
+import { createSupabaseServerClient } from "@/lib/supabase-ssr";
 import { User } from "@/types";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+
+function isDuplicateAuthUserError(error: unknown): boolean {
+    if (!error || typeof error !== 'object') return false;
+    const message = 'message' in error && typeof error.message === 'string'
+        ? error.message.toLowerCase()
+        : '';
+    const code = 'code' in error && typeof error.code === 'string'
+        ? error.code
+        : '';
+    return code === 'email_exists' || code === 'user_already_exists' || message.includes('already');
+}
+
+function getErrorCode(error: unknown): string {
+    return error && typeof error === 'object' && 'code' in error && typeof error.code === 'string'
+        ? error.code
+        : '';
+}
+
+function getErrorMessage(error: unknown): string {
+    return error && typeof error === 'object' && 'message' in error && typeof error.message === 'string'
+        ? error.message
+        : String(error);
+}
+
+function getSignupErrorMessage(error: unknown): string {
+    const code = getErrorCode(error);
+    const message = getErrorMessage(error);
+    const lowerMessage = message.toLowerCase();
+
+    if (code === '23505' || lowerMessage.includes('duplicate key')) {
+        if (lowerMessage.includes('users_pkey') || lowerMessage.includes('users_id')) {
+            return 'Username is unavailable.';
+        }
+        if (lowerMessage.includes('users_uid')) {
+            return 'That Supabase Auth user is already linked to a profile.';
+        }
+        return 'That account already exists.';
+    }
+    if ((code === '42703' || code === 'PGRST204') && lowerMessage.includes('uid')) {
+        return 'The users.uid database migration has not been applied or Supabase needs its schema cache reloaded.';
+    }
+    if (code === '23503') {
+        return 'Profile creation failed because a related database row was missing.';
+    }
+    if (code === '23502') {
+        return 'Profile creation failed because a required database field was missing.';
+    }
+
+    if (process.env.NODE_ENV !== 'production') {
+        return `Signup failed: ${code ? `${code} ` : ''}${message}`;
+    }
+
+    return 'Hmm, something went wrong. Try again later.';
+}
 
 export async function createUser(prevState: void | { message?: string }, formData: FormData) {
     const username = (formData.get('username') as string).trim().toLowerCase();
@@ -48,6 +102,20 @@ export async function createUser(prevState: void | { message?: string }, formDat
         userRoles[role] = Boolean(formData.get(role));
     });
 
+    const { data: existingUsername, error: usernameError } = await supabaseAdmin
+        .from('users')
+        .select('id')
+        .eq('id', username)
+        .maybeSingle();
+    if (usernameError) {
+        console.error(usernameError);
+        return { message: 'Unable to create your account right now.' };
+    }
+    if (existingUsername) return { message: 'Username is unavailable.' };
+
+    let authUserId: string | null = null;
+    let profileCreated = false;
+
     try {
         const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
             email,
@@ -62,18 +130,62 @@ export async function createUser(prevState: void | { message?: string }, formDat
 
         if (authError || !authData.user) {
             console.error(authError);
-            return { message: 'Unable to create your account right now.' };
+            if (isDuplicateAuthUserError(authError)) {
+                const supabase = await createSupabaseServerClient();
+                const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+                    email,
+                    password,
+                });
+                if (signInError || !signInData.user) {
+                    return { message: 'Email is already in use.' };
+                }
+
+                const { data: existingProfile, error: profileLookupError } = await supabaseAdmin
+                    .from('users')
+                    .select('id')
+                    .eq('uid', signInData.user.id)
+                    .maybeSingle();
+                if (profileLookupError) throw profileLookupError;
+                if (existingProfile) return { message: 'Email is already in use.' };
+
+                try {
+                    await saveUser(user, signInData.user.id, userRoles);
+                } catch (profileError) {
+                    throw profileError;
+                }
+                profileCreated = true;
+            } else {
+                return { message: 'Unable to create your account right now.' };
+            }
         }
 
-        await saveUser(user, userRoles);
-        await createAuthSession(username);
+        if (!profileCreated && authData.user) {
+            authUserId = authData.user.id;
+
+            try {
+                await saveUser(user, authData.user.id, userRoles);
+            } catch (profileError) {
+                if (authUserId) {
+                    const { error: cleanupError } = await supabaseAdmin.auth.admin.deleteUser(authUserId);
+                    if (cleanupError) console.error('Failed to clean up Supabase Auth user after profile creation failed', cleanupError);
+                }
+                throw profileError;
+            }
+
+            const supabase = await createSupabaseServerClient();
+            const { error: signInError } = await supabase.auth.signInWithPassword({
+                email,
+                password,
+            });
+            if (signInError) {
+                console.error(signInError);
+                return { message: 'Your account was created, but sign-in failed. Try logging in.' };
+            }
+        }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
-        if (error?.code && error.code.includes('CONSTRAINT')) {
-            return { message: 'Username is unavailable.' }
-        }
-        console.error(error);
-        return { message: 'Hmm, something went wrong. Try again later.'};
+        console.error('Signup failed', error);
+        return { message: getSignupErrorMessage(error) };
     }
     redirect(`/profile`);
 }
@@ -86,6 +198,7 @@ export async function login(redirectRoute = '/', prevState: void | { message?: s
         return { message: 'Invalid credentials.' };
     }
 
+    const supabase = await createSupabaseServerClient();
     const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -95,25 +208,26 @@ export async function login(redirectRoute = '/', prevState: void | { message?: s
         return { message: 'Invalid credentials.' };
     }
 
-    const username = (data.user.user_metadata?.username as string | undefined)?.trim().toLowerCase()
-        || (data.user.user_metadata?.app_user_id as string | undefined)?.trim().toLowerCase()
-        || data.user.email?.split('@')[0] || '';
+    const { data: existingUser, error: userError } = await supabaseAdmin
+        .from('users')
+        .select('id')
+        .eq('uid', data.user.id)
+        .maybeSingle();
 
-    const existingUser = await getUser(username);
+    if (userError) {
+        console.error(userError);
+        return { message: 'Invalid credentials.' };
+    }
+
     if (!existingUser) {
+        await supabase.auth.signOut();
         return { message: 'Your profile has not been set up yet.' };
     }
 
-    await createAuthSession(existingUser.id);
     redirect(redirectRoute);
 }
 
 export async function logout() {
-    try {
-        await supabase.auth.signOut();
-    } catch {
-        // Ignore Supabase sign-out issues and fall back to the local session cleanup.
-    }
     await destroySession();
     redirect('/login');
 }
@@ -161,12 +275,14 @@ export async function updateUserPassword(prevState: void | { message?: string },
 
     const user = (await verifyAuth()).user;
     if (!user) return { message: 'User not found' };
+    if (!user.uid) return { message: 'Unable to verify user' };
 
     // Get the user's email from Supabase
-    const { data: { user: authUser }, error: authError } = await supabaseAdmin.auth.admin.getUserById(user.id);
+    const { data: { user: authUser }, error: authError } = await supabaseAdmin.auth.admin.getUserById(user.uid);
     if (authError || !authUser?.email) return { message: 'Unable to verify user' };
 
     // Verify current password by attempting sign in
+    const supabase = await createSupabaseServerClient();
     const { error: signInError } = await supabase.auth.signInWithPassword({
         email: authUser.email,
         password: currentPassword,
@@ -175,13 +291,16 @@ export async function updateUserPassword(prevState: void | { message?: string },
     if (signInError) return { message: 'Current password is incorrect' };
 
     // Update password using Supabase admin API
-    const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(user.id, {
+    const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(user.uid, {
         password: newPassword,
     });
 
     if (updateError) return { message: 'Failed to update password' };
 
-    await createAuthSession(user.id);
+    await supabase.auth.signInWithPassword({
+        email: authUser.email,
+        password: newPassword,
+    });
     redirect('/account?passwordChanged=true');
 }
 

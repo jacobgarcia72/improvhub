@@ -107,6 +107,7 @@ export interface ShowCastMember extends CastMember {
 
 export interface User {
     id: string;
+    uid?: string;
     joinDate: string;
     firstName: string;
     lastName: string;
@@ -215,26 +216,11 @@ export type NotificationType =
     'friend_request' |
     'friend_request_accept'
 
-export class Notification {
-    id: string;
+export type Notification = {
     date: string;
     sender: string;
-    recipients: string[];
     type: NotificationType;
     data: string | null;
-    constructor(
-        sender: string,
-        recipients: string[],
-        type: NotificationType,
-        data?: string | null,
-    ) {
-        this.date = new Date().toISOString();
-        this.id = `${new Date().getTime()}-${getRandomNumberString(10)}`;
-        this.sender = sender;
-        this.recipients = recipients;
-        this.type = type;
-        this.data = data || null;
-    }
 }
 
 export type InputOptionObject = { id: string | number, text: string, image?: string };

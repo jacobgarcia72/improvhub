@@ -3,12 +3,12 @@ import ProfileImage from "./profile-image";
 import NavLinks from "./nav-links";
 import { appName } from "@/lib/app-info";
 import Notifications from "./notifications";
-import { getCurrentUserId } from "@/lib/users";
+import { getCurrentUser } from "@/lib/users";
 import { getNotifications } from "@/lib/notifications";
 
 export default async function Header() {
-    const userId = await getCurrentUserId();
-    const notifications = userId ? await getNotifications(userId) : [];
+    const uid = (await getCurrentUser())?.uid;
+    const notifications = uid ? await getNotifications(uid) : [];
     return (
         <header className="bg-[#556f8d] dark:bg-[#112247] px-6 text-[0.95em] relative z-50 h-11 w-full flex flex-row justify-between items-stretch">
             <Link href="/">
@@ -18,9 +18,9 @@ export default async function Header() {
             </Link>
             <NavLinks />
             <div>
-                {userId ? (
+                {uid ? (
                     <Link href="/notifications" className="flex flex-row w-12 justify-center items-center">
-                        <Notifications userId={userId} initialData={notifications} />
+                        <Notifications uid={uid} initialData={notifications} />
                     </Link>
                 ): null}
                 <Link href="/profile" className="flex flex-row w-12 justify-center items-center">

@@ -4,6 +4,7 @@ import { respondToTeamInvitation, saveTeam } from "./teams";
 import nameGenerator from "./name-generator";
 import slugify from 'slugify';
 import { getRandomElements, removeLeadingArticles } from "./helper-functions";
+import crypto from "node:crypto";
 
 const rnd = (top: number = 100) => Math.floor(Math.random() * top) + 1;
 const getBoyName = (): string => {
@@ -240,7 +241,7 @@ export const generateDummyUsers = async (amount: number = 100) => {
     const userCount = (await getAllUsersAbbreviated()).length;
     for (let i = userCount; i <= userCount + amount; i++) {
         const [user, roles] = generateUserAndRoles(i);
-        await saveUser(user, roles);
+        await saveUser(user, crypto.randomUUID(), roles);
     }
 }
 

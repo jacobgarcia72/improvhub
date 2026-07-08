@@ -35,7 +35,7 @@ function LayoutCard({
 export default async function UserProfilePage({ params }: { params: Promise<{username: string}> }) {
     const { username } = await params;
     const user = await getUser(username) as User | undefined;
-    if (!user) notFound();
+    if (!user) return notFound();
 
     const currentUserId = (await verifyAuth()).user?.id;
     const isCurrentUser = username === currentUserId;

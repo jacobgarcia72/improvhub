@@ -9,9 +9,21 @@ import { camelCaseObject, snakeCaseObject } from "./helper-functions";
 import { destroyImage } from "./cloudinary";
 import { postNotification } from "./notifications";
 
-// export async function getUIDFromUserId(userId): Promise<string> {
-
-// }
+export async function getUIDFromUserId(userId: string): Promise<string | null> {
+    const { data } = await supabaseAdmin
+        .from('users')
+        .select('uid')
+        .eq('id', userId)
+        .maybeSingle();
+    return data?.uid || null;
+}
+export async function getUIDsFromUserIds(userIds: string[]): Promise<string[]> {
+    const { data } = await supabaseAdmin
+        .from('users')
+        .select('uid')
+        .in('id', userIds);
+    return (data || []).map((u: {uid: string}) => u.uid);
+}
 
 export async function getUser(username: string): Promise<User | null> {
     const { data } = await supabaseAdmin
@@ -114,9 +126,15 @@ export async function updateUser(updates: { [key: string]: any }, userRoles?: { 
     if (error) throw error;
     if (oldImage) destroyImage(oldImage);
     if (userRoles) {
+        const { error: deleteRoleError } = await supabaseAdmin
+            .from('user_roles')
+            .delete()
+            .eq('user_id', user.id);
+        if (deleteRoleError) throw deleteRoleError;
+
         const { error: roleError } = await supabaseAdmin
             .from('user_roles')
-            .upsert({ ...userRoles, user_id: user.id }, { onConflict: 'user_id' });
+            .insert({ ...userRoles, user_id: user.id });
         if (roleError) throw roleError;
     }
 }
@@ -206,7 +224,7 @@ export async function createFriendRequest(senderId: string, receiverId: string):
             { user1_id: senderId, user2_id: receiverId, accepted: false }
         );
     if (error) throw error;
-    postNotification(senderId, [receiverId], 'friend_request');
+    await postNotification(senderId, [receiverId], 'friend_request');
     revalidatePath(`/profile/${receiverId}`, 'layout');
     revalidatePath(`/search`, 'layout');
 }
@@ -218,7 +236,7 @@ export async function acceptFriendRequest(senderId: string, receiverId: string):
         .eq('user1_id', senderId)
         .eq('user2_id', receiverId)
     if (error) throw error;
-    postNotification(receiverId, [senderId], 'friend_request_accept');
+    await postNotification(receiverId, [senderId], 'friend_request_accept');
     revalidatePath(`/profile/${senderId}`, 'layout');
     revalidatePath(`/profile/${receiverId}`, 'layout');
     revalidatePath(`/search`, 'layout');
@@ -297,11 +315,12 @@ export async function getFriendIds(userId: string): Promise<string[]> {
     return res;
 }
 
-export async function saveUser(user: User, userRoles?: { [role: string]: boolean }): Promise<void> {
+export async function saveUser(user: User, uid: string, userRoles?: { [role: string]: boolean }): Promise<void> {
     const { error } = await supabaseAdmin
         .from('users')
         .insert({
             id: user.id,
+            uid,
             join_date: user.joinDate,
             first_name: user.firstName,
             last_name: user.lastName,
@@ -330,8 +349,10 @@ export async function deleteUser(user: User): Promise<void> {
         await destroyImage(user.image);
     }
     // Delete Supabase Auth user
-    const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(user.id);
-    if (authError) throw authError;
+    if (user.uid) {
+        const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(user.uid);
+        if (authError) throw authError;
+    }
     
     await supabaseAdmin
         .from('users')
