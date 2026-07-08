@@ -2,9 +2,10 @@
 
 import { supabase } from "@/lib/supabase";
 import { Notification } from "@/types";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function Notifications({ uid, initialData }: { uid: string, initialData: Notification[] }) {
+    const [notifications, setNotifications] = useState<Notification[]>(initialData);
     useEffect(() => {
         const channel = supabase
             .channel(`notification_ids_stream:${uid}`)
@@ -21,8 +22,8 @@ export default function Notifications({ uid, initialData }: { uid: string, initi
     }, [uid]);
 
     return (
-        <div>
-            {initialData.length}
+        <div className={`${notifications.length ? 'bg-rose-700' : 'bg-rose-500'} border-white border-[2px] w-[29px] h-[29px] flex items-center justify-center rounded-full text-white hover:text-white transition-all duration-200 group-hover:scale-115`}>
+            {notifications.length}
         </div>
     );
 }

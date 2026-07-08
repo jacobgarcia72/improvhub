@@ -17,13 +17,13 @@ export default async function Header() {
                 </div>
             </Link>
             <NavLinks />
-            <div>
+            <div className="flex flex-row">
                 {uid ? (
-                    <Link href="/notifications" className="flex flex-row w-12 justify-center items-center">
+                    <Link href="/notifications" className="flex flex-row w-9 justify-center items-center group">
                         <Notifications uid={uid} initialData={notifications} />
                     </Link>
                 ): null}
-                <Link href="/profile" className="flex flex-row w-12 justify-center items-center">
+                <Link href="/profile" className="flex flex-row w-9 justify-center items-center group">
                     <ProfileImage />
                 </Link>
             </div>

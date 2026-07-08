@@ -12,8 +12,8 @@ export default async function ProfileImage() {
         <Image
             src={imageSource}
             alt={'Profile image'}
-            width={28} height={28}
-            className="rounded-full width-[26px] height-[26px] object-fill"
+            width={30} height={30}
+            className="rounded-full width-[30px] height-[30px] object-fill border-[2px] border-white transition-all duration-200 group-hover:scale-115"
         />
     )
 }
