@@ -217,6 +217,7 @@ export type NotificationType =
     'friend_request_accept'
 
 export type Notification = {
+    id: string;
     date: string;
     sender: string;
     type: NotificationType;

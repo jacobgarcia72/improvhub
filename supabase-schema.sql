@@ -264,7 +264,6 @@ CREATE TABLE if not exists notifications (
 CREATE TABLE if not exists public.notification_ids (
   user_id uuid,
   notification_id uuid not null references notifications(id) on delete cascade,
-  date timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
   primary key (user_id, notification_id)
 );
 alter publication supabase_realtime add table public.notification_ids;

@@ -16,6 +16,10 @@ export const getNotifications = async (uid: string): Promise<Notification[]> => 
     return data || [] as Notification[];
 }
 
+export const getNumberOfNotifications = async (uid: string): Promise<number> => {
+    return (await getNotifications(uid)).length;
+}
+
 export const postNotification = async (sender: string, recipients: string[], type: NotificationType, data?: string | null): Promise<void> => {
     const { data: users, error: usersError } = await supabaseAdmin
         .from('users')
