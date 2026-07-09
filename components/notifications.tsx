@@ -22,7 +22,7 @@ export default function Notifications({ uid, initialData }: { uid: string, initi
     }, [uid]);
 
     return (
-        <div className={`${notifications.length ? 'bg-rose-700' : 'bg-rose-500'} border-white border-[2px] w-[29px] h-[29px] flex items-center justify-center rounded-full text-white hover:text-white transition-all duration-200 group-hover:scale-115`}>
+        <div className={`${notifications.length ? 'bg-lime-600' : 'bg-mist-500'} shadow-sm shadow-black w-[29px] h-[29px] flex items-center justify-center rounded-full text-white hover:text-white transition-all duration-200 group-hover:scale-110`}>
             {notifications.length}
         </div>
     );

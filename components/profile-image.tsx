@@ -13,7 +13,7 @@ export default async function ProfileImage() {
             src={imageSource}
             alt={'Profile image'}
             width={30} height={30}
-            className="rounded-full width-[30px] height-[30px] object-fill border-[2px] border-white transition-all duration-200 group-hover:scale-115"
+            className="rounded-full width-[30px] height-[30px] object-fill border-1 border-black shadow-sm shadow-black transition-all duration-200 group-hover:scale-110"
         />
     )
 }
