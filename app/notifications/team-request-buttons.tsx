@@ -7,7 +7,7 @@ import { useState } from "react"
 export default function TeamRequestButtons({ teamId, userId, role, notifId }: { teamId: string, userId: string, role: string, notifId: string }) {
     const [pending, setPending] = useState(false);
     const deleteNotif = async (id: string) => {
-    await fetch(`/api/notification?id=${encodeURIComponent(id)}`, {
+    await fetch(`/api/notification?id=${encodeURIComponent(id)}&user=${encodeURIComponent(userId)}`, {
         method: 'DELETE'
     });
     };

@@ -71,17 +71,42 @@ export const postNotification = async (sender: string, recipients: string[], typ
     return res.id;
 }
 
-export async function deleteNotification(id: string) {
+export async function deleteNotification(id: string, username?: string) {
     const { error: idError } = await supabaseAdmin
         .from('notification_ids')
         .delete()
         .eq('notification_id', id);
     if (idError) throw idError;
-    const { error } = await supabaseAdmin
-        .from('notifications')
-        .delete()
-        .eq('id', id);
-    if (error) throw error;
+    if (username) {
+        const { data: notification, error: fetchError } = await supabaseAdmin
+            .from('notifications')
+            .select('recipients')
+            .eq('id', id)
+            .single();
+        if (fetchError) throw fetchError;
+
+        const updatedRecipients = (notification?.recipients || []).filter((recipient: string) => recipient !== username);
+
+        if (updatedRecipients.length) {
+            const { error: updateError } = await supabaseAdmin
+                .from('notifications')
+                .update({ recipients: updatedRecipients })
+                .eq('id', id);
+            if (updateError) throw updateError;
+        } else {
+            const { error: deleteError } = await supabaseAdmin
+                .from('notifications')
+                .delete()
+                .eq('id', id);
+            if (deleteError) throw deleteError;
+        }
+    } else {
+        const { error } = await supabaseAdmin
+            .from('notifications')
+            .delete()
+            .eq('id', id);
+        if (error) throw error;
+    }
     revalidatePath('/notifications');
     return { id };
 }

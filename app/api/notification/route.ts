@@ -10,12 +10,13 @@ export async function POST() {
 export async function DELETE(req: Request) {
     const url = new URL(req.url);
     const id = url.searchParams.get('id');
+    const user = url.searchParams.get('user');
     if (!id) {
         return NextResponse.json({ error: 'Missing notification id' }, { status: 400 });
     }
 
     try {
-        const notif = await deleteNotification(id);
+        const notif = await deleteNotification(id, user || undefined);
         revalidatePath('/notifications');
         return NextResponse.json(notif, { status: 200 });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
