@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache";
 import { Notification, NotificationType } from "@/types";
 import { supabaseAdmin } from "./supabase-server";
 
@@ -20,7 +21,7 @@ export const getNumberOfNotifications = async (uid: string): Promise<number> => 
     return (await getNotifications(uid)).length;
 }
 
-export const postNotification = async (sender: string, recipients: string[], type: NotificationType, data?: string | null): Promise<void> => {
+export const postNotification = async (sender: string, recipients: string[], type: NotificationType, data?: string | null): Promise<string | null> => {
     const { data: users, error: usersError } = await supabaseAdmin
         .from('users')
         .select('uid')
@@ -30,11 +31,11 @@ export const postNotification = async (sender: string, recipients: string[], typ
     const uids: string[] = (users || [])
         .map((user: { uid: string | null }) => user.uid)
         .filter((uid: string | null): uid is string => Boolean(uid));
-    if (!uids.length) return;
+    if (!uids.length) return null;
 
     const { data: res, error: notificationError } = await supabaseAdmin
         .from('notifications')
-        .insert({ sender, type, data })
+        .insert({ sender, type, data, recipients })
         .select('id')
         .single();
     if (notificationError) throw notificationError;
@@ -45,4 +46,21 @@ export const postNotification = async (sender: string, recipients: string[], typ
             user_id: uid, notification_id: res.id
         })));
     if (recipientError) throw recipientError;
+    revalidatePath('/notifications');
+    return res.id;
+}
+
+export async function deleteNotification(id: string) {
+    const { error: idError } = await supabaseAdmin
+        .from('notification_ids')
+        .delete()
+        .eq('notification_id', id);
+    if (idError) throw idError;
+    const { error } = await supabaseAdmin
+        .from('notifications')
+        .delete()
+        .eq('id', id);
+    if (error) throw error;
+    revalidatePath('/notifications');
+    return { id };
 }

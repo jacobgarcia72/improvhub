@@ -7,7 +7,7 @@ import { destroySession, verifyAuth } from "./auth";
 import { revalidatePath } from "next/cache";
 import { camelCaseObject, snakeCaseObject } from "./helper-functions";
 import { destroyImage } from "./cloudinary";
-import { postNotification } from "./notifications";
+import { deleteNotification, postNotification } from "./notifications";
 
 export async function getUIDFromUserId(userId: string): Promise<string | null> {
     const { data } = await supabaseAdmin
@@ -217,16 +217,17 @@ export async function setFollowing(userId: string, followId: string, type: Follo
     if (type === 'theatre') revalidatePath(`/theatres/${followId}`, 'layout');
 }
 
-export async function createFriendRequest(senderId: string, receiverId: string): Promise<void> {
+export async function createFriendRequest(senderId: string, receiverId: string): Promise<string | null> {
     const { error } = await supabaseAdmin
         .from('friendships')
         .insert(
             { user1_id: senderId, user2_id: receiverId, accepted: false }
         );
     if (error) throw error;
-    await postNotification(senderId, [receiverId], 'friend_request');
+    const id = await postNotification(senderId, [receiverId], 'friend_request');
     revalidatePath(`/profile/${receiverId}`, 'layout');
     revalidatePath(`/search`, 'layout');
+    return id;
 }
 
 export async function acceptFriendRequest(senderId: string, receiverId: string): Promise<void> {
@@ -240,6 +241,7 @@ export async function acceptFriendRequest(senderId: string, receiverId: string):
     revalidatePath(`/profile/${senderId}`, 'layout');
     revalidatePath(`/profile/${receiverId}`, 'layout');
     revalidatePath(`/search`, 'layout');
+    revalidatePath(`/notifications`);
 }
 
 export async function deleteFriendRequest(senderId: string, receiverId: string): Promise<void> {
@@ -249,6 +251,14 @@ export async function deleteFriendRequest(senderId: string, receiverId: string):
         .eq('user1_id', senderId)
         .eq('user2_id', receiverId)
     if (error) throw error;
+    const { data } = await supabaseAdmin
+        .from('notifications')
+        .select('id')
+        .eq('type', 'friend_request')
+        .eq('sender', senderId)
+        .contains('recipients', [receiverId])
+        .single();
+    if (data?.id) deleteNotification(data.id);
     revalidatePath(`/profile/${senderId}`, 'layout');
     revalidatePath(`/profile/${receiverId}`, 'layout');
     revalidatePath(`/search`, 'layout');

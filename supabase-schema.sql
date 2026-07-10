@@ -257,6 +257,7 @@ CREATE TABLE if not exists notifications (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   date timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
   sender text NOT NULL,
+  recipients text[],
   type text NOT NULL,
   data text
 );

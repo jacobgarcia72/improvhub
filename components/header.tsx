@@ -20,7 +20,9 @@ export default async function Header() {
             <div className="flex flex-row">
                 {uid ? (
                     <Link href="/notifications" className="flex flex-row w-9 justify-center items-center group">
-                        <Notifications uid={uid} numberOfNotifications={notifications} />
+                        <Notifications
+                            uid={uid}
+                            numberOfNotifications={notifications}/>
                     </Link>
                 ): null}
                 <Link href="/profile" className="flex flex-row w-9 justify-center items-center group">
