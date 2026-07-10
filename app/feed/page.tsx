@@ -108,7 +108,7 @@ export default async function FeedPage() {
                         const teamMember = await getUserAbbreviated(followId);
                         const teamJoined = await getTeam(newsItemId);
                         if (!teamMember || !teamJoined) return null;
-                        content = <p><Link className="link" href={`/profile/${teamMember.id}`}>{teamMember.name}</Link> is now a team member of <Link className="link" href={`/teams/${teamJoined.id}`}>{teamJoined.name}</Link>!</p>
+                        content = <p><Link className="link" href={`/profile/${teamMember.id}`}>{teamMember.name}</Link>{otherData === 'coach' ? ' is coaching ' : ' has joined the team, '}<Link className="link" href={`/teams/${teamJoined.id}`}>{teamJoined.name}</Link>{otherData === 'musician' ? ' as a musical accompanist' : ''}.</p>
                         image = teamMember.image || teamJoined.image;
                         break;
                     default:

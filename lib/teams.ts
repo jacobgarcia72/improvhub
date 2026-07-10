@@ -264,7 +264,7 @@ export async function respondToTeamInvitation(teamId: string, userId: string, ro
             .single();
         if (error) throw error;
         if (data.added_by) postNotification(userId, [data.added_by], 'confirmed_team', `${teamId},${role}`);
-        createNewsFeedItem('friend', userId, "joined_team", teamId);
+        createNewsFeedItem('friend', userId, "joined_team", teamId, null, role);
         revalidatePath('/teams', 'layout')
     } else {
         const { error } = await supabaseAdmin
