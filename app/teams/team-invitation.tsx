@@ -17,7 +17,7 @@ export default async function TeamInvitation({ teamMembership }: { teamMembershi
     if (teamMembership.role === 'coach') {
         verb = 'coach';
     } else if (teamMembership.role === 'musician') {
-        verb = 'accompany';
+        verb = 'musically accompany';
     }
     return (
         <Border className="w-full mb-2">

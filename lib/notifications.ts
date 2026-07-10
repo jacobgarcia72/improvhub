@@ -12,7 +12,8 @@ export const getNotifications = async (uid: string, isViewingNotifications?: boo
     const { data, error } = await supabaseAdmin
         .from('notifications')
         .select('*')
-        .in('id', notifIds.map(({ notification_id }: { notification_id: string }) => notification_id));
+        .in('id', notifIds.map(({ notification_id }: { notification_id: string }) => notification_id))
+        .order('date', { ascending: false });
     if (error) throw error;
     if (isViewingNotifications) {
         await supabaseAdmin

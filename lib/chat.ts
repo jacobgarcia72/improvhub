@@ -48,7 +48,7 @@ export async function getPosts(room: string, topicId: string): Promise<Discussio
         .select('*')
         .eq('room', room)
         .eq('topic_id', topicId)
-        .order('date', { ascending: false })
+        .order('date', { ascending: false });
     return [...(data || []).map(camelCaseObject)];
 }
 

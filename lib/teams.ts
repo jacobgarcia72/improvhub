@@ -9,6 +9,7 @@ import { getCurrentUser, getCurrentUserId } from "./users";
 import { destroyImage } from "./cloudinary";
 import { revalidatePath } from "next/cache";
 import { createNewsFeedItem } from "./news";
+import { postNotification } from "./notifications";
 
 export async function getTeam(id: string): Promise<Team | null> {
     const { data, error } = await supabaseAdmin
@@ -194,6 +195,18 @@ export async function getTeamsInRange(cityOrZipcode: string, miles: number) {
         .map(camelCaseObject);
 }
 
+export async function getTeamMembership(userId: string, teamId: string, role: Role): Promise<TeamMember | null> {
+    const { data, error } = await supabaseAdmin
+        .from('team_members')
+        .select('*')
+        .eq('id', userId)
+        .eq('team', teamId)
+        .eq('role', role)
+        .maybeSingle();
+    if (error) throw error;
+    return data ? camelCaseObject(data) as TeamMember : null;
+}
+
 export async function getTeamMembershipsByUser(id: string): Promise<TeamMember[]> {
     const { data, error } = await supabaseAdmin
         .from('team_members')
@@ -310,6 +323,11 @@ export async function saveTeam(team: Team, members: { name: string, id: string |
             .insert(memberRows);
         if (memberInsertError) throw memberInsertError;
     }
+    const usersToNotify = memberRows.filter((m) => m.id !== null && m.confirmed === false);
+    ['player', 'musician', 'coach'].forEach(async (role) => {
+        const usersWithRole = usersToNotify.filter((m) => m.role === role);
+        if (usersWithRole.length) await postNotification(creatorId, usersWithRole.map(m => m.id || ''), 'added_to_team', `${team.id},${role}`);
+    })
     createNewsFeedItem('friend', creatorId, 'new_team', teamId);
     return team.id;
 }
@@ -362,6 +380,11 @@ export async function updateTeam(teamId: string, updates: Partial<Team>, members
             .from('team_members')
             .insert(memberRows);
         if (memberInsertError) throw memberInsertError;
+        const usersToNotify = memberRows.filter((m) => m.id !== null && m.confirmed === false && m.date_added === timestamp);
+        ['player', 'musician', 'coach'].forEach(async (role) => {
+            const usersWithRole = usersToNotify.filter((m) => m.role === role);
+            if (usersWithRole.length) await postNotification(addedBy, usersWithRole.map(m => m.id || ''), 'added_to_team', `${teamId},${role}`);
+        })
     }
 
     return true;

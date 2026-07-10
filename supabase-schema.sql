@@ -185,7 +185,7 @@ create table if not exists team_members (
   date_added text not null,
   added_by text not null,
   confirmed boolean,
-  primary key (team, name, date_added)
+  primary key (team, name, role, date_added)
 );
 
 create table if not exists follows (

@@ -214,7 +214,8 @@ export class NewsFeedItem {
 
 export type NotificationType = 
     'friend_request' |
-    'friend_request_accept'
+    'friend_request_accept' |
+    'added_to_team'
 
 export type Notification = {
     id: string;
