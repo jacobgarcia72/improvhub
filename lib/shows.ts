@@ -9,9 +9,10 @@ import { supabaseAdmin } from './supabase-server';
 import { getCitiesWithinRange } from './location';
 import { revalidatePath } from 'next/cache';
 import { dateMatchesRecurringSchedule, getStartOfToday, normalizeDateTime } from './dates';
-import { getTeamsByUser } from './teams';
+import { getTeamMembers, getTeamsByUser } from './teams';
 import { createNewsFeedItem, deleteNewsFeedItem } from './news';
 import { getFriendIds, getFriends } from './users';
+import { postNotification } from './notifications';
 
 export async function getEvent(id: string, type: EventType): Promise<Event | null> {
     const { data, error } = await supabaseAdmin
@@ -515,6 +516,17 @@ export async function updateShowing(showId: string, dateTime: string, updates: P
         await supabaseAdmin
             .from('showing_cast')
             .upsert(castRows);
+        ['team', 'player', 'musician', 'director', 'tech'].forEach(async role => {
+            const usersToNotify = newCastMembers.filter((m) => m.id && m.role === role).map((m) => m.id).filter(m => m !== null && m !== undefined);
+            if (role === 'team') {
+                usersToNotify.map(async (teamId) => {
+                    const teamMembersToNotify = (await getTeamMembers(teamId)).map(m => m.id).filter(m => m !== null);
+                    postNotification(showId, teamMembersToNotify, 'cast_in_show', `${normalizedDateTime},${role},${teamId}`);
+                });
+            } else {
+                postNotification(showId, usersToNotify, 'cast_in_show', `${normalizedDateTime},${role}`);
+            }
+        })
         for (let i = 0; i < newCastMembers.length; i++) {
             const { id, role } = newCastMembers[i];
             if (id) await createNewsFeedItem(role === 'team' ? 'team' : 'friend', id, 'cast_in_show', showId, normalizedDateTime, role);

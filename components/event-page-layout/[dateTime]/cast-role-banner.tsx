@@ -37,9 +37,9 @@ export default function CastRoleBanner({ role, roleId, showId, dateTime, showTit
             confirmLabel="Confirm"
             cancelLabel="Cancel"
         />
-        <div className="flex flex-row flex-wrap gap-1 justify-between items-center py-2 px-6 min-h-[58px] my-2 bg-lime-500/40 rounded border border-green-800">
+        <div className="flex flex-row flex-wrap gap-1 justify-between items-center py-2 px-6 min-h-[58px] my-2 bg-lime-500/30 rounded border border-green-800">
             <p>{role === 'team' ? (
-                `Your team, ${teamName}, is playing in this show`
+                `${teamName} is playing in this show`
             ) : `You are in this show as a ${role}`}</p>
             <div className="flex justify-end grow-1">
                 <Button

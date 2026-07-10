@@ -8,6 +8,8 @@ import { getTeam, getTeamMembership } from "@/lib/teams";
 import { getPronounForm } from "@/lib/demographics";
 import TeamRequestButtons from "./team-request-buttons";
 import { getVerbFromRole } from "@/lib/helper-functions";
+import { getShow } from "@/lib/shows";
+import { formatDateTimeForDisplay } from "@/lib/dates";
 
 function Wrapper({ children, image, imageLink, imageAlt }: { children: React.ReactNode, image?: string | null, imageLink: string, imageAlt: string }) {
     return (
@@ -32,11 +34,11 @@ function Wrapper({ children, image, imageLink, imageAlt }: { children: React.Rea
 
 export default async function NotificationCard({ notification, userId }: { notification: Notification, userId: string }) {
     const { type, sender: senderId, id: notifId, data } = notification;
-    const sender = await getUserAbbreviated(senderId);
-    if (!sender) return null;
     let innerContent: React.ReactNode;
     switch (type) {
         case 'friend_request':
+            const sender = await getUserAbbreviated(senderId);
+            if (!sender) return null;
             const friendship = await getFriendship(userId, senderId);
             if (friendship === null) {
                 return null;
@@ -69,17 +71,21 @@ export default async function NotificationCard({ notification, userId }: { notif
                 </Wrapper>
             )
         case 'friend_request_accept':
+            const sender2 = await getUserAbbreviated(senderId);
+            if (!sender2) return null;
             return (
-                <Wrapper image={sender.image} imageLink={`/profile/${senderId}`} imageAlt={sender.name}>
+                <Wrapper image={sender2.image} imageLink={`/profile/${senderId}`} imageAlt={sender2.name}>
                         <p>
                             <Link href={`/profile/${senderId}`} className="link">
-                                {sender.name}
+                                {sender2.name}
                             </Link>
                             &nbsp;accepted your friend request
                         </p>
                 </Wrapper>
             )
         case 'added_to_team':
+            const sender3 = await getUserAbbreviated(senderId);
+            if (!sender3) return null;
             if (!data) return null;
             const [teamId, role] = data.split(',');
             const team = await getTeam(teamId);
@@ -92,7 +98,7 @@ export default async function NotificationCard({ notification, userId }: { notif
                     <p>
                         You accepted&nbsp;
                         <Link href={`/profile/${senderId}`} className="link">
-                            {sender.name}
+                            {sender3.name}
                         </Link>
                         &apos;s invitation to {getVerbFromRole(role as Role)} &nbsp;
                         <Link href={`/teams/${team.id}`} className="link">
@@ -105,7 +111,7 @@ export default async function NotificationCard({ notification, userId }: { notif
                     <div className="flex flex-col gap-1">
                         <p>
                             <Link href={`/profile/${senderId}`} className="link">
-                                {sender.name}
+                                {sender3.name}
                             </Link>
                             &nbsp;has invited you to&nbsp;{getVerbFromRole(role as Role)}&nbsp;{getPronounForm(pronouns, 2)}&nbsp;team,&nbsp;
                             <Link href={`/teams/${team.id}`} className="link">
@@ -117,21 +123,23 @@ export default async function NotificationCard({ notification, userId }: { notif
                 )
             }
             return (
-                <Wrapper image={team.image || sender.image} imageLink={team.image ? `/teams/${team.id}` : `/profile/${senderId}`} imageAlt={team.image ? team.name : sender.name}>
+                <Wrapper image={team.image || sender3.image} imageLink={team.image ? `/teams/${team.id}` : `/profile/${senderId}`} imageAlt={team.image ? team.name : sender3.name}>
                     {innerContent}
                 </Wrapper>
             )
         case 'confirmed_team':
+            const sender4 = await getUserAbbreviated(senderId);
+            if (!sender4) return null;
             if (!data) return null;
             const [teamId2, role2] = data.split(',');
             const team2 = await getTeam(teamId2);
             const membership2 = await getTeamMembership(senderId, teamId2, role2 as Role);
             if (!team2 || !membership2) return null;
             return (
-                <Wrapper image={sender.image} imageLink={`/profile/${senderId}`} imageAlt={sender.name}>
+                <Wrapper image={sender4.image} imageLink={`/profile/${senderId}`} imageAlt={sender4.name}>
                     <p>
                         <Link href={`/profile/${senderId}`} className="link">
-                            {sender.name}
+                            {sender4.name}
                         </Link>
                         &nbsp;accepted your invitation to {getVerbFromRole(role2 as Role)}&nbsp;
                         <Link href={`/teams/${team2.id}`} className="link">
@@ -140,6 +148,39 @@ export default async function NotificationCard({ notification, userId }: { notif
                     </p>
                 </Wrapper>
             )
+        case 'cast_in_show':
+            if (!data) return null;
+            const [showDateTime, role3, teamId3] = data.split(',');
+            const show = await getShow(senderId);
+            if (!show) return null;
+            if (role3 === 'team') {
+                const team = await getTeam(teamId3);
+                if (!team) return null;
+                return (
+                    <Wrapper image={show.image} imageLink={`/shows/${senderId}`} imageAlt={show.title}>
+                        <p>
+                            <Link href={`/teams/${team.id}/`} className="link">
+                                {team.name}
+                            </Link>
+                            &nbsp;has been cast to play in&nbsp;
+                            <Link href={`/shows/${show.id}/${showDateTime}`} className="link">
+                                {show.title}
+                            </Link> on {formatDateTimeForDisplay(showDateTime)}
+                        </p>
+                    </Wrapper>
+                )
+            } else {
+                return (
+                    <Wrapper image={show.image} imageLink={`/shows/${senderId}`} imageAlt={show.title}>
+                        <p>
+                            You&apos;ve been cast as a&nbsp;{role3}&nbsp;in&nbsp;
+                            <Link href={`/shows/${show.id}/${showDateTime}`} className="link">
+                                {show.title}
+                            </Link> on {formatDateTimeForDisplay(showDateTime)}
+                        </p>
+                    </Wrapper>
+                )
+            }
         default:
             break;
     }
