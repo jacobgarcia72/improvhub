@@ -7,18 +7,13 @@ import { TeamMember } from "@/types";
 import Image from "next/image";
 import Link from "next/link";
 import TeamInvitationOptions from "./team-invitation-options";
+import { getVerbFromRole } from "@/lib/helper-functions";
 
 export default async function TeamInvitation({ teamMembership }: { teamMembership: TeamMember }) {
     const team = await getTeam(teamMembership.team);
     const inviter = await getUser(teamMembership.addedBy);
     const user = teamMembership.id ? await getUser(teamMembership.id) : null;
     if (!team || !inviter || !user) return null;
-    let verb = 'join';
-    if (teamMembership.role === 'coach') {
-        verb = 'coach';
-    } else if (teamMembership.role === 'musician') {
-        verb = 'musically accompany';
-    }
     return (
         <Border className="w-full mb-2">
             <div className="flex flex-row min-h-[80px]">
@@ -35,7 +30,7 @@ export default async function TeamInvitation({ teamMembership }: { teamMembershi
                 <div className="py-3 px-4 w-full flex flex-col justify-center">
                     <p className="cursor-default">
                         <Link className="link" href={`profile/${inviter.id}`}>{`${inviter.firstName} ${inviter.lastName}`}</Link>
-                        {` has invited you to ${verb} ${getPronounForm(inviter.pronouns, 2)} team, `}
+                        {` has invited you to ${getVerbFromRole(teamMembership.role)} ${getPronounForm(inviter.pronouns, 2)} team, `}
                         <Link className="link" href={`teams/${team.id}`}>{`${team.name}!`}</Link>
                     </p>
                     <TeamInvitationOptions teamId={team.id} userId={user.id} role={teamMembership.role} />

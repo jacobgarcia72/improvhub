@@ -254,13 +254,16 @@ export async function getTeamInvitations(userId: string): Promise<TeamMember[]> 
 
 export async function respondToTeamInvitation(teamId: string, userId: string, role: string, accept: boolean): Promise<void> {
     if (accept) {
-        const { error } = await supabaseAdmin
+        const { error, data } = await supabaseAdmin
             .from('team_members')
             .update({ confirmed: true })
             .eq('team', teamId)
             .eq('id', userId)
-            .eq('role', role);
+            .eq('role', role)
+            .select('added_by')
+            .single();
         if (error) throw error;
+        if (data.added_by) postNotification(userId, [data.added_by], 'confirmed_team', `${teamId},${role}`);
         createNewsFeedItem('friend', userId, "joined_team", teamId);
         revalidatePath('/teams', 'layout')
     } else {

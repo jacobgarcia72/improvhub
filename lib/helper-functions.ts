@@ -1,4 +1,4 @@
-import { Event, InputOption, Showing } from "@/types";
+import { Event, InputOption, Role, Showing } from "@/types";
 import { addDays, formatDate, getWeekdayOccurence, isLastOfMonth } from "./dates";
 import { isAState, separateCityAndState } from "./location";
 
@@ -179,3 +179,13 @@ export const camelCaseObject = (data: { [key: string]: any }) => {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
     }, {} as { [key: string]: any });
 };
+
+export const getVerbFromRole = (role: Role | 'team') => {
+    if (role === 'coach') {
+        return 'coach';
+    } else if (role === 'musician') {
+        return 'musically accompany';
+    } else {
+        return 'join';
+    }
+}

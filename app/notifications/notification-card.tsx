@@ -7,6 +7,7 @@ import FriendRequestButtons from "./friend-request-buttons";
 import { getTeam, getTeamMembership } from "@/lib/teams";
 import { getPronounForm } from "@/lib/demographics";
 import TeamRequestButtons from "./team-request-buttons";
+import { getVerbFromRole } from "@/lib/helper-functions";
 
 function Wrapper({ children, image, imageLink, imageAlt }: { children: React.ReactNode, image?: string | null, imageLink: string, imageAlt: string }) {
     return (
@@ -81,12 +82,6 @@ export default async function NotificationCard({ notification, userId }: { notif
             const pronouns = (await getUser(senderId))?.pronouns;
             const membership = await getTeamMembership(userId, teamId, role as Role);
             if (!team || !membership) return null;
-            let verb = 'join';
-            if (role === 'coach') {
-                verb = 'coach';
-            } else if (role === 'musician') {
-                verb = 'musically accompany';
-            }
             const hasConfirmed = membership.confirmed;
             if (hasConfirmed) {
                 innerContent = (
@@ -95,7 +90,7 @@ export default async function NotificationCard({ notification, userId }: { notif
                         <Link href={`/profile/${senderId}`} className="link">
                             {sender.name}
                         </Link>
-                        &apos;s invitation to {verb} &nbsp;
+                        &apos;s invitation to {getVerbFromRole(role as Role)} &nbsp;
                         <Link href={`/teams/${team.id}`} className="link">
                             {team.name}
                         </Link>!
@@ -108,7 +103,7 @@ export default async function NotificationCard({ notification, userId }: { notif
                             <Link href={`/profile/${senderId}`} className="link">
                                 {sender.name}
                             </Link>
-                            &nbsp;has invited you to&nbsp;{verb}&nbsp;{getPronounForm(pronouns, 2)}&nbsp;team,&nbsp;
+                            &nbsp;has invited you to&nbsp;{getVerbFromRole(role as Role)}&nbsp;{getPronounForm(pronouns, 2)}&nbsp;team,&nbsp;
                             <Link href={`/teams/${team.id}`} className="link">
                                 {team.name}
                             </Link>!
@@ -120,6 +115,25 @@ export default async function NotificationCard({ notification, userId }: { notif
             return (
                 <Wrapper image={team.image || sender.image} imageLink={team.image ? `/teams/${team.id}` : `/profile/${senderId}`} imageAlt={team.image ? team.name : sender.name}>
                     {innerContent}
+                </Wrapper>
+            )
+        case 'confirmed_team':
+            if (!data) return null;
+            const [teamId2, role2] = data.split(',');
+            const team2 = await getTeam(teamId2);
+            const membership2 = await getTeamMembership(userId, teamId2, role2 as Role);
+            if (!team2 || !membership2) return null;
+            return (
+                <Wrapper image={sender.image} imageLink={`/profile/${senderId}`} imageAlt={sender.name}>
+                    <p>
+                        <Link href={`/profile/${senderId}`} className="link">
+                            {sender.name}
+                        </Link>
+                        &nbps;accepted your invitation to {getVerbFromRole(role2 as Role)}&nbsp;
+                        <Link href={`/teams/${team2.id}`} className="link">
+                            {team2.name}
+                        </Link>!
+                    </p>
                 </Wrapper>
             )
         default:
