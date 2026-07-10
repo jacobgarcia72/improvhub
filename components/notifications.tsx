@@ -10,6 +10,11 @@ export default function Notifications({ uid, numberOfNotifications }: { uid: str
     const router = useRouter();
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        if (pathname === '/notifications') setNotifications(0);
+    }, [pathname]);
+
+    useEffect(() => {
         const revalidateNotifications = async () => {
             await fetch('/api/notification', { method: 'POST' });
             if (pathname === '/notifications') router.refresh();

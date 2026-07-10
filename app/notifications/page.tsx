@@ -17,7 +17,7 @@ export default async function NotificationsPage() {
     if (!user) notFound();
     const uid = user.uid;
     const id = user.id;
-    const notifications: Notification[] = uid ? await getNotifications(uid) : [];
+    const notifications: Notification[] = uid ? await getNotifications(uid, true) : [];
 
     return (
         <section className="medium-section flex flex-col gap-2">

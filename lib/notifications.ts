@@ -2,7 +2,7 @@ import { revalidatePath } from "next/cache";
 import { Notification, NotificationType } from "@/types";
 import { supabaseAdmin } from "./supabase-server";
 
-export const getNotifications = async (uid: string): Promise<Notification[]> => {
+export const getNotifications = async (uid: string, isViewingNotifications?: boolean): Promise<Notification[]> => {
     const { data: notifIds, error: notifIdsError } = await supabaseAdmin
         .from('notification_ids')
         .select('notification_id')
@@ -14,11 +14,31 @@ export const getNotifications = async (uid: string): Promise<Notification[]> => 
         .select('*')
         .in('id', notifIds.map(({ notification_id }: { notification_id: string }) => notification_id));
     if (error) throw error;
+    if (isViewingNotifications) {
+        await supabaseAdmin
+            .from('notification_checks')
+            .delete()
+            .eq('user_id', uid);
+        await supabaseAdmin
+            .from('notification_checks')
+            .insert({ user_id: uid })
+    }
     return data || [] as Notification[];
 }
 
 export const getNumberOfNotifications = async (uid: string): Promise<number> => {
-    return (await getNotifications(uid)).length;
+    const { data } = await supabaseAdmin
+        .from('notification_checks')
+        .select('date')
+        .eq('user_id', uid);
+    const lastCheck = data?.date || new Date().toISOString();
+    const { count } = await supabaseAdmin
+        .from('notification_ids')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', uid)
+        .gte('date', lastCheck)
+        .maybeSingle();
+    return count || 0;
 }
 
 export const postNotification = async (sender: string, recipients: string[], type: NotificationType, data?: string | null): Promise<string | null> => {
