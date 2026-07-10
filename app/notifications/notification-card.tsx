@@ -13,14 +13,18 @@ function Wrapper({ children, image, imageLink, imageAlt }: { children: React.Rea
     return (
         <div className="border-b border-b-black/20 px-2 pb-3">
             <div className="flex flex-row gap-2 items-start">
-                {image ? <Link href={imageLink}>
-                    <Image
-                        src={optimizeImage(image, 100, 100, 90, true)}
-                        alt={imageAlt} width={50} height={50}
-                        className="rounded"
-                    />
-                </Link> : null}
-                {children}
+                <div className="w-12 h-12">
+                    {image ? <Link href={imageLink}>
+                        <Image
+                            src={optimizeImage(image, 100, 100, 90, true)}
+                            alt={imageAlt} width={50} height={50}
+                            className="rounded"
+                        />
+                    </Link> : null}
+                </div>
+                <div className="w-full">
+                    {children}
+                </div>
             </div>
         </div>
     )
@@ -71,7 +75,7 @@ export default async function NotificationCard({ notification, userId }: { notif
                             <Link href={`/profile/${senderId}`} className="link">
                                 {sender.name}
                             </Link>
-                            &nbsp;accepted your friend request!
+                            &nbsp;accepted your friend request
                         </p>
                 </Wrapper>
             )
@@ -93,7 +97,7 @@ export default async function NotificationCard({ notification, userId }: { notif
                         &apos;s invitation to {getVerbFromRole(role as Role)} &nbsp;
                         <Link href={`/teams/${team.id}`} className="link">
                             {team.name}
-                        </Link>!
+                        </Link>
                     </p>
                 )
             } else {
@@ -121,7 +125,7 @@ export default async function NotificationCard({ notification, userId }: { notif
             if (!data) return null;
             const [teamId2, role2] = data.split(',');
             const team2 = await getTeam(teamId2);
-            const membership2 = await getTeamMembership(userId, teamId2, role2 as Role);
+            const membership2 = await getTeamMembership(senderId, teamId2, role2 as Role);
             if (!team2 || !membership2) return null;
             return (
                 <Wrapper image={sender.image} imageLink={`/profile/${senderId}`} imageAlt={sender.name}>
@@ -129,10 +133,10 @@ export default async function NotificationCard({ notification, userId }: { notif
                         <Link href={`/profile/${senderId}`} className="link">
                             {sender.name}
                         </Link>
-                        &nbps;accepted your invitation to {getVerbFromRole(role2 as Role)}&nbsp;
+                        &nbsp;accepted your invitation to {getVerbFromRole(role2 as Role)}&nbsp;
                         <Link href={`/teams/${team2.id}`} className="link">
                             {team2.name}
-                        </Link>!
+                        </Link>
                     </p>
                 </Wrapper>
             )
