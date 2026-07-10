@@ -8,11 +8,12 @@ import { formatDateTimeForDisplay } from "@/lib/dates";
 import { pluralize } from "@/lib/helper-functions";
 import { useEffect, useState } from "react";
 
-export default function MiniCard({ item, type, dateTime, includeDescription }: {
+export default function MiniCard({ item, type, dateTime, includeDescription, className }: {
     item: Event | Team | User,
     type: string,
     dateTime?: string,
-    includeDescription?: boolean
+    includeDescription?: boolean,
+    className?: string
 }) {
     const image = (
         item.image && optimizeImage(item.image, 300, 300, 80, true)
@@ -39,7 +40,7 @@ export default function MiniCard({ item, type, dateTime, includeDescription }: {
     }, []);
     return (
         <Link href={url}>
-            <Border className="flex flex-row h-[132px] w-[226px] m-2 w-44 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
+            <Border className={`${className} flex flex-row h-[132px] w-[226px] m-2 w-44 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5`}>
                 {image ? (
                     <div className="w-[132px] h-full bg-gray-300">
                         <div className="flex h-full w-full items-center justify-center">

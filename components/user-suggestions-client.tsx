@@ -35,14 +35,14 @@ export default function UserSuggestionsClient({ initialUsers, role, teamId }: { 
     }
 
     return (
-        <section>
+        <section className="pt-1!">
             <div className="flex items-center justify-between px-3">
-                <h2 className="px-3">{headers[role]}</h2>
+                <h3 className="px-3 font-semibold text-sm">{headers[role]}</h3>
                 <Button caption="Refresh" onClick={refresh} style="link" disabled={loading} />
             </div>
             <div className="flex flex-row flex-wrap">
                 <Suspense fallback={<Loader />}>
-                    {users.map((user, i) => <MiniCard key={user.id || i} item={user} type="user" />)}
+                    {users.map((user, i) => <MiniCard className="h-[90px]!" key={user.id || i} item={user} type="user" />)}
                 </Suspense>
             </div>
         </section>
