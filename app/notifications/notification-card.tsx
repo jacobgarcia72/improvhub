@@ -5,18 +5,21 @@ import Image from "next/image";
 import Link from "next/link";
 import FriendRequestButtons from "./friend-request-buttons";
 
-async function UserImage({image, userName}: {image: string, userName: string}) {
+function Wrapper({ children, image, imageLink, imageAlt }: { children: React.ReactNode, image?: string | null, imageLink: string, imageAlt: string }) {
     return (
-        <Image
-            src={optimizeImage(image, 100, 100, 90, true)}
-            alt={userName} width={50} height={50}
-            className="rounded"
-        />
+        <div className="border-b border-b-black/20 px-2 pb-3">
+            <div className="flex flex-row gap-2 items-center">
+                {image ? <Link href={imageLink}>
+                    <Image
+                        src={optimizeImage(image, 100, 100, 90, true)}
+                        alt={imageAlt} width={50} height={50}
+                        className="rounded"
+                    />
+                </Link> : null}
+                {children}
+            </div>
+        </div>
     )
-}
-
-function Wrapper({ children }: { children: React.ReactNode }) {
-    return <div className="border-b border-b-black/20 px-2 pb-3">{ children }</div>
 }
 
 export default async function NotificationCard({ notification, userId }: { notification: Notification, userId: string }) {
@@ -52,14 +55,22 @@ export default async function NotificationCard({ notification, userId }: { notif
                     </div>
                 )
             }
-            return <Wrapper>
-                <div className="flex flex-row gap-2 items-center">
-                    {sender.image ? <Link href={`/profile/${senderId}`}>
-                        <UserImage image={sender.image} userName={sender.name} />
-                    </Link> : null}
+            return (
+                <Wrapper image={sender.image} imageLink={`/profile/${senderId}`} imageAlt={sender.name}>
                     {innerContent}
-                </div>
-            </Wrapper>
+                </Wrapper>
+            )
+        case 'friend_request_accept':
+            return (
+                <Wrapper image={sender.image} imageLink={`/profile/${senderId}`} imageAlt={sender.name}>
+                        <p>
+                            <Link href={`/profile/${senderId}`} className="link">
+                                {sender.name}
+                            </Link>
+                            &nbsp;accepted your friend request!
+                        </p>
+                </Wrapper>
+            )
         default:
             break;
     }
