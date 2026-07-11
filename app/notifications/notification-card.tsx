@@ -136,7 +136,7 @@ export default async function NotificationCard({ notification, userId }: { notif
             const membership2 = await getTeamMembership(senderId, teamId2, role2 as Role);
             if (!team2 || !membership2) return null;
             return (
-                <Wrapper image={sender4.image} imageLink={`/profile/${senderId}`} imageAlt={sender4.name}>
+                <Wrapper image={sender4.image || team2.image} imageLink={sender4.image ? `/profile/${senderId}` : `/teams/${team2.id}`} imageAlt={sender4.image ? sender4.name : team2.name}>
                     <p>
                         <Link href={`/profile/${senderId}`} className="link">
                             {sender4.name}
@@ -157,12 +157,12 @@ export default async function NotificationCard({ notification, userId }: { notif
                 const team = await getTeam(teamId3);
                 if (!team) return null;
                 return (
-                    <Wrapper image={show.image} imageLink={`/shows/${senderId}`} imageAlt={show.title}>
+                    <Wrapper image={show.image || team.image} imageLink={show.image ? `/shows/${senderId}` : `/teams/${team.id}`} imageAlt={show.image ? show.title : team.name}>
                         <p>
                             <Link href={`/teams/${team.id}/`} className="link">
                                 {team.name}
                             </Link>
-                            &nbsp;has been cast to play in&nbsp;
+                            &nbsp;have been cast to play in&nbsp;
                             <Link href={`/shows/${show.id}/${showDateTime}`} className="link">
                                 {show.title}
                             </Link> on {formatDateTimeForDisplay(showDateTime)}
@@ -181,6 +181,30 @@ export default async function NotificationCard({ notification, userId }: { notif
                     </Wrapper>
                 )
             }
+        case 'show_drop_out':
+            if (!data) return null;
+            const [showId, showDateTime2, role4] = data.split(',');
+            const show2 = await getShow(showId);
+            const isTeam = role4 === 'team';
+            const dropOut = isTeam ? await getTeam(senderId) : await getUserAbbreviated(senderId);
+            if (!show2 || !dropOut) return null;
+            let verb = '';
+            if (role4 === 'director') verb = ' directing';
+            if (role4 === 'tech') verb = ' teching';
+            if (role4 === 'musician') verb = ' accompanying';
+            return (
+                    <Wrapper image={show2.image} imageLink={`/shows/${show2.id}`} imageAlt={show2.title}>
+                        <p>
+                            <Link href={`/${isTeam ? 'teams' : 'profile'}/${dropOut.id}/`} className="link">
+                                {dropOut.name}
+                            </Link>
+                            &nbsp;{isTeam ? 'have' : 'has'} dropped out of{verb}&nbsp;
+                            <Link href={`/shows/${show2.id}/${showDateTime2}`} className="link">
+                                {show2.title}
+                            </Link> on {formatDateTimeForDisplay(showDateTime2)}
+                        </p>
+                    </Wrapper>
+                )
         default:
             break;
     }

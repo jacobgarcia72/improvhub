@@ -548,6 +548,15 @@ export async function removeCastMember(showId: string, dateTime: string, userId:
         .eq('date_time', normalizedDateTime)
         .eq('id', userId)
         .eq('role', role);
+    const cast = await getShowCast(showId, dateTime);
+    const directors = cast.filter((c) => c.role === 'director').map((c) => c.id).filter((d) => d !== null);
+    const show = await getShow(showId);
+    const admins = show?.admins || [];
+    const adminsAndDirectors = [...new Set(admins.concat(directors))]
+        .filter((a) =>  a !== userId || role === 'team'); // no need to notify yourself
+    if (adminsAndDirectors.length) {
+        postNotification(userId, adminsAndDirectors, 'show_drop_out', `${showId},${dateTime},${role}`);
+    }
     revalidatePath(`/shows/${showId}/${dateTime}/`, 'layout');
     await deleteNewsFeedItem(role === 'team' ? 'team' : 'friend', userId, 'cast_in_show', showId, normalizedDateTime, role);
 }

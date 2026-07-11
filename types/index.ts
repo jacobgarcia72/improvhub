@@ -217,7 +217,8 @@ export type NotificationType =
     'friend_request_accept' |
     'added_to_team' |
     'confirmed_team' |
-    'cast_in_show'
+    'cast_in_show' |
+    'show_drop_out'
 
 export type Notification = {
     id: string;
