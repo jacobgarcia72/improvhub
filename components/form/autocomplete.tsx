@@ -4,7 +4,7 @@ import { optimizeImage } from '@/lib/optimize-image';
 import { filterArrayBySearchTerm, getText } from '@/lib/helper-functions';
 import { InputOption } from '@/types';
 import Image from 'next/image';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 type AutocompleteProps = {
   options: InputOption[];
@@ -29,9 +29,14 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
     maxLength,
     startingValue
 }) => {
-  const [value, setValue] = useState<InputOption>(startingValue || '');
+  const [value, setValue] = useState<InputOption>('');
   const [showOptions, setShowOptions] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (startingValue && options.length) setValue(options.find((op) => typeof op !== 'string' && op.id === startingValue) || startingValue)
+  }, [options, startingValue]);
 
   const filteredOptions = useMemo(() => {
     return filterArrayBySearchTerm(options, getText(value));
