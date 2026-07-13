@@ -67,7 +67,7 @@ export default async function Occurrence({ id, dateTime, parentEvent, isASeries,
                 />
             )) : null}
             <div className="pt-1 pb-1 px-6">
-                <div className="w-full flex flex-row items-center justify-between items-start">
+                <div className="w-full flex flex-row flex-wrap items-center justify-between items-start">
                     <div className="mb-3">
                         <AddToCalendarButton event={parentEvent} date={eventDate} location={location} />
                     </div>

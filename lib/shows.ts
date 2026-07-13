@@ -587,12 +587,10 @@ export async function deleteOccurrence(eventId: string, dateTime: string, type: 
         const usersToNotify: string[] = [];
         for (let i = 0; i < data.length; i++) {
             const { id, role } = data[i];
-            console.log({id, role})
             if (!id) return;
             if (role === 'team') {
                 const teamMembers = (await getTeamMembers(id)).map((m) => m.id).filter(m => m !== null);
                 usersToNotify.push(...teamMembers);
-                console.log({teamMembers, usersToNotify})
             } else {
                 usersToNotify.push(id);
             }
@@ -622,12 +620,10 @@ export async function deleteEvent(eventId: string, type: EventType): Promise<voi
         const usersToNotify: string[] = [];
         for (let i = 0; i < data.length; i++) {
             const { id, role } = data[i];
-            console.log({id, role})
             if (!id) return;
             if (role === 'team') {
                 const teamMembers = (await getTeamMembers(id)).map((m) => m.id).filter(m => m !== null);
                 usersToNotify.push(...teamMembers);
-                console.log({teamMembers, usersToNotify})
             } else {
                 usersToNotify.push(id);
             }

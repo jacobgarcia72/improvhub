@@ -72,7 +72,7 @@ export default async function FeedPage() {
                         if (otherData === 'tech') verb = 'is teching';
                         if (otherData === 'director') verb = 'is directing';
                         if (otherData === 'musician') verb = 'is providing musical accompaniment in';
-                        content = <p><Link className="link" href={`/${followType === 'team' ? 'teams' : 'profile'}/${cast.id}`}>{cast.name}</Link> {verb} <Link className="link" href={`/shows/${showCast.id}`}>{showCast.title}</Link> on {formatDateForDisplay(newsItemDate.split(' ')[0])}.</p>
+                        content = <p><Link className="link" href={`/${followType === 'team' ? 'teams' : 'profile'}/${cast.id}`}>{cast.name}</Link> {verb} <Link className="link" href={`/shows/${showCast.id}/${newsItemDate}`}>{showCast.title}</Link> on {formatDateForDisplay(newsItemDate.split(' ')[0])}.</p>
                         image = cast.image || showCast.image;
                         break;
                     case 'going_to_show':

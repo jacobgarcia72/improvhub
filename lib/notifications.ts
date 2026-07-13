@@ -2,13 +2,27 @@ import { revalidatePath } from "next/cache";
 import { Notification, NotificationType } from "@/types";
 import { supabaseAdmin } from "./supabase-server";
 
-export const getNotifications = async (uid: string, isViewingNotifications?: boolean): Promise<Notification[]> => {
+export const getNotifications = async (uid: string): Promise<{ lastChecked: string | null, notifitactions: Notification[]}> => {
+    const { data: checkedData } = await supabaseAdmin
+        .from('notification_checks')
+        .select('date')
+        .eq('user_id', uid)
+        .maybeSingle();
+    const lastChecked = checkedData?.date || null;
+    await supabaseAdmin
+        .from('notification_checks')
+        .delete()
+        .eq('user_id', uid);
+    const {error: checkError} = await supabaseAdmin
+        .from('notification_checks')
+        .insert({ user_id: uid })
+    if (checkError) console.error(checkError)
     const { data: notifIds, error: notifIdsError } = await supabaseAdmin
         .from('notification_ids')
         .select('notification_id')
         .eq('user_id', uid);
     if (notifIdsError) throw notifIdsError;
-    if (!notifIds?.length) return [];
+    if (!notifIds?.length) return { lastChecked, notifitactions: [] };
     const { data, error } = await supabaseAdmin
         .from('notifications')
         .select('*')
@@ -16,23 +30,15 @@ export const getNotifications = async (uid: string, isViewingNotifications?: boo
         .order('date', { ascending: false })
         .limit(100)
     if (error) throw error;
-    if (isViewingNotifications) {
-        await supabaseAdmin
-            .from('notification_checks')
-            .delete()
-            .eq('user_id', uid);
-        await supabaseAdmin
-            .from('notification_checks')
-            .insert({ user_id: uid })
-    }
-    return data || [] as Notification[];
+    return { lastChecked, notifitactions: data || [] as Notification[] };
 }
 
 export const getNumberOfNotifications = async (uid: string): Promise<number> => {
     const { data } = await supabaseAdmin
         .from('notification_checks')
         .select('date')
-        .eq('user_id', uid);
+        .eq('user_id', uid)
+        .single();
     const lastCheck = data?.date || new Date().toISOString();
     const { count } = await supabaseAdmin
         .from('notification_ids')

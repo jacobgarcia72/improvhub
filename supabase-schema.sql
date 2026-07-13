@@ -305,6 +305,7 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.comments TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.news TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.notifications TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.notification_ids TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.notification_checks TO service_role;
 GRANT SELECT ON TABLE public.notification_ids TO authenticated;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.feedback TO service_role;
 
