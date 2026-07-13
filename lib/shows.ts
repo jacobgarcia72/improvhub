@@ -459,11 +459,7 @@ export async function saveEvent(type: EventType, event: Event, occurrences: Even
                 );
             if (occurrencesToDelete.length) {
                 for (let i = 0; i < occurrencesToDelete.length; i++) {
-                    await supabaseAdmin
-                        .from(`${type}_occurrences`)
-                        .delete()
-                        .eq('event_id', event.id)
-                        .eq('date_time', occurrencesToDelete[i].dateTime);
+                    await deleteOccurrence(event.id, occurrencesToDelete[i].dateTime, type);
                 };
             }
             await supabaseAdmin
