@@ -1,5 +1,5 @@
-import TeamForm from "@/components/form/team-form";
-import { getTeam, getTeamMembers } from "@/lib/teams";
+import TroupeForm from "@/components/form/troupe-form";
+import { getTroupe, getTroupeMembers } from "@/lib/troupes";
 import { getCurrentUserId } from "@/lib/users";
 import { notFound } from "next/navigation";
 import { appName } from '@/lib/app-info';
@@ -11,9 +11,9 @@ export async function generateMetadata(
 },
 ): Promise<Metadata> {
     const { id } = await params
-    const team = await getTeam(id);
-    if (!team) return {};
-    const { name, description, image } = team;
+    const troupe = await getTroupe(id);
+    if (!troupe) return {};
+    const { name, description, image } = troupe;
     const title = `${name} | ${appName}`;
     const metadata: Metadata = { title, description }
     if (image) {
@@ -28,21 +28,21 @@ type Props = {
     params: Promise<{ id: string }>
 }
 
-export default async function ManageTeam({ params }: Props) {
+export default async function ManageTroupe({ params }: Props) {
     const { id } = await params;
-    const team = await getTeam(id);
-    if (!team) notFound();
+    const troupe = await getTroupe(id);
+    if (!troupe) notFound();
 
     const userId = await getCurrentUserId();
-    const members = await getTeamMembers(id);
-    const canManageTeam = userId && members.some((member) => (
+    const members = await getTroupeMembers(id);
+    const canManageTroupe = userId && members.some((member) => (
         member.id === userId &&
         member.confirmed &&
         member.role !== 'coach'
     ));
-    if (!canManageTeam) notFound();
+    if (!canManageTroupe) notFound();
 
     return (
-        <TeamForm team={team} />
+        <TroupeForm troupe={troupe} />
     )
 }

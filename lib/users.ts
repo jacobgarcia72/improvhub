@@ -174,9 +174,9 @@ export async function getFollowees(userId: string, type: Followee): Promise<{ na
     if (!followeeData) return [];
     const ids = followeeData.map((row: { follow_id: any; }) => row.follow_id)
     switch (type) {
-        case 'team':
+        case 'troupe':
             return (await supabaseAdmin
-                .from(`teams`)
+                .from(`troupes`)
                 .select(`name, id, image`)
                 .in('id', ids))?.data || [];
         case 'theatre':
@@ -213,7 +213,7 @@ export async function setFollowing(userId: string, followId: string, type: Follo
                 { user_id: userId, follow_id: followId, type }
             );
     }
-    if (type === 'team') revalidatePath(`/teams/${followId}`, 'layout');
+    if (type === 'troupe') revalidatePath(`/troupes/${followId}`, 'layout');
     if (type === 'theatre') revalidatePath(`/theatres/${followId}`, 'layout');
 }
 
@@ -341,9 +341,9 @@ export async function saveUser(user: User, uid: string, userRoles?: { [role: str
             state: user.state,
             website: user.website,
             image: user.image,
-            open_to_join_team: user.openToJoinTeam,
-            open_to_accompany_team: user.openToAccompanyTeam,
-            open_to_coach_team: user.openToJoinTeam
+            open_to_join_troupe: user.openToJoinTroupe,
+            open_to_accompany_troupe: user.openToAccompanyTroupe,
+            open_to_coach_troupe: user.openToJoinTroupe
         });
     if (error) throw error;
     if (userRoles) {

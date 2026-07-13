@@ -12,7 +12,7 @@ export default function SupportPage() {
     return (
         <section className="medium-section">
             <p>Hello friend!</p><br />
-            <p>I am a one-man development team creating {appName} as a passion project for my love of improv.</p><br />
+            <p>I am a one-man development troupe creating {appName} as a passion project for my love of improv.</p><br />
             <p>Your support is greatly appreciated and will allow me to spend more time building up and maintaining this site.</p><br />
             <p>Here are a couple of links you can use to send me financial support:</p><br />
             <SupportLinks /><br />

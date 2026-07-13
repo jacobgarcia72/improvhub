@@ -5,9 +5,9 @@ import { saveEvent, updateEventAdmins, updateEventInstructors, updateShowing } f
 import { Candence, Event, Showing, Role, ShowCastMember, Theatre, EventType, EventOccurrence } from "@/types";
 import { sortDates } from "@/lib/dates";
 import { capitalize, pluralize, removeLeadingArticles } from "@/lib/helper-functions";
-import { Team } from '@/types';
+import { Troupe } from '@/types';
 import { destroyImage, uploadImage } from '@/lib/cloudinary';
-import { getTeam, getTeamMembers, leaveTeam as leaveTeamRecord, saveTeam, updateTeam as updateTeamRecord, updateTeamDetails as updateTeamDetailsRecord } from '@/lib/teams';
+import { getTroupe, getTroupeMembers, leaveTroupe as leaveTroupeRecord, saveTroupe, updateTroupe as updateTroupeRecord, updateTroupeDetails as updateTroupeDetailsRecord } from '@/lib/troupes';
 import { getCurrentUserId, updateUser } from "@/lib/users";
 import { revalidatePath } from 'next/cache';
 import { getTheatre, saveTheatre, updateTheatre } from '@/lib/theatres';
@@ -139,7 +139,7 @@ export async function postShowCast(showId: string, showDateTime: string, prevSta
 
     const data = Object.fromEntries(formData.entries());
 
-    const getCastByRole = (role: (Role | 'team')): { name: string, id: string | null, role: (Role | 'team') }[] => {
+    const getCastByRole = (role: (Role | 'troupe')): { name: string, id: string | null, role: (Role | 'troupe') }[] => {
         const members = Object.keys(data)
             .filter((key) => (
                 (key.split('-')[0] === role) &&
@@ -156,20 +156,20 @@ export async function postShowCast(showId: string, showDateTime: string, prevSta
         return [...new Set(members)];
     }
     const directors = getCastByRole('director');
-    const teams = getCastByRole('team');
+    const troupes = getCastByRole('troupe');
     const players = getCastByRole('player');
     const tech = getCastByRole('tech');
     const musicians = getCastByRole('musician');
 
     const updates: Partial<Showing> = {
         lookingForDirectors: Boolean(data.lookingForDirectors),
-        lookingForTeams: Boolean(data.lookingForTeams),
+        lookingForTroupes: Boolean(data.lookingForTroupes),
         lookingForPlayers: Boolean(data.lookingForPlayers),
         lookingForTech: Boolean(data.lookingForTech),
         lookingForMusician: Boolean(data.lookingForMusician)
     }
     const cast: Partial<ShowCastMember>[] = [
-        ...directors, ...teams, ...players, ...tech, ...musicians
+        ...directors, ...troupes, ...players, ...tech, ...musicians
     ]
     await updateShowing(showId, showDateTime, updates, cast);
     revalidatePath(`/shows/${showId}/${showDateTime}`);
@@ -207,14 +207,14 @@ export async function postEventInstructors(type: EventType, eventId: string, pre
     redirect(`/${pluralize(type)}/${eventId}/`);
 }
 
-export async function postTeam(prevState: void | { message?: string }, formData: FormData) {
+export async function postTroupe(prevState: void | { message?: string }, formData: FormData) {
     const creatorId = await getCurrentUserId();
     if (!creatorId) throw new Error('You must be logged in to continue');
 
     const data = Object.fromEntries(formData.entries());
 
     const name = (data.name as string)?.trim() || null;
-    if (!name) return { message: 'Team name is required' };
+    if (!name) return { message: 'Troupe name is required' };
     
     const imageFile = data.image as File;
     let imageUrl = '';
@@ -223,7 +223,7 @@ export async function postTeam(prevState: void | { message?: string }, formData:
             return { message: 'Image file size exceeds 5MB limit' };
         }
         try {
-            imageUrl = await uploadImage(imageFile, 'teams');
+            imageUrl = await uploadImage(imageFile, 'troupes');
         } catch {
             throw new Error('Image upload failed');
         }
@@ -236,7 +236,7 @@ export async function postTeam(prevState: void | { message?: string }, formData:
     let city = (data.city as string).trim() || null;
     if (city) city = capitalize(city);
 
-    const team: Team = {
+    const troupe: Troupe = {
         id: slugify(removeLeadingArticles(name), { lower: true, trim: true, strict: true }),
         name,
         image: imageUrl,
@@ -250,7 +250,7 @@ export async function postTeam(prevState: void | { message?: string }, formData:
         description,
     }
 
-    const getTeamMembersByRole = (role: Role): { name: string, id: string | null, role: Role }[] => {
+    const getTroupeMembersByRole = (role: Role): { name: string, id: string | null, role: Role }[] => {
         const members = Object.keys(data)
             .filter((key) => (
                 (key.split('-')[0] === role) &&
@@ -266,26 +266,26 @@ export async function postTeam(prevState: void | { message?: string }, formData:
             });
         return [...new Set(members)];
     }
-    const players = getTeamMembersByRole('player');
-    const coaches = getTeamMembersByRole('coach');
-    const musicians = getTeamMembersByRole('musician');
-    const teamMembers = [ ...players, ...coaches, ...musicians ];
-    const teamId = await saveTeam(team, teamMembers);
-    redirect(`/teams/${teamId}`);
+    const players = getTroupeMembersByRole('player');
+    const coaches = getTroupeMembersByRole('coach');
+    const musicians = getTroupeMembersByRole('musician');
+    const troupeMembers = [ ...players, ...coaches, ...musicians ];
+    const troupeId = await saveTroupe(troupe, troupeMembers);
+    redirect(`/troupes/${troupeId}`);
 }
 
-export async function updateTeam(teamId: string, prevState: void | { message?: string }, formData: FormData) {
+export async function updateTroupe(troupeId: string, prevState: void | { message?: string }, formData: FormData) {
     const userId = await getCurrentUserId();
     if (!userId) throw new Error('You must be logged in to continue');
 
-    const team = await getTeam(teamId);
-    if (!team) throw new Error('Cannot find record of team');
-    const members = await getTeamMembers(teamId);
+    const troupe = await getTroupe(troupeId);
+    if (!troupe) throw new Error('Cannot find record of troupe');
+    const members = await getTroupeMembers(troupeId);
     const isMember = members.some((member) => member.id === userId && member.confirmed);
-    if (!isMember) throw new Error('You must be a member of this team to update it');
+    if (!isMember) throw new Error('You must be a member of this troupe to update it');
 
     const data = Object.fromEntries(formData.entries());
-    const getTeamMembersByRole = (role: Role): { name: string, id: string | null, role: Role }[] => {
+    const getTroupeMembersByRole = (role: Role): { name: string, id: string | null, role: Role }[] => {
         const members = Object.keys(data)
             .filter((key) => (
                 (key.split('-')[0] === role) &&
@@ -302,11 +302,11 @@ export async function updateTeam(teamId: string, prevState: void | { message?: s
         return [...new Set(members)];
     }
 
-    const players = getTeamMembersByRole('player');
-    const coaches = getTeamMembersByRole('coach');
-    const musicians = getTeamMembersByRole('musician');
-    await updateTeamRecord(
-        teamId,
+    const players = getTroupeMembersByRole('player');
+    const coaches = getTroupeMembersByRole('coach');
+    const musicians = getTroupeMembersByRole('musician');
+    await updateTroupeRecord(
+        troupeId,
         {
             lookingForPlayers: Boolean(data.lookingForPlayers),
             lookingForCoach: Boolean(data.lookingForCoach),
@@ -315,39 +315,39 @@ export async function updateTeam(teamId: string, prevState: void | { message?: s
         [ ...players, ...coaches, ...musicians ],
         userId
     );
-    revalidatePath(`/teams/${teamId}`);
-    redirect(`/teams/${teamId}`);
+    revalidatePath(`/troupes/${troupeId}`);
+    redirect(`/troupes/${troupeId}`);
 }
 
-export async function updateTeamDetails(teamId: string, prevState: void | { message?: string }, formData: FormData) {
+export async function updateTroupeDetails(troupeId: string, prevState: void | { message?: string }, formData: FormData) {
     const userId = await getCurrentUserId();
     if (!userId) throw new Error('You must be logged in to continue');
 
-    const team = await getTeam(teamId);
-    if (!team) throw new Error('Cannot find record of team');
+    const troupe = await getTroupe(troupeId);
+    if (!troupe) throw new Error('Cannot find record of troupe');
 
-    const members = await getTeamMembers(teamId);
-    const canManageTeam = members.some((member) => (
+    const members = await getTroupeMembers(troupeId);
+    const canManageTroupe = members.some((member) => (
         member.id === userId &&
         member.confirmed &&
         member.role !== 'coach'
     ));
-    if (!canManageTeam) throw new Error('You must be a member of this team to update it');
+    if (!canManageTroupe) throw new Error('You must be a member of this troupe to update it');
 
     const data = Object.fromEntries(formData.entries());
     const name = (data.name as string)?.trim();
-    if (!name) return { message: 'Team name is required' };
+    if (!name) return { message: 'Troupe name is required' };
 
     const imageFile = data.image as File;
-    let imageUrl = team.image;
+    let imageUrl = troupe.image;
     if (imageFile && imageFile.size) {
         if (imageFile.size > 5 * 1024 * 1024) {
             return { message: 'Image file size exceeds 5MB limit' };
         }
         try {
-            imageUrl = await uploadImage(imageFile, 'teams');
-            if (team.image && team.image !== imageUrl) {
-                await destroyImage(team.image);
+            imageUrl = await uploadImage(imageFile, 'troupes');
+            if (troupe.image && troupe.image !== imageUrl) {
+                await destroyImage(troupe.image);
             }
         } catch {
             throw new Error('Image upload failed');
@@ -361,7 +361,7 @@ export async function updateTeamDetails(teamId: string, prevState: void | { mess
     let description = data.description as string || null;
     if (description) description = description.replaceAll(/\r\n/g, '<br>').replaceAll(/\n/g, '<br>').replaceAll(/\r/g, '<br>');
 
-    await updateTeamDetailsRecord(teamId, {
+    await updateTroupeDetailsRecord(troupeId, {
         name,
         image: imageUrl,
         photoCredit: data.photoCredit as string || null,
@@ -370,21 +370,21 @@ export async function updateTeamDetails(teamId: string, prevState: void | { mess
         theatres,
         description
     });
-    revalidatePath(`/teams/${teamId}`, 'layout');
-    redirect(`/teams/${teamId}`);
+    revalidatePath(`/troupes/${troupeId}`, 'layout');
+    redirect(`/troupes/${troupeId}`);
 }
 
-export async function leaveTeam(teamId: string): Promise<void> {
+export async function leaveTroupe(troupeId: string): Promise<void> {
     const userId = await getCurrentUserId();
     if (!userId) throw new Error('You must be logged in to continue');
 
-    const result = await leaveTeamRecord(teamId, userId);
-    revalidatePath(`/teams/${teamId}`, 'layout');
-    if (result.deletedTeam) {
-        revalidatePath('/teams');
-        redirect('/teams');
+    const result = await leaveTroupeRecord(troupeId, userId);
+    revalidatePath(`/troupes/${troupeId}`, 'layout');
+    if (result.deletedTroupe) {
+        revalidatePath('/troupes');
+        redirect('/troupes');
     }
-    redirect(`/teams/${teamId}`);
+    redirect(`/troupes/${troupeId}`);
 }
 
 export async function updateUserCommunityOptions(prevState: void | { message?: string }, formData: FormData) {

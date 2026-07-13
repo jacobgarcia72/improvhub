@@ -2,8 +2,8 @@ import EventResults from './event-results';
 import { filterArrayBySearchTerm, matchPattern, shuffle } from '@/lib/helper-functions';
 import { separateCityAndState } from '@/lib/location';
 import { getAllTheatres, getTheatre, getTheatresByCity, getTheatresByState, getTheatresByZipcode } from '@/lib/theatres';
-import { Team } from '@/types';
-import { getTeamsByTheatre, getTeamsInRange } from '@/lib/teams';
+import { Troupe } from '@/types';
+import { getTroupesByTheatre, getTroupesInRange } from '@/lib/troupes';
 import ItemCard from './item-card';
 import { Suspense } from 'react';
 import Loader from '@/components/loader';
@@ -13,7 +13,7 @@ export default async function SearchResults({ params }: { params: {
     theatre?: string;
     location?: string;
     miles?: string;
-    for?: 'theatres' | 'shows' | 'jams' | 'teams' | 'classes' | 'workshops';
+    for?: 'theatres' | 'shows' | 'jams' | 'troupes' | 'classes' | 'workshops';
 }}) {
     const eventTypes = ['shows', 'jams', 'classes', 'workshops'];
     const theatre = params?.theatre?.trim();
@@ -43,9 +43,9 @@ export default async function SearchResults({ params }: { params: {
             if (city && state) return await getTheatresByCity(city, state, radius);
             if (state) return await getTheatresByState(state);
             if (zipcode) return await getTheatresByZipcode(zipcode, radius || 1);
-        } else if (searchFor === 'teams') {
-            if (theatre) return shuffle(await getTeamsByTheatre(theatre) as Team[]);
-            if (zipcode || (city && state)) return shuffle(await getTeamsInRange(zipcode || `${city} ${state}`, radius || 0) as Team[]);
+        } else if (searchFor === 'troupes') {
+            if (theatre) return shuffle(await getTroupesByTheatre(theatre) as Troupe[]);
+            if (zipcode || (city && state)) return shuffle(await getTroupesInRange(zipcode || `${city} ${state}`, radius || 0) as Troupe[]);
         }
         return [];
     }

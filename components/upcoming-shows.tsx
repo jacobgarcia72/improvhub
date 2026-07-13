@@ -4,8 +4,8 @@ import MiniCard from "@/components/mini-card";
 import { Suspense } from "react";
 import Loader from "./loader";
 
-export default async function UpcomingShows({ id, label = "Upcoming Shows", limit, roles, includeTeams }: { id: string, label?: string, limit?: number, roles?: (Role | 'team')[], includeTeams?: boolean }) {
-    const showsUserIsIn = id ? await getUpcomingShowsByCastMember(id, roles, includeTeams) : [];
+export default async function UpcomingShows({ id, label = "Upcoming Shows", limit, roles, includeTroupes }: { id: string, label?: string, limit?: number, roles?: (Role | 'troupe')[], includeTroupes?: boolean }) {
+    const showsUserIsIn = id ? await getUpcomingShowsByCastMember(id, roles, includeTroupes) : [];
     let showsByDate: { dateTime: string, show: Event }[] = [];
     showsUserIsIn?.forEach(({ show, dateTimes }) => {
         dateTimes.forEach((dateTime) => {

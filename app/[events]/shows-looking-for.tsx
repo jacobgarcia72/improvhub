@@ -5,7 +5,7 @@ import { getShowsLookingForRole } from "@/lib/shows"
 import { Event, Role, User } from "@/types";
 import { Suspense } from "react";
 
-export default async function ShowsLookingFor({ role, limit, user } : { role: Role | 'team', limit?: number, user: User }) {
+export default async function ShowsLookingFor({ role, limit, user } : { role: Role | 'troupe', limit?: number, user: User }) {
     const shows = await getShowsLookingForRole(role, user);
 
     let showsByDate: { dateTime: string, show: Event }[] = [];

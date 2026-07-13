@@ -1,10 +1,10 @@
 'use client';
 
 import Button from "@/components/form/button";
-import { respondToTeamInvitation } from "@/lib/teams";
+import { respondToTroupeInvitation } from "@/lib/troupes";
 import { useState } from "react";
 
-export default function TeamInvitationOptions({ teamId, userId, role }: { teamId: string, userId: string, role: string }) {
+export default function TroupeInvitationOptions({ troupeId, userId, role }: { troupeId: string, userId: string, role: string }) {
     const [ accepted, setAccepted ] = useState<boolean | null>(null);
 
     return (
@@ -12,13 +12,13 @@ export default function TeamInvitationOptions({ teamId, userId, role }: { teamId
             {accepted === null && <>
                 <Button caption="Accept" className="small green"
                     onClick={() => {
-                        respondToTeamInvitation(teamId, userId, role, true);
+                        respondToTroupeInvitation(troupeId, userId, role, true);
                         setAccepted(true);
                     }}
                 />
                 <Button caption="Reject" className="small red"
                     onClick={() => {
-                        respondToTeamInvitation(teamId, userId, role, false);
+                        respondToTroupeInvitation(troupeId, userId, role, false);
                         setAccepted(false);
                     }}
                 />

@@ -1,31 +1,31 @@
-import { updateTeam } from "@/actions";
+import { updateTroupe } from "@/actions";
 import CastingInputs from "@/components/form/casting-inputs";
 import Form from "@/components/form/form";
-import { getTeam, getTeamMembers } from "@/lib/teams";
+import { getTroupe, getTroupeMembers } from "@/lib/troupes";
 import { getCurrentUserId } from "@/lib/users";
 import { notFound, redirect } from "next/navigation";
 
 type Props = {
     params: Promise<{ id: string }>
 }
-export default async function TeamManagePage({ params }: Props) {
+export default async function TroupeManagePage({ params }: Props) {
     const { id } = await params;
-    const members = await getTeamMembers(id, true);
+    const members = await getTroupeMembers(id, true);
     const userId = await getCurrentUserId();
-    const team = await getTeam(id);
+    const troupe = await getTroupe(id);
     const isMemberNotCoach = userId && members.some(
         (member) => member.id === userId && member.confirmed && member.role !== 'coach'
     );
-    if (!isMemberNotCoach || !team) notFound();
+    if (!isMemberNotCoach || !troupe) notFound();
 
     async function cancel() {
         'use server';
-        redirect(`/teams/${id}`);
+        redirect(`/troupes/${id}`);
     }
 
-    const { lookingForPlayers, lookingForCoach, lookingForMusician } = team;
+    const { lookingForPlayers, lookingForCoach, lookingForMusician } = troupe;
     return <section>
-        <Form onSubmit={updateTeam.bind(null, id)} cancel={cancel}>
+        <Form onSubmit={updateTroupe.bind(null, id)} cancel={cancel}>
             <CastingInputs
                 roles={['player', 'coach', 'musician']}
                 currentCast={members}

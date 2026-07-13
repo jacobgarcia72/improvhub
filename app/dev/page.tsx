@@ -1,7 +1,7 @@
 'use client';
 import Button from "@/components/form/button";
 import Input from "@/components/form/input";
-import { generateDummyTeams, generateDummyUsers } from "@/lib/dev-helpers";
+import { generateDummyTroupes, generateDummyUsers } from "@/lib/dev-helpers";
 import { useState } from "react";
 
 export default function DevPage() {
@@ -15,9 +15,9 @@ export default function DevPage() {
                 await generateDummyUsers(Number(num));
                 setPending(false);
             }} />
-            <Button caption="Create Dummy Teams" disabled={pending} onClick={async () => {
+            <Button caption="Create Dummy Troupes" disabled={pending} onClick={async () => {
                 setPending(true);
-                await generateDummyTeams(Number(num));
+                await generateDummyTroupes(Number(num));
                 setPending(false);
             }} />
         </section>

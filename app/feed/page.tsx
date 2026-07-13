@@ -3,7 +3,7 @@ import { capitalize, pluralize } from "@/lib/helper-functions";
 import { getNewsFeedItems } from "@/lib/news"
 import { optimizeImage } from "@/lib/optimize-image";
 import { getEvent, getShow } from "@/lib/shows";
-import { getTeam } from "@/lib/teams";
+import { getTroupe } from "@/lib/troupes";
 import { getTheatre } from "@/lib/theatres";
 import { getCurrentUserId, getUserAbbreviated } from "@/lib/users";
 import Image from "next/image";
@@ -62,17 +62,17 @@ export default async function FeedPage() {
                         image = newEvent.image || theatre.image;
                         break;
                     case 'cast_in_show':
-                        const cast = followType === 'team' ? (
-                            await getTeam(followId)
+                        const cast = followType === 'troupe' ? (
+                            await getTroupe(followId)
                         ) : await getUserAbbreviated(followId);
                         const showCast = await getShow(newsItemId);
                         if (!cast || !showCast || !newsItemDate) return null;
                         let verb = 'is performing in';
-                        if (otherData === 'team') verb = 'are performing in';
+                        if (otherData === 'troupe') verb = 'are performing in';
                         if (otherData === 'tech') verb = 'is teching';
                         if (otherData === 'director') verb = 'is directing';
                         if (otherData === 'musician') verb = 'is providing musical accompaniment in';
-                        content = <p><Link className="link" href={`/${followType === 'team' ? 'teams' : 'profile'}/${cast.id}`}>{cast.name}</Link> {verb} <Link className="link" href={`/shows/${showCast.id}/${newsItemDate}`}>{showCast.title}</Link> on {formatDateForDisplay(newsItemDate.split(' ')[0])}.</p>
+                        content = <p><Link className="link" href={`/${followType === 'troupe' ? 'troupes' : 'profile'}/${cast.id}`}>{cast.name}</Link> {verb} <Link className="link" href={`/shows/${showCast.id}/${newsItemDate}`}>{showCast.title}</Link> on {formatDateForDisplay(newsItemDate.split(' ')[0])}.</p>
                         image = cast.image || showCast.image;
                         break;
                     case 'going_to_show':
@@ -97,19 +97,19 @@ export default async function FeedPage() {
                         content = <p><Link className="link" href={`/profile/${instructor.id}`}>{instructor.name}</Link> is {instructorType === 'jam' ? 'leading' : 'teaching'} a {instructorType}, <Link className="link" href={`/${pluralize(instructorType)}/${instructorEvent.id}`}>{instructorEvent.title}</Link>{instructorTheatre ? <>, at <Link className="link" href={`/theatres/${instructorTheatre.id}`}>{instructorTheatre.name}</Link></> : ''}.</p>
                         image = instructor.image || instructorEvent.image;
                         break;
-                    case 'new_team':
-                        const teamCreator = await getUserAbbreviated(followId);
-                        const newTeam = await getTeam(newsItemId);
-                        if (!teamCreator || !newTeam) return null;
-                        content = <p><Link className="link" href={`/profile/${teamCreator.id}`}>{teamCreator.name}</Link> has created a new team page for <Link className="link" href={`/teams/${newTeam.id}`}>{newTeam.name}</Link>.</p>
-                        image = newTeam.image || teamCreator.image;
+                    case 'new_troupe':
+                        const troupeCreator = await getUserAbbreviated(followId);
+                        const newTroupe = await getTroupe(newsItemId);
+                        if (!troupeCreator || !newTroupe) return null;
+                        content = <p><Link className="link" href={`/profile/${troupeCreator.id}`}>{troupeCreator.name}</Link> has created a new troupe page for <Link className="link" href={`/troupes/${newTroupe.id}`}>{newTroupe.name}</Link>.</p>
+                        image = newTroupe.image || troupeCreator.image;
                         break;
-                    case 'joined_team':
-                        const teamMember = await getUserAbbreviated(followId);
-                        const teamJoined = await getTeam(newsItemId);
-                        if (!teamMember || !teamJoined) return null;
-                        content = <p><Link className="link" href={`/profile/${teamMember.id}`}>{teamMember.name}</Link>{otherData === 'coach' ? ' is coaching ' : ' has joined the team, '}<Link className="link" href={`/teams/${teamJoined.id}`}>{teamJoined.name}</Link>{otherData === 'musician' ? ' as a musical accompanist' : ''}.</p>
-                        image = teamMember.image || teamJoined.image;
+                    case 'joined_troupe':
+                        const troupeMember = await getUserAbbreviated(followId);
+                        const troupeJoined = await getTroupe(newsItemId);
+                        if (!troupeMember || !troupeJoined) return null;
+                        content = <p><Link className="link" href={`/profile/${troupeMember.id}`}>{troupeMember.name}</Link>{otherData === 'coach' ? ' is coaching ' : ' has joined the troupe, '}<Link className="link" href={`/troupes/${troupeJoined.id}`}>{troupeJoined.name}</Link>{otherData === 'musician' ? ' as a musical accompanist' : ''}.</p>
+                        image = troupeMember.image || troupeJoined.image;
                         break;
                     default:
                         return;

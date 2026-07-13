@@ -6,7 +6,7 @@ import { getUserAbbreviated } from "@/lib/users";
 import Link from "next/link";
 import { pluralize } from "@/lib/helper-functions";
 import { CastMember } from "@/types";
-import { getTeam } from "@/lib/teams";
+import { getTroupe } from "@/lib/troupes";
 
 function P({ children, className }: { children: React.ReactNode, className?: string }) {
     return children ? <p className={`mb-4 mt-2 ${className}`}>{children}</p> : null;
@@ -21,9 +21,9 @@ async function MemberEntry(member: CastMember, noConfirm?: boolean) {
         return (
             <Link
                 className="link flex flex-row gap-2 items-center w-fit"
-                href={`/${member.role === 'team' ? 'teams' : 'profile'}/${member.id}`}
+                href={`/${member.role === 'troupe' ? 'troupes' : 'profile'}/${member.id}`}
             >
-                {PlayerImage(member.id, member.role === 'team')}
+                {PlayerImage(member.id, member.role === 'troupe')}
                 <P>{member.name}</P>
             </Link>
         )
@@ -32,8 +32,8 @@ async function MemberEntry(member: CastMember, noConfirm?: boolean) {
     }
 }
 
-async function PlayerImage(id: string, isTeam?: boolean) {
-    const user = isTeam ? await getTeam(id) : await getUserAbbreviated(id);
+async function PlayerImage(id: string, isTroupe?: boolean) {
+    const user = isTroupe ? await getTroupe(id) : await getUserAbbreviated(id);
     const image = user?.image;
     if (!image) return null;
     return <Image
@@ -49,7 +49,7 @@ export default async function CastList({ castMembers, noConfirm }: { castMembers
     const musicians = castMembers.filter((member) => member.role === 'musician');
     const directors = castMembers.filter((member) => member.role === 'director');
     const tech = castMembers.filter((member) => member.role === 'tech');
-    const teams = castMembers.filter((member) => member.role === 'team');
+    const troupes = castMembers.filter((member) => member.role === 'troupe');
     return (
         <Suspense fallback={<Loader />}>
             <div className="flex flex-row flex-wrap px-6 justify-between">
@@ -62,11 +62,11 @@ export default async function CastList({ castMembers, noConfirm }: { castMembers
                             ))}
                         </ul>
                     </> : null}
-                    {teams?.length ? <>
-                        <Header>{pluralize('Team', teams.length)}</Header>
+                    {troupes?.length ? <>
+                        <Header>{pluralize('Troupe', troupes.length)}</Header>
                         <ul className="mt-2">
-                            {teams.map((team, i) => (
-                                <li key={i} className="no-bullets">{MemberEntry(team, noConfirm)}</li>
+                            {troupes.map((troupe, i) => (
+                                <li key={i} className="no-bullets">{MemberEntry(troupe, noConfirm)}</li>
                             ))}
                         </ul>
                     </> : null}

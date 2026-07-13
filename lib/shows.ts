@@ -9,7 +9,7 @@ import { supabaseAdmin } from './supabase-server';
 import { getCitiesWithinRange } from './location';
 import { revalidatePath } from 'next/cache';
 import { dateMatchesRecurringSchedule, getStartOfToday, normalizeDateTime } from './dates';
-import { getTeamMembers, getTeamsByUser } from './teams';
+import { getTroupeMembers, getTroupesByUser } from './troupes';
 import { createNewsFeedItem, deleteNewsFeedItem } from './news';
 import { getFriendIds, getFriends } from './users';
 import { postNotification } from './notifications';
@@ -79,9 +79,9 @@ export async function getUpcomingEventsByRSVP(userId: string, type: EventType, r
     return res;
 }
 
-export async function getShowsLookingForRole(role: Role | 'team', user: User): Promise<{ show: Event, dateTimes: string[] }[]> {
+export async function getShowsLookingForRole(role: Role | 'troupe', user: User): Promise<{ show: Event, dateTimes: string[] }[]> {
     const key = {
-        team: 'looking_for_teams',
+        troupe: 'looking_for_troupes',
         player: 'looking_for_players',
         director: 'looking_for_directors',
         musician: 'looking_for_musician',
@@ -127,15 +127,15 @@ export async function getShowsLookingForRole(role: Role | 'team', user: User): P
     return res;
 }
 
-export async function getUpcomingShowsByCastMember(userId: string, roles: (Role | 'team')[] = ['player', 'musician', 'tech', 'director'], includeUsersTeams = false): Promise<{ show: Event, dateTimes: string[] }[]> {
-    let teams: string[] = [];
-    if (includeUsersTeams) {
-        teams = (await getTeamsByUser(userId)).map((team) => team.id);
+export async function getUpcomingShowsByCastMember(userId: string, roles: (Role | 'troupe')[] = ['player', 'musician', 'tech', 'director'], includeUsersTroupes = false): Promise<{ show: Event, dateTimes: string[] }[]> {
+    let troupes: string[] = [];
+    if (includeUsersTroupes) {
+        troupes = (await getTroupesByUser(userId)).map((troupe) => troupe.id);
     }
     const { data } = await supabaseAdmin
         .from('showing_cast')
         .select('show_id, date_time')
-        .or(`and(id.eq.${userId},role.in.(${roles.join(',')})),and(id.in.(${teams.join(',')}),role.eq.team)`)
+        .or(`and(id.eq.${userId},role.in.(${roles.join(',')})),and(id.in.(${troupes.join(',')}),role.eq.troupe)`)
         .gte('date_time', getStartOfToday());
 
     const showDates: { [showId: string]: string[] } = { };
@@ -512,12 +512,12 @@ export async function updateShowing(showId: string, dateTime: string, updates: P
         await supabaseAdmin
             .from('showing_cast')
             .upsert(castRows);
-        ['team', 'player', 'musician', 'director', 'tech'].forEach(async role => {
+        ['troupe', 'player', 'musician', 'director', 'tech'].forEach(async role => {
             const usersToNotify = newCastMembers.filter((m) => m.id && m.role === role).map((m) => m.id).filter(m => m !== null && m !== undefined);
-            if (role === 'team') {
-                usersToNotify.map(async (teamId) => {
-                    const teamMembersToNotify = (await getTeamMembers(teamId, true)).map(m => m.id).filter(m => m !== null);
-                    postNotification(showId, teamMembersToNotify, 'cast_in_show', `${normalizedDateTime},${role},${teamId}`);
+            if (role === 'troupe') {
+                usersToNotify.map(async (troupeId) => {
+                    const troupeMembersToNotify = (await getTroupeMembers(troupeId, true)).map(m => m.id).filter(m => m !== null);
+                    postNotification(showId, troupeMembersToNotify, 'cast_in_show', `${normalizedDateTime},${role},${troupeId}`);
                 });
             } else {
                 postNotification(showId, usersToNotify, 'cast_in_show', `${normalizedDateTime},${role}`);
@@ -525,17 +525,17 @@ export async function updateShowing(showId: string, dateTime: string, updates: P
         })
         for (let i = 0; i < newCastMembers.length; i++) {
             const { id, role } = newCastMembers[i];
-            if (id) await createNewsFeedItem(role === 'team' ? 'team' : 'friend', id, 'cast_in_show', showId, normalizedDateTime, role);
+            if (id) await createNewsFeedItem(role === 'troupe' ? 'troupe' : 'friend', id, 'cast_in_show', showId, normalizedDateTime, role);
         }
         for (let i = 0; i < removedCastMembers.length; i++) {
             const { id, role } = removedCastMembers[i];
-            if (id) await deleteNewsFeedItem(role === 'team' ? 'team' : 'friend', id, 'cast_in_show', showId, normalizedDateTime, role);
+            if (id) await deleteNewsFeedItem(role === 'troupe' ? 'troupe' : 'friend', id, 'cast_in_show', showId, normalizedDateTime, role);
         }
     }
     return true;
 }
 
-export async function removeCastMember(showId: string, dateTime: string, userId: string, role: Role | 'team'): Promise<void> {
+export async function removeCastMember(showId: string, dateTime: string, userId: string, role: Role | 'troupe'): Promise<void> {
     const normalizedDateTime = dateTime.replaceAll('%20', ' ').replaceAll('%3A', ':');
     await supabaseAdmin
         .from('showing_cast')
@@ -549,12 +549,12 @@ export async function removeCastMember(showId: string, dateTime: string, userId:
     const show = await getShow(showId);
     const admins = show?.admins || [];
     const adminsAndDirectors = [...new Set(admins.concat(directors))]
-        .filter((a) =>  a !== userId || role === 'team'); // no need to notify yourself
+        .filter((a) =>  a !== userId || role === 'troupe'); // no need to notify yourself
     if (adminsAndDirectors.length) {
         postNotification(userId, adminsAndDirectors, 'show_drop_out', `${showId},${dateTime},${role}`);
     }
     revalidatePath(`/shows/${showId}/${dateTime}/`, 'layout');
-    await deleteNewsFeedItem(role === 'team' ? 'team' : 'friend', userId, 'cast_in_show', showId, normalizedDateTime, role);
+    await deleteNewsFeedItem(role === 'troupe' ? 'troupe' : 'friend', userId, 'cast_in_show', showId, normalizedDateTime, role);
 }
 
 export async function deleteOccurrence(eventId: string, dateTime: string, type: EventType): Promise<void> {
@@ -584,9 +584,9 @@ export async function deleteOccurrence(eventId: string, dateTime: string, type: 
         for (let i = 0; i < data.length; i++) {
             const { id, role } = data[i];
             if (!id) return;
-            if (role === 'team') {
-                const teamMembers = (await getTeamMembers(id)).map((m) => m.id).filter(m => m !== null);
-                usersToNotify.push(...teamMembers);
+            if (role === 'troupe') {
+                const troupeMembers = (await getTroupeMembers(id)).map((m) => m.id).filter(m => m !== null);
+                usersToNotify.push(...troupeMembers);
             } else {
                 usersToNotify.push(id);
             }
@@ -617,9 +617,9 @@ export async function deleteEvent(eventId: string, type: EventType): Promise<voi
         for (let i = 0; i < data.length; i++) {
             const { id, role } = data[i];
             if (!id) return;
-            if (role === 'team') {
-                const teamMembers = (await getTeamMembers(id)).map((m) => m.id).filter(m => m !== null);
-                usersToNotify.push(...teamMembers);
+            if (role === 'troupe') {
+                const troupeMembers = (await getTroupeMembers(id)).map((m) => m.id).filter(m => m !== null);
+                usersToNotify.push(...troupeMembers);
             } else {
                 usersToNotify.push(id);
             }

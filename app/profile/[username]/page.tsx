@@ -7,7 +7,7 @@ import { User } from "@/types";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import Link from "next/link";
-import { getTeam, getTeamMembershipsByUser } from "@/lib/teams";
+import { getTroupe, getTroupeMembershipsByUser } from "@/lib/troupes";
 import MiniCard from "@/components/mini-card";
 import CommunityOptions from "./community-options";
 import CommunityDetails from "./community-details";
@@ -42,11 +42,11 @@ export default async function UserProfilePage({ params }: { params: Promise<{use
     const userRoles = (await getUserRoles(username)) ?? undefined;
 
     const friendCount = await getFriendCount(username);
-    const teamsFollowedCount = await getFollowCount(username, 'team', true) || 0;
+    const troupesFollowedCount = await getFollowCount(username, 'troupe', true) || 0;
 
-    const teamMemberships = await getTeamMembershipsByUser(username);
-    const teams = (await Promise.all([...new Set(teamMemberships.filter((m) => m.role !== 'coach').map((m) => m.team))].map(getTeam))).filter((t) => t !== null);
-    const coachedTeams = (await Promise.all([...new Set(teamMemberships.filter((m) => m.role === 'coach').map((m) => m.team))].map(getTeam))).filter((t) => t !== null);
+    const troupeMemberships = await getTroupeMembershipsByUser(username);
+    const troupes = (await Promise.all([...new Set(troupeMemberships.filter((m) => m.role !== 'coach').map((m) => m.troupe))].map(getTroupe))).filter((t) => t !== null);
+    const coachedTroupes = (await Promise.all([...new Set(troupeMemberships.filter((m) => m.role === 'coach').map((m) => m.troupe))].map(getTroupe))).filter((t) => t !== null);
     return (
         <Suspense fallback={<Loader />}>
             {friendCount ? (
@@ -72,57 +72,57 @@ export default async function UserProfilePage({ params }: { params: Promise<{use
                     ) : null
                 )}
             </LayoutCard>
-            <LayoutCard header="Teams">
-                {teams.length ? (
+            <LayoutCard header="Troupes">
+                {troupes.length ? (
                     <div className="flex flex-row flex-wrap">
-                        {teams.map((team) => <MiniCard key={team.id} item={team} type='team' includeDescription />)}
+                        {troupes.map((troupe) => <MiniCard key={troupe.id} item={troupe} type='troupe' includeDescription />)}
                     </div>
                 ) : null}
                 {isCurrentUser && <>
                     {userRoles?.player ? <OpenToCheckbox
                         user={user}
-                        openToKey="openToJoinTeam"
-                        label="Open to Joining Teams"
+                        openToKey="openToJoinTroupe"
+                        label="Open to Joining Troupes"
                     /> : null}
                     {userRoles?.musician ? <OpenToCheckbox
                         user={user}
-                        openToKey="openToAccompanyTeam"
-                        label="Open to Accompanying Musical Teams"
+                        openToKey="openToAccompanyTroupe"
+                        label="Open to Accompanying Musical Troupes"
                     /> : null}
                 </>}
-                {!isCurrentUser && user.openToJoinTeam && <p className="pt-2">Open to Joining Teams</p>}
-                {!isCurrentUser && user.openToAccompanyTeam && <p className="pt-2">Open to Accompanying Musical Teams</p>}
-                {teamsFollowedCount > 0 && (
+                {!isCurrentUser && user.openToJoinTroupe && <p className="pt-2">Open to Joining Troupes</p>}
+                {!isCurrentUser && user.openToAccompanyTroupe && <p className="pt-2">Open to Accompanying Musical Troupes</p>}
+                {troupesFollowedCount > 0 && (
                     <div className="w-full flex flex-row justify-center">
-                        <Link href={`/profile/${username}/teams-followed`} className="link mt-2 text-sm">
-                            {`Following ${teamsFollowedCount} ${pluralize('Team', teamsFollowedCount)}`}
+                        <Link href={`/profile/${username}/troupes-followed`} className="link mt-2 text-sm">
+                            {`Following ${troupesFollowedCount} ${pluralize('Troupe', troupesFollowedCount)}`}
                         </Link>
                     </div>
                 )}
                 {isCurrentUser && <>
                     <div className="w-full flex flex-row justify-center">
-                        <Link href="/create/team">
-                            <Button caption="New Team" style="link" className="w-48" />
+                        <Link href="/create/troupe">
+                            <Button caption="New Troupe" style="link" className="w-48" />
                         </Link>
                     </div>
                 </>}
             </LayoutCard>
             {userRoles?.coach ? <LayoutCard header="Coaching">
-                {coachedTeams.length ? (
+                {coachedTroupes.length ? (
                     <div className="flex flex-row flex-wrap">
-                        {coachedTeams.map((team) => <MiniCard key={team.id} item={team} type='team' />)}
+                        {coachedTroupes.map((troupe) => <MiniCard key={troupe.id} item={troupe} type='troupe' />)}
                     </div>
                 ) : null}
                 {isCurrentUser && <>
                     <OpenToCheckbox
                         user={user}
-                        openToKey="openToCoachTeam"
+                        openToKey="openToCoachTroupe"
                         label="Available to Coach"
                     />
                 </>}
-                {!isCurrentUser && user.openToCoachTeam && <p className="pt-2">Available to Coach</p>}
+                {!isCurrentUser && user.openToCoachTroupe && <p className="pt-2">Available to Coach</p>}
             </LayoutCard> : null}
-            <UpcomingShows includeTeams id={username} limit={6} />
+            <UpcomingShows includeTroupes id={username} limit={6} />
             <LayoutCard header={user.website ? "Website" : ''}>
                 {isCurrentUser ? (
                     <WebsiteOptions user={user} />

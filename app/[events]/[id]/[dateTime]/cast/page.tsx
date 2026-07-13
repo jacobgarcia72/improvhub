@@ -47,7 +47,7 @@ export default async function ShowCastPage({ params } : {
                 onSubmit={postShowCast.bind(null, id, dateTime)}>
                 <CastingInputs
                     currentCast={cast}
-                    roles={['director', 'tech', 'team', 'player', 'musician']}
+                    roles={['director', 'tech', 'troupe', 'player', 'musician']}
                 />
             </Form>
         </Border>

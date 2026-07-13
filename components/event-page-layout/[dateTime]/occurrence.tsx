@@ -2,9 +2,9 @@ import { getFriendsRsvpCount, getRsvpCount, getRsvpStatus, getShowCast } from "@
 import { getCurrentUserId } from "@/lib/users";
 import CastingTools from "./casting-tools";
 import CastList from "@/components/cast-list";
-import { Event, EventType, ShowCastMember, Team } from "@/types";
+import { Event, EventType, ShowCastMember, Troupe } from "@/types";
 import CastRoleBanner from "./cast-role-banner";
-import { getTeamsByUser } from "@/lib/teams";
+import { getTroupesByUser } from "@/lib/troupes";
 import CancelOccurrence from "./cancel-occurrence";
 import RSVP from "./rsvp";
 import AddToCalendarButton from "./add-to-calendar";
@@ -26,11 +26,11 @@ export default async function Occurrence({ id, dateTime, parentEvent, isASeries,
     const userRoles = (type === 'show' && userId) ? (
         showCast.filter((c) => c.id === userId).map((c) => c.role)
     ) : null;
-    let userTeams: Team[] = [];
+    let userTroupes: Troupe[] = [];
     if (type === 'show' && userId) {
-        const teams = await getTeamsByUser(userId);
-        const teamIds = teams.map((team) => team.id);
-        userTeams = showCast.filter((c) => c.id && c.role === 'team' && teamIds.includes(c.id)).map((c) => teams.find((t) => t.id === c.id)).filter((t) => t !== undefined);
+        const troupes = await getTroupesByUser(userId);
+        const troupeIds = troupes.map((troupe) => troupe.id);
+        userTroupes = showCast.filter((c) => c.id && c.role === 'troupe' && troupeIds.includes(c.id)).map((c) => troupes.find((t) => t.id === c.id)).filter((t) => t !== undefined);
     }
     const isDirector = userRoles?.includes('director');
 
@@ -55,15 +55,15 @@ export default async function Occurrence({ id, dateTime, parentEvent, isASeries,
                     key={role}
                 />
             )) : null}
-            {userTeams?.length ? userTeams.map((team) => (
+            {userTroupes?.length ? userTroupes.map((troupe) => (
                 <CastRoleBanner
-                    teamName={team.name}
+                    troupeName={troupe.name}
                     showTitle={parentEvent.title}
-                    roleId={team.id}
+                    roleId={troupe.id}
                     showId={id}
                     dateTime={dateTime}
-                    role='team'
-                    key={team.id}
+                    role='troupe'
+                    key={troupe.id}
                 />
             )) : null}
             <div className="pt-1 pb-1 px-6">

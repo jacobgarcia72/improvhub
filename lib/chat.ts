@@ -1,7 +1,7 @@
 'use server';
 
 import { Comment, DiscussionPost, InputOptionObject, Topic } from '@/types';
-import { getTeamsByUser } from './teams';
+import { getTroupesByUser } from './troupes';
 import { getTheatre } from './theatres';
 import { getUser } from './users';
 import { supabaseAdmin } from './supabase-server';
@@ -10,16 +10,16 @@ import { camelCaseObject, getRandomNumberString, snakeCaseObject } from './helpe
 
 export async function getChatRooms(userId: string): Promise<{
     theatres: InputOptionObject[],
-    teams: InputOptionObject[]
+    troupes: InputOptionObject[]
 }> {
     const theatreStrings = (await getUser(userId))?.theatres || [];
     const theatres = (await Promise.all(theatreStrings.map(getTheatre))).filter((t) => t !== null);
     const theatreChatRooms = theatres.map(({ id, name, image }) => ({ id: `theatre-${id}`, text: name, image }));
-    const teams = await getTeamsByUser(userId);
-    const teamChatRooms = teams.map(({ id, name, image }) => ({ id: `team-${id}`, text: name, image: image || undefined }));
+    const troupes = await getTroupesByUser(userId);
+    const troupeChatRooms = troupes.map(({ id, name, image }) => ({ id: `troupe-${id}`, text: name, image: image || undefined }));
     return ({
         theatres: theatreChatRooms,
-        teams: teamChatRooms
+        troupes: troupeChatRooms
     });
 }
 

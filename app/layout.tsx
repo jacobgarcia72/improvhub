@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const description = "Find improv shows, jams, and theatres. Create and manage improv teams and events and connect with other improvisers!";
+const description = "Find improv shows, jams, and theatres. Create and manage improv troupes and events and connect with other improvisers!";
 export const metadata: Metadata = {
   title: appName,
   description,

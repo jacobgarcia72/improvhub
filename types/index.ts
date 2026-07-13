@@ -57,7 +57,7 @@ export interface EventOccurrence {
 }
 
 export interface Showing extends EventOccurrence {
-    lookingForTeams?: boolean;
+    lookingForTroupes?: boolean;
     lookingForPlayers?: boolean;
     lookingForDirectors?: boolean;
     lookingForMusician?: boolean;
@@ -71,7 +71,7 @@ export interface RsvpStatus {
     rsvp: 'g' | 'n' | 'i' | null;
 }
 
-export interface Team {
+export interface Troupe {
     id: string;
     name: string;
     image: string | null;
@@ -90,12 +90,12 @@ export type Role = 'player' | 'coach' | 'musician' | 'director' | 'tech';
 export interface CastMember {
     name: string;
     id: string | null;
-    role: Role | 'team';
+    role: Role | 'troupe';
     confirmed?: boolean | null;
 }
 
-export interface TeamMember extends CastMember {
-    team: string;
+export interface TroupeMember extends CastMember {
+    troupe: string;
     dateAdded: string;
     addedBy: string;
 }
@@ -118,14 +118,14 @@ export interface User {
     state?: string;
     website?: string;
     image?: string;
-    openToJoinTeam?: boolean;
-    openToAccompanyTeam?: boolean;
-    openToCoachTeam?: boolean;
+    openToJoinTroupe?: boolean;
+    openToAccompanyTroupe?: boolean;
+    openToCoachTroupe?: boolean;
 }
 
 export interface AbbrevUser { id: string, name: string, image?: string };
 
-export type Followee = 'team' | 'theatre';
+export type Followee = 'troupe' | 'theatre';
 export interface Follow {
     userId: string;
     followId: string;
@@ -177,8 +177,8 @@ export type NewsType = (
     'going_to_jam' | 
     'going_to_workshop' | 
     'going_to_class' | 
-    'new_team' | 
-    'joined_team' |
+    'new_troupe' | 
+    'joined_troupe' |
     `instructor_for_jam` |
     `instructor_for_workshop` |
     `instructor_for_class`
@@ -215,8 +215,8 @@ export class NewsFeedItem {
 export type NotificationType = 
     'friend_request' |
     'friend_request_accept' |
-    'added_to_team' |
-    'confirmed_team' |
+    'added_to_troupe' |
+    'confirmed_troupe' |
     'cast_in_show' |
     'show_drop_out' |
     'show_cancelled' |

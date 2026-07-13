@@ -1,21 +1,21 @@
 import Loader from "@/components/loader";
 import UserSuggestionsClient from "@/components/user-suggestions-client";
-import { getSuggestionsForTeam } from "@/lib/teams";
-import { Role, Team } from "@/types";
+import { getSuggestionsForTroupe } from "@/lib/troupes";
+import { Role, Troupe } from "@/types";
 import { Suspense } from "react";
 
 export default async function AvailableUsersSection({
     role,
-    team
+    troupe
 } : {
     role: Role,
-    team?: Team
+    troupe?: Troupe
 }) {
-    const users = await getSuggestionsForTeam(role, team);
+    const users = await getSuggestionsForTroupe(role, troupe);
     if (!users?.length) return null;
     return (
         <Suspense fallback={<Loader />}>
-            <UserSuggestionsClient initialUsers={users} role={role} teamId={team?.id} />
+            <UserSuggestionsClient initialUsers={users} role={role} troupeId={troupe?.id} />
         </Suspense>
     )
 }

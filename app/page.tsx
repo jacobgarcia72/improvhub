@@ -8,7 +8,7 @@ import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
     title: `${appName} | Home`,
-    description: "All things improv, all in one place. Find shows, teams, theatres, jams, auditions, and more near you!",
+    description: "All things improv, all in one place. Find shows, troupes, theatres, jams, auditions, and more near you!",
 };
 
 export default async function Home() {
@@ -33,7 +33,7 @@ export default async function Home() {
             </div>
             <div className="py-2 min-w-48 w-5/12 flex flex-col justify-end items-center gap-4">
               <div className="h-full flex items-center justify-center">
-                <p className="text-lg text-center">Create and manage teams and events and connect with other improvisers!</p>
+                <p className="text-lg text-center">Create and manage troupes and events and connect with other improvisers!</p>
               </div>
               <Link href="/login" className="w-54 max-w-11/12">
                 <Button caption="Sign In" className="w-full" />

@@ -1,5 +1,5 @@
 import { optimizeImage } from "@/lib/optimize-image";
-import { Event, Team, User } from "@/types";
+import { Event, Troupe, User } from "@/types";
 import Image from "next/image";
 import Link from "next/link";
 import { Border } from "./border";
@@ -8,7 +8,7 @@ import { getTheatre } from "@/lib/theatres";
 import { pluralize } from "@/lib/helper-functions";
 
 export default async function MediumCard({ item, type, dateTime }: {
-    item: Event | Team | User,
+    item: Event | Troupe | User,
     type: string,
     dateTime?: string
 }) {

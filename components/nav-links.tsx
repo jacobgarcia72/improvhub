@@ -3,9 +3,9 @@ import HamburgerMenu from "./hamburger-menu";
 import NavLink from "./nav-link";
 import { appName } from "@/lib/app-info";
 
-const allLinks = ['Feed', 'Create', 'Search', 'Shows', 'Jams', 'Classes', 'Workshops', 'Teams', 'Chat', 'Support', 'Feedback'];
-const topLinks = ['Create', 'Search', 'Shows', 'Jams', 'Classes', 'Teams', 'Chat'];
-const topLinksShortList = ['Create', 'Search', 'Shows', 'Teams', 'Chat'];
+const allLinks = ['Feed', 'Create', 'Search', 'Shows', 'Jams', 'Classes', 'Workshops', 'Troupes', 'Chat', 'Support', 'Feedback'];
+const topLinks = ['Create', 'Search', 'Shows', 'Jams', 'Classes', 'Troupes', 'Chat'];
+const topLinksShortList = ['Create', 'Search', 'Shows', 'Troupes', 'Chat'];
 
 export default function NavLinks() {
     return <>

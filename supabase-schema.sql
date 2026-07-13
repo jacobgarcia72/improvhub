@@ -13,9 +13,9 @@ create table if not exists users (
   state text,
   website text,
   image text,
-  open_to_join_team boolean,
-  open_to_accompany_team boolean,
-  open_to_coach_team boolean
+  open_to_join_troupe boolean,
+  open_to_accompany_troupe boolean,
+  open_to_coach_troupe boolean
 );
 
 create table if not exists sessions (
@@ -69,7 +69,7 @@ create table if not exists shows (
 create table if not exists show_occurrences (
   event_id text not null references shows(id) on delete cascade,
   date_time text not null,
-  looking_for_teams boolean,
+  looking_for_troupes boolean,
   looking_for_players boolean,
   looking_for_directors boolean,
   looking_for_musician boolean,
@@ -163,7 +163,7 @@ create table if not exists rsvps (
   status text
 );
 
-create table if not exists teams (
+create table if not exists troupes (
   id text primary key,
   name text not null,
   image text,
@@ -177,15 +177,15 @@ create table if not exists teams (
   description text
 );
 
-create table if not exists team_members (
-  team text not null references teams(id) on delete cascade,
+create table if not exists troupe_members (
+  troupe text not null references troupes(id) on delete cascade,
   name text not null,
   id text,
   role text not null,
   date_added text not null,
   added_by text not null,
   confirmed boolean,
-  primary key (team, name, role, date_added)
+  primary key (troupe, name, role, date_added)
 );
 
 create table if not exists follows (
@@ -294,8 +294,8 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.showing_cast TO service_rol
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.jams TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.jam_occurrences TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.rsvps TO service_role;
-GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.teams TO service_role;
-GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.team_members TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.troupes TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.troupe_members TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.follows TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.friendships TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.user_roles TO service_role;

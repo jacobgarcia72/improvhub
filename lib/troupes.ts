@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use server';
 
-import { Team, Role, TeamMember, User } from "@/types";
+import { Troupe, Role, TroupeMember, User } from "@/types";
 import { supabaseAdmin } from './supabase-server';
 import { getCitiesWithinRange } from "./location";
 import { camelCaseObject, getRandomElements, removeLeadingArticles, snakeCaseObject } from "./helper-functions";
@@ -11,38 +11,38 @@ import { revalidatePath } from "next/cache";
 import { createNewsFeedItem } from "./news";
 import { postNotification } from "./notifications";
 
-export async function getTeam(id: string): Promise<Team | null> {
+export async function getTroupe(id: string): Promise<Troupe | null> {
     const { data, error } = await supabaseAdmin
-        .from('teams')
+        .from('troupes')
         .select('*')
         .eq('id', id)
         .maybeSingle();
     if (error) throw error;
-    return data ? camelCaseObject(data) as Team : null;
+    return data ? camelCaseObject(data) as Troupe : null;
 }
 
-export async function getAllTeams(): Promise<{ name: string, id: string, image?: string }[]> {
+export async function getAllTroupes(): Promise<{ name: string, id: string, image?: string }[]> {
     const { data, error } = await supabaseAdmin
-        .from('teams')
+        .from('troupes')
         .select('name, id, image');
     if (error) throw error;
-    return (data || []).map((team: any) => ({
-        name: team.name,
-        id: team.id,
-        image: team.image || undefined
+    return (data || []).map((troupe: any) => ({
+        name: troupe.name,
+        id: troupe.id,
+        image: troupe.image || undefined
     }));
 }
 
-export async function getTeamsByTheatre(theatre: string) {
+export async function getTroupesByTheatre(theatre: string) {
     const { data, error } = await supabaseAdmin
-        .from('teams')
+        .from('troupes')
         .select('*')
         .contains('theatres', [theatre]);
     if (error) throw error;
     return (data || []).map(camelCaseObject);
 }
 
-export async function getOpenTeams(user: User, role: Role): Promise<Team[]> {
+export async function getOpenTroupes(user: User, role: Role): Promise<Troupe[]> {
     // Map role to the looking_for_* field
     const roleFieldMap: Record<Role, string | null> = {
         'player': 'looking_for_players',
@@ -53,18 +53,18 @@ export async function getOpenTeams(user: User, role: Role): Promise<Team[]> {
     };
 
     const lookingForField = roleFieldMap[role];
-    if (!lookingForField) return []; // Role not applicable for teams
+    if (!lookingForField) return []; // Role not applicable for troupes
     const { id: userId, theatres, state, city } = user;
 
     // Get confirmed memberships for this user
     const { data: userMemberships, error: membershipsError } = await supabaseAdmin
-        .from('team_members')
-        .select('team')
+        .from('troupe_members')
+        .select('troupe')
         .eq('id', userId)
         .eq('confirmed', true);
     if (membershipsError) throw membershipsError;
 
-    const userTeamIds = new Set(userMemberships?.map((m: any) => m.team) || []);
+    const userTroupeIds = new Set(userMemberships?.map((m: any) => m.troupe) || []);
 
     // Normalize input for case-insensitive comparison
     const normalizedCity = city?.toLowerCase();
@@ -73,25 +73,25 @@ export async function getOpenTeams(user: User, role: Role): Promise<Team[]> {
 
     // Query by role first, then filter by city/state or theatre locally.
     // This is safer than using DB-specific array overlap operators until schema is verified.
-    const { data: allTeams, error: teamsError } = await supabaseAdmin
-        .from('teams')
+    const { data: allTroupes, error: troupesError } = await supabaseAdmin
+        .from('troupes')
         .select('*')
         .eq(lookingForField, true)
         .limit(250);
-    if (teamsError) throw teamsError;
+    if (troupesError) throw troupesError;
 
-    const openTeams = (allTeams || [])
-        .filter((team: any) => {
-            if (userTeamIds.has(team.id)) return false;
+    const openTroupes = (allTroupes || [])
+        .filter((troupe: any) => {
+            if (userTroupeIds.has(troupe.id)) return false;
 
-            const cityStateMatch = team.city && team.state &&
-                team.city.toLowerCase() === normalizedCity &&
-                team.state.toLowerCase() === normalizedState;
+            const cityStateMatch = troupe.city && troupe.state &&
+                troupe.city.toLowerCase() === normalizedCity &&
+                troupe.state.toLowerCase() === normalizedState;
 
-            const teamTheatres = (team.theatres || []).map((t: string) => removeLeadingArticles(t).toLowerCase());
+            const troupeTheatres = (troupe.theatres || []).map((t: string) => removeLeadingArticles(t).toLowerCase());
             const theatreMatch = normalizedTheatres?.length && normalizedTheatres.some((theatre: string) =>
-                teamTheatres.some((teamTheatre: string) =>
-                    teamTheatre.includes(theatre) || theatre.includes(teamTheatre)
+                troupeTheatres.some((troupeTheatre: string) =>
+                    troupeTheatre.includes(theatre) || theatre.includes(troupeTheatre)
                 )
             );
 
@@ -99,46 +99,46 @@ export async function getOpenTeams(user: User, role: Role): Promise<Team[]> {
         })
         .map(camelCaseObject);
 
-    return openTeams.length ? getRandomElements(openTeams, 6) : [] as Team[];
+    return openTroupes.length ? getRandomElements(openTroupes, 6) : [] as Troupe[];
 }
 
-export async function getSuggestionsForTeam(role: Role, team?: Team | string | null): Promise<User[]> {
-    // Map role to the DB column for open-to-team preferences
+export async function getSuggestionsForTroupe(role: Role, troupe?: Troupe | string | null): Promise<User[]> {
+    // Map role to the DB column for open-to-troupe preferences
     const roleFieldMap: Record<Role, string | null> = {
-        'player': 'open_to_join_team',
-        'coach': 'open_to_coach_team',
-        'musician': 'open_to_accompany_team',
+        'player': 'open_to_join_troupe',
+        'coach': 'open_to_coach_troupe',
+        'musician': 'open_to_accompany_troupe',
         'director': null,
         'tech': null,
     };
 
     const openToField = roleFieldMap[role];
-    if (!openToField) return []; // Role not applicable for teams
+    if (!openToField) return []; // Role not applicable for troupes
 
     // Normalize input for case-insensitive comparison (used later)
     // We'll perform two DB queries to avoid a full table scan:
     // 1) users with matching city/state
     // 2) users whose theatres overlap the given theatres
 
-    let teamId = '';
+    let troupeId = '';
     let theatres: string[] = [];
     let state = '';
     let city = '';
-    let teamMemberIds: Set<string> = new Set();
-    if (team) {
-        const teamObject = typeof team === 'string' ? await getTeam(team) : team;
-        if (teamObject) {
-            teamId = teamObject?.id;
-            theatres = teamObject?.theatres;
-            state = teamObject?.state || '';
-            city = teamObject?.city || '';
-            // Get confirmed memberships for this team
-            const { data: teamMemberships } = await supabaseAdmin
-                .from('team_members')
-                .select('team')
-                .eq('id', teamId)
+    let troupeMemberIds: Set<string> = new Set();
+    if (troupe) {
+        const troupeObject = typeof troupe === 'string' ? await getTroupe(troupe) : troupe;
+        if (troupeObject) {
+            troupeId = troupeObject?.id;
+            theatres = troupeObject?.theatres;
+            state = troupeObject?.state || '';
+            city = troupeObject?.city || '';
+            // Get confirmed memberships for this troupe
+            const { data: troupeMemberships } = await supabaseAdmin
+                .from('troupe_members')
+                .select('troupe')
+                .eq('id', troupeId)
                 .eq('confirmed', true);
-            teamMemberIds = new Set(teamMemberships?.map((m: any) => m.id as string) || []);
+            troupeMemberIds = new Set(troupeMemberships?.map((m: any) => m.id as string) || []);
         }
     } else {
         const currentUser = await getCurrentUser();
@@ -163,7 +163,7 @@ export async function getSuggestionsForTeam(role: Role, team?: Team | string | n
     const users = usersData || [];
     const availableUsers = users
         .filter((user: any) => {
-            if (teamMemberIds?.has(user.id)) return false;
+            if (troupeMemberIds?.has(user.id)) return false;
 
             const cityStateMatch = user.city && user.state &&
                 user.city.toLowerCase() === normalizedCity &&
@@ -183,138 +183,138 @@ export async function getSuggestionsForTeam(role: Role, team?: Team | string | n
     return availableUsers.length ? getRandomElements(availableUsers, 6) : [] as User[];
 }
 
-export async function getTeamsInRange(cityOrZipcode: string, miles: number) {
+export async function getTroupesInRange(cityOrZipcode: string, miles: number) {
     const citiesInRange = getCitiesWithinRange(cityOrZipcode, miles);
     if (!citiesInRange.length) return [];
     const { data, error } = await supabaseAdmin
-        .from('teams')
+        .from('troupes')
         .select('*');
     if (error) throw error;
     return (data || [])
-        .filter((team: any) => team.city && team.state && citiesInRange.includes(`${team.city} ${team.state}`))
+        .filter((troupe: any) => troupe.city && troupe.state && citiesInRange.includes(`${troupe.city} ${troupe.state}`))
         .map(camelCaseObject);
 }
 
-export async function getTeamMembership(userId: string, teamId: string, role: Role): Promise<TeamMember | null> {
+export async function getTroupeMembership(userId: string, troupeId: string, role: Role): Promise<TroupeMember | null> {
     const { data, error } = await supabaseAdmin
-        .from('team_members')
+        .from('troupe_members')
         .select('*')
         .eq('id', userId)
-        .eq('team', teamId)
+        .eq('troupe', troupeId)
         .eq('role', role)
         .maybeSingle();
     if (error) throw error;
-    return data ? camelCaseObject(data) as TeamMember : null;
+    return data ? camelCaseObject(data) as TroupeMember : null;
 }
 
-export async function getTeamMembershipsByUser(id: string): Promise<TeamMember[]> {
+export async function getTroupeMembershipsByUser(id: string): Promise<TroupeMember[]> {
     const { data, error } = await supabaseAdmin
-        .from('team_members')
+        .from('troupe_members')
         .select('*')
         .eq('id', id);
     if (error) throw error;
     if (!data?.length) return [];
-    return (data || []).map(camelCaseObject) as TeamMember[];
+    return (data || []).map(camelCaseObject) as TroupeMember[];
 }
 
-export async function getTeamsByUser(id: string): Promise<Team[]> {
+export async function getTroupesByUser(id: string): Promise<Troupe[]> {
     const { data: memberships, error: membershipError } = await supabaseAdmin
-        .from('team_members')
-        .select('team')
+        .from('troupe_members')
+        .select('troupe')
         .eq('id', id);
     if (membershipError) throw membershipError;
     if (!memberships?.length) return [];
-    const teamIds = memberships.map((membership: any) => membership.team);
+    const troupeIds = memberships.map((membership: any) => membership.troupe);
     const { data, error } = await supabaseAdmin
-        .from('teams')
+        .from('troupes')
         .select('*')
-        .in('id', teamIds);
+        .in('id', troupeIds);
     if (error) throw error;
-    return (data || []).map(camelCaseObject) as Team[];
+    return (data || []).map(camelCaseObject) as Troupe[];
 }
 
-export async function getTeamMembers(teamId: string, includeCoaches: boolean = false): Promise<TeamMember[]> {
+export async function getTroupeMembers(troupeId: string, includeCoaches: boolean = false): Promise<TroupeMember[]> {
     const { data, error } = await supabaseAdmin
-        .from('team_members')
+        .from('troupe_members')
         .select('*')
-        .eq('team', teamId);
+        .eq('troupe', troupeId);
     if (error) throw error;
     let res = data || [];
-    if (!includeCoaches) res = res.filter((m: TeamMember) => m.role !== 'coach')
-    return res.map(camelCaseObject) as TeamMember[];
+    if (!includeCoaches) res = res.filter((m: TroupeMember) => m.role !== 'coach')
+    return res.map(camelCaseObject) as TroupeMember[];
 }
 
-export async function getTeamInvitations(userId: string): Promise<TeamMember[]> {
+export async function getTroupeInvitations(userId: string): Promise<TroupeMember[]> {
     const { data, error } = await supabaseAdmin
-        .from('team_members')
+        .from('troupe_members')
         .select('*')
         .eq('id', userId)
         .eq('confirmed', false);
     if (error) throw error;
-    return (data || []).map(camelCaseObject) as TeamMember[];
+    return (data || []).map(camelCaseObject) as TroupeMember[];
 }
 
-export async function respondToTeamInvitation(teamId: string, userId: string, role: string, accept: boolean): Promise<void> {
+export async function respondToTroupeInvitation(troupeId: string, userId: string, role: string, accept: boolean): Promise<void> {
     if (accept) {
         const { error, data } = await supabaseAdmin
-            .from('team_members')
+            .from('troupe_members')
             .update({ confirmed: true })
-            .eq('team', teamId)
+            .eq('troupe', troupeId)
             .eq('id', userId)
             .eq('role', role)
             .select('added_by')
             .single();
         if (error) throw error;
-        if (data.added_by) postNotification(userId, [data.added_by], 'confirmed_team', `${teamId},${role}`);
-        createNewsFeedItem('friend', userId, "joined_team", teamId, null, role);
-        revalidatePath('/teams', 'layout')
+        if (data.added_by) postNotification(userId, [data.added_by], 'confirmed_troupe', `${troupeId},${role}`);
+        createNewsFeedItem('friend', userId, "joined_troupe", troupeId, null, role);
+        revalidatePath('/troupes', 'layout')
     } else {
         const { error } = await supabaseAdmin
-            .from('team_members')
+            .from('troupe_members')
             .delete()
-            .eq('team', teamId)
+            .eq('troupe', troupeId)
             .eq('id', userId)
             .eq('role', role);
         if (error) throw error;
-        await deleteTeamIfNooneLeft(teamId);
+        await deleteTroupeIfNooneLeft(troupeId);
     }
 }
 
-export async function saveTeam(team: Team, members: { name: string, id: string | null, role: Role }[]): Promise<string> {
+export async function saveTroupe(troupe: Troupe, members: { name: string, id: string | null, role: Role }[]): Promise<string> {
     const creatorId = await getCurrentUserId();
     if (!creatorId) {
         throw new Error('You must be logged in to continue')
     }
-    const baseId = team.id;
-    let teamId = baseId;
+    const baseId = troupe.id;
+    let troupeId = baseId;
     let counter = 1;
-    let existingTeam = await getTeam(teamId);
-    while (existingTeam) {
+    let existingTroupe = await getTroupe(troupeId);
+    while (existingTroupe) {
         counter++;
-        teamId = `${baseId}-${counter}`;
-        existingTeam = await getTeam(teamId);
+        troupeId = `${baseId}-${counter}`;
+        existingTroupe = await getTroupe(troupeId);
     }
-    team.id = teamId;
-    const { error: teamInsertError } = await supabaseAdmin
-        .from('teams')
+    troupe.id = troupeId;
+    const { error: troupeInsertError } = await supabaseAdmin
+        .from('troupes')
         .insert({
-            id: team.id,
-            name: team.name,
-            image: team.image,
-            photo_credit: team.photoCredit,
-            city: team.city,
-            state: team.state,
-            theatres: team.theatres,
-            looking_for_players: team.lookingForPlayers,
-            looking_for_coach: team.lookingForCoach,
-            looking_for_musician: team.lookingForMusician,
-            description: team.description
+            id: troupe.id,
+            name: troupe.name,
+            image: troupe.image,
+            photo_credit: troupe.photoCredit,
+            city: troupe.city,
+            state: troupe.state,
+            theatres: troupe.theatres,
+            looking_for_players: troupe.lookingForPlayers,
+            looking_for_coach: troupe.lookingForCoach,
+            looking_for_musician: troupe.lookingForMusician,
+            description: troupe.description
         });
-    if (teamInsertError) console.error(teamInsertError);
+    if (troupeInsertError) console.error(troupeInsertError);
 
     const timestamp = new Date().toISOString();
     const memberRows = members.map(({ name, id, role }) => ({
-        team: team.id,
+        troupe: troupe.id,
         name,
         id,
         role,
@@ -324,29 +324,29 @@ export async function saveTeam(team: Team, members: { name: string, id: string |
     }));
     if (memberRows.length) {
         const { error: memberInsertError } = await supabaseAdmin
-            .from('team_members')
+            .from('troupe_members')
             .insert(memberRows);
         if (memberInsertError) throw memberInsertError;
     }
     const usersToNotify = memberRows.filter((m) => m.id !== null && m.confirmed === false);
     ['player', 'musician', 'coach'].forEach(async (role) => {
         const usersWithRole = usersToNotify.filter((m) => m.role === role);
-        if (usersWithRole.length) await postNotification(creatorId, usersWithRole.map(m => m.id || ''), 'added_to_team', `${team.id},${role}`);
+        if (usersWithRole.length) await postNotification(creatorId, usersWithRole.map(m => m.id || ''), 'added_to_troupe', `${troupe.id},${role}`);
     })
-    createNewsFeedItem('friend', creatorId, 'new_team', teamId);
-    return team.id;
+    createNewsFeedItem('friend', creatorId, 'new_troupe', troupeId);
+    return troupe.id;
 }
 
-export async function updateTeam(teamId: string, updates: Partial<Team>, members: { name: string, id: string | null, role: Role }[], addedBy: string): Promise<boolean> {
+export async function updateTroupe(troupeId: string, updates: Partial<Troupe>, members: { name: string, id: string | null, role: Role }[], addedBy: string): Promise<boolean> {
     if (Object.keys(updates).length) {
         const { error } = await supabaseAdmin
-            .from('teams')
+            .from('troupes')
             .update(snakeCaseObject(updates))
-            .eq('id', teamId);
+            .eq('id', troupeId);
         if (error) throw error;
     }
 
-    const existingMembers = await getTeamMembers(teamId, true);
+    const existingMembers = await getTroupeMembers(troupeId, true);
     const getExistingMember = (member: { name: string, id: string | null, role: Role }) => (
         existingMembers.find((existing) => (
             existing.role === member.role &&
@@ -356,9 +356,9 @@ export async function updateTeam(teamId: string, updates: Partial<Team>, members
     );
 
     const { error: deleteError } = await supabaseAdmin
-        .from('team_members')
+        .from('troupe_members')
         .delete()
-        .eq('team', teamId);
+        .eq('troupe', troupeId);
     if (deleteError) throw deleteError;
 
     const timestamp = new Date().toISOString();
@@ -371,7 +371,7 @@ export async function updateTeam(teamId: string, updates: Partial<Team>, members
             confirmed = member.id === addedBy;
         }
         return {
-            team: teamId,
+            troupe: troupeId,
             name: member.name,
             id: member.id,
             role: member.role,
@@ -382,88 +382,88 @@ export async function updateTeam(teamId: string, updates: Partial<Team>, members
     });
     if (memberRows.length) {
         const { error: memberInsertError } = await supabaseAdmin
-            .from('team_members')
+            .from('troupe_members')
             .insert(memberRows);
         if (memberInsertError) throw memberInsertError;
         const usersToNotify = memberRows.filter((m) => m.id !== null && m.confirmed === false && m.date_added === timestamp);
         ['player', 'musician', 'coach'].forEach(async (role) => {
             const usersWithRole = usersToNotify.filter((m) => m.role === role);
-            if (usersWithRole.length) await postNotification(addedBy, usersWithRole.map(m => m.id || ''), 'added_to_team', `${teamId},${role}`);
+            if (usersWithRole.length) await postNotification(addedBy, usersWithRole.map(m => m.id || ''), 'added_to_troupe', `${troupeId},${role}`);
         })
     }
 
     return true;
 }
 
-export async function updateTeamDetails(teamId: string, updates: Partial<Team>): Promise<boolean> {
+export async function updateTroupeDetails(troupeId: string, updates: Partial<Troupe>): Promise<boolean> {
     if (!Object.keys(updates).length) return true;
     const { error } = await supabaseAdmin
-        .from('teams')
+        .from('troupes')
         .update(snakeCaseObject(updates))
-        .eq('id', teamId);
+        .eq('id', troupeId);
     if (error) throw error;
     return true;
 }
 
-export async function leaveTeam(teamId: string, userId: string): Promise<{ deletedTeam: boolean }> {
+export async function leaveTroupe(troupeId: string, userId: string): Promise<{ deletedTroupe: boolean }> {
     const { data: confirmedMemberships, error: membershipError } = await supabaseAdmin
-        .from('team_members')
+        .from('troupe_members')
         .select('*')
-        .eq('team', teamId)
+        .eq('troupe', troupeId)
         .eq('id', userId)
         .eq('confirmed', true);
     if (membershipError) throw membershipError;
-    if (!confirmedMemberships?.length) return { deletedTeam: false };
+    if (!confirmedMemberships?.length) return { deletedTroupe: false };
 
     const { error: deleteError } = await supabaseAdmin
-        .from('team_members')
+        .from('troupe_members')
         .delete()
-        .eq('team', teamId)
+        .eq('troupe', troupeId)
         .eq('id', userId);
     if (deleteError) throw deleteError;
 
-    const deletedTeam = await deleteTeamIfNooneLeft(teamId);
-    return { deletedTeam };
+    const deletedTroupe = await deleteTroupeIfNooneLeft(troupeId);
+    return { deletedTroupe };
 }
 
-async function deleteTeamIfNooneLeft(teamId: string): Promise<boolean> {
+async function deleteTroupeIfNooneLeft(troupeId: string): Promise<boolean> {
     const { count, error: countError } = await supabaseAdmin
-        .from('team_members')
+        .from('troupe_members')
         .select('*', { count: 'exact', head: true })
-        .eq('team', teamId)
+        .eq('troupe', troupeId)
         .neq('id', '')
         .neq('role', 'coach');
     if (countError) throw countError;
     if ((count ?? 0) > 0) {
         return false;
     }
-    const team = await getTeam(teamId);
-    if (team) await destroyImage(team.image);
+    const troupe = await getTroupe(troupeId);
+    if (troupe) await destroyImage(troupe.image);
 
     const { error: deleteMembersError } = await supabaseAdmin
-        .from('team_members')
+        .from('troupe_members')
         .delete()
-        .eq('team', teamId);
+        .eq('troupe', troupeId);
     if (deleteMembersError) throw deleteMembersError;
 
-    const { error: deleteTeamError } = await supabaseAdmin
-        .from('teams')
+    const { error: deleteTroupeError } = await supabaseAdmin
+        .from('troupes')
         .delete()
-        .eq('id', teamId);
-    if (deleteTeamError) throw deleteTeamError;
+        .eq('id', troupeId);
+    if (deleteTroupeError) throw deleteTroupeError;
 
     const { error: deleteCastError } = await supabaseAdmin
         .from('showing_cast')
         .delete()
-        .eq('role', 'team')
-        .eq('id', teamId);
+        .eq('role', 'troupe')
+        .eq('id', troupeId);
     if (deleteCastError) throw deleteCastError;
 
     const { error: deleteFollowError } = await supabaseAdmin
         .from('follows')
         .delete()
-        .eq('follow_id', teamId)
-        .eq('type', 'team');
+        .eq('follow_id', troupeId)
+        .eq('type', 'troupe');
     if (deleteFollowError) throw deleteFollowError;
 
     return true;

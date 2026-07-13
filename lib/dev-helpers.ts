@@ -1,6 +1,6 @@
-import { Role, Team, User } from "@/types";
+import { Role, Troupe, User } from "@/types";
 import { getAllUsersAbbreviated, saveUser } from "./users";
-import { respondToTeamInvitation, saveTeam } from "./teams";
+import { respondToTroupeInvitation, saveTroupe } from "./troupes";
 import nameGenerator from "./name-generator";
 import slugify from 'slugify';
 import { getRandomElements, removeLeadingArticles } from "./helper-functions";
@@ -121,12 +121,12 @@ const generateUserAndRoles = (count: number): [User, { [role: string]: boolean }
         musician: false,
         coach: false
     };
-    let openToJoinTeam = rnd() <= 10;
-    let openToAccompanyTeam = rnd() <= 2;
-    let openToCoachTeam = rnd() <= 5;
+    let openToJoinTroupe = rnd() <= 10;
+    let openToAccompanyTroupe = rnd() <= 2;
+    let openToCoachTroupe = rnd() <= 5;
     if (rnd() <= 95) {
         roles.player = true;
-        openToJoinTeam = rnd() <= 50;
+        openToJoinTroupe = rnd() <= 50;
     }
     if (rnd() <= 30) {
         roles.tech = true;
@@ -136,16 +136,16 @@ const generateUserAndRoles = (count: number): [User, { [role: string]: boolean }
     }
     if (rnd() <= 10) {
         roles.musician = true;
-        openToAccompanyTeam = rnd() <= 80;
+        openToAccompanyTroupe = rnd() <= 80;
     }
     if (rnd() <= 15) {
         roles.coach = true;
-        openToCoachTeam = rnd() <= 90;
+        openToCoachTroupe = rnd() <= 90;
     }
     const joinDate = new Date().toISOString();
     return [
         {
-            id, joinDate, firstName, lastName, pronouns, bio, theatres, city, state, website, image, openToJoinTeam, openToAccompanyTeam, openToCoachTeam
+            id, joinDate, firstName, lastName, pronouns, bio, theatres, city, state, website, image, openToJoinTroupe, openToAccompanyTroupe, openToCoachTroupe
         },
         roles
     ]
@@ -156,7 +156,7 @@ const generateUserAndRoles = (count: number): [User, { [role: string]: boolean }
 //     const admins = [creatorId];
 // }
 
-const generateTeam = (users: { name: string, id: string, image?: string }[]): [team: Team, members: { name: string, id: string | null, role: Role }[]] => {
+const generateTroupe = (users: { name: string, id: string, image?: string }[]): [troupe: Troupe, members: { name: string, id: string | null, role: Role }[]] => {
     const name = nameGenerator();
     let city: string | null = null;
     let state: string | null = null;
@@ -223,7 +223,7 @@ const generateTeam = (users: { name: string, id: string, image?: string }[]): [t
         'https://res.cloudinary.com/dojkqkskx/image/upload/v1781128642/ghows-OH-b2c9f5c7-d717-4480-a2f8-78d5ef68b6b0-cf4f89b1_vyjh51.jpg',
         'https://res.cloudinary.com/dojkqkskx/image/upload/v1781128642/90_zxfod3.jpg',
     ];
-    const team: Team = {
+    const troupe: Troupe = {
         name,
         id: slugify(removeLeadingArticles(name), { lower: true, trim: true, strict: true }),
         photoCredit: rnd() <= 20 ? `${rnd() <= 50 ? getGirlName() : getBoyName()} ${getLastName()}` : null,
@@ -234,7 +234,7 @@ const generateTeam = (users: { name: string, id: string, image?: string }[]): [t
         description: rnd() <= 35 ? getLoremIpsum(rnd(200) + 15) : null,
         image: rnd() <= 90 ? images[rnd(images.length - 1)] : null
     }
-    return [team, [ ...players, ...musicians, ...coaches ]]
+    return [troupe, [ ...players, ...musicians, ...coaches ]]
 }
 
 export const generateDummyUsers = async (amount: number = 100) => {
@@ -245,17 +245,17 @@ export const generateDummyUsers = async (amount: number = 100) => {
     }
 }
 
-export const generateDummyTeams = async (amount: number = 100) => {
+export const generateDummyTroupes = async (amount: number = 100) => {
     const users = await getAllUsersAbbreviated();
     for (let i = 1; i <= amount; i++) {
-        const [team, members] = generateTeam(users);
-        console.log('team ' + i, team)
+        const [troupe, members] = generateTroupe(users);
+        console.log('troupe ' + i, troupe)
         console.log('members', members)
-        await saveTeam(team, members);
+        await saveTroupe(troupe, members);
         for (let i = 0; i < members.length; i++) {
             const member = members[i];
             if (member.id && rnd() <= 80) {
-                await respondToTeamInvitation(team.id, member.id, member.role, true);
+                await respondToTroupeInvitation(troupe.id, member.id, member.role, true);
             }
         }
     }

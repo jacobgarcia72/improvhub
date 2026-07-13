@@ -1,6 +1,6 @@
 'use client'
 import { optimizeImage } from "@/lib/optimize-image";
-import { Event, Team, Theatre, User } from "@/types";
+import { Event, Troupe, Theatre, User } from "@/types";
 import Image from "next/image";
 import Link from "next/link";
 import { Border } from "./border";
@@ -9,7 +9,7 @@ import { pluralize } from "@/lib/helper-functions";
 import { useEffect, useState } from "react";
 
 export default function MiniCard({ item, type, dateTime, includeDescription, className }: {
-    item: Event | Team | User,
+    item: Event | Troupe | User,
     type: string,
     dateTime?: string,
     includeDescription?: boolean,

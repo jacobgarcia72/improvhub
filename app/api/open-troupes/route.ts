@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/users";
-import { getOpenTeams } from "@/lib/teams";
+import { getOpenTroupes } from "@/lib/troupes";
 import { Role } from "@/types";
 
 export async function GET(req: Request) {
@@ -9,6 +9,6 @@ export async function GET(req: Request) {
     if (!roleParam) return NextResponse.json([], { status: 200 });
     const user = await getCurrentUser();
     if (!user) return NextResponse.json([], { status: 200 });
-    const teams = await getOpenTeams(user, roleParam);
-    return NextResponse.json(teams || []);
+    const troupes = await getOpenTroupes(user, roleParam);
+    return NextResponse.json(troupes || []);
 }

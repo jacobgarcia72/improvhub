@@ -4,7 +4,7 @@ import { useState } from "react";
 import Button from "./form/button";
 import ConfirmModal from "./confirm-modal";
 
-export default function LeaveTeamConfirm({ caption = 'Leave Team' }: { caption?: string }) {
+export default function LeaveTroupeConfirm({ caption = 'Leave Troupe' }: { caption?: string }) {
     const [open, setOpen] = useState(false);
 
     const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -34,8 +34,8 @@ export default function LeaveTeamConfirm({ caption = 'Leave Team' }: { caption?:
             <Button submit caption={caption} style="link" onClick={(e) => handleClick(e)} />
             <ConfirmModal
                 open={open}
-                title="Leave team"
-                description="Are you sure you want to leave this team?"
+                title="Leave troupe"
+                description="Are you sure you want to leave this troupe?"
                 onCancel={() => setOpen(false)}
                 onConfirm={handleConfirm}
                 confirmLabel="Leave"

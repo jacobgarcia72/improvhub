@@ -6,7 +6,7 @@ import { User, Role } from "@/types";
 import Loader from "./loader";
 import Button from "./form/button";
 
-export default function UserSuggestionsClient({ initialUsers, role, teamId }: { initialUsers: User[], role: Role, teamId?: string }) {
+export default function UserSuggestionsClient({ initialUsers, role, troupeId }: { initialUsers: User[], role: Role, troupeId?: string }) {
     const [users, setUsers] = useState<User[]>(initialUsers || []);
     const [loading, setLoading] = useState(false);
 
@@ -14,7 +14,7 @@ export default function UserSuggestionsClient({ initialUsers, role, teamId }: { 
         try {
             setLoading(true);
             let apiRoute = `/api/user-suggestions?role=${encodeURIComponent(role)}`;
-            if (teamId) apiRoute += `&team=${encodeURIComponent(teamId)}`;
+            if (troupeId) apiRoute += `&troupe=${encodeURIComponent(troupeId)}`;
             const res = await fetch(apiRoute);
             if (!res.ok) throw new Error('Fetch failed');
             const data = await res.json();
@@ -28,7 +28,7 @@ export default function UserSuggestionsClient({ initialUsers, role, teamId }: { 
 
     if (!users?.length) return null;
     const headers: Record<Role, string> = {
-        player: 'Players looking for teams',
+        player: 'Players looking for troupes',
         coach: 'Available coaches',
         musician: 'Musicians available to accompany',
         director: '', tech: ''

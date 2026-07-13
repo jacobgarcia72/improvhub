@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 export default function ChatRoomSelect({ chatRooms, onSelect }: {
     chatRooms: {
         theatres: InputOptionObject[],
-        teams: InputOptionObject[]
+        troupes: InputOptionObject[]
     },
     onSelect?: (id: string | null) => void;
 }) {
@@ -18,7 +18,7 @@ export default function ChatRoomSelect({ chatRooms, onSelect }: {
     const params = new URLSearchParams(searchParams);
     const room = searchParams.get('room');
 
-    const { teams, theatres } = chatRooms;
+    const { troupes, theatres } = chatRooms;
     const [isOpen, setIsOpen] = useState(false);
 
     const globalChatRoom = { text: 'Global', id: 'global', image: '/icons/globe.png' };
@@ -40,7 +40,7 @@ export default function ChatRoomSelect({ chatRooms, onSelect }: {
 
     const getChatRoomObject = (id: string): InputOptionObject | null => {
         if (id === 'global') return globalChatRoom;
-        if (id.startsWith('team')) return teams.find(t => t.id === id) || null;
+        if (id.startsWith('troupe')) return troupes.find(t => t.id === id) || null;
         if (id.startsWith('theatre')) return theatres.find(t => t.id === id) || null;
         return null;
     }
@@ -73,7 +73,7 @@ export default function ChatRoomSelect({ chatRooms, onSelect }: {
                 <div className="max-h-72 overflow-y-scroll overflow-x-hidden z-50 dropdown bg-white/90 border-gray-300 border-1 rounded absolute top-9.5 w-86 max-w-[90vw] flex flex-col">
                     {ChatRoomOption(globalChatRoom)}
                     {theatres.map(ChatRoomOption)}
-                    {teams.map(ChatRoomOption)}
+                    {troupes.map(ChatRoomOption)}
                 </div>
             </> : null}
             <div

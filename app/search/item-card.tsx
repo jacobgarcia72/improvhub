@@ -3,7 +3,7 @@ import FollowButton from "@/components/follow-button";
 import { optimizeImage } from "@/lib/optimize-image";
 import { formatTime } from "@/lib/dates";
 import { getFollowing } from "@/lib/users";
-import { Event, Team, Theatre } from "@/types";
+import { Event, Troupe, Theatre } from "@/types";
 import Image from "next/image";
 import Link from "next/link";
 import { getTheatre } from "@/lib/theatres";
@@ -11,7 +11,7 @@ import { getTheatre } from "@/lib/theatres";
 export default async function ItemCard({
     item, type, time, date, userId
 } : {
-    item: Event | Team | Theatre | Partial<Theatre>, type: string, time?: string, date?: string, userId?: string | null
+    item: Event | Troupe | Theatre | Partial<Theatre>, type: string, time?: string, date?: string, userId?: string | null
 }) {
     const image = (
         item.image && optimizeImage(item.image, 600, 600, 100, true)
@@ -25,8 +25,8 @@ export default async function ItemCard({
     let following = false;
     let showFollowButton = false;
     if (userId && 'id' in item) {
-        if (type === 'teams') {
-            following = item.id && await getFollowing(userId, item.id, 'team') || false;
+        if (type === 'troupes') {
+            following = item.id && await getFollowing(userId, item.id, 'troupe') || false;
             showFollowButton = true;
         } else if (type === 'theatres') {
             following = item.id && await getFollowing(userId, item.id, 'theatre') || false;
@@ -36,7 +36,7 @@ export default async function ItemCard({
     return (
         <Border className="grow-1 max-w-[272px] relative flex flex-col h-[300px] min-w-[212px] m-2 w-44 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
             {showFollowButton ? <div className="absolute right-2 top-2">
-                <FollowButton mini userId={userId || ''} followId={'id' in item && item.id ? item.id : ''} type={type === 'teams' ? 'team' : 'theatre'} following={following} />
+                <FollowButton mini userId={userId || ''} followId={'id' in item && item.id ? item.id : ''} type={type === 'troupes' ? 'troupe' : 'theatre'} following={following} />
             </div> : null}
             <Link href={link} className="h-full">
                 {image ? (

@@ -6,13 +6,13 @@ import { removeCastMember } from "@/lib/shows";
 import { Role } from "@/types";
 import { useState } from "react";
 
-export default function CastRoleBanner({ role, roleId, showId, dateTime, showTitle, teamName }: {
-    role: Role | 'team',
+export default function CastRoleBanner({ role, roleId, showId, dateTime, showTitle, troupeName }: {
+    role: Role | 'troupe',
     roleId: string | null,
     showTitle: string,
     showId: string,
     dateTime: string,
-    teamName?: string,
+    troupeName?: string,
 }) {
     const [openModal, setOpenModal] = useState<boolean>(false);
 
@@ -26,11 +26,11 @@ export default function CastRoleBanner({ role, roleId, showId, dateTime, showTit
     return <>
         <ConfirmModal
             open={openModal}
-            title={role === 'team' ? (
-                `Withdraw team from show?`
+            title={role === 'troupe' ? (
+                `Withdraw troupe from show?`
             ) : `Drop out of show?`}
-            description={role === 'team' ? (
-                `Confirm that ${teamName} would like to drop out of ${show}, and that you are authorized to make this decision on the team's behalf.`
+            description={role === 'troupe' ? (
+                `Confirm that ${troupeName} would like to drop out of ${show}, and that you are authorized to make this decision on the troupe's behalf.`
             ) : `Are you sure you want to drop out of ${show}?`}
             onCancel={() => setOpenModal(false)}
             onConfirm={handleDropOut}
@@ -38,13 +38,13 @@ export default function CastRoleBanner({ role, roleId, showId, dateTime, showTit
             cancelLabel="Cancel"
         />
         <div className="flex flex-row flex-wrap gap-1 justify-between items-center py-2 px-6 min-h-[58px] my-2 bg-lime-500/30 rounded border border-green-800">
-            <p>{role === 'team' ? (
-                `${teamName} is playing in this show`
+            <p>{role === 'troupe' ? (
+                `${troupeName} is playing in this show`
             ) : `You are in this show as a ${role}`}</p>
             <div className="flex justify-end grow-1">
                 <Button
-                    caption={role === 'team' ? (
-                        `Withdraw Team`
+                    caption={role === 'troupe' ? (
+                        `Withdraw Troupe`
                     ) : `Drop Out`}
                     className="small dark"
                     onClick={() => setOpenModal(true)}

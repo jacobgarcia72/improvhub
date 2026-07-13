@@ -9,7 +9,7 @@ import { Suspense } from "react";
 import Loader from "@/components/loader";
 import { getEventsByAdmin, getUpcomingShowsByCastMember } from "@/lib/shows";
 import { Event, EventType, Role } from "@/types";
-import { getTeamsByUser } from "@/lib/teams";
+import { getTroupesByUser } from "@/lib/troupes";
 import MiniCard from "@/components/mini-card";
 import ShowsLookingFor from "./shows-looking-for";
 import UpcomingShows from "@/components/upcoming-shows";
@@ -50,7 +50,7 @@ export default async function EventsPage({ params }: { params: Promise<{ events:
         return new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime();
     });
     const roles = (type === 'show' && userId) ? await getUserRoles(userId) : null;
-    const isOnATeam = (type === 'show' && userId) ? (await getTeamsByUser(userId)).length > 0 : null;
+    const isOnATroupe = (type === 'show' && userId) ? (await getTroupesByUser(userId)).length > 0 : null;
 
     return (
         <>
@@ -74,7 +74,7 @@ export default async function EventsPage({ params }: { params: Promise<{ events:
             </Suspense>
             {type === 'show' && <>
                 <Suspense fallback={<Loader />}>
-                    {userId ? <UpcomingShows includeTeams label="Shows I'm In" id={userId} /> : null}
+                    {userId ? <UpcomingShows includeTroupes label="Shows I'm In" id={userId} /> : null}
                 </Suspense>
             </>}
             <Suspense fallback={<Loader />}>
@@ -84,8 +84,8 @@ export default async function EventsPage({ params }: { params: Promise<{ events:
                 {user && roles ? Object.keys(roles).filter((key) => roles[key]).map((role) => (
                     <ShowsLookingFor key={role} role={role as Role} limit={24} user={user} />
                 )) : null}
-                {user && isOnATeam ? (
-                    <ShowsLookingFor key='team' role='team' limit={24} user={user} />
+                {user && isOnATroupe ? (
+                    <ShowsLookingFor key='troupe' role='troupe' limit={24} user={user} />
                 ) : null}
             </>}
             {!user && <section className="min-h-32 flex flex-col items-center justify-center gap-2">

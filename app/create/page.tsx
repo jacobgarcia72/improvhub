@@ -7,7 +7,7 @@ export default function CreatePage() {
             <h1 className="text-lg">Create a New Page</h1>
             <Link href="create/show"><Button className="w-56" caption="Show" /></Link>
             <Link href="create/jam"><Button className="w-56" caption="Jam" /></Link>
-            <Link href="create/team"><Button className="w-56" caption="Team" /></Link>
+            <Link href="create/troupe"><Button className="w-56" caption="Troupe" /></Link>
             <Link href="create/theatre"><Button className="w-56" caption="Theatre" /></Link>
         </section>
     )

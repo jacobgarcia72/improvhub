@@ -180,7 +180,7 @@ export const camelCaseObject = (data: { [key: string]: any }) => {
     }, {} as { [key: string]: any });
 };
 
-export const getVerbFromRole = (role: Role | 'team') => {
+export const getVerbFromRole = (role: Role | 'troupe') => {
     if (role === 'coach') {
         return 'coach';
     } else if (role === 'musician') {

@@ -4,9 +4,9 @@ import { Notification, Role } from "@/types";
 import Image from "next/image";
 import Link from "next/link";
 import FriendRequestButtons from "./friend-request-buttons";
-import { getTeam, getTeamMembership } from "@/lib/teams";
+import { getTroupe, getTroupeMembership } from "@/lib/troupes";
 import { getPronounForm } from "@/lib/demographics";
-import TeamRequestButtons from "./team-request-buttons";
+import TroupeRequestButtons from "./troupe-request-buttons";
 import { getVerbFromRole } from "@/lib/helper-functions";
 import { getShow } from "@/lib/shows";
 import { formatDateTimeForDisplay } from "@/lib/dates";
@@ -83,15 +83,15 @@ export default async function NotificationCard({ notification, userId, isNew }: 
                         </p>
                 </Wrapper>
             )
-        case 'added_to_team':
+        case 'added_to_troupe':
             const sender3 = await getUserAbbreviated(senderId);
             if (!sender3) return null;
             if (!data) return null;
-            const [teamId, role] = data.split(',');
-            const team = await getTeam(teamId);
+            const [troupeId, role] = data.split(',');
+            const troupe = await getTroupe(troupeId);
             const pronouns = (await getUser(senderId))?.pronouns;
-            const membership = await getTeamMembership(userId, teamId, role as Role);
-            if (!team || !membership) return null;
+            const membership = await getTroupeMembership(userId, troupeId, role as Role);
+            if (!troupe || !membership) return null;
             const hasConfirmed = membership.confirmed;
             if (hasConfirmed) {
                 innerContent = (
@@ -101,8 +101,8 @@ export default async function NotificationCard({ notification, userId, isNew }: 
                             {sender3.name}
                         </Link>
                         &apos;s invitation to {getVerbFromRole(role as Role)} &nbsp;
-                        <Link href={`/teams/${team.id}`} className="link">
-                            {team.name}
+                        <Link href={`/troupes/${troupe.id}`} className="link">
+                            {troupe.name}
                         </Link>
                     </p>
                 )
@@ -113,54 +113,54 @@ export default async function NotificationCard({ notification, userId, isNew }: 
                             <Link href={`/profile/${senderId}`} className="link">
                                 {sender3.name}
                             </Link>
-                            &nbsp;has invited you to&nbsp;{getVerbFromRole(role as Role)}&nbsp;{getPronounForm(pronouns, 2)}&nbsp;team,&nbsp;
-                            <Link href={`/teams/${team.id}`} className="link">
-                                {team.name}
+                            &nbsp;has invited you to&nbsp;{getVerbFromRole(role as Role)}&nbsp;{getPronounForm(pronouns, 2)}&nbsp;troupe,&nbsp;
+                            <Link href={`/troupes/${troupe.id}`} className="link">
+                                {troupe.name}
                             </Link>!
                         </p>
-                        <TeamRequestButtons notifId={notifId} teamId={teamId} userId={userId} role={role} />
+                        <TroupeRequestButtons notifId={notifId} troupeId={troupeId} userId={userId} role={role} />
                     </div>
                 )
             }
             return (
-                <Wrapper isNew={isNew} image={team.image || sender3.image} imageLink={team.image ? `/teams/${team.id}` : `/profile/${senderId}`} imageAlt={team.image ? team.name : sender3.name}>
+                <Wrapper isNew={isNew} image={troupe.image || sender3.image} imageLink={troupe.image ? `/troupes/${troupe.id}` : `/profile/${senderId}`} imageAlt={troupe.image ? troupe.name : sender3.name}>
                     {innerContent}
                 </Wrapper>
             )
-        case 'confirmed_team':
+        case 'confirmed_troupe':
             const sender4 = await getUserAbbreviated(senderId);
             if (!sender4) return null;
             if (!data) return null;
-            const [teamId2, role2] = data.split(',');
-            const team2 = await getTeam(teamId2);
-            const membership2 = await getTeamMembership(senderId, teamId2, role2 as Role);
-            if (!team2 || !membership2) return null;
+            const [troupeId2, role2] = data.split(',');
+            const troupe2 = await getTroupe(troupeId2);
+            const membership2 = await getTroupeMembership(senderId, troupeId2, role2 as Role);
+            if (!troupe2 || !membership2) return null;
             return (
-                <Wrapper isNew={isNew} image={sender4.image || team2.image} imageLink={sender4.image ? `/profile/${senderId}` : `/teams/${team2.id}`} imageAlt={sender4.image ? sender4.name : team2.name}>
+                <Wrapper isNew={isNew} image={sender4.image || troupe2.image} imageLink={sender4.image ? `/profile/${senderId}` : `/troupes/${troupe2.id}`} imageAlt={sender4.image ? sender4.name : troupe2.name}>
                     <p>
                         <Link href={`/profile/${senderId}`} className="link">
                             {sender4.name}
                         </Link>
                         &nbsp;accepted your invitation to {getVerbFromRole(role2 as Role)}&nbsp;
-                        <Link href={`/teams/${team2.id}`} className="link">
-                            {team2.name}
+                        <Link href={`/troupes/${troupe2.id}`} className="link">
+                            {troupe2.name}
                         </Link>
                     </p>
                 </Wrapper>
             )
         case 'cast_in_show':
             if (!data) return null;
-            const [showDateTime, role3, teamId3] = data.split(',');
+            const [showDateTime, role3, troupeId3] = data.split(',');
             const show = await getShow(senderId);
             if (!show) return null;
-            if (role3 === 'team') {
-                const team = await getTeam(teamId3);
-                if (!team) return null;
+            if (role3 === 'troupe') {
+                const troupe = await getTroupe(troupeId3);
+                if (!troupe) return null;
                 return (
-                    <Wrapper isNew={isNew} image={show.image || team.image} imageLink={show.image ? `/shows/${senderId}` : `/teams/${team.id}`} imageAlt={show.image ? show.title : team.name}>
+                    <Wrapper isNew={isNew} image={show.image || troupe.image} imageLink={show.image ? `/shows/${senderId}` : `/troupes/${troupe.id}`} imageAlt={show.image ? show.title : troupe.name}>
                         <p>
-                            Your troupe, <Link href={`/teams/${team.id}/`} className="link">
-                                {team.name}
+                            Your troupe, <Link href={`/troupes/${troupe.id}/`} className="link">
+                                {troupe.name}
                             </Link>, has been cast to play in&nbsp;
                             <Link href={`/shows/${show.id}/${showDateTime}`} className="link">
                                 {show.title}
@@ -184,8 +184,8 @@ export default async function NotificationCard({ notification, userId, isNew }: 
             if (!data) return null;
             const [showId, showDateTime2, role4] = data.split(',');
             const show2 = await getShow(showId);
-            const isTeam = role4 === 'team';
-            const dropOut = isTeam ? await getTeam(senderId) : await getUserAbbreviated(senderId);
+            const isTroupe = role4 === 'troupe';
+            const dropOut = isTroupe ? await getTroupe(senderId) : await getUserAbbreviated(senderId);
             if (!show2 || !dropOut) return null;
             let verb = '';
             if (role4 === 'director') verb = ' directing';
@@ -194,10 +194,10 @@ export default async function NotificationCard({ notification, userId, isNew }: 
             return (
                     <Wrapper isNew={isNew} image={show2.image} imageLink={`/shows/${show2.id}`} imageAlt={show2.title}>
                         <p>
-                            <Link href={`/${isTeam ? 'teams' : 'profile'}/${dropOut.id}/`} className="link">
+                            <Link href={`/${isTroupe ? 'troupes' : 'profile'}/${dropOut.id}/`} className="link">
                                 {dropOut.name}
                             </Link>
-                            &nbsp;{isTeam ? 'have' : 'has'} dropped out of{verb}&nbsp;
+                            &nbsp;{isTroupe ? 'have' : 'has'} dropped out of{verb}&nbsp;
                             <Link href={`/shows/${show2.id}/${showDateTime2}`} className="link">
                                 {show2.title}
                             </Link> on {formatDateTimeForDisplay(showDateTime2)}
