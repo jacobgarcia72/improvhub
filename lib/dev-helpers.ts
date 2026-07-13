@@ -225,7 +225,7 @@ const generateTeam = (users: { name: string, id: string, image?: string }[]): [t
     ];
     const team: Team = {
         name,
-        id: slugify(removeLeadingArticles(name), { lower: true, trim: true }),
+        id: slugify(removeLeadingArticles(name), { lower: true, trim: true, strict: true }),
         photoCredit: rnd() <= 20 ? `${rnd() <= 50 ? getGirlName() : getBoyName()} ${getLastName()}` : null,
         city, state, theatres,
         lookingForPlayers: true, // rnd() < (295 / (players.length * 2 + 1)),

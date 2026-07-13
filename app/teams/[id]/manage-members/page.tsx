@@ -10,7 +10,7 @@ type Props = {
 }
 export default async function TeamManagePage({ params }: Props) {
     const { id } = await params;
-    const members = await getTeamMembers(id);
+    const members = await getTeamMembers(id, true);
     const userId = await getCurrentUserId();
     const team = await getTeam(id);
     const isMemberNotCoach = userId && members.some(

@@ -11,12 +11,12 @@ import { getVerbFromRole } from "@/lib/helper-functions";
 import { getShow } from "@/lib/shows";
 import { formatDateTimeForDisplay } from "@/lib/dates";
 
-function Wrapper({ children, image, imageLink, imageAlt }: { children: React.ReactNode, image?: string | null, imageLink: string, imageAlt: string }) {
+function Wrapper({ children, image, imageLink, imageAlt }: { children: React.ReactNode, image?: string | null, imageLink?: string, imageAlt?: string }) {
     return (
         <div className="border-b border-b-black/20 px-2 pb-3">
             <div className="flex flex-row gap-2 items-start">
                 <div className="w-12 h-12">
-                    {image ? <Link href={imageLink}>
+                    {image && imageLink && imageAlt ? <Link href={imageLink}>
                         <Image
                             src={optimizeImage(image, 100, 100, 90, true)}
                             alt={imageAlt} width={50} height={50}
@@ -159,10 +159,9 @@ export default async function NotificationCard({ notification, userId }: { notif
                 return (
                     <Wrapper image={show.image || team.image} imageLink={show.image ? `/shows/${senderId}` : `/teams/${team.id}`} imageAlt={show.image ? show.title : team.name}>
                         <p>
-                            <Link href={`/teams/${team.id}/`} className="link">
+                            Your troupe, <Link href={`/teams/${team.id}/`} className="link">
                                 {team.name}
-                            </Link>
-                            &nbsp;have been cast to play in&nbsp;
+                            </Link>, has been cast to play in&nbsp;
                             <Link href={`/shows/${show.id}/${showDateTime}`} className="link">
                                 {show.title}
                             </Link> on {formatDateTimeForDisplay(showDateTime)}
@@ -205,6 +204,24 @@ export default async function NotificationCard({ notification, userId }: { notif
                         </p>
                     </Wrapper>
                 )
+        case 'showing_cancelled':
+            console.log({data, senderId})
+            if (!data) return null;
+            const cancelledShow = await getShow(senderId);
+            const [cancelledShowTitle, cancelledDateTime] = data.split(',');
+            console.log({cancelledShow, cancelledShowTitle});
+            return <Wrapper image={cancelledShow?.image} imageLink={`/shows/${senderId}/${cancelledDateTime}`} imageAlt={cancelledShowTitle}>
+                <p>
+                    {cancelledShow ? <Link href={`/shows/${senderId}/`} className="link">
+                        {cancelledShow.title}
+                    </Link> : <>{cancelledShowTitle}</>}, {formatDateTimeForDisplay(cancelledDateTime)}, has been cancelled
+                </p>
+            </Wrapper>
+        case 'show_cancelled':
+            if (!data) return null;
+            return <Wrapper>
+                <p>{data} has been cancelled</p>
+            </Wrapper>
         default:
             break;
     }

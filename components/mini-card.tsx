@@ -53,7 +53,7 @@ export default function MiniCard({ item, type, dateTime, includeDescription, cla
                 <div className="w-full h-full pr-2 pb-1 pt-3 pl-2">
                     <h2 className={`leading-none text-[1.005em] pb-1 text-slate-900 dark:text-slate-100 overflow-hidden text-ellipsis`}>{name}</h2>
                     <div className="h-full fade-out text-sm text-gray-700 dark:text-gray-400 overflow-hidden text-ellipsis flex flex-col gap-1 pt-0.5">
-                        {dateTime ? <p className="leading-none text-[0.85em] text-gray-900 font-semibold mt-[-1px]">{formatDateTimeForDisplay(dateTime)}</p> : null}
+                        {dateTime ? <p className="leading-none text-[0.85em] text-gray-900 dark:text-gray-200 font-semibold mt-[-1px]">{formatDateTimeForDisplay(dateTime)}</p> : null}
                         {includeDescription && 'description' in item && item.description ? (
                             <p>{item.description.replaceAll('<br>', '\n')}</p>
                         ) : null}

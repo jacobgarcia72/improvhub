@@ -63,7 +63,7 @@ export async function getComments(room: string, topicId: string, postId: string)
 }
 
 export async function saveTopic(userId: string, room: string, topic: string, description: string | null): Promise<{ success: boolean, message: string, id: string }> {
-    const id = slugify(topic, { lower: true, trim: true });
+    const id = slugify(topic, { lower: true, trim: true, strict: true });
     const topicExists = Boolean(await getTopic(room, id));
     if (topicExists) return { success: false, message: 'Topic already exists', id };
     const newTopic: Topic = {

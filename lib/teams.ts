@@ -233,13 +233,15 @@ export async function getTeamsByUser(id: string): Promise<Team[]> {
     return (data || []).map(camelCaseObject) as Team[];
 }
 
-export async function getTeamMembers(teamId: string): Promise<TeamMember[]> {
+export async function getTeamMembers(teamId: string, includeCoaches: boolean = false): Promise<TeamMember[]> {
     const { data, error } = await supabaseAdmin
         .from('team_members')
         .select('*')
         .eq('team', teamId);
     if (error) throw error;
-    return (data || []).map(camelCaseObject) as TeamMember[];
+    let res = data || [];
+    if (!includeCoaches) res = res.filter((m: TeamMember) => m.role !== 'coach')
+    return res.map(camelCaseObject) as TeamMember[];
 }
 
 export async function getTeamInvitations(userId: string): Promise<TeamMember[]> {
@@ -344,7 +346,7 @@ export async function updateTeam(teamId: string, updates: Partial<Team>, members
         if (error) throw error;
     }
 
-    const existingMembers = await getTeamMembers(teamId);
+    const existingMembers = await getTeamMembers(teamId, true);
     const getExistingMember = (member: { name: string, id: string | null, role: Role }) => (
         existingMembers.find((existing) => (
             existing.role === member.role &&

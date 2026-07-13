@@ -366,7 +366,7 @@ export async function setRsvpStatus(userId: string, eventId: string, eventDate: 
 export async function saveEvent(type: EventType, event: Event, occurrences: EventOccurrence[] | null): Promise<string> {
     const isNewEvent = !event.id;
     if (isNewEvent) {
-        const baseId = slugify(`${event.theatre ? event.theatre + ' ' : ''}${removeLeadingArticles(event.title)}`, { lower: true, trim: true });
+        const baseId = slugify(`${event.theatre ? event.theatre + ' ' : ''}${removeLeadingArticles(event.title)}`, { lower: true, trim: true, strict: true });
         let eventId = baseId;
         let counter = 1;
         let existingEvent = await getEvent(eventId, type);
@@ -520,7 +520,7 @@ export async function updateShowing(showId: string, dateTime: string, updates: P
             const usersToNotify = newCastMembers.filter((m) => m.id && m.role === role).map((m) => m.id).filter(m => m !== null && m !== undefined);
             if (role === 'team') {
                 usersToNotify.map(async (teamId) => {
-                    const teamMembersToNotify = (await getTeamMembers(teamId)).map(m => m.id).filter(m => m !== null);
+                    const teamMembersToNotify = (await getTeamMembers(teamId, true)).map(m => m.id).filter(m => m !== null);
                     postNotification(showId, teamMembersToNotify, 'cast_in_show', `${normalizedDateTime},${role},${teamId}`);
                 });
             } else {
@@ -563,35 +563,76 @@ export async function removeCastMember(showId: string, dateTime: string, userId:
 
 export async function deleteOccurrence(eventId: string, dateTime: string, type: EventType): Promise<void> {
     const normalizedDateTime = dateTime.replaceAll('%20', ' ').replaceAll('%3A', ':');
+    let showTitle = '';
+    if (type === 'show') {
+        const { data: showData } = await supabaseAdmin
+            .from('shows')
+            .select('title')
+            .eq('id', eventId)
+            .single();
+        showTitle = showData.title;
+    }
     await supabaseAdmin
         .from(`${type}_occurrences`)
         .delete()
         .eq('event_id', eventId)
         .eq('date_time', normalizedDateTime);
     if (type === 'show') {
-        await supabaseAdmin
+        const { data } = await supabaseAdmin
             .from('showing_cast')
             .delete()
             .eq('show_id', eventId)
-            .eq('date_time', normalizedDateTime);
+            .eq('date_time', normalizedDateTime)
+            .select('id, role');
+        const usersToNotify: string[] = [];
+        for (let i = 0; i < data.length; i++) {
+            const { id, role } = data[i];
+            console.log({id, role})
+            if (!id) return;
+            if (role === 'team') {
+                const teamMembers = (await getTeamMembers(id)).map((m) => m.id).filter(m => m !== null);
+                usersToNotify.push(...teamMembers);
+                console.log({teamMembers, usersToNotify})
+            } else {
+                usersToNotify.push(id);
+            }
+        };
+        if (usersToNotify.length) postNotification(eventId, usersToNotify, 'showing_cancelled', `${showTitle},${dateTime}`);
     }
     revalidatePath(`/${pluralize(type)}/${eventId}/`, 'layout');
 }
 
 export async function deleteEvent(eventId: string, type: EventType): Promise<void> {
-    await supabaseAdmin
+    const { data: showData } = await supabaseAdmin
         .from(`${pluralize(type)}`)
         .delete()
         .eq('id', eventId)
+        .select('title')
+        .single();
     await supabaseAdmin
         .from(`${type}_occurrences`)
         .delete()
         .eq('event_id', eventId)
     if (type === 'show') {
-        await supabaseAdmin
+        const { data } = await supabaseAdmin
             .from('showing_cast')
             .delete()
             .eq('show_id', eventId)
+            .select('id, role');
+        const usersToNotify: string[] = [];
+        for (let i = 0; i < data.length; i++) {
+            const { id, role } = data[i];
+            console.log({id, role})
+            if (!id) return;
+            if (role === 'team') {
+                const teamMembers = (await getTeamMembers(id)).map((m) => m.id).filter(m => m !== null);
+                usersToNotify.push(...teamMembers);
+                console.log({teamMembers, usersToNotify})
+            } else {
+                usersToNotify.push(id);
+            }
+        };
+        if (usersToNotify.length) postNotification(eventId, usersToNotify, 'show_cancelled', showData.title);
     }
     revalidatePath(`/${pluralize(type)}/${eventId}/`, 'layout');
 }

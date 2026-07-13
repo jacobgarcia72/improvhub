@@ -218,7 +218,9 @@ export type NotificationType =
     'added_to_team' |
     'confirmed_team' |
     'cast_in_show' |
-    'show_drop_out'
+    'show_drop_out' |
+    'show_cancelled' |
+    'showing_cancelled'
 
 export type Notification = {
     id: string;

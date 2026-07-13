@@ -12,7 +12,7 @@ type Props = {
 }
 export default async function TeamPage({ params }: Props) {
     const { id } = await params;
-    const members = await getTeamMembers(id);
+    const members = await getTeamMembers(id, true);
     const currentUserId = await getCurrentUserId();
     const isMemberNotCoach = currentUserId && members.some(
         (member) => member.id === currentUserId && member.confirmed && member.role !== 'coach'

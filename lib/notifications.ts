@@ -13,7 +13,8 @@ export const getNotifications = async (uid: string, isViewingNotifications?: boo
         .from('notifications')
         .select('*')
         .in('id', notifIds.map(({ notification_id }: { notification_id: string }) => notification_id))
-        .order('date', { ascending: false });
+        .order('date', { ascending: false })
+        .limit(100)
     if (error) throw error;
     if (isViewingNotifications) {
         await supabaseAdmin
@@ -43,16 +44,17 @@ export const getNumberOfNotifications = async (uid: string): Promise<number> => 
 }
 
 export const postNotification = async (sender: string, recipients: string[], type: NotificationType, data?: string | null): Promise<string | null> => {
+    console.log({recipients})
     const { data: users, error: usersError } = await supabaseAdmin
         .from('users')
         .select('uid')
-        .in('id', recipients);
+        .in('id', [...new Set(recipients)]);
     if (usersError) throw usersError;
-
     const uids: string[] = (users || [])
         .map((user: { uid: string | null }) => user.uid)
         .filter((uid: string | null): uid is string => Boolean(uid));
     if (!uids.length) return null;
+    console.log(`NOTIFYING ${type}:`, uids);
 
     const { data: res, error: notificationError } = await supabaseAdmin
         .from('notifications')
@@ -67,7 +69,6 @@ export const postNotification = async (sender: string, recipients: string[], typ
             user_id: uid, notification_id: res.id
         })));
     if (recipientError) throw recipientError;
-    revalidatePath('/notifications');
     return res.id;
 }
 

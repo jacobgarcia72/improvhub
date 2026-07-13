@@ -52,7 +52,7 @@ export default async function TeamLayout({ params, children }: Props) {
 
     if (!team) notFound();
 
-    const members = await getTeamMembers(id);
+    const members = await getTeamMembers(id, true);
 
     const currentUser = await getCurrentUser();
     const isMember = currentUser && members.some((member) => member.id === currentUser.id && member.confirmed);

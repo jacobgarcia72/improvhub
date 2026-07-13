@@ -237,7 +237,7 @@ export async function postTeam(prevState: void | { message?: string }, formData:
     if (city) city = capitalize(city);
 
     const team: Team = {
-        id: slugify(removeLeadingArticles(name), { lower: true, trim: true }),
+        id: slugify(removeLeadingArticles(name), { lower: true, trim: true, strict: true }),
         name,
         image: imageUrl,
         photoCredit: data.photoCredit as string || null,
@@ -460,7 +460,7 @@ export async function postTheatre(existingTheatre: Theatre | null, userId: strin
     }
 
     const theatre: Theatre = {
-        id: existingTheatre?.id || slugify(removeLeadingArticles(name), { lower: true, trim: true }),
+        id: existingTheatre?.id || slugify(removeLeadingArticles(name), { lower: true, trim: true, strict: true }),
         name,
         image: imageUrl,
         address,

@@ -893,7 +893,7 @@ export const populateTheatresInDb = async () => {
     await supabaseAdmin
       .from('theatres')
       .insert({
-        id: slugify(removeLeadingArticles(id), { lower: true, trim: true }),
+        id: slugify(removeLeadingArticles(id), { lower: true, trim: true, strict: true }),
         name,
         city,
         state,

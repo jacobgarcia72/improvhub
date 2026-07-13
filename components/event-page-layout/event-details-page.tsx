@@ -60,7 +60,7 @@ export default async function EventDetailsPage({ id, type }: { id: string, type:
             </div>
             {type === 'show' && !onlyOneOccurrence && (
                 <div className="w-full flex justify-center">
-                    <div className="flex justify-center px-3 py-3 border border-gray-700 bg-slate-200 rounded">
+                    <div className="flex justify-center px-3 py-3 border border-gray-700 bg-slate-200 dark:bg-slate-800 rounded">
                         <p className="text-sm">
                             <span className="font-semibold">Admin Note:</span> This is a show series. To manage casting of individual showing, select a date below.
                         </p>
