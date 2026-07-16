@@ -25,7 +25,7 @@ export default function OccurrenceSelection({ dateTimes, eventId, type }: {
         <option value="">More dates...</option>
         {dateTimes.map((dateTime) => (
             <option key={dateTime} value={dateTime}>
-                {formatDateTimeForDisplay(dateTime)}
+                {formatDateTimeForDisplay(dateTime, true)}
             </option>
         ))}
         </select>

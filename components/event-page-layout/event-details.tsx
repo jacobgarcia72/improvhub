@@ -1,5 +1,5 @@
 import { getEventOccurrences } from "@/lib/shows";
-import { formatDateTimeForDisplay, formatTime, removePastDates, sortDates, weekdays, addDays, formatDate, getWeekdayOccurence, isLastOfMonth } from "@/lib/dates";
+import { formatDateTimeForDisplay, formatTime, splitPastAndFutureDates, sortDates, weekdays, addDays, formatDate, getWeekdayOccurence, isLastOfMonth } from "@/lib/dates";
 import Button from "@/components/form/button";
 import { CadenceText, Event, EventType } from "@/types";
 import Link from "next/link";
@@ -18,18 +18,15 @@ export default async function EventDetails({ event, type }: {
     event: Event,
     type: EventType
 }) {
+    const numberOfDatesToDisplay = 5;
+
     const occurrences = await getEventOccurrences(event.id, type);
-    const isASeries = occurrences.length > 1 || event.recurringTime;
-    const dateTimes = occurrences.map(({ dateTime }) => dateTime);
-    let futureEvents: string[] = [];
-    if (dateTimes) {
-        futureEvents = removePastDates(
-            sortDates(dateTimes)
-        ).slice(0, 52);
-    }
+    const isRecurring = event.cadence && (event.recurringDay || event.recurringDay === 0);
+    const isASeries = occurrences.length > 1 || isRecurring;
+    const dateTimes = isRecurring ? [] : sortDates(occurrences.map(({ dateTime }) => dateTime));
 
     let recurringSchedule = null;
-    if ((event.recurringDay || event.recurringDay === 0) && event.cadence) {
+    if (isRecurring && event.cadence) {
         const day = weekdays[Number(event.recurringDay)];
         let text = CadenceText[event.cadence].replace('X', day);
         if (event.recurringTime) text += ` at ${formatTime(event.recurringTime)}`;
@@ -37,7 +34,7 @@ export default async function EventDetails({ event, type }: {
         // Generate next 4 dates based on recurringDay and cadence
         let currentDate = new Date();
         const cadenceOrdinals = event.cadence === 'last' ? [] : event.cadence.split('').map(Number);
-        while (futureEvents.length < 52) {
+        while (dateTimes.length < 52) {
             if (currentDate.getDay() === Number(event.recurringDay)) {
                 const occurrence = getWeekdayOccurence(currentDate);
                 const isMatch = event.cadence === 'last' ? isLastOfMonth(currentDate) : cadenceOrdinals.includes(occurrence);
@@ -46,12 +43,15 @@ export default async function EventDetails({ event, type }: {
                     if (event.recurringTime) {
                         dateTimeStr += ` ${event.recurringTime}`;
                     }
-                    futureEvents.push(dateTimeStr);
+                    dateTimes.push(dateTimeStr);
                 }
             }
             currentDate = addDays(currentDate, 1);
         }
     }
+    const [pastDates, futureDates] = splitPastAndFutureDates(dateTimes);
+    let datesToDisplay = futureDates.splice(0, numberOfDatesToDisplay);
+    if (datesToDisplay.length < numberOfDatesToDisplay) datesToDisplay = pastDates.slice(-numberOfDatesToDisplay + datesToDisplay.length).concat(datesToDisplay);
 
     let ticketInfo = null;
     if ('price' in event && event.price !== null) {
@@ -76,10 +76,10 @@ export default async function EventDetails({ event, type }: {
                     <div className="grow-2 min-w-[200px]">
                         {recurringSchedule && <Header>{capitalize(type)} Schedule:</Header>}
                         <P>{recurringSchedule}</P>
-                        {futureEvents.length ? <>
-                            <Header>Upcoming {capitalize(type)} Dates:</Header>
+                        {datesToDisplay.length ? <>
+                            <Header>{capitalize(type)} Dates:</Header>
                             <ul className="mt-2">
-                                {futureEvents.slice(0, 4).map((date, i) => (
+                                {datesToDisplay.map((date, i) => (
                                     <Link key={i} href={`/${pluralize(type)}/${event.id}/${date}`}>
                                         <li className="no-bullets link ">
                                             {formatDateTimeForDisplay(date)}
@@ -88,10 +88,10 @@ export default async function EventDetails({ event, type }: {
                                 ))}
                             </ul>
                         </> : null}
-                        {futureEvents.length > 4 && (
+                        {dateTimes.length > datesToDisplay.length && (
                             <OccurrenceSelection
                                 eventId={event.id}
-                                dateTimes={futureEvents}
+                                dateTimes={dateTimes}
                                 type={type}
                             />
                         )}

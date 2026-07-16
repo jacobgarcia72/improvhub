@@ -82,18 +82,18 @@ export const formatDateForDisplay = (date: Date | string): string => {
     return `${weekday}, ${month} ${(day)}${year !== new Date().getFullYear() ? `, ${year}` : ''}`;
 }
 
-export const formatDateTimeForDisplay = (date: Date | string): string => {
+export const formatDateTimeForDisplay = (date: Date | string, includeYear?: boolean): string => {
     const dateObject = typeof date === 'string' ? new Date(date) : date;
     const month = dateObject.toLocaleString('default', { month: 'long' });
     const day = dateObject.getDate();
     const year = dateObject.getFullYear();
     const time = dateObject.toLocaleTimeString([], { hour:'numeric', minute: '2-digit' });
-    return `${month} ${(day)}${year !== new Date().getFullYear() ? `, ${year}` : ''}, ${time}`;
+    return `${month} ${(day)}${includeYear || year !== new Date().getFullYear() ? `, ${year}` : ''}, ${time}`;
 }
 
-export const removePastDates = (dates: string[]): string[] => {
+export const splitPastAndFutureDates = (dates: string[]): [string[], string[]] => {
     const today = new Date();
-    return dates.filter(date => new Date(date) >= today);
+    return [dates.filter(date => new Date(date) < today), dates.filter(date => new Date(date) >= today)];
 }
 
 export const sortDates = (dates: string[]): string[] => {
