@@ -11,7 +11,7 @@ import { getVerbFromRole } from "@/lib/helper-functions";
 import { getShow } from "@/lib/shows";
 import { formatDateTimeForDisplay } from "@/lib/dates";
 
-function Wrapper({ children, image, imageLink, imageAlt, isNew }: { children: React.ReactNode, image?: string | null, imageLink?: string, imageAlt?: string, isNew: boolean }) {
+function Wrapper({ children, date, image, imageLink, imageAlt, isNew }: { children: React.ReactNode, date: string, image?: string | null, imageLink?: string, imageAlt?: string, isNew: boolean }) {
     return (
         <div className={`border-b border-b-black/20 p-2 ${isNew ? 'bg-cyan-500/10' : ''}`}>
             <div className="flex flex-row gap-2 items-start">
@@ -26,6 +26,7 @@ function Wrapper({ children, image, imageLink, imageAlt, isNew }: { children: Re
                 </div>
                 <div className="w-full">
                     {children}
+                    <p className="ml-1 text-xs text-mist-500">{formatDateTimeForDisplay(date)}</p>
                 </div>
             </div>
         </div>
@@ -33,7 +34,7 @@ function Wrapper({ children, image, imageLink, imageAlt, isNew }: { children: Re
 }
 
 export default async function NotificationCard({ notification, userId, isNew }: { notification: Notification, userId: string, isNew: boolean }) {
-    const { type, sender: senderId, id: notifId, data } = notification;
+    const { date, type, sender: senderId, id: notifId, data } = notification;
     let innerContent: React.ReactNode;
     switch (type) {
         case 'friend_request':
@@ -66,7 +67,7 @@ export default async function NotificationCard({ notification, userId, isNew }: 
                 )
             }
             return (
-                <Wrapper isNew={isNew} image={sender.image} imageLink={`/profile/${senderId}`} imageAlt={sender.name}>
+                <Wrapper date={date} isNew={isNew} image={sender.image} imageLink={`/profile/${senderId}`} imageAlt={sender.name}>
                     {innerContent}
                 </Wrapper>
             )
@@ -74,7 +75,7 @@ export default async function NotificationCard({ notification, userId, isNew }: 
             const sender2 = await getUserAbbreviated(senderId);
             if (!sender2) return null;
             return (
-                <Wrapper isNew={isNew} image={sender2.image} imageLink={`/profile/${senderId}`} imageAlt={sender2.name}>
+                <Wrapper date={date} isNew={isNew} image={sender2.image} imageLink={`/profile/${senderId}`} imageAlt={sender2.name}>
                         <p>
                             <Link href={`/profile/${senderId}`} className="link">
                                 {sender2.name}
@@ -123,7 +124,7 @@ export default async function NotificationCard({ notification, userId, isNew }: 
                 )
             }
             return (
-                <Wrapper isNew={isNew} image={troupe.image || sender3.image} imageLink={troupe.image ? `/troupes/${troupe.id}` : `/profile/${senderId}`} imageAlt={troupe.image ? troupe.name : sender3.name}>
+                <Wrapper date={date} isNew={isNew} image={troupe.image || sender3.image} imageLink={troupe.image ? `/troupes/${troupe.id}` : `/profile/${senderId}`} imageAlt={troupe.image ? troupe.name : sender3.name}>
                     {innerContent}
                 </Wrapper>
             )
@@ -136,7 +137,7 @@ export default async function NotificationCard({ notification, userId, isNew }: 
             const membership2 = await getTroupeMembership(senderId, troupeId2, role2 as Role);
             if (!troupe2 || !membership2) return null;
             return (
-                <Wrapper isNew={isNew} image={sender4.image || troupe2.image} imageLink={sender4.image ? `/profile/${senderId}` : `/troupes/${troupe2.id}`} imageAlt={sender4.image ? sender4.name : troupe2.name}>
+                <Wrapper date={date} isNew={isNew} image={sender4.image || troupe2.image} imageLink={sender4.image ? `/profile/${senderId}` : `/troupes/${troupe2.id}`} imageAlt={sender4.image ? sender4.name : troupe2.name}>
                     <p>
                         <Link href={`/profile/${senderId}`} className="link">
                             {sender4.name}
@@ -157,7 +158,7 @@ export default async function NotificationCard({ notification, userId, isNew }: 
                 const troupe = await getTroupe(troupeId3);
                 if (!troupe) return null;
                 return (
-                    <Wrapper isNew={isNew} image={show.image || troupe.image} imageLink={show.image ? `/shows/${senderId}` : `/troupes/${troupe.id}`} imageAlt={show.image ? show.title : troupe.name}>
+                    <Wrapper date={date} isNew={isNew} image={show.image || troupe.image} imageLink={show.image ? `/shows/${senderId}` : `/troupes/${troupe.id}`} imageAlt={show.image ? show.title : troupe.name}>
                         <p>
                             Your troupe, <Link href={`/troupes/${troupe.id}/`} className="link">
                                 {troupe.name}
@@ -170,7 +171,7 @@ export default async function NotificationCard({ notification, userId, isNew }: 
                 )
             } else {
                 return (
-                    <Wrapper isNew={isNew} image={show.image} imageLink={`/shows/${senderId}`} imageAlt={show.title}>
+                    <Wrapper date={date} isNew={isNew} image={show.image} imageLink={`/shows/${senderId}`} imageAlt={show.title}>
                         <p>
                             You&apos;ve been cast as a&nbsp;{role3}&nbsp;in&nbsp;
                             <Link href={`/shows/${show.id}/${showDateTime}`} className="link">
@@ -192,7 +193,7 @@ export default async function NotificationCard({ notification, userId, isNew }: 
             if (role4 === 'tech') verb = ' teching';
             if (role4 === 'musician') verb = ' accompanying';
             return (
-                    <Wrapper isNew={isNew} image={show2.image} imageLink={`/shows/${show2.id}`} imageAlt={show2.title}>
+                    <Wrapper date={date} isNew={isNew} image={show2.image} imageLink={`/shows/${show2.id}`} imageAlt={show2.title}>
                         <p>
                             <Link href={`/${isTroupe ? 'troupes' : 'profile'}/${dropOut.id}/`} className="link">
                                 {dropOut.name}
@@ -208,7 +209,7 @@ export default async function NotificationCard({ notification, userId, isNew }: 
             if (!data) return null;
             const cancelledShow = await getShow(senderId);
             const [cancelledShowTitle, cancelledDateTime] = data.split(',');
-            return <Wrapper isNew={isNew} image={cancelledShow?.image} imageLink={`/shows/${senderId}/${cancelledDateTime}`} imageAlt={cancelledShowTitle}>
+            return <Wrapper date={date} isNew={isNew} image={cancelledShow?.image} imageLink={`/shows/${senderId}/${cancelledDateTime}`} imageAlt={cancelledShowTitle}>
                 <p>
                     {cancelledShow ? <Link href={`/shows/${senderId}/`} className="link">
                         {cancelledShow.title}
@@ -217,7 +218,7 @@ export default async function NotificationCard({ notification, userId, isNew }: 
             </Wrapper>
         case 'show_cancelled':
             if (!data) return null;
-            return <Wrapper isNew={isNew}>
+            return <Wrapper date={date} isNew={isNew}>
                 <p>{data} has been cancelled</p>
             </Wrapper>
         default:
