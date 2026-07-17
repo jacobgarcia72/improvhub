@@ -14,7 +14,7 @@ export default async function EventResults({ eventType, city, state, theatre, zi
 }) {
     const handleSearchParams = async () => {
         const type = singularize(eventType) as EventType;
-        let events: Event[] = []
+        let events: Event[] = [];
         if (theatre) {
             events = await getEventsByTheatre(theatre, type);
         } else if (zipcode || (city && state)) {
@@ -25,7 +25,7 @@ export default async function EventResults({ eventType, city, state, theatre, zi
         return arrangeEventsByDate(eventDates, events);
     }
 
-    const hasActiveQuery = Boolean(theatre || zipcode);
+    const hasActiveQuery = Boolean(theatre || zipcode || (city && state));
     const results = await handleSearchParams();
     const hasNoResults = hasActiveQuery && !results;
 

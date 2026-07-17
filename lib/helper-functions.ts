@@ -112,7 +112,7 @@ export const removeLeadingArticles = (text: string): string => {
 
 export const arrangeEventsByDate = (showings: Showing[], shows: Event[], startingDate?: string, limit: number = 30, maxDaysSearched = 365): {
     [date: string]: { time: string, event: Event }[]
-} => {
+} | null => {
     const date = startingDate ? new Date(startingDate) : new Date();
     const res: { [date: string]: { time: string, event: Event }[] } = { };
     let daysSearched = 0;
@@ -124,7 +124,8 @@ export const arrangeEventsByDate = (showings: Showing[], shows: Event[], startin
             return date === dateString
         })
         const recurringShowsOnDate = shows.filter((show) => (
-            show.recurringDay === dayOfWeek && (
+            (show.recurringDay || show.recurringDay == 0) &&
+            show.recurringDay?.toString() === dayOfWeek?.toString() && (
                 show.cadence?.includes(`${getWeekdayOccurence(dateString)}`) ||
                 show.cadence === 'last' && isLastOfMonth(dateString)
             )
@@ -156,7 +157,7 @@ export const arrangeEventsByDate = (showings: Showing[], shows: Event[], startin
         addDays(date, 1);
         daysSearched++;
     }
-    return res;
+    return Object.keys(res).length ? res : null;
 }
 
 export const toSnakeCase = (key: string): string => key.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);

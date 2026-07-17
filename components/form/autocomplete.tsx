@@ -33,19 +33,20 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
   const [showOptions, setShowOptions] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
 
+  const updateValue = (newValue: InputOption) => {
+    setValue(newValue);
+    onChange?.(newValue);
+  };
+
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    if (startingValue && options.length) setValue(options.find((op) => typeof op !== 'string' && op.id === startingValue) || startingValue)
+    if (startingValue && options.length) updateValue(options.find((op) => typeof op !== 'string' && op.id === startingValue) || startingValue)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [options, startingValue]);
 
   const filteredOptions = useMemo(() => {
     return filterArrayBySearchTerm(options, getText(value));
   }, [options, value]);
-
-  const updateValue = (newValue: InputOption) => {
-    setValue(newValue);
-    onChange?.(newValue);
-  };
 
   const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout>();
 

@@ -1,7 +1,7 @@
 'use client'
 
 import Autocomplete from "@/components/form/autocomplete";
-import { capitalize, removeLeadingArticles } from "@/lib/helper-functions";
+import { removeLeadingArticles } from "@/lib/helper-functions";
 import { InputOption, InputOptionObject } from "@/types";
 import { useEffect, useState } from "react";
 
@@ -20,14 +20,15 @@ export default function TheatreSearchBar({ search, onSearch }: { search?: string
     if (search) {
         const searchText = search.replaceAll('+', ' ');
         startingValue = theatres.find((t) => (
+            t.id === search ||
             removeLeadingArticles(t.text.toLowerCase()) === removeLeadingArticles(searchText.toLowerCase())
-        )) || capitalize(searchText);
+        )) || searchText;
     }
     return (
         <div className="w-[358px]">
             <Autocomplete
                 startingValue={startingValue || undefined}
-                onChange={(value) => onSearch(typeof value === 'string' ? value : value.text)}
+                onChange={(value) => onSearch(typeof value === 'string' ? value : value.id.toString())}
                 options={theatres}
                 label="Theatre Name"
             />

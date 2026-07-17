@@ -236,13 +236,25 @@ export async function getIsASeries(eventId: string, type: EventType): Promise<bo
     return count > 1;
 }
 
-export async function getOccurrencesForEvents(eventIds: string[], type: EventType): Promise<EventOccurrence[]> {
-    const { data, error } = await supabaseAdmin
-        .from(`${type}_occurrences`)
-        .select('*')
-        .in('event_id', eventIds);
-    if (error) throw error;
-    return (data || []).map(camelCaseObject) as EventOccurrence[];
+export async function getOccurrencesForEvents(eventIds: string[], type: EventType, includePastEvents?: boolean): Promise<EventOccurrence[]> {
+    let res = [];
+    if (includePastEvents) {
+        const { data, error } = await supabaseAdmin
+            .from(`${type}_occurrences`)
+            .select('*')
+            .in('event_id', eventIds);
+        if (error) console.error(error);
+        if (data) res = data;
+    } else {
+        const { data, error } = await supabaseAdmin
+            .from(`${type}_occurrences`)
+            .select('*')
+            .in('event_id', eventIds)
+            .gte('date_time', getStartOfToday());
+        if (error) console.error(error);
+        if (data) res = data;
+    }
+    return (res).map(camelCaseObject) as EventOccurrence[];
 }
 
 export async function getShowCast(showId: string, dateTime: string): Promise<ShowCastMember[]> {
