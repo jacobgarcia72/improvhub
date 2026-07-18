@@ -12,7 +12,7 @@ export default async function EventResults({ showTheatre = true, eventType = 'al
     zipcode?: string;
     miles?: number;
     limit?: number;
-    showTheatre: boolean;
+    showTheatre?: boolean;
 }) {
     const handleSearchParams = async () => {
         const type = eventType === 'all' ? 'all' : singularize(eventType) as EventType;

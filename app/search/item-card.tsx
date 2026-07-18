@@ -11,8 +11,7 @@ import { getTheatre } from "@/lib/theatres";
 export default async function ItemCard({
     item, type, time, date, userId, showTheatre = true
 } : {
-    item: Event | Troupe | Theatre | Partial<Theatre>, type: string, time?: string, date?: string, userId?: string | null, 
-    showTheatre: boolean;
+    item: Event | Troupe | Theatre | Partial<Theatre>, type: string, time?: string, date?: string, userId?: string | null, showTheatre?: boolean
 }) {
     const theatre = ('theatre' in item && item.theatre) ? await getTheatre(item.theatre) : null;
     const image = (
