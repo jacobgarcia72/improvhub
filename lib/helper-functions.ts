@@ -90,7 +90,8 @@ export const filterArrayBySearchTerm = (
     if (limit) {
         results = results.slice(0, limit);
     }
-    return results;
+    const foundItemWithId = options.find((option) => typeof option !== 'string' && option.id === searchTerm);
+    return foundItemWithId ? [foundItemWithId, ...results] : results;
 }
 
 export const getRandomNumberString = (digits: number): string => {
