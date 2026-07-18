@@ -15,7 +15,7 @@ export async function UserLink({userId}: {userId: string}) {
                 <Image
                     src={optimizeImage(user.image, 72, 72, 90, true, true)}
                     alt={user.name} width={36} height={36}
-                    className="mb-[10px]"
+                    className="mb-[10px] rounded-full"
                 />
             ) : null}
             <p className="mb-4 mt-2">{user.name}</p>

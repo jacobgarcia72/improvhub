@@ -102,7 +102,7 @@ export default async function EventForm({ existingEvent, type }: {
                 {!existingEvent && ['jam', 'class', 'workshop'].includes(type) ? (
                     <Checkbox
                         name="isInstructor"
-                        label={`I am ${type === 'jam' ? 'leading' : 'the instructor for'} this ${type}`}
+                        label={`I am ${type === 'jam' ? 'leading' : 'teaching'} this ${type}`}
                         defaultChecked={true}
                     />
                 ) : null}

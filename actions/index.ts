@@ -20,12 +20,6 @@ export async function postEvent(type: EventType, existingEvent: Event | null = n
     const title = (formData.get('title') as string)?.trim() || null;
     if (!title) return { message: 'Title is required' };
 
-    const ticketsUrl = type === 'show' && (formData.get('ticketsUrl') as string)?.trim() || null;
-    if (ticketsUrl) {
-        const isValid = URL.canParse(ticketsUrl);
-        if (!isValid) return { message: 'Tickets link must be a valid URL' };
-    }
-
     const imageFile = formData.get('image') as File || null;
     let imageUrl = existingEvent?.image || '';
     if (imageFile && imageFile.size) {
@@ -77,9 +71,6 @@ export async function postEvent(type: EventType, existingEvent: Event | null = n
         }
     }
 
-    const price = type === 'show' ? formData.get('price') : null;
-    const doorPrice = type === 'show' ? formData.get('doorPrice') : null;
-
     const runtimeHours = Number(formData.get('runtimeHours'));
     const runtimeMinutes = Number(formData.get('runtimeMinutes'));
     let runtime: string | null = null;
@@ -88,7 +79,6 @@ export async function postEvent(type: EventType, existingEvent: Event | null = n
     }
 
     const photoCredit = (formData.get('photoCredit') as string)?.trim() || null;
-    const notes = type === 'show' && (formData.get('notes') as string)?.trim() || null;
 
     let description = formData.get('description') as string || null;
     if (description) description = description.replaceAll(/\r\n/g, '<br>').replaceAll(/\n/g, '<br>').replaceAll(/\r/g, '<br>');
@@ -104,17 +94,31 @@ export async function postEvent(type: EventType, existingEvent: Event | null = n
         city,
         state,
         description,
-        recurringDay,
-        recurringTime,
-        cadence,
         runtime,
     };
     if (type === 'show') {
+        const doorPrice = formData.get('doorPrice');
+        event.doorPrice = doorPrice === '' ? null : Number(doorPrice);
+        event.notes = (formData.get('notes') as string)?.trim() || null;
+    }
+    if (['show', 'jam'].includes(type)) {
         event = {
-            price: price === '' ? null : Number(price),
-            doorPrice: doorPrice === '' ? null : Number(doorPrice),
+            recurringDay,
+            recurringTime,
+            cadence,
+            ...event
+        }
+    }
+    if (['show', 'jam', 'workshop'].includes(type)) {
+        const ticketsUrl = (formData.get('ticketsUrl') as string)?.trim() || null;
+        if (ticketsUrl) {
+            const isValid = URL.canParse(ticketsUrl);
+            if (!isValid) return { message: 'Tickets link must be a valid URL' };
+        }
+        const price = formData.get('price');
+        event = {
             ticketsUrl,
-            notes,
+            price: price === '' ? null : Number(price),
             ...event
         }
     }

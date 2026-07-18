@@ -5,6 +5,7 @@ import { CadenceText, Event, EventType } from "@/types";
 import Link from "next/link";
 import OccurrenceSelection from "./occurrence-selection";
 import { capitalize, pluralize } from "@/lib/helper-functions";
+import { UserLink } from "../user-link";
 
 function P({ children, className }: { children: React.ReactNode, className?: string }) {
     return children ? <p className={`mb-4 mt-2 ${className}`}>{children}</p> : null;
@@ -70,6 +71,12 @@ export default async function EventDetails({ event, type }: {
 
     return (
         <div className="pb-2">
+            {['jam', 'class', 'workshop'].includes(type) && event.instructors?.length ? (
+                <div>
+                    <Header>{pluralize(type === 'jam' ? 'Host' : 'Instructor', event.instructors?.length)}</Header>
+                    {event.instructors.map((id, i) => <UserLink key={i} userId={id} />)}
+                </div>
+            ) : null}
             {event.description?.split('<br>').map((line, i) => <P key={i}>{line}</P>)}
             <div className="flex flex-row flex-wrap gap-2">
                 {isASeries && (

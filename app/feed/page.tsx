@@ -58,7 +58,7 @@ export default async function FeedPage() {
                         const newEvent = await getEvent(newsItemId, newEventType);
                         const newEventCreator = otherData ? await getUserAbbreviated(otherData) : null;
                         if (!theatre || !newEvent || !newEventCreator) return null;
-                        content = <p><Link className="link" href={`/profile/${newEventCreator.id}`}>{newEventCreator.name}</Link> posted a new {newEventType}, <Link className="link" href={`/${pluralize(newEventType)}/${newEvent.id}`}>{newEvent.title}</Link>, at <Link className="link" href={`/theatres/${theatre.id}`}>{theatre.name}</Link>.</p>
+                        content = <p><Link className="link" href={`/${pluralize(newEventType)}/${newEvent.id}`}>{newEvent.title}</Link>, a new {newEventType} at <Link className="link" href={`/theatres/${theatre.id}`}>{theatre.name}</Link> has been posted by <Link className="link" href={`/profile/${newEventCreator.id}`}>{newEventCreator.name}</Link>.</p>
                         image = newEvent.image || theatre.image;
                         break;
                     case 'cast_in_show':
