@@ -70,6 +70,7 @@ export default function SearchBar() {
                     }}
                 >
                     <option value=""></option>
+                    <option value="all">All Events</option>
                     <option value="classes">Classes</option>
                     <option value="jams">Jams</option>
                     <option value="shows">Shows</option>
