@@ -94,7 +94,7 @@ export default async function FeedPage() {
                         const instructorEvent = await getEvent(newsItemId, instructorType);
                         const instructorTheatre = instructorEvent?.theatre ? await getTheatre(instructorEvent.theatre) : null;
                         if (!instructor || !instructorEvent) return null;
-                        content = <p><Link className="link" href={`/profile/${instructor.id}`}>{instructor.name}</Link> is {instructorType === 'jam' ? 'leading' : 'teaching'} a {instructorType}, <Link className="link" href={`/${pluralize(instructorType)}/${instructorEvent.id}`}>{instructorEvent.title}</Link>{instructorTheatre ? <>, at <Link className="link" href={`/theatres/${instructorTheatre.id}`}>{instructorTheatre.name}</Link></> : ''}.</p>
+                        content = <p><Link className="link" href={`/profile/${instructor.id}`}>{instructor.name}</Link> is {instructorType === 'jam' ? 'hosting' : 'teaching'} a {instructorType}, <Link className="link" href={`/${pluralize(instructorType)}/${instructorEvent.id}`}>{instructorEvent.title}</Link>{instructorTheatre ? <>, at <Link className="link" href={`/theatres/${instructorTheatre.id}`}>{instructorTheatre.name}</Link></> : ''}.</p>
                         image = instructor.image || instructorEvent.image;
                         break;
                     case 'new_troupe':
