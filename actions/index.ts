@@ -119,8 +119,14 @@ export async function postEvent(type: EventType, existingEvent: Event | null = n
         }
     }
     if (['jam', 'class', 'workshop'].includes(type)) {
+        let instructors: string[] = [];
+        if (existingEvent) {
+            instructors = existingEvent.instructors || [];
+        } else if (formData.get('isInstructor')) {
+            instructors = [creatorId];
+        }
         event = {
-            instructors: formData.get('isInstructor') ? [creatorId] : [],
+            instructors,
             ...event
         }
     }
