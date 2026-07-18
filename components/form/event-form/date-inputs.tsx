@@ -3,7 +3,7 @@ import Button from '@/components/form/button';
 import Checkbox from '@/components/form/checkbox';
 import Input from '@/components/form/input';
 import XButton from '@/components/form/x';
-import { addDays, addOrdinal, findNextOrdinalWeekday, formatDate, getDayOfWeek, getWeekdayOccurence, newDate, weekdays } from '@/lib/dates';
+import { addDays, addOrdinal, findNextOrdinalWeekday, formatDate, formatTime, getDayOfWeek, getWeekdayOccurence, newDate, weekdays } from '@/lib/dates';
 import { capitalize } from '@/lib/helper-functions';
 import { Candence, Event, EventType } from '@/types';
 import { useState } from 'react';
@@ -129,7 +129,7 @@ function ScheduleOptions({ existingEventDates, type }: {
             let complimentaryOccurences;
             if ([1, 3].includes(weekdayOccurrence)) complimentaryOccurences = '1st and 3rd';
             if ([2, 4].includes(weekdayOccurrence)) complimentaryOccurences = '2nd and 4th';
-            const options = [
+            let options = [
                 { value: 0, text: `Every ${dayOfWeek}` },
                 { value: 1, text: `Every other ${dayOfWeek}` },
                 { value: 2, text: `Every ${addOrdinal(weekdayOccurrence)} ${dayOfWeek}` }
@@ -137,6 +137,7 @@ function ScheduleOptions({ existingEventDates, type }: {
             if (complimentaryOccurences) {
                 options.push({ value: 3, text: `Every ${complimentaryOccurences} ${dayOfWeek}` });
             }
+            if (times[0]) options = options.map((option) => ({ value: option.value, text: `${option.text} at ${formatTime(times[0])}` }));
             return options;
         } else {
             return [];
