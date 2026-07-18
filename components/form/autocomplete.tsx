@@ -42,7 +42,7 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (startingValue && options.length) updateValue(options.find((op) => typeof op !== 'string' && op.id === startingValue) || startingValue)
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [options, startingValue]);
+  }, []);
 
   const filteredOptions = useMemo(() => {
     return filterArrayBySearchTerm(options, getText(value));
