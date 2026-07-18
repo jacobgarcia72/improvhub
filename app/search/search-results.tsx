@@ -1,5 +1,5 @@
 import EventResults from './event-results';
-import { filterArrayBySearchTerm, matchPattern, shuffle } from '@/lib/helper-functions';
+import { filterArrayBySearchTerm, matchPattern, pluralize, shuffle } from '@/lib/helper-functions';
 import { separateCityAndState } from '@/lib/location';
 import { getAllTheatres, getTheatre, getTheatresByCity, getTheatresByState, getTheatresByZipcode } from '@/lib/theatres';
 import { allEventTypes, Troupe } from '@/types';
@@ -15,7 +15,7 @@ export default async function SearchResults({ params }: { params: {
     miles?: string;
     for?: 'theatres' | 'shows' | 'jams' | 'troupes' | 'classes' | 'workshops';
 }}) {
-    const eventTypes = [...allEventTypes, 'all'];
+    const eventTypes = [...allEventTypes.map((type) => pluralize(type)), 'all'];
     const theatre = params?.theatre?.trim();
     const location = params?.location?.trim();
     const miles = params?.miles?.trim();
