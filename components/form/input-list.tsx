@@ -14,13 +14,9 @@ export default function InputList({ name, options, label, addLabel, startingOpti
     options?: InputOption[]
     startingOptions?: InputOption[]
 }) {
+    const startingInputs = startingOptions?.map((option, i) => ({ key: i, value: option })) || [];
     const nextKey = useRef(startingOptions?.length || 0);
-    const [addedInputs, setAddedInputs] = useState<{ key: number, value: InputOption | null }[]>(
-        () => startingOptions?.map((option, i) => ({ key: i, value: option })) || []
-    );
-    const availableOptions = options?.filter((option) => (
-        !addedInputs.some((input) => input.value === option)
-    ));
+    const [addedInputs, setAddedInputs] = useState<{ key: number, value: InputOption | null }[]>(startingInputs);
 
     const updateInput = (value: InputOption, i: number) => {
         const inputs = [...addedInputs];
@@ -43,9 +39,11 @@ export default function InputList({ name, options, label, addLabel, startingOpti
             <div className="grid gap-2 w-full">
                 {addedInputs.map((input, i) => (
                     <div key={input.key} className="flex items-center gap-2">
-                        {options ? (
+                        {options?.length ? (
                             <Autocomplete
-                                options={availableOptions || []}
+                                options={options?.filter((option) => (
+                                    !addedInputs.find((input) => typeof input.value !== 'string' && typeof option !== 'string' && input.value?.id === option.id)
+                                ))}
                                 name={`${name}-${i}`}
                                 placeholder={addLabel}
                                 onChange={(value) => updateInput(value, i)}
