@@ -29,7 +29,8 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
     maxLength,
     startingValue
 }) => {
-  const [value, setValue] = useState<InputOption>('');
+  const foundStartingOption = (startingValue && options.length) && options.find((op) => typeof op !== 'string' && op.id === startingValue) || startingValue;
+  const [value, setValue] = useState<InputOption>(foundStartingOption || '');
   const [showOptions, setShowOptions] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
 
@@ -40,9 +41,8 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    if (startingValue && options.length) updateValue(options.find((op) => typeof op !== 'string' && op.id === startingValue) || startingValue)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    if (foundStartingOption) setValue(foundStartingOption);
+  }, [foundStartingOption]);
 
   const filteredOptions = useMemo(() => {
     return filterArrayBySearchTerm(options, getText(value));
