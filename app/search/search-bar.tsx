@@ -59,7 +59,7 @@ export default function SearchBar() {
     }
     
     return (
-        <section className="max-w-[1200px]! flex flex-wrap gap-2">
+        <section className="max-w-[1280px]! flex flex-wrap gap-2">
             <div className="flex-1 min-w-[140px] max-w-[200px]">
                 <label htmlFor="searchFor">Find</label>
                 <select

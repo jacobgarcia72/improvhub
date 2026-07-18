@@ -33,19 +33,19 @@ export default async function ItemCard({
         }
     }
     return (
-        <Border className="grow-1 max-w-[272px] relative flex flex-col h-[300px] min-w-[212px] m-2 w-44 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
+        <Border className="w-[180px] h-[240px] relative flex flex-col m-2 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
             {showFollowButton ? <div className="absolute right-2 top-2">
                 <FollowButton mini userId={userId || ''} followId={'id' in item && item.id ? item.id : ''} type={type === 'troupes' ? 'troupe' : 'theatre'} following={following} />
             </div> : null}
             <Link href={link} className="h-full">
                 {image ? (
-                    <div className={`${type === 'theatres' ? 'h-[180px]' : 'h-[120px]'} w-full bg-gray-300`}>
-                        <Image src={image} alt={name || type} width={120} height={type === 'theatres' ? 180 : 120} className={`object-cover h-[${type === 'theatres' ? 180 : 120}px] w-full`} />
+                    <div className={`${type === 'theatres' ? 'h-[150px]' : 'h-[90px]'} w-full bg-gray-300`}>
+                        <Image src={image} alt={name || type} width={120} height={type === 'theatres' ? 150 : 90} className={`object-cover h-[${type === 'theatres' ? 150 : 90}px] w-full`} />
                     </div>
                 ) : (
-                    <div className="h-[35px] w-full" />
+                    <div className="h-[15px] w-full" />
                 )}
-                <div className={`w-full ${image ? 'h-[180px]' : 'h-[265px]'} pb-1 px-4 pt-2`}>
+                <div className={`w-full ${image ? 'h-[150px]' : 'h-[225px]'} pb-1 px-4 pt-2`}>
                     <h2 className="leading-none text-lg pt-1 pb-1 text-gray-900 dark:text-gray-100">{name}</h2>
                     <div className="h-full fade-out text-sm text-gray-800  dark:text-gray-200 overflow-hidden text-ellipsis flex flex-col gap-1 pt-1">
                         {time ? (
