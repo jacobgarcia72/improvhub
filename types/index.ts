@@ -28,6 +28,8 @@ export const CadenceText: { [cadence: string]: string } = {
 }
 
 export type EventType = 'show' | 'jam' | 'class' | 'workshop';
+export const allEventTypes: EventType[] = ['show', 'jam', 'class', 'workshop'];
+export type EventTypeFilter = EventType | 'all';
 
 export interface Event {
     id: string;

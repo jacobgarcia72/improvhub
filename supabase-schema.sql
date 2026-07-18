@@ -293,6 +293,10 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.show_occurrences TO service
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.showing_cast TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.jams TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.jam_occurrences TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.workshops TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.workshop_occurrences TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.classes TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.class_occurrences TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.rsvps TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.troupes TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.troupe_members TO service_role;

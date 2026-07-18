@@ -3,7 +3,7 @@
 
 import slugify from 'slugify';
 
-import { AbbrevUser, Event, EventOccurrence, EventType, NewsType, Role, ShowCastMember, Showing, Theatre, User } from "@/types";
+import { AbbrevUser, allEventTypes, Event, EventOccurrence, EventType, EventTypeFilter, NewsType, Role, ShowCastMember, Showing, Theatre, User } from "@/types";
 import { camelCaseObject, pluralize, removeLeadingArticles, snakeCaseObject } from './helper-functions';
 import { supabaseAdmin } from './supabase-server';
 import { getCitiesWithinRange } from './location';
@@ -268,7 +268,18 @@ export async function getShowCast(showId: string, dateTime: string): Promise<Sho
     return (data || []).map(camelCaseObject) as ShowCastMember[];
 }
 
-export async function getEventsByTheatre(theatre: string, type: EventType): Promise<Event[]> {
+export async function getEventsByTheatre(theatre: string, type: EventTypeFilter): Promise<Event[]> {
+    if (type === 'all') {
+        const eventResults = await Promise.all(allEventTypes.map(async (eventType) => {
+            const { data } = await supabaseAdmin
+                .from(pluralize(eventType))
+                .select('*')
+                .ilike('theatre', theatre);
+            return data || [];
+        }));
+        return eventResults.flat().map(camelCaseObject) as Event[];
+    }
+
     const { data } = await supabaseAdmin
         .from(pluralize(type))
         .select('*')
@@ -276,9 +287,24 @@ export async function getEventsByTheatre(theatre: string, type: EventType): Prom
     return (data || []).map(camelCaseObject) as Event[];
 }
 
-export async function getEventsInRange(cityOrZipcode: string, miles: number, type: EventType): Promise<Event[]> {
+export async function getEventsInRange(cityOrZipcode: string, miles: number, type: EventTypeFilter): Promise<Event[]> {
     const citiesInRange = getCitiesWithinRange(cityOrZipcode, miles);
     if (!citiesInRange.length) return [];
+
+    if (type === 'all') {
+        const eventResults = await Promise.all(allEventTypes.map(async (eventType) => {
+            const { data, error } = await supabaseAdmin
+                .from(pluralize(eventType))
+                .select('*');
+            if (error) throw error;
+            return data || [];
+        }));
+        return eventResults
+            .flat()
+            .filter((event: any) => event.city && event.state && citiesInRange.includes(`${event.city} ${event.state}`))
+            .map(camelCaseObject) as Event[];
+    }
+
     const { data, error } = await supabaseAdmin
         .from(pluralize(type))
         .select('*');

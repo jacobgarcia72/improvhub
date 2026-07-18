@@ -8,7 +8,7 @@ import { capitalize, singularize } from "@/lib/helper-functions";
 import { Suspense } from "react";
 import Loader from "@/components/loader";
 import { getEventsByAdmin, getUpcomingShowsByCastMember } from "@/lib/shows";
-import { Event, EventType, Role } from "@/types";
+import { allEventTypes, Event, EventType, Role } from "@/types";
 import { getTroupesByUser } from "@/lib/troupes";
 import MiniCard from "@/components/mini-card";
 import ShowsLookingFor from "./shows-looking-for";
@@ -31,7 +31,7 @@ export async function generateMetadata(
 export default async function EventsPage({ params }: { params: Promise<{ events: string }> }) {
     const { events } = await params;
     const type = singularize(events) as EventType;
-    if (!['show', 'jam', 'class', 'workshop'].includes(type)) {
+    if (!allEventTypes.includes(type)) {
         notFound();
     }
     const user = await getCurrentUser();

@@ -9,9 +9,10 @@ import Link from "next/link";
 import { getTheatre } from "@/lib/theatres";
 
 export default async function ItemCard({
-    item, type, time, date, userId
+    item, type, time, date, userId, showTheatre = true
 } : {
-    item: Event | Troupe | Theatre | Partial<Theatre>, type: string, time?: string, date?: string, userId?: string | null
+    item: Event | Troupe | Theatre | Partial<Theatre>, type: string, time?: string, date?: string, userId?: string | null, 
+    showTheatre: boolean;
 }) {
     const theatre = ('theatre' in item && item.theatre) ? await getTheatre(item.theatre) : null;
     const image = (
@@ -51,7 +52,7 @@ export default async function ItemCard({
                         {time ? (
                             <time className="mt-[-6px] text-sm text-gray-700  dark:text-gray-300 dark:text-gray-400">{formatTime(time)}</time>
                         ) : null}
-                        {theatre ? (
+                        {showTheatre && theatre ? (
                             <p className="font-semibold text-gray-700  dark:text-gray-300 dark:text-gray-400">{theatre.name}</p>
                         ) : null}
                         {'description' in item && item.description ? (

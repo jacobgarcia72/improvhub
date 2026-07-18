@@ -1,5 +1,4 @@
 import Loader from "@/components/loader";
-import UpcomingEvents from "./upcoming-events";
 import { pluralize } from "@/lib/helper-functions";
 import { getTheatre } from "@/lib/theatres";
 import { getCurrentUserId, getFollowCount } from "@/lib/users";
@@ -7,6 +6,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import Button from "@/components/form/button";
+import EventResults from "@/app/search/event-results";
 
 export default async function TheatreDetailsPage({ params }: {
     params: Promise<{ id: string }>
@@ -52,9 +52,10 @@ export default async function TheatreDetailsPage({ params }: {
                     </Link>
                 ): null}
             </section>
-            <UpcomingEvents theatre={theatre} type="jam" limit={12} />
-            <UpcomingEvents theatre={theatre} type="workshop" limit={12} />
-            <UpcomingEvents theatre={theatre} />
+            <section>
+                <h3 className="ml-8 mb-2">Upcoming Events:</h3>
+                <EventResults showTheatre={false} limit={14} theatre={id} />
+            </section>
         </Suspense>
     );
 }

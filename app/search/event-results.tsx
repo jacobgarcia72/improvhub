@@ -1,19 +1,21 @@
 import { formatDate, formatDateForDisplay } from '@/lib/dates';
 import { arrangeEventsByDate, singularize } from '@/lib/helper-functions';
 import { getOccurrencesForEvents, getEventsByTheatre, getEventsInRange } from '@/lib/shows';
-import { Event, EventOccurrence, EventType } from '@/types';
+import { allEventTypes, Event, EventOccurrence, EventType } from '@/types';
 import ItemCard from './item-card';
 
-export default async function EventResults({ eventType, city, state, theatre, zipcode, miles }: {
-    eventType: string;
+export default async function EventResults({ showTheatre = true, eventType = 'all', city, state, theatre, zipcode, miles, limit }: {
+    eventType?: string;
     city?: string;
     state?: string;
     theatre?: string;
     zipcode?: string;
     miles?: number;
+    limit?: number;
+    showTheatre: boolean;
 }) {
     const handleSearchParams = async () => {
-        const type = singularize(eventType) as EventType;
+        const type = eventType === 'all' ? 'all' : singularize(eventType) as EventType;
         let events: Event[] = [];
         if (theatre) {
             events = await getEventsByTheatre(theatre, type);
@@ -21,8 +23,15 @@ export default async function EventResults({ eventType, city, state, theatre, zi
             events = await getEventsInRange(zipcode || `${city} ${state}`, miles || 0, type);
         }
         if (!events.length) return null;
-        const eventDates: EventOccurrence[] = await getOccurrencesForEvents(events.map(({ id }) => id), type);
-        return arrangeEventsByDate(eventDates, events);
+        let eventDates: EventOccurrence[] = []
+        if (type === 'all') {
+            eventDates = (
+                await Promise.all(allEventTypes.map(async (type) => await getOccurrencesForEvents(events.map(({ id }) => id), type)))
+            ).flat();
+        } else {
+            eventDates = await getOccurrencesForEvents(events.map(({ id }) => id), type);
+        }
+        return arrangeEventsByDate(eventDates, events, undefined, limit);
     }
 
     const hasActiveQuery = Boolean(theatre || zipcode || (city && state));
@@ -38,7 +47,7 @@ export default async function EventResults({ eventType, city, state, theatre, zi
                         <h2 className='text-slate-900 dark:text-slate-100 font-semibold '>{date === formatDate(new Date()) ? 'Today' : formatDateForDisplay(date)}</h2>
                     </div>
                     <div className='flex flex-row flex-wrap'>
-                        {results[date].map(({ event, time }, i) => <ItemCard key={i} item={event} time={time} type={eventType} date={date} />)}
+                        {results[date].map(({ event, time }, i) => <ItemCard showTheatre={showTheatre} key={i} item={event} time={time} type={eventType} date={date} />)}
                     </div>
                 </div>
             ))}
