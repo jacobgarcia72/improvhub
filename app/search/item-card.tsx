@@ -13,11 +13,10 @@ export default async function ItemCard({
 } : {
     item: Event | Troupe | Theatre | Partial<Theatre>, type: string, time?: string, date?: string, userId?: string | null
 }) {
+    const theatre = ('theatre' in item && item.theatre) ? await getTheatre(item.theatre) : null;
     const image = (
         item.image && optimizeImage(item.image, 600, 600, 100, true)
-    ) || (
-        'theatre' in item && item.theatre && (await getTheatre(item.theatre))?.image
-    );
+    ) || theatre?.image;
     const name = 'name' in item ? item.name : 'title' in item ? item.title : '';
     let link = `/${type}/${item.id}`;
     if (date && time) link += `/${date}%20${time}`;
@@ -52,8 +51,8 @@ export default async function ItemCard({
                         {time ? (
                             <time className="mt-[-6px] text-sm text-gray-700  dark:text-gray-300 dark:text-gray-400">{formatTime(time)}</time>
                         ) : null}
-                        {'theatre' in item && item.theatre ? (
-                            <p className="font-semibold text-gray-700  dark:text-gray-300 dark:text-gray-400">{item.theatre}</p>
+                        {theatre ? (
+                            <p className="font-semibold text-gray-700  dark:text-gray-300 dark:text-gray-400">{theatre.name}</p>
                         ) : null}
                         {'description' in item && item.description ? (
                             <p>{item.description.replaceAll('<br>', '\n')}</p>
