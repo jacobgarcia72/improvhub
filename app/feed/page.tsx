@@ -83,7 +83,14 @@ export default async function FeedPage() {
                         const eventGoingType = newsType.split('_')[2] as EventType;
                         const eventGoingTo = await getEvent(newsItemId, eventGoingType);
                         if (!eventGoer || !eventGoingTo || !newsItemDate) return null;
-                        content = <p><Link className="link" href={`/profile/${eventGoer.id}`}>{eventGoer.name}</Link> is going to <Link className="link" href={`/${pluralize(eventGoingType)}/${eventGoingTo.id}/${newsItemDate}`}>{eventGoingTo.title}</Link> on {formatDateForDisplay(newsItemDate.split(' ')[0])}.</p>
+                        const eventGoingTheatre = eventGoingTo?.theatre ? await getTheatre(eventGoingTo.theatre) : null;
+                        let verbPhrase = 'is going to';
+                        let addComma = true;
+                        if (eventGoingType === 'show') addComma = false;
+                        if (eventGoingType === 'jam') verbPhrase = 'is going to a jam,';
+                        if (eventGoingType === 'workshop') verbPhrase = 'is attending a workshop,';
+                        if (eventGoingType === 'class') verbPhrase = 'is taking a class,';
+                        content = <p><Link className="link" href={`/profile/${eventGoer.id}`}>{eventGoer.name}</Link> {verbPhrase} <Link className="link" href={`/${pluralize(eventGoingType)}/${eventGoingTo.id}/${newsItemDate}`}>{eventGoingTo.title}</Link>{addComma ? ',' : ''} on {formatDateForDisplay(newsItemDate.split(' ')[0])}{eventGoingTheatre ? <> at <Link className="link" href={`/theatres/${eventGoingTheatre.id}`}>{eventGoingTheatre.name}</Link></> : ''}.</p>
                         image = eventGoer.image || eventGoingTo.image;
                         break;
                     case 'instructor_for_jam':
