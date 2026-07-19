@@ -38,7 +38,8 @@ export default async function ManageEventPage({ params }: { params: Promise<{ ev
 
     const userId = await getCurrentUserId();
     const isAdmin = userId && event?.admins.includes(userId);
-    if (!isAdmin) notFound();
+    const isInstructor = userId && event?.instructors?.includes(userId);
+    if (!(isAdmin || isInstructor)) notFound();
 
     return <EventForm existingEvent={event} type={type as EventType} />
 }

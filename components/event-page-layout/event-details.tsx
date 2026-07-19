@@ -105,13 +105,13 @@ export default async function EventDetails({ event, type }: {
                     </div>
                 )}
                 <div className="grow-1 min-w-[200px]">
-                    {runtime && <Header>{type === 'class' ? 'Approximate Runtime:' : 'Duration:'}</Header>}
+                    {runtime && <Header>{type === 'show' ? 'Approximate Runtime:' : `${capitalize(type)} Duration:`}</Header>}
                     <P>{runtime}</P>
-                    {ticketInfo && <Header>Ticket Price:</Header>}
+                    {ticketInfo && <Header>{type === 'show' ? 'Ticket Price' : 'Registration Cost'}:</Header>}
                     <P>{ticketInfo}</P>
                     {('ticketsUrl' in event && event.ticketsUrl) ? (
                         <a href={event.ticketsUrl} target="_blank" rel="noopener noreferrer">
-                            <Button className="w-54" caption="Get Tickets" />
+                            <Button className="w-54" caption={type === 'show' ? 'Get Tickets' : 'Register'} />
                         </a>
                     ) : null}
                 </div>

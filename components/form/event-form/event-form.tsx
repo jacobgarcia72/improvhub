@@ -58,7 +58,7 @@ export default async function EventForm({ existingEvent, type }: {
                     type={type}
                 />
                 <div>
-                    <p className='label'>{type === 'class' ? 'Approximate Runtime:' : 'Duration:'}</p>
+                    <p className='label'>{type === 'show' ? 'Approximate Runtime:' : `${capitalize(type)} Duration:`}</p>
                     <div className='flex flex-row mt-1'>
                         <Input
                             value={existingEvent?.runtime?.split('h')[0] || ''}

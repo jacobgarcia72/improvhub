@@ -222,7 +222,13 @@ export type NotificationType =
     'cast_in_show' |
     'show_drop_out' |
     'show_cancelled' |
-    'showing_cancelled'
+    'jam_cancelled' |
+    'workshop_cancelled' |
+    'class_cancelled' |
+    'show_occurrence_cancelled' |
+    'jam_occurrence_cancelled' |
+    'workshop_occurrence_cancelled' |
+    'class_occurrence_cancelled';
 
 export type Notification = {
     id: string;

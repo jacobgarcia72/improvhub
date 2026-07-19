@@ -14,8 +14,8 @@ import { getTheatre, saveTheatre, updateTheatre } from '@/lib/theatres';
 import { saveFeedback } from '@/lib/feedback';
 
 export async function postEvent(type: EventType, existingEvent: Event | null = null, prevState: void | { message?: string }, formData: FormData) {
-    const creatorId = await getCurrentUserId();
-    if (!creatorId) throw new Error('You must be logged in to continue');
+    const currentUser = await getCurrentUserId();
+    if (!currentUser) throw new Error('You must be logged in to continue');
 
     const title = (formData.get('title') as string)?.trim() || null;
     if (!title) return { message: 'Title is required' };
@@ -85,8 +85,8 @@ export async function postEvent(type: EventType, existingEvent: Event | null = n
 
     let event: Event = {
         id: existingEvent?.id || '',
-        creatorId,
-        admins: [creatorId],
+        creatorId: existingEvent ? existingEvent.creatorId : currentUser,
+        admins: existingEvent ? existingEvent.admins : [currentUser],
         title,
         image: imageUrl || null,
         photoCredit,
@@ -109,7 +109,7 @@ export async function postEvent(type: EventType, existingEvent: Event | null = n
             ...event
         }
     }
-    if (['show', 'jam', 'workshop'].includes(type)) {
+    if (['show', 'class', 'workshop'].includes(type)) {
         const ticketsUrl = (formData.get('ticketsUrl') as string)?.trim() || null;
         if (ticketsUrl) {
             const isValid = URL.canParse(ticketsUrl);
@@ -127,7 +127,7 @@ export async function postEvent(type: EventType, existingEvent: Event | null = n
         if (existingEvent) {
             instructors = existingEvent.instructors || [];
         } else if (formData.get('isInstructor')) {
-            instructors = [creatorId];
+            instructors = [currentUser];
         }
         event = {
             instructors,

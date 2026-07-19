@@ -597,15 +597,20 @@ export async function removeCastMember(showId: string, dateTime: string, userId:
 
 export async function deleteOccurrence(eventId: string, dateTime: string, type: EventType): Promise<void> {
     const normalizedDateTime = dateTime.replaceAll('%20', ' ').replaceAll('%3A', ':');
-    let showTitle = '';
-    if (type === 'show') {
-        const { data: showData } = await supabaseAdmin
-            .from('shows')
-            .select('title')
-            .eq('id', eventId)
-            .single();
-        showTitle = showData.title;
-    }
+    const { data: rsvpData } = await supabaseAdmin
+        .from('rsvps')
+        .select('user_id')
+        .eq('event_id', eventId)
+        .eq('date_time', dateTime)
+        .eq('type', type)
+        .or('status.eq.g,status.eq.i');
+    const usersToNotify: string[] = (rsvpData as { user_id: string }[] || []).map(({user_id}) => user_id);
+    const { data: showData } = await supabaseAdmin
+        .from(pluralize(type))
+        .select('title')
+        .eq('id', eventId)
+        .single();
+    const eventTitle = showData.title;
     await supabaseAdmin
         .from(`${type}_occurrences`)
         .delete()
@@ -618,7 +623,6 @@ export async function deleteOccurrence(eventId: string, dateTime: string, type: 
             .eq('show_id', eventId)
             .eq('date_time', normalizedDateTime)
             .select('id, role');
-        const usersToNotify: string[] = [];
         for (let i = 0; i < data.length; i++) {
             const { id, role } = data[i];
             if (!id) return;
@@ -629,12 +633,19 @@ export async function deleteOccurrence(eventId: string, dateTime: string, type: 
                 usersToNotify.push(id);
             }
         };
-        if (usersToNotify.length) postNotification(eventId, usersToNotify, 'showing_cancelled', `${showTitle},${dateTime}`);
     }
+    if (usersToNotify.length) postNotification(eventId, usersToNotify, `${type}_occurrence_cancelled`, `${eventTitle},${dateTime}`);
     revalidatePath(`/${pluralize(type)}/${eventId}/`, 'layout');
 }
 
 export async function deleteEvent(eventId: string, type: EventType): Promise<void> {
+    const { data: rsvpData } = await supabaseAdmin
+        .from('rsvps')
+        .select('user_id')
+        .eq('event_id', eventId)
+        .eq('type', type)
+        .or('status.eq.g,status.eq.i')
+        .gte('date_time', getStartOfToday());
     const { data: showData } = await supabaseAdmin
         .from(`${pluralize(type)}`)
         .delete()
@@ -644,14 +655,14 @@ export async function deleteEvent(eventId: string, type: EventType): Promise<voi
     await supabaseAdmin
         .from(`${type}_occurrences`)
         .delete()
-        .eq('event_id', eventId)
+        .eq('event_id', eventId);
+    const usersToNotify: string[] = (rsvpData as { user_id: string }[] || []).map(({user_id}) => user_id);
     if (type === 'show') {
         const { data } = await supabaseAdmin
             .from('showing_cast')
             .delete()
             .eq('show_id', eventId)
             .select('id, role');
-        const usersToNotify: string[] = [];
         for (let i = 0; i < data.length; i++) {
             const { id, role } = data[i];
             if (!id) return;
@@ -662,7 +673,7 @@ export async function deleteEvent(eventId: string, type: EventType): Promise<voi
                 usersToNotify.push(id);
             }
         };
-        if (usersToNotify.length) postNotification(eventId, usersToNotify, 'show_cancelled', showData.title);
     }
+    if (usersToNotify.length) postNotification(eventId, usersToNotify, `${type}_cancelled`, showData.title);
     revalidatePath(`/${pluralize(type)}/${eventId}/`, 'layout');
 }

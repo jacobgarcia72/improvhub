@@ -85,11 +85,10 @@ export default async function FeedPage() {
                         if (!eventGoer || !eventGoingTo || !newsItemDate) return null;
                         const eventGoingTheatre = eventGoingTo?.theatre ? await getTheatre(eventGoingTo.theatre) : null;
                         let verbPhrase = 'is going to';
-                        let addComma = true;
-                        if (eventGoingType === 'show') addComma = false;
+                        if (eventGoingType === 'class') verbPhrase = 'is attending';
                         if (eventGoingType === 'jam') verbPhrase = 'is going to a jam,';
                         if (eventGoingType === 'workshop') verbPhrase = 'is attending a workshop,';
-                        if (eventGoingType === 'class') verbPhrase = 'is taking a class,';
+                        const addComma = ['jam', 'workshop'].includes(eventGoingType);
                         content = <p><Link className="link" href={`/profile/${eventGoer.id}`}>{eventGoer.name}</Link> {verbPhrase} <Link className="link" href={`/${pluralize(eventGoingType)}/${eventGoingTo.id}/${newsItemDate}`}>{eventGoingTo.title}</Link>{addComma ? ',' : ''} on {formatDateForDisplay(newsItemDate.split(' ')[0])}{eventGoingTheatre ? <> at <Link className="link" href={`/theatres/${eventGoingTheatre.id}`}>{eventGoingTheatre.name}</Link></> : ''}.</p>
                         image = eventGoer.image || eventGoingTo.image;
                         break;

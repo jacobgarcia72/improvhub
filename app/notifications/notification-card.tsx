@@ -1,14 +1,14 @@
 import { optimizeImage } from "@/lib/optimize-image";
 import { getFriendship, getUser, getUserAbbreviated } from "@/lib/users";
-import { Notification, Role } from "@/types";
+import { EventType, Notification, Role } from "@/types";
 import Image from "next/image";
 import Link from "next/link";
 import FriendRequestButtons from "./friend-request-buttons";
 import { getTroupe, getTroupeMembership } from "@/lib/troupes";
 import { getPronounForm } from "@/lib/demographics";
 import TroupeRequestButtons from "./troupe-request-buttons";
-import { getVerbFromRole } from "@/lib/helper-functions";
-import { getShow } from "@/lib/shows";
+import { getVerbFromRole, pluralize } from "@/lib/helper-functions";
+import { getEvent, getShow } from "@/lib/shows";
 import { formatDateTimeForDisplay } from "@/lib/dates";
 
 function Wrapper({ children, date, image, imageLink, imageAlt, isNew }: { children: React.ReactNode, date: string, image?: string | null, imageLink?: string, imageAlt?: string, isNew: boolean }) {
@@ -205,18 +205,25 @@ export default async function NotificationCard({ notification, userId, isNew }: 
                         </p>
                     </Wrapper>
                 )
-        case 'showing_cancelled':
+        case 'show_occurrence_cancelled':
+        case 'jam_occurrence_cancelled':
+        case 'workshop_occurrence_cancelled':
+        case 'class_occurrence_cancelled':
             if (!data) return null;
-            const cancelledShow = await getShow(senderId);
-            const [cancelledShowTitle, cancelledDateTime] = data.split(',');
-            return <Wrapper date={date} isNew={isNew} image={cancelledShow?.image} imageLink={`/shows/${senderId}/${cancelledDateTime}`} imageAlt={cancelledShowTitle}>
+            const cancelledEventType = type.split('_')[0] as EventType;
+            const cancelledEvent = await getEvent(senderId, cancelledEventType);
+            const [cancelledEventTitle, cancelledDateTime] = data.split(',');
+            return <Wrapper date={date} isNew={isNew} image={cancelledEvent?.image} imageLink={`/${pluralize(cancelledEventType)}/${senderId}/${cancelledDateTime}`} imageAlt={cancelledEventTitle}>
                 <p>
-                    {cancelledShow ? <Link href={`/shows/${senderId}/`} className="link">
-                        {cancelledShow.title}
-                    </Link> : <>{cancelledShowTitle}</>}, {formatDateTimeForDisplay(cancelledDateTime)}, has been cancelled
+                    {cancelledEvent ? <Link href={`/${pluralize(cancelledEventType)}/${senderId}/`} className="link">
+                        {cancelledEvent.title}
+                    </Link> : <>{cancelledEventTitle}</>}, {formatDateTimeForDisplay(cancelledDateTime)}, has been cancelled
                 </p>
             </Wrapper>
         case 'show_cancelled':
+        case 'jam_cancelled':
+        case 'class_cancelled':
+        case 'workshop_cancelled':
             if (!data) return null;
             return <Wrapper date={date} isNew={isNew}>
                 <p>{data} has been cancelled</p>
