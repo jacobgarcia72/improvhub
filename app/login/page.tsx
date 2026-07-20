@@ -8,6 +8,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Metadata } from "next";
 import { appName } from "@/lib/app-info";
+import TestUserButton from "./test-user-button";
+import TestInputs from "./test-inputs";
 
 export const metadata: Metadata = {
     title: `Login | ${appName}`
@@ -19,6 +21,10 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
         redirect(`/profile/${userId}`);
     }
     const reroute = (await searchParams)?.reroute || '';
+
+    const isDev = process.env.NODE_ENV !== 'production';
+    const test = isDev && (await searchParams)?.test === 'true';
+
     let caption = 'Sign In';
     if (reroute) {
         caption = reroute.includes('profile/') ? (
@@ -36,8 +42,12 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
                         <h1 className="text-slate-800 text-lg">
                             {caption}
                         </h1>
-                        <Input required name="email" type="email" label="Email" />
-                        <Input required name="password" type="password" label="Password" />
+                        {test ? (
+                            <TestInputs />
+                        ) : <>
+                            <Input required name="email" type="email" label="Email" />
+                            <Input required name="password" type="password" label="Password" />
+                        </>}
                     </Form>
                     <Link href="signup" className="m-auto">
                         <Button
@@ -45,6 +55,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
                             style="link"
                         />
                     </Link>
+                    {isDev && <TestUserButton />}
                 </div>
             </section>
         </div>

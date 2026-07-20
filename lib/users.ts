@@ -34,6 +34,14 @@ export async function getUser(username: string): Promise<User | null> {
     return data ? camelCaseObject(data) as User : null;
 }
 
+export async function getNumberOfTestUsers(): Promise<number> {
+    const { count } = await supabaseAdmin
+        .from('users')
+        .select('*', { count: 'exact', head: true })
+        .like('id', 'test-user-%');
+    return count || 0;
+}
+
 export async function getUserAbbreviated(username: string): Promise<AbbrevUser | null> {
     const { data: user } = await supabaseAdmin
         .from('users')

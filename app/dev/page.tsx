@@ -1,25 +1,15 @@
-'use client';
-import Button from "@/components/form/button";
+'use client'
+import Form from "@/components/form/form";
 import Input from "@/components/form/input";
-import { generateDummyTroupes, generateDummyUsers } from "@/lib/dev-helpers";
-import { useState } from "react";
+import { handleDevFormSubmit } from "@/lib/dev-helpers";
 
 export default function DevPage() {
-    const [num, setNum] = useState('100');
-    const [pending, setPending] = useState(false);
     return (
-        <section className="flex flex-col items-center justify-center align-center gap-4">
-            <Input type='number' name='number' value={num} onChange={setNum} />
-            <Button caption="Create Dummy Users" disabled={pending} onClick={async () => {
-                setPending(true);
-                await generateDummyUsers(Number(num));
-                setPending(false);
-            }} />
-            <Button caption="Create Dummy Troupes" disabled={pending} onClick={async () => {
-                setPending(true);
-                await generateDummyTroupes(Number(num));
-                setPending(false);
-            }} />
+        <section>
+            <Form onSubmit={handleDevFormSubmit} className="flex flex-col items-center justify-center align-center gap-4">
+                <Input label="Create Dummy Users" type='number' name='users' />
+                <Input label="Create Dummy Troupes" type='number' name='troupes' />
+            </Form>
         </section>
     )
 }

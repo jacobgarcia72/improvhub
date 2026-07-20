@@ -1,10 +1,20 @@
+'use server';
+
 import { Role, Troupe, User } from "@/types";
-import { getAllUsersAbbreviated, saveUser } from "./users";
+import { getAllUsersAbbreviated, getNumberOfTestUsers, saveUser } from "./users";
 import { respondToTroupeInvitation, saveTroupe } from "./troupes";
 import nameGenerator from "./name-generator";
 import slugify from 'slugify';
 import { getRandomElements, removeLeadingArticles } from "./helper-functions";
-import crypto from "node:crypto";
+import { supabaseAdmin } from "./supabase-server";
+
+export async function handleDevFormSubmit(prevState: void | { message?: string }, formData: FormData) {
+    const data = Object.fromEntries(formData.entries());
+    const numberOfUsers = Number(data.users);
+    const numberOfTroupes = Number(data.troupes);
+    if (numberOfUsers > 0) await generateDummyUsers(numberOfUsers);
+    if (numberOfTroupes > 0) await generateDummyTroupes(numberOfTroupes);
+}
 
 const rnd = (top: number = 100) => Math.floor(Math.random() * top) + 1;
 const getBoyName = (): string => {
@@ -22,7 +32,7 @@ const getLastName = (): string => {
 const getLoremIpsum = (chars: number): string => 'Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos. Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos.'.slice(0, chars);
 
 const generateUserAndRoles = (count: number): [User, { [role: string]: boolean }] => {
-    const id = `test-${count}`;
+    const id = `test-user-${count}`;
 
     const images = {
         male: [
@@ -181,7 +191,7 @@ const generateTroupe = (users: { name: string, id: string, image?: string }[]): 
                 if (rnd() <= 70) theatres.push(theatre);
             });
     }
-    const players = getRandomElements(users, rnd(20))
+    const players = getRandomElements(users, rnd(10))
         .map(({ name, id }) => ({
             name,
             id: rnd() <= 80 ? id : null,
@@ -238,10 +248,21 @@ const generateTroupe = (users: { name: string, id: string, image?: string }[]): 
 }
 
 export const generateDummyUsers = async (amount: number = 100) => {
-    const userCount = (await getAllUsersAbbreviated()).length;
-    for (let i = userCount; i <= userCount + amount; i++) {
+    const userCount = await getNumberOfTestUsers();
+    for (let i = userCount + 1; i < userCount + amount; i++) {
         const [user, roles] = generateUserAndRoles(i);
-        await saveUser(user, crypto.randomUUID(), roles);
+        const { data: authData } = await supabaseAdmin.auth.admin.createUser({
+            email: `test-user-${i}@test.com`,
+            password: `test-user-${i}`,
+            email_confirm: true,
+            user_metadata: {
+                username: user.id,
+                app_user_id: user.id,
+                display_name: `${user.firstName} ${user.lastName}`
+            },
+        });
+        const uid = authData.user.id;
+        await saveUser(user, uid, roles);
     }
 }
 

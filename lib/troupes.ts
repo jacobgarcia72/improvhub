@@ -281,9 +281,13 @@ export async function respondToTroupeInvitation(troupeId: string, userId: string
 }
 
 export async function saveTroupe(troupe: Troupe, members: { name: string, id: string | null, role: Role }[]): Promise<string> {
-    const creatorId = await getCurrentUserId();
+    let creatorId = await getCurrentUserId() || '';
     if (!creatorId) {
-        throw new Error('You must be logged in to continue')
+        if (process.env.NODE_ENV === 'production') {
+            throw new Error('You must be logged in to continue');
+        } else {
+            creatorId = members[0].id || '';
+        }
     }
     const baseId = troupe.id;
     let troupeId = baseId;
