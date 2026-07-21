@@ -15,7 +15,7 @@ export default async function ChatPage({ searchParams }: { searchParams: Promise
     const { room, topic } = await searchParams;
     const user = await getCurrentUser();
     if (!user) {
-        redirect(`/login?reroute=chat`);
+        redirect(`/login?reroute=discuss`);
     }
     const chatRooms = await getChatRooms(user.id);
     return <>

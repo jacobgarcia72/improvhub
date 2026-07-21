@@ -11,8 +11,8 @@ export async function postTopic(userId: string, roomId: string, prevState: void 
     const description = (data.description as string ).trim().replaceAll(/\r\n/g, '<br>').replaceAll(/\n/g, '<br>').replaceAll(/\r/g, '<br>');
     const { success, id, message } = await saveTopic(userId, roomId, topic, description || null);
     if (success) {
-        revalidatePath(`/chat`, 'layout');
-        redirect(`/chat?room=${roomId}&topic=${id}`);
+        revalidatePath(`/discuss`, 'layout');
+        redirect(`/discuss?channel=${roomId}&topic=${id}`);
     } else {
         return { message }
     }
@@ -24,8 +24,8 @@ export async function postPost(userId: string, roomId: string, topicId: string, 
     if (!post) return { message: 'Enter a post' };
     const { success, message } = await savePost(userId, roomId, topicId, post);
     if (success) {
-        revalidatePath(`/chat`, 'layout');
-        redirect(`/chat?room=${roomId}&topic=${topicId}`);
+        revalidatePath(`/discuss`, 'layout');
+        redirect(`/discuss?channel=${roomId}&topic=${topicId}`);
     } else {
         return { message }
     }
@@ -37,7 +37,7 @@ export async function postComment(userId: string, roomId: string, topicId: strin
     if (!comment) return { message: 'Enter a comment' };
     const { success, message } = await saveComment(userId, roomId, topicId, postId, comment);
     if (success) {
-        revalidatePath(`/chat`, 'layout');
+        revalidatePath(`/discuss`, 'layout');
     } else {
         return { message }
     }

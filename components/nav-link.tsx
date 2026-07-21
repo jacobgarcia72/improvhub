@@ -15,7 +15,6 @@ export default function NavLink({ link, onClick }: {
                 {{
                     'Feed': 'Live Feed',
                     'Search': 'Find',
-                    'Chat': 'Discussion',
                 }[link] || link}
             </div>
         </Link>
