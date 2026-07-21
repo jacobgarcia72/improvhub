@@ -19,7 +19,7 @@ export default function NewCommentForm({ user, room, topic, postId }: { user: Us
 
     return (
         <div id={id} className="flex flex-row items-start justify-stretch w-full border-b border-b-mist-300 mb-4 gap-1">
-            <UserImage user={user} linkProfile={false} small />
+            <UserImage user={user} linkProfile={false} xsmall />
             {active ? <>
                 <Form smallButtons buttonCaption="Comment" className="gap-1 w-full" onSubmit={handleSubmit} cancel={() => {
                     setActive(false)
