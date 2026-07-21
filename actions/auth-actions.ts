@@ -7,6 +7,7 @@ import { supabaseAdmin } from "@/lib/supabase-server";
 import { createSupabaseServerClient } from "@/lib/supabase-ssr";
 import { User } from "@/types";
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 function isDuplicateAuthUserError(error: unknown): boolean {
@@ -61,6 +62,18 @@ function getSignupErrorMessage(error: unknown): string {
     }
 
     return 'Hmm, something went wrong. Try again later.';
+}
+
+async function getSiteUrl() {
+    const configuredUrl = process.env.NEXT_PUBLIC_SITE_URL;
+    if (configuredUrl) return configuredUrl.replace(/\/$/, '');
+
+    const headerStore = await headers();
+    const host = headerStore.get('x-forwarded-host') || headerStore.get('host');
+    if (!host) return 'http://localhost:3000';
+
+    const protocol = headerStore.get('x-forwarded-proto') || 'http';
+    return `${protocol}://${host}`;
 }
 
 export async function createUser(prevState: void | { message?: string }, formData: FormData) {
@@ -225,6 +238,50 @@ export async function login(redirectRoute = '/', prevState: void | { message?: s
     }
 
     redirect(redirectRoute);
+}
+
+export async function requestPasswordReset(prevState: void | { message?: string }, formData: FormData) {
+    const email = (formData.get('email') as string).trim().toLowerCase();
+    if (!email) return { message: 'Email is required' };
+
+    const siteUrl = await getSiteUrl();
+    const supabase = await createSupabaseServerClient();
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${siteUrl}/auth/callback?next=/account/reset-password`,
+    });
+
+    if (error) {
+        console.error(error);
+        return { message: 'Unable to send a password reset email right now.' };
+    }
+
+    redirect('/login/forgot-password?sent=true');
+}
+
+export async function resetForgottenPassword(prevState: void | { message?: string }, formData: FormData) {
+    const newPassword = formData.get('newPassword') as string;
+    const confirmNewPassword = formData.get('confirmNewPassword') as string;
+
+    if (!newPassword) return { message: 'New password is required' };
+    if (newPassword.length < 8) return { message: 'New password must be at least 8 characters' };
+    if (newPassword !== confirmNewPassword) return { message: 'New passwords do not match' };
+
+    const supabase = await createSupabaseServerClient();
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+        return { message: 'This reset link is invalid or has expired. Request a new reset email.' };
+    }
+
+    const { error } = await supabase.auth.updateUser({
+        password: newPassword,
+    });
+
+    if (error) {
+        console.error(error);
+        return { message: 'Failed to update password' };
+    }
+
+    redirect('/account?passwordChanged=true');
 }
 
 export async function logout() {

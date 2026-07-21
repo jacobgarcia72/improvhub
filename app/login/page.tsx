@@ -37,7 +37,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
     return (
         <div className="w-full min-h-[calc(100vh-100px)] flex flex-col items-center justify-center">
             <section className="small-section">
-                <div className="flex flex-col m-auto max-w-md pb-8 pt-4">
+                <div className="flex flex-col m-auto max-w-md pb-6 pt-4">
                     <Form onSubmit={login.bind(null, `/${reroute}`)}>
                         <h1 className="text-slate-800 text-lg">
                             {caption}
@@ -47,6 +47,9 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
                         ) : <>
                             <Input required name="email" type="email" label="Email" />
                             <Input required name="password" type="password" label="Password" />
+                            <Link href="/login/forgot-password" className="link text-sm self-end -my-2">
+                                Forgot password?
+                            </Link>
                         </>}
                     </Form>
                     <Link href="signup" className="m-auto">
