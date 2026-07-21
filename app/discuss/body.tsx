@@ -39,7 +39,7 @@ export default async function MessagesBody({ user, room, topic }: { user: User, 
                 </Suspense>
                 <div className="pt-1.5">
                     <Link
-                        href={`/chat/new-topic?channel=${room}`}
+                        href={`/discuss/new-topic?channel=${room}`}
                     >
                         <Button className="w-48" caption="New Topic" />
                     </Link>

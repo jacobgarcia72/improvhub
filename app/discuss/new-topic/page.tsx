@@ -14,7 +14,7 @@ export default async function NewChatPage({ searchParams }: { searchParams: Prom
         redirect(`/login?reroute=discuss`);
     }
     const params = await searchParams;
-    const room = params.room as string;
+    const room = params.channel as string;
     if (!room) {
         redirect(`/discuss`);
     }
