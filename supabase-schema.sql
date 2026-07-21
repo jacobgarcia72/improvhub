@@ -217,26 +217,22 @@ create table if not exists topics (
 );
 
 create table if not exists posts (
-  id text not null,
+  id text primary key,
   room text not null,
   topic_id text not null,
   post text not null,
   creator text not null,
-  date text not null,
-  primary key (room, topic_id, id),
-  foreign key (room, topic_id) references topics(room, id) on delete cascade
+  date text not null
 );
 
 create table if not exists comments (
-  id text not null,
+  id text primary key,
   room text not null,
   topic_id text not null,
   post_id text not null,
   comment text not null,
   creator text not null,
-  date text not null,
-  primary key (room, topic_id, post_id, id),
-  foreign key (room, topic_id, post_id) references posts(room, topic_id, id) on delete cascade
+  date text not null
 );
 
 create table if not exists news (

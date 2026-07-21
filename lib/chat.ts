@@ -39,6 +39,9 @@ export async function getTopics(room: string): Promise<Topic[]> {
         .select('*')
         .eq('room', room);
     const generalTopic: Topic = { room, title: 'General', id: 'general', description: null };
+    if (room === 'general' && !data?.length) {
+
+    }
     return [...(data || []).map(camelCaseObject), generalTopic];
 }
 
