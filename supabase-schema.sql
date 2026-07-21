@@ -69,6 +69,7 @@ create table if not exists shows (
 create table if not exists show_occurrences (
   event_id text not null references shows(id) on delete cascade,
   date_time text not null,
+  cancelled boolean,
   looking_for_troupes boolean,
   looking_for_players boolean,
   looking_for_directors boolean,
@@ -106,6 +107,7 @@ create table if not exists jams (
 create table if not exists jam_occurrences (
   event_id text not null references jams(id) on delete cascade,
   date_time text not null,
+  cancelled boolean,
   primary key (event_id, date_time)
 );
 
@@ -129,6 +131,7 @@ create table if not exists workshops (
 create table if not exists workshop_occurrences (
   event_id text not null references workshops(id) on delete cascade,
   date_time text not null,
+  cancelled boolean,
   primary key (event_id, date_time)
 );
 
@@ -152,6 +155,7 @@ create table if not exists classes (
 create table if not exists class_occurrences (
   event_id text not null references classes(id) on delete cascade,
   date_time text not null,
+  cancelled boolean,
   primary key (event_id, date_time)
 );
 

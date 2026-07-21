@@ -33,6 +33,7 @@ export type EventTypeFilter = EventType | 'all';
 
 export interface Event {
     id: string;
+    type?: EventType;
     creatorId: string;
     admins: string[];
     title: string;
@@ -56,6 +57,7 @@ export interface Event {
 export interface EventOccurrence {
     eventId: string;
     dateTime: string;
+    cancelled?: boolean;
 }
 
 export interface Showing extends EventOccurrence {

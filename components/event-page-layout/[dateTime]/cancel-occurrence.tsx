@@ -27,7 +27,7 @@ export default function CancelOccurrence({ dateTime, eventTitle, eventId, type }
         <ConfirmModal
             open={openModal}
             title={`Cancel ${type} occurrence?`}
-            description={`Are you sure you want to cancel ${event}?`}
+            description={`Are you sure you want to cancel ${event}? This action cannot be undone.`}
             onCancel={() => setOpenModal(false)}
             onConfirm={handleConfirm}
             confirmLabel="Yes"

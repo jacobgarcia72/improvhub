@@ -1,6 +1,7 @@
 import { Event, InputOption, Role, Showing } from "@/types";
 import { addDays, formatDate, getWeekdayOccurence, isLastOfMonth } from "./dates";
 import { isAState, separateCityAndState } from "./location";
+import { getEventOccurrence } from "./shows";
 
 export function validateInputValue(value: string, type: 'price' | 'zipcode' | 'username'): boolean {
     if (type === 'price') return /^\d*\.?\d?\d?$/.test(value);
@@ -111,9 +112,7 @@ export const removeLeadingArticles = (text: string): string => {
     return result;
 }
 
-export const arrangeEventsByDate = (showings: Showing[], shows: Event[], startingDate?: string, limit: number = 30, maxDaysSearched = 365): {
-    [date: string]: { time: string, event: Event }[]
-} | null => {
+export const arrangeEventsByDate = async (showings: Showing[], shows: Event[], startingDate?: string, limit: number = 30, maxDaysSearched = 365): Promise<{ [date: string]: { time: string, event: Event }[] } | null> => {
     const date = startingDate ? new Date(startingDate) : new Date();
     const res: { [date: string]: { time: string, event: Event }[] } = { };
     let daysSearched = 0;
@@ -123,14 +122,25 @@ export const arrangeEventsByDate = (showings: Showing[], shows: Event[], startin
         const scheduledShowingsOnDate = showings.filter(({dateTime}) => {
             const date = dateTime.split(' ')[0];
             return date === dateString
-        })
-        const recurringShowsOnDate = shows.filter((show) => (
-            (show.recurringDay || show.recurringDay == 0) &&
-            show.recurringDay?.toString() === dayOfWeek?.toString() && (
-                show.cadence?.includes(`${getWeekdayOccurence(dateString)}`) ||
-                show.cadence === 'last' && isLastOfMonth(dateString)
-            )
-        ));
+        });
+        const recurringShowsOnDate: Event[] = [];
+        for (let i = 0; i < shows.length; i++) {
+            const show = shows[i];
+            if (!show.recurringTime) continue;
+            if (
+                (
+                    show.recurringDay || show.recurringDay == 0
+                ) && (
+                    show.recurringDay?.toString() === dayOfWeek?.toString()
+                ) && (
+                    show.cadence?.includes(`${getWeekdayOccurence(dateString)}`) ||
+                    show.cadence === 'last' && isLastOfMonth(dateString)
+                )
+            ) {
+                const showingIsCancelled = !!show.type && (await getEventOccurrence(show.id, `${dateString} ${show.recurringTime}`, show.type, true))?.cancelled;
+                if (!showingIsCancelled) recurringShowsOnDate.push(show);
+            }
+        }
         if (scheduledShowingsOnDate.length || recurringShowsOnDate.length) {
             res[dateString] = scheduledShowingsOnDate
                 .map(({ dateTime, eventId }) => {

@@ -1,4 +1,4 @@
-import { getEventOccurrences } from "@/lib/shows";
+import { getEventOccurrence, getEventOccurrences } from "@/lib/shows";
 import { formatDateTimeForDisplay, formatTime, splitPastAndFutureDates, sortDates, weekdays, addDays, formatDate, getWeekdayOccurence, isLastOfMonth } from "@/lib/dates";
 import Button from "@/components/form/button";
 import { CadenceText, Event, EventType } from "@/types";
@@ -44,7 +44,8 @@ export default async function EventDetails({ event, type }: {
                     if (event.recurringTime) {
                         dateTimeStr += ` ${event.recurringTime}`;
                     }
-                    dateTimes.push(dateTimeStr);
+                    const occurrenceIsCancelled = (await getEventOccurrence(event.id, dateTimeStr, type, true))?.cancelled === true;
+                    if (!occurrenceIsCancelled) dateTimes.push(dateTimeStr);
                 }
             }
             currentDate = addDays(currentDate, 1);

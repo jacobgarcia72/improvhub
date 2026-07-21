@@ -173,6 +173,7 @@ export async function getUpcomingEventsByTheatre(theatre: Theatre, type: EventTy
     const { data } = await supabaseAdmin
         .from(`${type}_occurrences`)
         .select('event_id, date_time')
+        .or('cancelled.neq.true,cancelled.is.null')
         .in('event_id', eventsAtTheatre.map(({ id }: { id: string }) => id))
         .gte('date_time', getStartOfToday());
 
@@ -206,6 +207,7 @@ export async function getEventOccurrences(eventId: string, type: EventType): Pro
     const { data, error } = await supabaseAdmin
         .from(`${type}_occurrences`)
         .select('*')
+        .or('cancelled.neq.true,cancelled.is.null')
         .eq('event_id', eventId);
     if (error) throw error;
     return (data || []).map(camelCaseObject) as EventOccurrence[];
@@ -215,7 +217,7 @@ export async function getShowings(eventId: string): Promise<Showing[]> {
     return await getEventOccurrences(eventId, 'show') as Showing[];
 }
 
-export async function getEventOccurrence(eventId: string, dateTime: string, type: EventType): Promise<Showing | null> {
+export async function getEventOccurrence(eventId: string, dateTime: string, type: EventType, includeCancelledEvents = false): Promise<Showing | null> {
     const normalizedDateTime = dateTime.replaceAll('%20', ' ').replaceAll('%3A', ':');
     const { data, error } = await supabaseAdmin
         .from(`${type}_occurrences`)
@@ -224,13 +226,16 @@ export async function getEventOccurrence(eventId: string, dateTime: string, type
         .eq('date_time', normalizedDateTime)
         .maybeSingle();
     if (error) throw error;
-    return data ? camelCaseObject(data) as Showing : null;
+    let res = data ? camelCaseObject(data) as Showing : null;
+    if (res?.cancelled === true && !includeCancelledEvents) res = null;
+    return res;
 }
 
 export async function getIsASeries(eventId: string, type: EventType): Promise<boolean> {
     const { count, error } = await supabaseAdmin
         .from(`${type}_occurrences`)
         .select('*', { count: 'exact', head: true })
+        .or('cancelled.neq.true,cancelled.is.null')
         .eq('event_id', eventId);
     if (error) throw error;
     return count > 1;
@@ -242,7 +247,8 @@ export async function getOccurrencesForEvents(eventIds: string[], type: EventTyp
         const { data, error } = await supabaseAdmin
             .from(`${type}_occurrences`)
             .select('*')
-            .in('event_id', eventIds);
+            .in('event_id', eventIds)
+            .or('cancelled.neq.true,cancelled.is.null');
         if (error) console.error(error);
         if (data) res = data;
     } else {
@@ -250,6 +256,7 @@ export async function getOccurrencesForEvents(eventIds: string[], type: EventTyp
             .from(`${type}_occurrences`)
             .select('*')
             .in('event_id', eventIds)
+            .or('cancelled.neq.true,cancelled.is.null')
             .gte('date_time', getStartOfToday());
         if (error) console.error(error);
         if (data) res = data;
@@ -275,7 +282,7 @@ export async function getEventsByTheatre(theatre: string, type: EventTypeFilter)
                 .from(pluralize(eventType))
                 .select('*')
                 .ilike('theatre', theatre);
-            return data || [];
+            return (data || []).map((row: any) => ({ ...row, type: eventType }));
         }));
         return eventResults.flat().map(camelCaseObject) as Event[];
     }
@@ -297,7 +304,7 @@ export async function getEventsInRange(cityOrZipcode: string, miles: number, typ
                 .from(pluralize(eventType))
                 .select('*');
             if (error) throw error;
-            return data || [];
+            return (data || []).map((row: any) => ({ ...row, type: eventType }));
         }));
         return eventResults
             .flat()
@@ -487,7 +494,8 @@ export async function saveEvent(type: EventType, event: Event, occurrences: Even
                 )
                 .map((occurrence) => ({
                     event_id: event.id,
-                    date_time: occurrence.dateTime
+                    date_time: occurrence.dateTime,
+                    cancelled: false
                 }));
             const occurrencesToDelete = existingOccurrences
                 .filter((existingOccurrence) => !occurrences
@@ -502,7 +510,9 @@ export async function saveEvent(type: EventType, event: Event, occurrences: Even
             }
             await supabaseAdmin
                 .from(`${type}_occurrences`)
-                .insert(newOccurrences);
+                .upsert(newOccurrences, {
+                    onConflict: 'event_id,date_time'
+                });
         }
     return event.id;
     }
@@ -613,9 +623,11 @@ export async function deleteOccurrence(eventId: string, dateTime: string, type: 
     const eventTitle = showData.title;
     await supabaseAdmin
         .from(`${type}_occurrences`)
-        .delete()
-        .eq('event_id', eventId)
-        .eq('date_time', normalizedDateTime);
+        .upsert({
+            event_id: eventId,
+            date_time: normalizedDateTime,
+            cancelled: true
+        });
     if (type === 'show') {
         const { data } = await supabaseAdmin
             .from('showing_cast')
