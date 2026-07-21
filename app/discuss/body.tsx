@@ -28,7 +28,7 @@ export default async function MessagesBody({ user, room, topic: topicId }: { use
                 <div className="flex flex-col gap-2 items-center">
                     <Suspense fallback={<Loader />}>
                         {posts.map((p) => <PostCard key={p.id} post={p} user={user} room={room} topic={topicId} />)}
-                        {posts.length === 0 && <p className="text-mist-600">No posts found.</p>}
+                        {posts.length === 0 && <p className="text-mist-600 dark:text-mist-300">No posts found.</p>}
                     </Suspense>
                 </div>
             </section>

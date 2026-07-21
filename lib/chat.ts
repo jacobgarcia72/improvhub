@@ -25,7 +25,6 @@ export async function getChatRooms(userId: string): Promise<{
 
 export async function getTopic(room: string, topic: string): Promise<Topic | null> {
     if (topic === 'general') return ({ room, title: 'General', id: 'general', description: null });
-    console.log({room, topic})
     const { data } = await supabaseAdmin
         .from('topics')
         .select('*')

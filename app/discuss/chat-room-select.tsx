@@ -56,7 +56,7 @@ export default function ChatRoomSelect({ chatRooms, onSelect }: {
 
     function ChatRoomOption(chatRoom: InputOptionObject) {
         return (
-            <div onClick={() => handleSelect(chatRoom.id.toString())} key={chatRoom.id} className="w-full py-2 px-4 cursor-pointer hover:bg-blue-500 hover:text-white flex flex-row gap-2">
+            <div onClick={() => handleSelect(chatRoom.id.toString())} key={chatRoom.id} className="w-full py-2 px-4 cursor-pointer hover:bg-blue-500 dark:hover:bg-blue-900 hover:text-white flex flex-row gap-2">
                 {displayNameAndImage(chatRoom)}
             </div>
         )
@@ -70,14 +70,14 @@ export default function ChatRoomSelect({ chatRooms, onSelect }: {
                     onClick={() => setIsOpen(false)}
                     className="z-0 cursor-pointer w-full h-full fixed left-0 top-0"
                 ></div>
-                <div className="max-h-72 overflow-y-scroll overflow-x-hidden z-50 dropdown bg-white/90 border-gray-300 border-1 rounded absolute top-9.5 w-86 max-w-[90vw] flex flex-col">
+                <div className="max-h-72 overflow-y-scroll overflow-x-hidden z-50 dropdown bg-white/90 dark:bg-black/90 border-gray-300 border-1 rounded absolute top-9.5 w-86 max-w-[90vw] flex flex-col">
                     {ChatRoomOption(globalChatRoom)}
                     {theatres.map(ChatRoomOption)}
                     {troupes.map(ChatRoomOption)}
                 </div>
             </> : null}
             <div
-                className="cursor-pointer flex items-center px-4 h-10 w-86 max-w-[90vw] transition-colors mb-0.5 bg-white hover:bg-blue-500 text-gray-700 dark:text-gray-400 hover:text-white rounded-md border-1 border-gray-300"
+                className="cursor-pointer flex items-center px-4 h-10 w-86 max-w-[90vw] transition-colors mb-0.5 bg-white dark:bg-black hover:bg-blue-500 dark:hover:bg-blue-900 text-gray-700 dark:text-gray-400 hover:text-white rounded-md border-1 border-gray-300"
                 onClick={() => setIsOpen(!isOpen)}
             >
                 <div className="flex flex-row items-center gap-1">{room && displayNameAndImage(getChatRoomObject(room) || globalChatRoom) || 'Select Discussion Board'}</div>

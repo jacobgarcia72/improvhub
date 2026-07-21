@@ -12,7 +12,7 @@ export default function NewPostForm({ user, room, topic }: { user: User, room: s
         <div className="flex flex-row items-start justify-stretch w-full border-b border-b-mist-200 mb-4">
             {active ? <>
                 <UserImage user={user} linkProfile={false} />
-                <Form buttonCaption="Post" className="gap-1 w-full" onSubmit={postPost.bind(null, user.id, room, topic)} cancel={() => {
+                <Form buttonCaption="Post" className="gap-1 w-full ml-2" onSubmit={postPost.bind(null, user.id, room, topic)} cancel={() => {
                     setActive(false)
                 }}>
                     <Text name="post" rows={4} />
@@ -20,7 +20,7 @@ export default function NewPostForm({ user, room, topic }: { user: User, room: s
             </> : (
                 <div
                     onClick={() => setActive(true)}
-                    className="w-full border border-gray-300 rounded px-3 py-2 mb-3 text-mist-600 cursor-pointer"
+                    className="dark:bg-black dark:text-white/70 w-full border border-gray-300 dark:gray-800 rounded px-3 py-2 mb-3 text-mist-600 cursor-pointer"
                 >
                     <p>Write something...</p>
                 </div>
