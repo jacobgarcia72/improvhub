@@ -16,7 +16,7 @@ export default function ChatRoomSelect({ chatRooms, onSelect }: {
     const pathname = usePathname();
     const { replace } = useRouter();
     const params = new URLSearchParams(searchParams);
-    const room = searchParams.get('room');
+    const room = searchParams.get('channel');
 
     const { troupes, theatres } = chatRooms;
     const [isOpen, setIsOpen] = useState(false);
@@ -27,7 +27,7 @@ export default function ChatRoomSelect({ chatRooms, onSelect }: {
         replace(pathname);
         if (roomId) {
             params.delete('topic');
-            params.set('room', roomId);
+            params.set('channel', roomId);
             replace(`${pathname}?${params.toString()}`);
         }
     }
