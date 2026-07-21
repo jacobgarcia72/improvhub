@@ -24,6 +24,16 @@ export async function getEvent(id: string, type: EventType): Promise<Event | nul
     return data ? camelCaseObject(data) as Event : null;
 }
 
+export async function getEventInstructors(id: string, type: EventType): Promise<string[]> {
+    const { data, error } = await supabaseAdmin
+        .from(`${pluralize(type)}`)
+        .select('instructors')
+        .eq('id', id)
+        .maybeSingle();
+    if (error) throw error;
+    return data?.instructors || [];
+}
+
 export async function getShow(id: string): Promise<Event | null> {
     return await getEvent(id, 'show');
 }
@@ -525,11 +535,13 @@ export async function updateEventAdmins(type: EventType, eventId: string, admins
         .eq('id', eventId);
 }
 
-export async function updateEventInstructors(type: EventType, eventId: string, instructors: string[]) {
+export async function updateEventInstructors(type: EventType, eventId: string, instructors: string[], userId: string) {
+    const currentInstructors = await getEventInstructors(eventId, type);
     await supabaseAdmin
         .from(pluralize(type))
         .update({ instructors })
         .eq('id', eventId);
+    postNotification(userId, instructors.filter((i) => !currentInstructors.includes(i) && i !== userId), 'made_instructor', `${type},${eventId}`)
 }
 
 export async function updateShowing(showId: string, dateTime: string, updates: Partial<Showing>, cast?: Partial<ShowCastMember>[]): Promise<boolean> {

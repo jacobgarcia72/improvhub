@@ -228,6 +228,25 @@ export default async function NotificationCard({ notification, userId, isNew }: 
             return <Wrapper date={date} isNew={isNew}>
                 <p>{data} has been cancelled</p>
             </Wrapper>
+        case 'made_instructor':
+            if (!data) return null;
+            const [instructorEventType, instructorEventId] = data.split(',');
+            const instructorAddedBy = await getUserAbbreviated(senderId);
+            const instructorEvent = await getEvent(instructorEventId, instructorEventType as EventType);
+            if (!instructorEvent) return null;
+            const instructorTitle = instructorEventType === 'jam' ? 'a host' : 'an instructor';
+            return <Wrapper date={date} isNew={isNew} image={instructorEvent.image || instructorAddedBy?.image} imageLink={instructorEvent.image ? `/${pluralize(instructorEventType)}/${instructorEventId}` : `/profile/${senderId}`} imageAlt={instructorEvent.image ? instructorEvent.title : instructorAddedBy?.name}>
+                <p>
+                    {instructorAddedBy ? <>
+                        <Link href={`/profile/${senderId}`} className="link">
+                            {instructorAddedBy.name}
+                        </Link> added you as {instructorTitle}
+                    </> : <>
+                        You&apos;ve been added  as {instructorTitle}
+                    </>} for <Link className="link" href={`/${pluralize(instructorEventType)}/${instructorEventId}`}>{instructorEvent.title}</Link>
+                </p>
+            </Wrapper>
+            
         default:
             break;
     }

@@ -33,7 +33,7 @@ export default async function EventInstructorsPage({ id, type }: { id: string, t
             <AdminsInputs
                 label={label}
                 currentAdmins={instructors || []}
-                onSubmit={postEventInstructors.bind(null, type, id)}
+                onSubmit={postEventInstructors.bind(null, type, id, userId)}
                 cancel={onCancel}
             />
         </div>

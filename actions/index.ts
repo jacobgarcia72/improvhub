@@ -202,7 +202,7 @@ export async function postEventAdmins(type: EventType, eventId: string, prevStat
     redirect(`/${pluralize(type)}/${eventId}/`);
 }
 
-export async function postEventInstructors(type: EventType, eventId: string, prevState: void | { message?: string }, formData: FormData) {
+export async function postEventInstructors(type: EventType, eventId: string, userId: string, prevState: void | { message?: string }, formData: FormData) {
     const data = Object.fromEntries(formData.entries());
 
     const instructors = Object.keys(data)
@@ -212,7 +212,7 @@ export async function postEventInstructors(type: EventType, eventId: string, pre
             Boolean((data[key] as string).trim())
         ))
         .map((key) => (data[`${key}-id`] as string)?.trim());
-    await updateEventInstructors(type, eventId, instructors);
+    await updateEventInstructors(type, eventId, instructors, userId);
     revalidatePath(`/${pluralize(type)}/${eventId}/`);
     redirect(`/${pluralize(type)}/${eventId}/`);
 }

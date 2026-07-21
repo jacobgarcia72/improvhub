@@ -230,7 +230,8 @@ export type NotificationType =
     'show_occurrence_cancelled' |
     'jam_occurrence_cancelled' |
     'workshop_occurrence_cancelled' |
-    'class_occurrence_cancelled';
+    'class_occurrence_cancelled' |
+    'made_instructor';
 
 export type Notification = {
     id: string;
