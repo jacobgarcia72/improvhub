@@ -147,3 +147,12 @@ export const deletePost = async (postId: string) => {
         .eq('post_id', postId);
     revalidatePath('/discuss');
 }
+
+export const deleteComment = async (commentId: string, postId: string) => {
+    await supabaseAdmin
+        .from('comments')
+        .delete()
+        .eq('id', commentId)
+        .eq('post_id', postId);
+    revalidatePath('/discuss');
+}

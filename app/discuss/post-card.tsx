@@ -30,11 +30,14 @@ export default async function PostCard({ post, user, room, topic }: { post: Disc
                     return (
                         <div key={c.id} className="flex flex-row gap-1">
                             {commenter ? <UserImage xsmall user={commenter} /> : null}
-                            <p className="w-full border border-gray-300 dark:bg-black dark:text-mist-100 rounded px-3 py-2 text-mist-600">
-                                <span className="text-blue-500 text-[0.9em]">{commenter ? (
-                                    <Link href={`/profile/${commenter.id}`}>{name}</Link>
-                                ): '[deleted]'}:</span>&nbsp;{c.comment}
-                            </p>
+                            <div className="flex flex-row w-full border border-gray-300 dark:bg-black rounded px-3 py-2">
+                                <p className="grow-1 w-full dark:text-mist-100 text-mist-600">
+                                    <span className="text-blue-500 text-[0.9em]">{commenter ? (
+                                        <Link href={`/profile/${commenter.id}`}>{name}</Link>
+                                    ): '[deleted]'}:</span>&nbsp;{c.comment}
+                                </p>
+                                {user.id === c.creator ? <DeletePost postId={post.id} commentId={c.id} /> : null}
+                            </div>
                         </div>
                     )
                 })}
