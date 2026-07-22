@@ -107,6 +107,7 @@ export default async function TroupeLayout({ params, children }: Props) {
                 <div className="px-8 pt-2">
                     {troupe.description?.split('<br>').map((line, i) => <P key={i}>{line}</P>)}
                 </div>
+                {currentUser && isMember && <Link className="ml-9 link" href={`/discuss?channel=troupe-${id}`}>Troupe Member Channel</Link>}
             </section>
             {children}
             {(troupe.city && troupe.state) || theatres.length > 0 ? (
