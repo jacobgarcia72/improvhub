@@ -12,7 +12,7 @@ export default async function MessagesBody({ user, room, topic: topicId }: { use
     if (!room) {
         return (
             <section>
-                <p>Select Discussion Board</p>
+                <p>Select Channel</p>
             </section>
         )
     } else if (topicId) {

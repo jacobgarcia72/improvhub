@@ -63,7 +63,7 @@ export default function ChatRoomSelect({ chatRooms, onSelect }: {
     }
 
     return <div className="flex flex-col">
-        <div className="label mt-[-6px]">Discussion Board</div>
+        <div className="label mt-[-6px]">Channel</div>
         <div onClick={() => setIsOpen(!isOpen)} className="relative">
             {isOpen ? <>
                 <div
@@ -80,7 +80,7 @@ export default function ChatRoomSelect({ chatRooms, onSelect }: {
                 className="cursor-pointer flex items-center px-4 h-10 w-86 max-w-[90vw] transition-colors mb-0.5 bg-white dark:bg-black hover:bg-blue-500 dark:hover:bg-blue-900 text-gray-700 dark:text-gray-400 hover:text-white rounded-md border-1 border-gray-300"
                 onClick={() => setIsOpen(!isOpen)}
             >
-                <div className="flex flex-row items-center gap-1">{room && displayNameAndImage(getChatRoomObject(room) || globalChatRoom) || 'Select Discussion Board'}</div>
+                <div className="flex flex-row items-center gap-1">{room && displayNameAndImage(getChatRoomObject(room) || globalChatRoom) || 'Select Channel'}</div>
             </div>
         </div>
     </div>
