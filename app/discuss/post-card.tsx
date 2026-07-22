@@ -4,6 +4,7 @@ import UserImage from "./user-image";
 import NewCommentForm from "./new-comment-form";
 import { getComments } from "@/lib/chat";
 import Link from "next/link";
+import DeletePost from "./delete-post";
 
 export default async function PostCard({ post, user, room, topic }: { post: DiscussionPost, user: User, room: string, topic: string }) {
     const { post: body } = post;
@@ -17,10 +18,11 @@ export default async function PostCard({ post, user, room, topic }: { post: Disc
                 </div>
             ) : null}
             <div className="flex flex-col w-full gap-1 pl-2">
-                <div className="border border-slate-400 bg-slate-100/40 rounded py-2 px-4">
-                    <p className="text-mist-900"><span className="text-blue-500 text-[0.9em]">{poster ? (
+                <div className="flex flex-row border border-slate-400 bg-slate-100/40 rounded py-2 px-4">
+                    <p className="text-mist-900 grow-1"><span className="text-blue-500 text-[0.9em]">{poster ? (
                         <Link href={`/profile/${poster.id}`}>{`${poster.firstName} ${poster.lastName[0]}`}</Link>
                     ): '[deleted]'}:</span>&nbsp;{body.replaceAll('<br>', '\n')}</p>
+                    {user.id === post.creator ? <DeletePost postId={post.id} /> : null}
                 </div>
                 {comments.map(async (c) => {
                     const commenter = await getUser(c.creator);

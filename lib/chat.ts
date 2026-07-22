@@ -7,6 +7,7 @@ import { getUser } from './users';
 import { supabaseAdmin } from './supabase-server';
 import slugify from 'slugify';
 import { camelCaseObject, getRandomNumberString, snakeCaseObject } from './helper-functions';
+import { revalidatePath } from 'next/cache';
 
 export async function getChatRooms(userId: string): Promise<{
     theatres: InputOptionObject[],
@@ -133,4 +134,16 @@ export async function saveComment(userId: string, room: string, topicId: string,
         console.error(error);
         return { success: false, message: 'Something went wrong', id };
     }
+}
+
+export const deletePost = async (postId: string) => {
+    await supabaseAdmin
+        .from('posts')
+        .delete()
+        .eq('id', postId);
+    await supabaseAdmin
+        .from('comments')
+        .delete()
+        .eq('post_id', postId);
+    revalidatePath('/discuss');
 }
