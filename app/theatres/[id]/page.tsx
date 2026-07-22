@@ -40,6 +40,7 @@ export default async function TheatreDetailsPage({ params }: {
             ) : null}
             <section>
                 <div className="px-7 flex flex-col gap-1">
+                    <Link className="link mb-2" href={`/discuss?channel=theatre-${id}`}>Theatre Discussion Channel</Link>
                     <div>
                         {address ? <p className="text-slate-700 dark:text-slate-300">{address}</p> : null}
                         {location ? <p className="text-slate-700 dark:text-slate-300">{location}</p> : null}
