@@ -1,16 +1,17 @@
 'use client'
 import { optimizeImage } from "@/lib/optimize-image";
-import { InputOptionObject } from "@/types";
+import { InputOptionObject, Theatre } from "@/types";
 import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
-export default function ChatRoomSelect({ chatRooms, onSelect }: {
+export default function ChatRoomSelect({ chatRooms, onSelect, theatre }: {
     chatRooms: {
         theatres: InputOptionObject[],
         troupes: InputOptionObject[]
     },
-    onSelect?: (id: string | null) => void;
+    onSelect?: (id: string | null) => void,
+    theatre?: Theatre | null
 }) {
     const searchParams = useSearchParams();
     const pathname = usePathname();
@@ -41,7 +42,7 @@ export default function ChatRoomSelect({ chatRooms, onSelect }: {
     const getChatRoomObject = (id: string): InputOptionObject | null => {
         if (id === 'global') return globalChatRoom;
         if (id.startsWith('troupe')) return troupes.find(t => t.id === id) || null;
-        if (id.startsWith('theatre')) return theatres.find(t => t.id === id) || null;
+        if (id.startsWith('theatre')) return theatres.find(t => t.id === id) || theatre && ({ id: theatre.id, text: theatre.name, image: theatre.image}) || null;
         return null;
     }
 
