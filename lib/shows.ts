@@ -34,6 +34,16 @@ export async function getEventInstructors(id: string, type: EventType): Promise<
     return data?.instructors || [];
 }
 
+export async function getEventAdmins(id: string, type: EventType): Promise<string[]> {
+    const { data, error } = await supabaseAdmin
+        .from(`${pluralize(type)}`)
+        .select('admins')
+        .eq('id', id)
+        .maybeSingle();
+    if (error) throw error;
+    return data?.admins || [];
+}
+
 export async function getShow(id: string): Promise<Event | null> {
     return await getEvent(id, 'show');
 }
@@ -528,11 +538,13 @@ export async function saveEvent(type: EventType, event: Event, occurrences: Even
     }
 }
 
-export async function updateEventAdmins(type: EventType, eventId: string, admins: string[]) {
+export async function updateEventAdmins(type: EventType, eventId: string, admins: string[], userId: string) {
+    const currentAdmins = await getEventAdmins(eventId, type);
     await supabaseAdmin
         .from(pluralize(type))
         .update({ admins })
         .eq('id', eventId);
+    postNotification(userId, admins.filter((i) => !currentAdmins.includes(i) && i !== userId), 'made_admin', `${type},${eventId}`)
 }
 
 export async function updateEventInstructors(type: EventType, eventId: string, instructors: string[], userId: string) {

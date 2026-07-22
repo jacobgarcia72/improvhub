@@ -29,7 +29,7 @@ export default async function EventAdminsPage({ id, type }: { id: string, type: 
             <h3 className="mt-3 mb-3 font-semibold text-sm">{capitalize(type)} Page Admins</h3>
             <AdminsInputs
                 currentAdmins={admins}
-                onSubmit={postEventAdmins.bind(null, type, id)}
+                onSubmit={postEventAdmins.bind(null, type, id, userId)}
                 cancel={onCancel}
             />
         </div>

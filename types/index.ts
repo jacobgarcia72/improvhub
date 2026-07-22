@@ -231,6 +231,7 @@ export type NotificationType =
     'jam_occurrence_cancelled' |
     'workshop_occurrence_cancelled' |
     'class_occurrence_cancelled' |
+    'made_admin' |
     'made_instructor';
 
 export type Notification = {

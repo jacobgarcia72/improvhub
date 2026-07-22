@@ -229,12 +229,16 @@ export default async function NotificationCard({ notification, userId, isNew }: 
                 <p>{data} has been cancelled</p>
             </Wrapper>
         case 'made_instructor':
+        case 'made_admin':
             if (!data) return null;
             const [instructorEventType, instructorEventId] = data.split(',');
             const instructorAddedBy = await getUserAbbreviated(senderId);
             const instructorEvent = await getEvent(instructorEventId, instructorEventType as EventType);
             if (!instructorEvent) return null;
-            const instructorTitle = instructorEventType === 'jam' ? 'a host' : 'an instructor';
+            let instructorTitle = 'an admin';
+            if (type === 'made_instructor') {
+                instructorTitle = instructorEventType === 'jam' ? 'a host' : 'an instructor';
+            }
             return <Wrapper date={date} isNew={isNew} image={instructorEvent.image || instructorAddedBy?.image} imageLink={instructorEvent.image ? `/${pluralize(instructorEventType)}/${instructorEventId}` : `/profile/${senderId}`} imageAlt={instructorEvent.image ? instructorEvent.title : instructorAddedBy?.name}>
                 <p>
                     {instructorAddedBy ? <>

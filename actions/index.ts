@@ -186,7 +186,7 @@ export async function postShowCast(showId: string, showDateTime: string, prevSta
     redirect(`/shows/${showId}/${showDateTime}`);
 }
 
-export async function postEventAdmins(type: EventType, eventId: string, prevState: void | { message?: string }, formData: FormData) {
+export async function postEventAdmins(type: EventType, eventId: string, userId: string, prevState: void | { message?: string }, formData: FormData) {
     const data = Object.fromEntries(formData.entries());
 
     const admins = Object.keys(data)
@@ -197,7 +197,7 @@ export async function postEventAdmins(type: EventType, eventId: string, prevStat
         ))
         .map((key) => (data[`${key}-id`] as string)?.trim());
     if (!admins.length) return { message: `${capitalize(pluralize(type))} must have at least one admin` };
-    await updateEventAdmins(type, eventId, admins);
+    await updateEventAdmins(type, eventId, admins, userId);
     revalidatePath(`/${pluralize(type)}/${eventId}/`);
     redirect(`/${pluralize(type)}/${eventId}/`);
 }
