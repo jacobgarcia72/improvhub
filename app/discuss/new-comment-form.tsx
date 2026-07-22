@@ -34,7 +34,7 @@ export default function NewCommentForm({ user, room, topic, postId }: { user: Us
                             document.querySelector<HTMLTextAreaElement>(`#${id} #comment`)?.focus();
                         }, 0);
                     }}
-                    className="w-full border border-gray-300 rounded px-3 py-2 mb-3 text-mist-600 cursor-pointer"
+                    className="w-full border dark:bg-black dark:text-mist-300 border-gray-300 rounded px-3 py-2 mb-3 text-mist-600 cursor-pointer"
                 >
                     <p>Comment...</p>
                 </div>

@@ -18,8 +18,8 @@ export default async function PostCard({ post, user, room, topic }: { post: Disc
                 </div>
             ) : null}
             <div className="flex flex-col w-full gap-1 pl-2">
-                <div className="flex flex-row border border-slate-400 bg-slate-100/40 rounded py-2 px-4">
-                    <p className="text-mist-900 grow-1"><span className="text-blue-500 text-[0.9em]">{poster ? (
+                <div className="flex flex-row border border-slate-400 bg-slate-100/40 dark:bg-black rounded py-2 px-4">
+                    <p className="text-mist-900 dark:text-mist-100 grow-1"><span className="text-blue-500 text-[0.9em]">{poster ? (
                         <Link href={`/profile/${poster.id}`}>{`${poster.firstName} ${poster.lastName[0]}`}</Link>
                     ): '[deleted]'}:</span>&nbsp;{body.replaceAll('<br>', '\n')}</p>
                     {user.id === post.creator ? <DeletePost postId={post.id} /> : null}
@@ -30,7 +30,7 @@ export default async function PostCard({ post, user, room, topic }: { post: Disc
                     return (
                         <div key={c.id} className="flex flex-row gap-1">
                             {commenter ? <UserImage xsmall user={commenter} /> : null}
-                            <p className="w-full border border-gray-300 rounded px-3 py-2 text-mist-600">
+                            <p className="w-full border border-gray-300 dark:bg-black dark:text-mist-100 rounded px-3 py-2 text-mist-600">
                                 <span className="text-blue-500 text-[0.9em]">{commenter ? (
                                     <Link href={`/profile/${commenter.id}`}>{name}</Link>
                                 ): '[deleted]'}:</span>&nbsp;{c.comment}
