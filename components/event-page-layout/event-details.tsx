@@ -19,7 +19,7 @@ export default async function EventDetails({ event, type }: {
     event: Event,
     type: EventType
 }) {
-    const numberOfDatesToDisplay = 5;
+    const numberOfDatesToDisplay = 6;
 
     const occurrences = await getEventOccurrences(event.id, type);
     const isRecurring = event.cadence && (event.recurringDay || event.recurringDay === 0);
