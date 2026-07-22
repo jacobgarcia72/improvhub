@@ -173,7 +173,7 @@ section.medium-section {
   font-weight: var(--semibold);
 }
 .link:hover {
-  color: var(--color-blue-900);
+  color: var(--link-hover);
   text-decoration: underline;
 }
 
