@@ -115,6 +115,7 @@ export interface User {
     joinDate: string;
     firstName: string;
     lastName: string;
+    name?: string;
     pronouns?: string;
     bio?: string;
     theatres?: string[];

@@ -2,7 +2,7 @@ import { login } from "@/actions/auth-actions";
 import Button from "@/components/form/button";
 import Form from "@/components/form/form";
 import Input from "@/components/form/input";
-import { getCurrentUserId } from "@/lib/users";
+import { getCurrentUserId, getNumberOfTestUsers } from "@/lib/users";
 import { SearchParams } from "next/dist/server/request/search-params";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -10,6 +10,7 @@ import { Metadata } from "next";
 import { appName, isDevOrStaging } from "@/lib/app-info";
 import TestUserButton from "./test-user-button";
 import TestInputs from "./test-inputs";
+import { generateDummyTroupes, generateDummyUsers } from "@/lib/dev-helpers";
 
 export const metadata: Metadata = {
     title: `Login | ${appName}`
@@ -23,6 +24,13 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
     const reroute = (await searchParams)?.reroute || '';
 
     const test = isDevOrStaging && (await searchParams)?.test === 'true';
+    if (test) {
+        const testUsersExist = await getNumberOfTestUsers() > 0;
+        if (!testUsersExist) {
+            await generateDummyUsers(100);
+            await generateDummyTroupes(10);
+        }
+    }
 
     let caption = 'Sign In';
     if (reroute) {

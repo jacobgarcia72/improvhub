@@ -10,7 +10,6 @@ import { destroyImage } from "./cloudinary";
 import { revalidatePath } from "next/cache";
 import { createNewsFeedItem } from "./news";
 import { postNotification } from "./notifications";
-import { isProd } from "./app-info";
 
 export async function getTroupe(id: string): Promise<Troupe | null> {
     const { data, error } = await supabaseAdmin
@@ -255,7 +254,7 @@ export async function getTroupeInvitations(userId: string): Promise<TroupeMember
     return (data || []).map(camelCaseObject) as TroupeMember[];
 }
 
-export async function respondToTroupeInvitation(troupeId: string, userId: string, role: string, accept: boolean): Promise<void> {
+export async function respondToTroupeInvitation(troupeId: string, userId: string, role: string, accept: boolean, generatingTestData = false): Promise<void> {
     if (accept) {
         const { error, data } = await supabaseAdmin
             .from('troupe_members')
@@ -266,9 +265,11 @@ export async function respondToTroupeInvitation(troupeId: string, userId: string
             .select('added_by')
             .single();
         if (error) throw error;
-        if (data.added_by) postNotification(userId, [data.added_by], 'confirmed_troupe', `${troupeId},${role}`);
-        createNewsFeedItem('friend', userId, "joined_troupe", troupeId, null, role);
-        revalidatePath('/troupes', 'layout')
+        if (!generatingTestData) {
+            if (data.added_by) postNotification(userId, [data.added_by], 'confirmed_troupe', `${troupeId},${role}`);
+            createNewsFeedItem('friend', userId, "joined_troupe", troupeId, null, role);
+            revalidatePath('/troupes', 'layout');
+        }
     } else {
         const { error } = await supabaseAdmin
             .from('troupe_members')
@@ -281,14 +282,10 @@ export async function respondToTroupeInvitation(troupeId: string, userId: string
     }
 }
 
-export async function saveTroupe(troupe: Troupe, members: { name: string, id: string | null, role: Role }[]): Promise<string> {
-    let creatorId = await getCurrentUserId() || '';
+export async function saveTroupe(troupe: Troupe, members: { name: string, id: string | null, role: Role }[], generatingTestData = false): Promise<string> {
+    const creatorId = (generatingTestData ? members[0].id : await getCurrentUserId()) || '';
     if (!creatorId) {
-        if (isProd) {
-            throw new Error('You must be logged in to continue');
-        } else {
-            creatorId = members[0].id || '';
-        }
+        throw new Error('You must be logged in to continue');
     }
     const baseId = troupe.id;
     let troupeId = baseId;
@@ -333,12 +330,14 @@ export async function saveTroupe(troupe: Troupe, members: { name: string, id: st
             .insert(memberRows);
         if (memberInsertError) throw memberInsertError;
     }
-    const usersToNotify = memberRows.filter((m) => m.id !== null && m.confirmed === false);
-    ['player', 'musician', 'coach'].forEach(async (role) => {
-        const usersWithRole = usersToNotify.filter((m) => m.role === role);
-        if (usersWithRole.length) await postNotification(creatorId, usersWithRole.map(m => m.id || ''), 'added_to_troupe', `${troupe.id},${role}`);
-    })
-    createNewsFeedItem('friend', creatorId, 'new_troupe', troupeId);
+    if (!generatingTestData) {
+        const usersToNotify = memberRows.filter((m) => m.id !== null && m.confirmed === false);
+        ['player', 'musician', 'coach'].forEach(async (role) => {
+            const usersWithRole = usersToNotify.filter((m) => m.role === role);
+            if (usersWithRole.length) await postNotification(creatorId, usersWithRole.map(m => m.id || ''), 'added_to_troupe', `${troupe.id},${role}`);
+        })
+        createNewsFeedItem('friend', creatorId, 'new_troupe', troupeId);
+    }
     return troupe.id;
 }
 

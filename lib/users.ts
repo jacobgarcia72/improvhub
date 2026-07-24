@@ -31,7 +31,10 @@ export async function getUser(username: string): Promise<User | null> {
         .select('*')
         .eq('id', username)
         .maybeSingle();
-    return data ? camelCaseObject(data) as User : null;
+    return data ? camelCaseObject({
+        ...data,
+        name: `${data.first_name} ${data.last_name}`
+    }) as User : null;
 }
 
 export async function getNumberOfTestUsers(): Promise<number> {
@@ -85,6 +88,19 @@ export async function getAllUsers(): Promise<User[]> {
     if (error) throw error;
     return (data || []).map((row: { [key: string]: any; }) => camelCaseObject({
         ...row,
+        name: `${row.first_name} ${row.last_name}`
+    })) as User[];
+}
+
+export async function getAllTestUsers(): Promise<User[]> {
+    const { data, error } = await supabaseAdmin
+        .from('users')
+        .select('*')
+        .like('id', 'test-user-%');
+    if (error) throw error;
+    return (data || []).map((row: { [key: string]: any; }) => camelCaseObject({
+        ...row,
+        name: `${row.first_name} ${row.last_name}`
     })) as User[];
 }
 

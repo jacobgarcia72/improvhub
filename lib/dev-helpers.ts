@@ -1,7 +1,7 @@
 'use server';
 
 import { Role, Troupe, User } from "@/types";
-import { getAllUsersAbbreviated, getNumberOfTestUsers, saveUser } from "./users";
+import { getAllTestUsers, getNumberOfTestUsers, saveUser } from "./users";
 import { respondToTroupeInvitation, saveTroupe } from "./troupes";
 import nameGenerator from "./name-generator";
 import slugify from 'slugify';
@@ -107,7 +107,7 @@ const generateUserAndRoles = (count: number): [User, { [role: string]: boolean }
             city = 'Austin';
             state = 'TX';
         }
-        ['The Hideout Theatre', 'ColdTowne Theater', 'Fallout Theater', 'ComedySportz Austin']
+        ['The Hideout Theatre', 'ColdTowne Theater', 'Fallout Theater']
             .forEach((theatre) => {
                 if (rnd() <= 60) theatres.push(theatre);
             });
@@ -116,7 +116,7 @@ const generateUserAndRoles = (count: number): [User, { [role: string]: boolean }
             city = 'Round Rock';
             state = 'TX';
         }
-        ['The Hideout Theatre', 'ColdTowne Theater', 'Fallout Theater', 'ComedySportz Austin']
+        ['The Hideout Theatre', 'ColdTowne Theater', 'Fallout Theater']
             .forEach((theatre) => {
                 if (rnd() <= 60) theatres.push(theatre);
             });
@@ -166,7 +166,7 @@ const generateUserAndRoles = (count: number): [User, { [role: string]: boolean }
 //     const admins = [creatorId];
 // }
 
-const generateTroupe = (users: { name: string, id: string, image?: string }[]): [troupe: Troupe, members: { name: string, id: string | null, role: Role }[]] => {
+const generateTroupe = (users: User[]): [troupe: Troupe, members: { name: string, id: string | null, role: Role }[]] => {
     const name = nameGenerator();
     let city: string | null = null;
     let state: string | null = null;
@@ -186,7 +186,7 @@ const generateTroupe = (users: { name: string, id: string, image?: string }[]): 
             city = 'Austin';
             state = 'TX';
         }
-        ['The Hideout Theatre', 'ColdTowne Theater', 'Fallout Theater', 'ComedySportz Austin']
+        ['The Hideout Theatre', 'ColdTowne Theater', 'Fallout Theater']
             .forEach((theatre) => {
                 if (rnd() <= 70) theatres.push(theatre);
             });
@@ -238,9 +238,9 @@ const generateTroupe = (users: { name: string, id: string, image?: string }[]): 
         id: slugify(removeLeadingArticles(name), { lower: true, trim: true, strict: true }),
         photoCredit: rnd() <= 20 ? `${rnd() <= 50 ? getGirlName() : getBoyName()} ${getLastName()}` : null,
         city, state, theatres,
-        lookingForPlayers: true, // rnd() < (295 / (players.length * 2 + 1)),
-        lookingForMusician: true, // rnd() <= 10,
-        lookingForCoach: true, // rnd() <= (coaches.length ? 5 : 75),
+        lookingForPlayers: rnd() < (295 / (players.length * 2 + 1)),
+        lookingForMusician: rnd() <= 10,
+        lookingForCoach: rnd() <= (coaches.length ? 5 : 75),
         description: rnd() <= 35 ? getLoremIpsum(rnd(200) + 15) : null,
         image: rnd() <= 90 ? images[rnd(images.length - 1)] : null
     }
@@ -267,16 +267,16 @@ export const generateDummyUsers = async (amount: number = 100) => {
 }
 
 export const generateDummyTroupes = async (amount: number = 100) => {
-    const users = await getAllUsersAbbreviated();
+    const users = await getAllTestUsers();
     for (let i = 1; i <= amount; i++) {
         const [troupe, members] = generateTroupe(users);
         console.log('troupe ' + i, troupe)
         console.log('members', members)
-        await saveTroupe(troupe, members);
+        await saveTroupe(troupe, members, true);
         for (let i = 0; i < members.length; i++) {
             const member = members[i];
-            if (member.id && rnd() <= 80) {
-                await respondToTroupeInvitation(troupe.id, member.id, member.role, true);
+            if (member.id && rnd() <= 90) {
+                await respondToTroupeInvitation(troupe.id, member.id, member.role, true, true);
             }
         }
     }
