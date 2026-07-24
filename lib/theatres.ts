@@ -4,6 +4,7 @@ import { supabaseAdmin } from './supabase-server';
 import { camelCaseObject, removeLeadingArticles } from "./helper-functions";
 import slugify from 'slugify';
 import { createNewsFeedItem } from "./news";
+import { isDev } from "./app-info";
 
 const theatres: Partial<Theatre>[] = [
   {
@@ -908,7 +909,7 @@ export const getAllTheatres = async (): Promise<InputOptionObject[]> => {
   const { data } = await supabaseAdmin
     .from('theatres')
     .select('*');
-  if (!data?.length) {
+  if (!data?.length && isDev) {
     await populateTheatresInDb();
     const theatres = await getAllTheatres();
     return theatres;

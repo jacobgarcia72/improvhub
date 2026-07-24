@@ -10,6 +10,7 @@ import { destroyImage } from "./cloudinary";
 import { revalidatePath } from "next/cache";
 import { createNewsFeedItem } from "./news";
 import { postNotification } from "./notifications";
+import { isProd } from "./app-info";
 
 export async function getTroupe(id: string): Promise<Troupe | null> {
     const { data, error } = await supabaseAdmin
@@ -283,7 +284,7 @@ export async function respondToTroupeInvitation(troupeId: string, userId: string
 export async function saveTroupe(troupe: Troupe, members: { name: string, id: string | null, role: Role }[]): Promise<string> {
     let creatorId = await getCurrentUserId() || '';
     if (!creatorId) {
-        if (process.env.NODE_ENV === 'production') {
+        if (isProd) {
             throw new Error('You must be logged in to continue');
         } else {
             creatorId = members[0].id || '';

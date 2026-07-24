@@ -7,7 +7,7 @@ import { SearchParams } from "next/dist/server/request/search-params";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Metadata } from "next";
-import { appName } from "@/lib/app-info";
+import { appName, isDevOrStaging } from "@/lib/app-info";
 import TestUserButton from "./test-user-button";
 import TestInputs from "./test-inputs";
 
@@ -22,8 +22,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
     }
     const reroute = (await searchParams)?.reroute || '';
 
-    const isDev = process.env.NODE_ENV !== 'production';
-    const test = isDev && (await searchParams)?.test === 'true';
+    const test = isDevOrStaging && (await searchParams)?.test === 'true';
 
     let caption = 'Sign In';
     if (reroute) {
@@ -58,7 +57,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
                             style="link"
                         />
                     </Link>
-                    {isDev && <TestUserButton />}
+                    {isDevOrStaging && <TestUserButton />}
                 </div>
             </section>
         </div>

@@ -9,6 +9,7 @@ import { User } from "@/types";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { isDevOrStaging } from "@/lib/app-info";
 
 function isDuplicateAuthUserError(error: unknown): boolean {
     if (!error || typeof error !== 'object') return false;
@@ -57,7 +58,7 @@ function getSignupErrorMessage(error: unknown): string {
         return 'Profile creation failed because a required database field was missing.';
     }
 
-    if (process.env.NODE_ENV !== 'production') {
+    if (isDevOrStaging) {
         return `Signup failed: ${code ? `${code} ` : ''}${message}`;
     }
 
