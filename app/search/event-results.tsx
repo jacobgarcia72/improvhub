@@ -1,5 +1,5 @@
 import { formatDate, formatDateForDisplay } from '@/lib/dates';
-import { arrangeEventsByDate, singularize } from '@/lib/helper-functions';
+import { arrangeEventsByDate, pluralize, singularize } from '@/lib/helper-functions';
 import { getOccurrencesForEvents, getEventsByTheatre, getEventsInRange } from '@/lib/shows';
 import { allEventTypes, Event, EventOccurrence, EventType } from '@/types';
 import ItemCard from './item-card';
@@ -47,7 +47,7 @@ export default async function EventResults({ showTheatre = true, eventType = 'al
                         <h2 className='text-slate-900 dark:text-slate-100 font-semibold '>{date === formatDate(new Date()) ? 'Today' : formatDateForDisplay(date)}</h2>
                     </div>
                     <div className='flex flex-row flex-wrap'>
-                        {results[date].map(({ event, time }, i) => <ItemCard showTheatre={showTheatre} key={i} item={event} time={time} type={event.type || eventType} date={date} />)}
+                        {results[date].map(({ event, time }, i) => <ItemCard showTheatre={showTheatre} key={i} item={event} time={time} type={event.type ? pluralize(event.type) : eventType} date={date} />)}
                     </div>
                 </div>
             ))}
