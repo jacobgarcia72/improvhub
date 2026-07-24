@@ -28,7 +28,7 @@ export default async function MediumCard({ item, type, dateTime }: {
                 {image ? (
                     <div className="w-[200px] h-full bg-gray-300">
                         <div className="flex h-full w-full items-center justify-center">
-                            <Image src={image} alt={name} width={120} height={120} className="object-cover h-full w-full" />
+                            <Image src={image} alt={name || type} width={120} height={120} className="object-cover h-full w-full" />
                         </div>
                     </div>
                 ) : (
