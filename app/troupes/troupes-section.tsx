@@ -23,7 +23,7 @@ export default async function TroupesSection({
     return (
         <Suspense fallback={<Loader />}>
             <section>
-                <h2 className="px-3">{header}</h2>
+                <h2 className="px-3 font-semibold text-sm">{header}</h2>
                 <div className="flex flex-row flex-wrap">
                     {troupes.map((troupe, i) => <MiniCard key={i} item={troupe} type="troupe" />)}
                 </div>
