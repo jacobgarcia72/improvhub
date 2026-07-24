@@ -34,7 +34,7 @@ export default function OpenTroupesClient({ initialTroupes, role }: { initialTro
             </div>
             <div className="flex flex-row flex-wrap">
                 <Suspense fallback={<Loader />}>
-                    {troupes.map((troupe, i) => <MiniCard key={troupe.id || i} item={troupe} type="troupe" />)}
+                    {troupes.map((troupe, i) => <MiniCard className="h-[90px]!" key={troupe.id || i} item={troupe} type="troupe" />)}
                 </Suspense>
             </div>
         </section>
