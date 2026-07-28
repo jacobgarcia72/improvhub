@@ -7,6 +7,7 @@ import nameGenerator from "./name-generator";
 import slugify from 'slugify';
 import { getRandomElements, removeLeadingArticles } from "./helper-functions";
 import { supabaseAdmin } from "./supabase-server";
+import { populateTheatresInDb } from "./theatres";
 
 export async function handleDevFormSubmit(prevState: void | { message?: string }, formData: FormData) {
     const data = Object.fromEntries(formData.entries());
@@ -14,6 +15,8 @@ export async function handleDevFormSubmit(prevState: void | { message?: string }
     const numberOfTroupes = Number(data.troupes);
     if (numberOfUsers > 0) await generateDummyUsers(numberOfUsers);
     if (numberOfTroupes > 0) await generateDummyTroupes(numberOfTroupes);
+    const createTheatres = Boolean(data['create-theatres']);
+    if (createTheatres) await populateTheatresInDb();
 }
 
 const rnd = (top: number = 100) => Math.floor(Math.random() * top) + 1;
