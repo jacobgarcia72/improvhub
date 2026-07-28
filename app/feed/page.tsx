@@ -36,7 +36,9 @@ export default async function FeedPage() {
     return (
         <section>
             <h1 className="text-xl mb-4">News Feed</h1>
-            {await Promise.all(newsFeedItems.map(async (item, i) => {
+            {newsFeedItems.length === 0 ? (
+                <p className="mt-5 mb-7 text-mist-600 dark:text-mist-400">No items to display.</p>
+            ) : await Promise.all(newsFeedItems.map(async (item, i) => {
                 let content: React.ReactNode;
                 let image: string | null | undefined = null;
                 const { date, newsType, followId, followType, newsItemId, newsItemDate, otherData } = item;
