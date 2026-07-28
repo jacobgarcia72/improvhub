@@ -4,6 +4,7 @@ import "./globals.css";
 import Header from "@/components/header";
 import { appName } from "@/lib/app-info";
 import BuyMeACoffee from "@/components/buy-me-a-coffee";
+import { Analytics } from "@vercel/analytics/next";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -49,6 +50,7 @@ export default function RootLayout({
         <main className="mt-12">
           {children}
         </main>
+        <Analytics />
         <BuyMeACoffee />
       </body>
     </html>
