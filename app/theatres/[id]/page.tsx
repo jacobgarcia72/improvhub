@@ -7,6 +7,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import Button from "@/components/form/button";
 import EventResults from "@/app/search/event-results";
+import { isDev } from "@/lib/app-info";
 
 export default async function TheatreDetailsPage({ params }: {
     params: Promise<{ id: string }>
@@ -40,7 +41,7 @@ export default async function TheatreDetailsPage({ params }: {
             ) : null}
             <section>
                 <div className="px-7 flex flex-col gap-1">
-                    <Link className="link mb-2" href={`/discuss?channel=theatre-${id}`}>Theatre Discussion Channel</Link>
+                    {isDev && <Link className="link mb-2" href={`/discuss?channel=theatre-${id}`}>Theatre Discussion Channel</Link>}
                     <div>
                         {address ? <p className="text-slate-700 dark:text-slate-300">{address}</p> : null}
                         {location ? <p className="text-slate-700 dark:text-slate-300">{location}</p> : null}
@@ -49,7 +50,7 @@ export default async function TheatreDetailsPage({ params }: {
                 </div>
                 {canManage ? (
                     <Link href={`/manage/theatre/${id}`}>
-                        <Button caption="Edit Theatre" className="w-54 mt-3" />
+                        <Button caption="Edit Theatre" className="w-54 mt-3 ml-5" />
                     </Link>
                 ): null}
             </section>

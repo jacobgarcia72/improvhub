@@ -188,6 +188,10 @@ input, select {
   height: 42px;
 }
 
+select, option {
+  cursor: pointer;
+}
+
 label, .label {
   font-size: .9rem;
   color: var(--label);

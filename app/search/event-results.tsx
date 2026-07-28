@@ -40,7 +40,7 @@ export default async function EventResults({ showTheatre = true, eventType = 'al
 
     return (
         <>
-            {hasNoResults && <p className="text-slate-700 dark:text-slate-300 mt-4">No results found.</p>}
+            {hasNoResults && <p className="text-mist-700 dark:text-mist-300 mt-4 ml-8">No results found.</p>}
             {results && Object.keys(results).map((date, i) => (
                 <div key={i} className='flex flex-col w-full px-4'>
                     <div className='mx-3 my-2 px-2 border-b border-slate-300'>
