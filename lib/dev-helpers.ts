@@ -252,7 +252,8 @@ const generateTroupe = (users: User[]): [troupe: Troupe, members: { name: string
 
 export const generateDummyUsers = async (amount: number = 100) => {
     const userCount = await getNumberOfTestUsers();
-    for (let i = userCount + 1; i < userCount + amount; i++) {
+    console.log({userCount})
+    for (let i = userCount + 1; i <= userCount + amount; i++) {
         const [user, roles] = generateUserAndRoles(i);
         const { data: authData } = await supabaseAdmin.auth.admin.createUser({
             email: `test-user-${i}@test.com`,
@@ -265,6 +266,7 @@ export const generateDummyUsers = async (amount: number = 100) => {
             },
         });
         const uid = authData.user.id;
+        console.log({user})
         await saveUser(user, uid, roles);
     }
 }
