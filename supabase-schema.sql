@@ -263,7 +263,7 @@ CREATE TABLE if not exists notifications (
 );
 
 CREATE TABLE if not exists notification_checks (
-  user_id uuid,
+  user_id uuid PRIMARY KEY,
   date timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
@@ -287,31 +287,32 @@ USING ( auth.uid() = user_id );
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.sessions TO service_role;
 
 -- Grant privileges on other tables your app writes to
-GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.theatres TO service_role;
-GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.shows TO service_role;
-GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.show_occurrences TO service_role;
-GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.showing_cast TO service_role;
-GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.jams TO service_role;
-GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.jam_occurrences TO service_role;
-GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.workshops TO service_role;
-GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.workshop_occurrences TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.classes TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.class_occurrences TO service_role;
-GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.rsvps TO service_role;
-GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.troupes TO service_role;
-GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.troupe_members TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.comments TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.feedback TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.follows TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.friendships TO service_role;
-GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.user_roles TO service_role;
-GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.topics TO service_role;
-GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.posts TO service_role;
-GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.comments TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.jams TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.jam_occurrences TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.news TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.notifications TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.notification_ids TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.notification_checks TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.posts TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.rsvps TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.showing_cast TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.shows TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.show_occurrences TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.theatres TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.topics TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.troupes TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.troupe_members TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.user_roles TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.users TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.workshops TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.workshop_occurrences TO service_role;
 GRANT SELECT ON TABLE public.notification_ids TO authenticated;
-GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.feedback TO service_role;
 
 -- Grant sequence privileges for auto-incrementing IDs (if used)
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO service_role;
