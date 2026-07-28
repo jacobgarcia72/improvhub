@@ -30,13 +30,19 @@ export default async function TroupePage({ params }: Props) {
         ) : null}
         <section>
             {isMemberNotCoach ? <>
-                <div className="flex flex-row gap-2 justify-center mb-2">
+                <div className="flex flex-row flex-wrap gap-2 justify-center mb-2">
                     <Link href={`/troupes/${id}/manage-members`}>
                         <Button caption="Manage Members" className="w-54 max-w-[45vw] px-0!" />
                     </Link>
                     <Link href={`/manage/troupe/${id}`}>
                         <Button caption="Manage Troupe Details" className="w-54 max-w-[45vw] px-0!" />
                     </Link>
+                    <div className="relative">
+                        <div className="absolute bg-slate-100 text-black border border-black/50 rounded px-2 -top-5 left-3 text-sm">Coming Soon</div>
+                        <Link href={`/create/submission-form/troupe/${id}`}>
+                            <Button caption="Create Submission Form" className="w-54 max-w-[45vw] px-0!" />
+                        </Link>
+                    </div>
                 </div>
             </> : null}
             <CastList castMembers={members} />
