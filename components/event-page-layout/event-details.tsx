@@ -86,15 +86,17 @@ export default async function EventDetails({ event, type }: {
                         <P>{recurringSchedule}</P>
                         {datesToDisplay.length ? <>
                             <Header>{capitalize(type)} Dates:</Header>
-                            <ul className="mt-2">
-                                {datesToDisplay.map((date, i) => (
-                                    <Link key={i} href={`/${pluralize(type)}/${event.id}/${date}`}>
-                                        <li className="no-bullets link ">
-                                            {formatDateTimeForDisplay(date)}
-                                        </li>
-                                    </Link>
-                                ))}
-                            </ul>
+                            <div className="w-fit">
+                                <ul className="mt-2 w-fit">
+                                    {datesToDisplay.map((date, i) => (
+                                        <Link className="w-fit" key={i} href={`/${pluralize(type)}/${event.id}/${date}`}>
+                                            <li className="no-bullets link w-fit">
+                                                {formatDateTimeForDisplay(date)}
+                                            </li>
+                                        </Link>
+                                    ))}
+                                </ul>
+                            </div>
                         </> : null}
                         {dateTimes.length > datesToDisplay.length && (
                             <OccurrenceSelection
