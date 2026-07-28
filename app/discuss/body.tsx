@@ -37,6 +37,7 @@ export default async function MessagesBody({ user, room, topic: topicId }: { use
         const topics = await getTopics(room);
         return (
             <section className="flex flex-col gap-1.5">
+                <h2>Select Discussion Topic:</h2>
                 <Suspense fallback={<Loader />}>
                     {topics.map((t) => <TopicCard topic={t} key={t.id} />)}
                 </Suspense>
