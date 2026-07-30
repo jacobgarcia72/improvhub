@@ -31,14 +31,17 @@ export const metadata: Metadata = {
     title: appName,
     description,
     siteName: appName,
-    // images: [
-    //   {
-    //     url: '/og-image.png', // Pointing to public/og-image.png
-    //     width: 1200,
-    //     height: 630,
-    //     alt: appName,
-    //   },
-    // ],
+    images: [
+      {
+        url: '/icons/favicon.svg',
+        width: 640,
+        height: 640,
+        alt: appName,
+      },
+    ],
+  },
+  icons: {
+    icon: "/icons/favicon.svg"
   },
 };
 
