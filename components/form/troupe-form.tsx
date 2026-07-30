@@ -24,7 +24,9 @@ export default async function TroupeForm({
         <section className="medium-section">
             <Form
                 onSubmit={newTroupe ? postTroupe : updateTroupeDetails.bind(null, troupe?.id || '')}
-                cancel={onCancel}>
+                cancel={onCancel}
+                buttonCaption={newTroupe ? 'Create Troupe' : 'Submit Changes'}
+            >
                 <NameInput value={troupe?.name} />
                 <ImagePicker currentImage={troupe?.image} />
                 <Input label="Photo Credit" name="photoCredit" value={troupe?.photoCredit || ''} />

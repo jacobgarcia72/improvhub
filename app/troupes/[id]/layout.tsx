@@ -13,6 +13,8 @@ import FollowButton from "@/components/follow-button";
 import CoverPhoto from "@/components/cover-photo";
 import { TheatreLink } from "@/components/theatre-link";
 import { getTheatre } from "@/lib/theatres";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faMessage } from "@fortawesome/free-regular-svg-icons";
 
 type Props = {
     params: Promise<{ id: string }>
@@ -107,7 +109,7 @@ export default async function TroupeLayout({ params, children }: Props) {
                 <div className="px-8 pt-2">
                     {troupe.description?.split('<br>').map((line, i) => <P key={i}>{line}</P>)}
                 </div>
-                {currentUser && isMember && <Link className="ml-9 link" href={`/discuss?channel=troupe-${id}`}>Troupe Member Channel</Link>}
+                {currentUser && isMember && <Link className="ml-9 link" href={`/discuss?channel=troupe-${id}`}><FontAwesomeIcon icon={faMessage} /> Troupe Member Discussion</Link>}
             </section>
             {children}
             {(troupe.city && troupe.state) || theatres.length > 0 ? (

@@ -38,14 +38,14 @@ export default async function TroupePage({ params }: Props) {
                         <Button caption="Manage Troupe Details" className="w-54 max-w-[45vw] px-0!" />
                     </Link>
                     <div className="relative">
-                        <div className="absolute bg-slate-100 text-black border border-black/50 rounded px-2 -top-5 left-3 text-sm">Coming Soon</div>
+                        <div className="absolute bg-slate-100 text-black border border-black/50 rounded px-2 -bottom-4 right-3 text-sm">Coming Soon</div>
                         <Link href={`/create/submission-form/troupe/${id}`}>
-                            <Button caption="Create Submission Form" className="w-54 max-w-[45vw] px-0!" />
+                            <Button caption="Submission Form" className="w-54 max-w-[45vw] px-0!" />
                         </Link>
                     </div>
                 </div>
             </> : null}
-            <CastList castMembers={members} />
+            <CastList castMembers={members} noConfirm={Boolean(isMemberNotCoach)} />
         </section>
         <UpcomingShows id={id} roles={['troupe']} limit={6} />
         {isMemberNotCoach ? <>

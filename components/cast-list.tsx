@@ -13,7 +13,7 @@ function P({ children, className }: { children: React.ReactNode, className?: str
 }
 
 function Header({ children }: { children: React.ReactNode }) {
-    return children ? <h3 className="mt-3 font-semibold text-sm">{children}</h3> : null;
+    return children ? <h3 className="mt-3 font-semibold">{children}</h3> : null;
 }
 
 async function MemberEntry(member: CastMember, noConfirm?: boolean) {

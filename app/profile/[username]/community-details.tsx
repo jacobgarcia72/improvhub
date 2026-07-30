@@ -1,6 +1,8 @@
 'use client'
 import { TheatreLink } from "@/components/theatre-link";
 import { InputOption, Theatre, User } from "@/types";
+import { faCity } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
 
 export default function CommunityDetails({ user }: { user: User }) {
@@ -29,7 +31,7 @@ export default function CommunityDetails({ user }: { user: User }) {
                 </div>
             ) : null}
             {user.city || user.state ? (
-                <p className="mt-2">{`${user.city ? user.city + ', ' : ''}${user.state || ''}`}</p>
+                <p className="mt-2"><FontAwesomeIcon icon={faCity} /> {`${user.city ? user.city + ', ' : ''}${user.state || ''}`}</p>
             ) : null}
         </>
     )

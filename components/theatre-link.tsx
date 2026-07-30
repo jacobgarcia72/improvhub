@@ -1,12 +1,14 @@
 import { optimizeImage } from "@/lib/optimize-image";
 import { InputOption } from "@/types";
+import { faMasksTheater } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
 import Link from "next/link";
 
 export function TheatreLink({ theatre, removePadding }: {theatre: InputOption, removePadding?: boolean }) {
     if (typeof theatre === 'string') {
         return (
-            <p className="mb-2 mt-2">{theatre}</p>
+            <p className="mb-2 mt-2"><FontAwesomeIcon icon={faMasksTheater} /> {theatre}</p>
         )
     }
     return (

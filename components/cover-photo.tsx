@@ -24,7 +24,7 @@ export default function CoverPhoto({ src, alt, photoCredit }: {src: string, alt:
                 height={400}
                 className="cursor-pointer mt-2 w-9/10 h-36 h-[40vw] max-h-64 object-cover rounded"
             />
-            {photoCredit && <p className="italic text-sm">{`Photo Credit: ${photoCredit}`}</p>}
+            {photoCredit && <p className="italic text-sm mt-1">{`Photo Credit: ${photoCredit}`}</p>}
         </div>
     </>
 }

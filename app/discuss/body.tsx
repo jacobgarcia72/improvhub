@@ -21,7 +21,10 @@ export default async function MessagesBody({ user, room, topic: topicId }: { use
         const posts = await getPosts(room, topicId);
         return (
             <section>
-                <TopicCard topic={topic} isHeader backUrl={`/discuss?channel=${room}`} />
+                <div className="flex justify-end mt-[-4px] mb-[2px]">
+                    <Link href={`/discuss?channel=${room}`} className='link text-sm'>Back to Topics</Link>
+                </div>
+                <TopicCard topic={topic} isHeader />
                 {user ? (
                     <NewPostForm user={user} room={room} topic={topicId} />
                 ): <Link href='/login'>Sign in to create post</Link>}
