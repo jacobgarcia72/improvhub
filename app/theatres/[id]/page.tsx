@@ -8,6 +8,8 @@ import { Suspense } from "react";
 import Button from "@/components/form/button";
 import EventResults from "@/app/search/event-results";
 import { isDev } from "@/lib/app-info";
+import { faMessage } from "@fortawesome/free-regular-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 export default async function TheatreDetailsPage({ params }: {
     params: Promise<{ id: string }>
@@ -41,7 +43,9 @@ export default async function TheatreDetailsPage({ params }: {
             ) : null}
             <section>
                 <div className="px-7 flex flex-col gap-1">
-                    {isDev && <Link className="link mb-2" href={`/discuss?channel=theatre-${id}`}>Theatre Discussion Channel</Link>}
+                    {isDev && <Link className="link mb-2" href={`/discuss?channel=theatre-${id}`}>
+                        <FontAwesomeIcon icon={faMessage} /> Theatre Discussion Channel
+                    </Link>}
                     <div>
                         {address ? <p className="text-slate-700 dark:text-slate-300">{address}</p> : null}
                         {location ? <p className="text-slate-700 dark:text-slate-300">{location}</p> : null}

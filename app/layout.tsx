@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
+import "@fortawesome/fontawesome-svg-core/styles.css";
+import { config } from "@fortawesome/fontawesome-svg-core";
 import Header from "@/components/header";
 import { appName } from "@/lib/app-info";
 import BuyMeACoffee from "@/components/buy-me-a-coffee";
@@ -15,6 +18,10 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
+
+config.autoAddCss = false; 
+
+const inter = Inter({ subsets: ["latin"] });
 
 const description = "Find improv shows, jams, and theatres. Create and manage improv troupes and events and connect with other improvisers!";
 export const metadata: Metadata = {
@@ -45,7 +52,7 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className={`${inter.className} min-h-full flex flex-col`}>
         <Header />
         <main className="mt-12">
           {children}
