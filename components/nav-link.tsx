@@ -13,7 +13,7 @@ export default function NavLink({ link, onClick }: {
         <Link onClick={onClick || undefined} href={href} className={path === href || path.startsWith(`${href}/`) ? 'active' : ''}>
             <div className="flex flex-row min-w-14 px-2 justify-center text-[0.9rem]">
                 {{
-                    'Feed': 'Live Feed',
+                    'Feed': 'News Feed',
                     'Search': 'Find',
                 }[link] || link}
             </div>
