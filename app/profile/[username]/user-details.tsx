@@ -23,7 +23,7 @@ export default function UserDetails({ user, userRoles }: {
         </div>
         <div className="pl-3 pb-1 flex flex-col justify-end text-mist-800 dark:text-mist-200">
             <h1 className="text-2xl font-light">{displayName}{user.pronouns && <span className="text-sm">&nbsp;&nbsp;({user.pronouns})</span>}</h1>
-            {userRoles ? <h2 className="pl-1 flex flex-row font-light text-mist-700 dark:text-mist-300">{Object.keys(userRoles).filter((role) => userRoles[role]).map(capitalize).join(`\u2002\u2022\u2002`)}</h2> : null}
+            {userRoles ? <h2 className="pl-1 flex flex-row font-light text-mist-700 dark:text-mist-300">{Object.keys(userRoles).filter((role) => userRoles[role]).map((r) => r === 'player' ? 'improviser' : r).map(capitalize).join(`\u2002\u2022\u2002`)}</h2> : null}
         </div>
     </div>
 }

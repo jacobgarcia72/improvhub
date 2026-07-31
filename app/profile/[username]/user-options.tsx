@@ -52,7 +52,7 @@ export default function UserOptions({ user, userRoles }: {
                             key={role}
                             defaultChecked={userRoles?.[role] || false}
                             name={role}
-                            label={capitalize(role)}
+                            label={role === 'player' ? 'Improviser' : capitalize(role)}
                         />
                     ))}
                 </div>

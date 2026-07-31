@@ -38,7 +38,7 @@ export default function CreateProfileForm() {
                             key={role}
                             defaultChecked={role === 'player'}
                             name={role}
-                            label={capitalize(role)}
+                            label={role === 'player' ? 'Improviser' : capitalize(role)}
                         />
                     ))}
                 </div>
