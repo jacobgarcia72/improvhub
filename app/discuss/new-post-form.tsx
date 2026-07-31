@@ -9,7 +9,7 @@ import { User } from "@/types";
 export default function NewPostForm({ user, room, topic }: { user: User, room: string, topic: string }) {
     const [active, setActive] = useState(false);
     return (
-        <div className="flex flex-row items-start justify-stretch w-full border-b border-b-mist-200 mb-4">
+        <div className="flex flex-row items-start justify-stretch w-full">
             {active ? <>
                 <UserImage user={user} linkProfile={false} />
                 <Form buttonCaption="Post" className="gap-1 w-full ml-2" onSubmit={postPost.bind(null, user.id, room, topic)} cancel={() => {

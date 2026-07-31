@@ -31,7 +31,7 @@ export default function CommunityDetails({ user }: { user: User }) {
                 </div>
             ) : null}
             {user.city || user.state ? (
-                <p className="mt-2"><FontAwesomeIcon icon={faCity} /> {`${user.city ? user.city + ', ' : ''}${user.state || ''}`}</p>
+                <p className="mt-2"><FontAwesomeIcon className="text-mist-600 dark:text-mist-400" icon={faCity} /> {`${user.city ? user.city + ', ' : ''}${user.state || ''}`}</p>
             ) : null}
         </>
     )

@@ -21,14 +21,14 @@ export default async function MessagesBody({ user, room, topic: topicId }: { use
         const posts = await getPosts(room, topicId);
         return (
             <section>
-                <div className="flex justify-end mt-[-4px] mb-[2px]">
+                <div className="flex justify-end my-[-2px] mr-1">
                     <Link href={`/discuss?channel=${room}`} className='link text-sm'>Back to Topics</Link>
                 </div>
                 <TopicCard topic={topic} isHeader />
                 {user ? (
                     <NewPostForm user={user} room={room} topic={topicId} />
                 ): <Link href='/login'>Sign in to create post</Link>}
-                <div className="flex flex-col gap-2 items-center pb-4">
+                <div className="flex flex-col gap-2 items-center pb-6">
                     <Suspense fallback={<Loader />}>
                         {posts.map((p) => <PostCard key={p.id} post={p} user={user} room={room} topic={topicId} />)}
                         {posts.length === 0 && <p className="text-mist-600 dark:text-mist-300">No posts found.</p>}

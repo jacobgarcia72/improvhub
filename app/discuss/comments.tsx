@@ -16,7 +16,7 @@ export default async function Comments({ comments, post, user }: {
                 const commenter = await getUser(c.creator);
                 const name = commenter ? `${commenter.firstName} ${commenter.lastName[0]}` : null;
                 return (
-                    <div key={c.id} className="flex flex-row gap-1 mb-1">
+                    <div key={c.id} className="flex flex-row gap-1 mb-[6px] mt-[2px]">
                         {commenter ? <UserImage xsmall user={commenter} /> : null}
                         <div className="flex flex-row w-full">
                             <p className="grow-1 w-full">

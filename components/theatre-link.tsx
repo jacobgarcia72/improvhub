@@ -8,7 +8,7 @@ import Link from "next/link";
 export function TheatreLink({ theatre, removePadding }: {theatre: InputOption, removePadding?: boolean }) {
     if (typeof theatre === 'string') {
         return (
-            <p className="mb-2 mt-2"><FontAwesomeIcon icon={faMasksTheater} /> {theatre}</p>
+            <p className="mb-2 mt-2"><FontAwesomeIcon className="text-mist-600 dark:text-mist-400" icon={faMasksTheater} /> {theatre}</p>
         )
     }
     return (
