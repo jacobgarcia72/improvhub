@@ -21,10 +21,11 @@ export default async function MessagesBody({ user, room, topic: topicId }: { use
         const posts = await getPosts(room, topicId);
         return (
             <section>
-                <div className="flex justify-end my-[-2px] mr-1">
-                    <Link href={`/discuss?channel=${room}`} className='link text-sm'>Back to Topics</Link>
-                </div>
-                <TopicCard topic={topic} isHeader />
+                <TopicCard topic={topic} isHeader>
+                    <div className="flex justify-end mr-1">
+                        <Link href={`/discuss?channel=${room}`} className='link text-sm'>Back to Topics</Link>
+                    </div>
+                </TopicCard>
                 {user ? (
                     <NewPostForm user={user} room={room} topic={topicId} />
                 ): <Link href='/login'>Sign in to create post</Link>}
