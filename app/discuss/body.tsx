@@ -12,6 +12,7 @@ export default async function MessagesBody({ user, room, topic: topicId }: { use
     if (!room) {
         return (
             <section>
+                <Loader caption="channel" />
             </section>
         )
     } else if (topicId) {
