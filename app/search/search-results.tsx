@@ -58,7 +58,7 @@ export default async function SearchResults({ params }: { params: {
 
     return (
         <section className="max-w-[1280px]! flex flex-row flex-wrap px-4 pb-4 justify-evenly min-h-[calc(100vh-220px)]">
-            <Suspense fallback={<Loader />}>
+            <Suspense fallback={<Loader caption='results' />}>
             {searchFor && eventTypes.includes(searchFor) ? (
                 <EventResults
                     eventType={searchFor}

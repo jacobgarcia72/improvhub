@@ -1,7 +1,6 @@
 import { protectRoute } from "@/lib/auth";
-import { getNotifications, getNumberOfNotifications } from "@/lib/notifications";
+import { getNotifications } from "@/lib/notifications";
 import { getCurrentUser } from "@/lib/users";
-import { Notification } from "@/types";
 import { notFound } from "next/navigation";
 import NotificationCard from "./notification-card";
 import { Metadata } from "next";
@@ -23,7 +22,9 @@ export default async function NotificationsPage() {
     return (
         <section className="medium-section flex flex-col">
             <h1 className="text-xl mb-2">Notifications</h1>
-            {notifications.map((notif, i) => (
+            {notifications.length === 0 ? (
+                <p className="mt-5 mb-7 text-mist-600 dark:text-mist-400">You have no notifications.</p>
+            ) : notifications.map((notif, i) => (
                 <NotificationCard isNew={notif.date === null || new Date(notif.date) > new Date(lastChecked)} key={i} userId={id} notification={notif} />
             ))}
         </section>

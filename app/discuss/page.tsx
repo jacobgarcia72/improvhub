@@ -8,6 +8,8 @@ import { Metadata } from "next";
 import { appName } from "@/lib/app-info";
 import { Theatre } from "@/types";
 import { getTheatre } from "@/lib/theatres";
+import { Suspense } from "react";
+import Loader from "@/components/loader";
 
 export const metadata: Metadata = {
     title: `Discussions | ${appName}`
@@ -26,7 +28,11 @@ export default async function ChatPage({ searchParams }: { searchParams: Promise
         theatre = await getTheatre(theatreId);
     }
     return <>
-        <MessagesHeader chatRooms={chatRooms} theatre={theatre} />
-        <MessagesBody user={user} room={channel as string || null} topic={topic as string || null} />
+        <Suspense fallback={<Loader caption="channels" />}>
+            <MessagesHeader chatRooms={chatRooms} theatre={theatre} />
+        </Suspense>
+        <Suspense fallback={<Loader />}>
+            <MessagesBody user={user} room={channel as string || null} topic={topic as string || null} />
+        </Suspense>
     </>
 }

@@ -6,6 +6,8 @@ import Button from "@/components/form/button";
 import { pluralize } from "@/lib/helper-functions";
 import AvailableUsersSection from "../available-users-section";
 import UpcomingShows from "@/components/upcoming-shows";
+import { Suspense } from "react";
+import Loader from "@/components/loader";
 
 type Props = {
     params: Promise<{ id: string }>
@@ -45,7 +47,9 @@ export default async function TroupePage({ params }: Props) {
                     </div>
                 </div>
             </> : null}
-            <CastList castMembers={members} noConfirm={Boolean(isMemberNotCoach)} />
+            <Suspense fallback={<Loader caption="troupe members" />}>
+                <CastList castMembers={members} noConfirm={Boolean(isMemberNotCoach)} />
+            </Suspense>
         </section>
         <UpcomingShows id={id} roles={['troupe']} limit={6} />
         {isMemberNotCoach ? <>

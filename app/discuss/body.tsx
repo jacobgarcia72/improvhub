@@ -12,7 +12,6 @@ export default async function MessagesBody({ user, room, topic: topicId }: { use
     if (!room) {
         return (
             <section>
-                <p>Select Channel</p>
             </section>
         )
     } else if (topicId) {
@@ -29,7 +28,7 @@ export default async function MessagesBody({ user, room, topic: topicId }: { use
                     <NewPostForm user={user} room={room} topic={topicId} />
                 ): <Link href='/login'>Sign in to create post</Link>}
                 <div className="flex flex-col gap-2 items-center pb-6">
-                    <Suspense fallback={<Loader />}>
+                    <Suspense fallback={<Loader caption="posts" />}>
                         {posts.map((p) => <PostCard key={p.id} post={p} user={user} room={room} topic={topicId} />)}
                         {posts.length === 0 && <p className="text-mist-600 dark:text-mist-300">No posts found.</p>}
                     </Suspense>

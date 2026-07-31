@@ -71,7 +71,7 @@ export default function ChatRoomSelect({ chatRooms, onSelect, theatre }: {
                     onClick={() => setIsOpen(false)}
                     className="z-0 cursor-pointer w-full h-full fixed left-0 top-0"
                 ></div>
-                <div className="max-h-72 overflow-y-scroll overflow-x-hidden z-50 dropdown bg-white/90 dark:bg-black/90 border-gray-300 border-1 rounded absolute top-9.5 w-86 max-w-[90vw] flex flex-col">
+                <div className="max-h-72 overflow-y-auto overflow-x-hidden z-50 dropdown bg-white/90 dark:bg-black/90 border-gray-300 border-1 rounded absolute top-9.5 w-86 max-w-[90vw] flex flex-col">
                     {ChatRoomOption(globalChatRoom)}
                     {theatres.map(ChatRoomOption)}
                     {troupes.map(ChatRoomOption)}

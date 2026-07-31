@@ -1,9 +1,10 @@
 'use client'
+import Loader from "@/components/loader";
 import { TheatreLink } from "@/components/theatre-link";
 import { InputOption, Theatre, User } from "@/types";
 import { faCity } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 
 export default function CommunityDetails({ user }: { user: User }) {
     const [theatres, setTheatres] = useState<InputOption[]>([]);
@@ -27,7 +28,9 @@ export default function CommunityDetails({ user }: { user: User }) {
         <>
             {theatres.length ? (
                 <div className="mt-2">
-                    {theatres.map((theatre, i) => <TheatreLink theatre={theatre} key={i} />)}
+                    <Suspense fallback={<Loader caption="theatres" />}>
+                        {theatres.map((theatre, i) => <TheatreLink theatre={theatre} key={i} />)}
+                    </Suspense>
                 </div>
             ) : null}
             {user.city || user.state ? (

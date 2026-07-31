@@ -1,9 +1,7 @@
-import Loader from "@/components/loader";
 import { isSignedIn, verifyAuth } from "@/lib/auth";
 import { getFriendship, getUser, getUserAbbreviated, getUserRoles } from "@/lib/users";
 import { User } from "@/types";
 import { notFound, redirect } from "next/navigation";
-import { Suspense } from "react";
 import UserDetails from "./user-details";
 import UserOptions from "./user-options";
 import FriendsButton from "@/components/friends-button";
@@ -59,7 +57,7 @@ export default async function UserProfilePage({ params, children }: { params: Pr
     const friendship = isCurrentUser ? null : await getFriendship(currentUserId, username);
 
     return (
-        <Suspense fallback={<Loader />}>
+        <>
             <LayoutCard className="relative">
                 {!isCurrentUser && <div className="absolute right-5 top-3">
                     <FriendsButton
@@ -76,6 +74,6 @@ export default async function UserProfilePage({ params, children }: { params: Pr
                 ) : <UserDetails user={user} userRoles={userRoles} />}
             </LayoutCard>
             {children}
-        </Suspense>
+        </>
     )
 }

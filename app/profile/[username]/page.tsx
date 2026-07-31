@@ -48,7 +48,7 @@ export default async function UserProfilePage({ params }: { params: Promise<{use
     const troupes = (await Promise.all([...new Set(troupeMemberships.filter((m) => m.role !== 'coach').map((m) => m.troupe))].map(getTroupe))).filter((t) => t !== null);
     const coachedTroupes = (await Promise.all([...new Set(troupeMemberships.filter((m) => m.role === 'coach').map((m) => m.troupe))].map(getTroupe))).filter((t) => t !== null);
     return (
-        <Suspense fallback={<Loader />}>
+        <Suspense fallback={<Loader caption="profile" />}>
             {friendCount ? (
                 <LayoutCard className="flex flex-row justify-center">
                     <div className="w-full flex flex-row justify-center">
@@ -73,11 +73,13 @@ export default async function UserProfilePage({ params }: { params: Promise<{use
                 )}
             </LayoutCard>
             <LayoutCard header="Troupes">
-                {troupes.length ? (
-                    <div className="flex flex-row flex-wrap">
-                        {troupes.map((troupe) => <MiniCard key={troupe.id} item={troupe} type='troupe' includeDescription />)}
-                    </div>
-                ) : null}
+                <Suspense fallback={<Loader caption="troupes" />}>
+                    {troupes.length ? (
+                        <div className="flex flex-row flex-wrap">
+                            {troupes.map((troupe) => <MiniCard key={troupe.id} item={troupe} type='troupe' includeDescription />)}
+                        </div>
+                    ) : null}
+                </Suspense>
                 {isCurrentUser && <>
                     {userRoles?.player ? <OpenToCheckbox
                         user={user}
