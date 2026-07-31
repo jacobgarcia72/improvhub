@@ -33,15 +33,15 @@ export const metadata: Metadata = {
     siteName: appName,
     images: [
       {
-        url: '/icons/favicon.svg',
-        width: 640,
-        height: 640,
+        url: '/icons/favicon.png',
+        width: 500,
+        height: 500,
         alt: appName,
       },
     ],
   },
   icons: {
-    icon: "/icons/favicon.svg"
+    icon: "/icons/favicon.png"
   },
 };
 
