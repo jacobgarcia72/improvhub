@@ -50,7 +50,7 @@ export default function Notifications({ uid, numberOfNotifications }: { uid: str
     }, [pathname, router, uid]);
 
     return (
-        <div className={`${notifications ? 'bg-lime-600' : 'bg-mist-500'} shadow-sm shadow-black w-[29px] h-[29px] flex items-center justify-center rounded-full text-white hover:text-white transition-all duration-200 group-hover:scale-110`}>
+        <div className={`${notifications ? 'bg-lime-600' : 'bg-mist-500'} shadow-sm shadow-black w-[30px] h-[30px] flex items-center justify-center rounded-full text-white hover:text-white transition-all duration-200 group-hover:scale-110`}>
             {notifications}
         </div>
     );

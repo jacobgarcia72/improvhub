@@ -37,7 +37,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
         <div className="w-full min-h-[calc(100vh-100px)] flex flex-col items-center justify-center">
             <section className="small-section">
                 <div className="flex flex-col m-auto max-w-md pb-6 pt-4">
-                    <Form onSubmit={login.bind(null, `/${reroute}`)}>
+                    <Form fullSubmitButton onSubmit={login.bind(null, `/${reroute}`)}>
                         <h1 className="text-slate-800 text-lg">
                             {caption}
                         </h1>
