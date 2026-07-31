@@ -11,12 +11,12 @@ export default async function Comments({ comments, post, user }: {
     user: User
 }) {
     return <>
-        <div className="mb-0.5 pl-6 pr-2">
+        <div className="mb-0.5 pl-2 flex flex-col">
             {comments.map(async (c) => {
                 const commenter = await getUser(c.creator);
                 const name = commenter ? `${commenter.firstName} ${commenter.lastName[0]}` : null;
                 return (
-                    <div key={c.id} className="flex flex-row gap-1 mb-[6px] mt-[2px]">
+                    <div key={c.id} className="flex flex-row gap-1 mb-[6px] mt-[4px]">
                         {commenter ? <UserImage xsmall user={commenter} /> : null}
                         <div className="flex flex-row w-full">
                             <p className="grow-1 w-full">

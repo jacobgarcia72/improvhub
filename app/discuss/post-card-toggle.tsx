@@ -44,7 +44,7 @@ export default function PostCardToggle({ avatar, children, collapsedComments, ex
     };
 
     return (
-        <div className="flex flex-row items-start w-full">
+        <div className="flex flex-row items-start w-full px-2">
             <div
                 aria-expanded={showComments}
                 className="cursor-pointer"
