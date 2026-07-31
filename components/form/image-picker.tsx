@@ -48,7 +48,7 @@ export default function ImagePicker({ label = 'Image', name = 'image', square = 
                 {(selectedImage || currentImage) && <>
                     {square ? (
                         <Image
-                            className={`rounded object-cover w-60 h-60'}`}
+                            className={`rounded object-cover w-60 h-60 max-w-60 max-h-60'}`}
                             src={selectedImage || currentImage || ''}
                             alt="Selected image"
                             width={500}
