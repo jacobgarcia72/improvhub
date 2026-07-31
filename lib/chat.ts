@@ -67,6 +67,17 @@ export async function getComments(room: string, topicId: string, postId: string)
     return [...(data || []).map(camelCaseObject)];
 }
 
+export async function getActivityTotal(room: string, topicId: string): Promise<number> {
+    const { data } = await supabaseAdmin
+        .from('posts')
+        .select('id')
+        .eq('room', room)
+        .eq('topic_id', topicId);
+    const postCount = data?.length || 0;
+    const commentCount = (await Promise.all((data || []).map(async (row: { id: string; }) => await getComments(room, topicId, row.id)))).length;
+    return postCount + commentCount;
+}
+
 export async function saveTopic(userId: string, room: string, topic: string, description: string | null): Promise<{ success: boolean, message: string, id: string }> {
     const id = slugify(topic, { lower: true, trim: true, strict: true });
     const topicExists = Boolean(await getTopic(room, id));
