@@ -20,7 +20,7 @@ export default async function Comments({ comments, post, user }: {
                         {commenter ? <UserImage xsmall user={commenter} /> : null}
                         <div className="flex flex-row w-full">
                             <p className="grow-1 w-full">
-                                <span className="text-blue-500 text-[0.9em]">{commenter ? (
+                                <span className="hover:underline text-blue-500 text-[0.9em]">{commenter ? (
                                     <Link href={`/profile/${commenter.id}`}>{name}</Link>
                                 ): '[deleted]'}:</span>&nbsp;{c.comment}
                             </p>

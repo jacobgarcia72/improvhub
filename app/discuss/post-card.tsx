@@ -23,7 +23,7 @@ export default async function PostCard({ post, user, room, topic }: { post: Disc
             expandedComments={<Comments user={user} comments={comments} post={post} />}
         >
             <div className="flex flex-row">
-                <p className="text-mist-900 dark:text-mist-100 grow-1"><span className="text-blue-500 text-[0.9em]">
+                <p className="text-mist-900 dark:text-mist-100 grow-1"><span className="hover:underline text-blue-500 text-[0.9em]">
                     {poster ? (
                         <Link href={`/profile/${poster.id}`}>{`${poster.firstName} ${poster.lastName}`}</Link>
                     ): '[deleted]'}:</span>&nbsp;{body.replaceAll('<br>', '\n')}

@@ -15,8 +15,8 @@ export default function Initials({ firstName, lastName, width, rounded }: { firs
         fontSize = '2xl';
     }
     return (
-        <div style={{height: `${width}px`, width: `${width}px`}} className={`bg-mist-500 flex justify-center items-center align-center ${rounded ? 'rounded-full' : 'rounded'} h-[${width}px] w-[${width}px] `}>
-            <div className={`text-${fontSize} text-white font-extralight`}>{initials}</div>
+        <div style={{height: `${width}px`, width: `${width}px`}} className={`bg-indigo-800/60 flex justify-center items-center align-center ${rounded ? 'rounded-full' : 'rounded'} h-[${width}px] w-[${width}px] `}>
+            <div className={`text-${fontSize} text-white font-light`}>{initials}</div>
         </div>
     )
 }
