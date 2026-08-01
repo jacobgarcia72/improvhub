@@ -24,7 +24,7 @@ export default async function TroupeSubmissionsPage({ params }: { params: Promis
             <div className="flex flex-row flex-wrap justify-between gap-2 mb-4">
                 <div>
                     <h1 className="text-lg">Submissions</h1>
-                    {form && <Link className="link text-sm" href={`/submission-form/troupe/${id}`}>Open public form</Link>}
+                    {form && <Link className="link text-sm" href={`/submission-form/troupe/${id}`}>View Submission Form</Link>}
                 </div>
                 <div className="flex flex-row flex-wrap gap-2">
                     <Link href={`/create/submission-form/troupe/${id}`}>
@@ -68,6 +68,7 @@ export default async function TroupeSubmissionsPage({ params }: { params: Promis
                     })}
                 </div>
             )}
+            <Link href={`/troupes/${id}`} className="link">Back</Link>
         </section>
     )
 }

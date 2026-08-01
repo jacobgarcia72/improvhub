@@ -26,9 +26,8 @@ export default async function AuditionSlotsPage({ params }: { params: Promise<{ 
     };
 
     return (
-        <section className="medium-section">
-            <Link className="link text-sm" href={`/troupes/${id}/submissions`}>Back to submissions</Link>
-            <h1 className="text-xl mt-2 mb-4">Audition Slot Assignment</h1>
+        <section className="px-10! sm:px-16! flex flex-col gap-4">
+            <h1 className="text-lg">Audition Slot Assignment</h1>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {assignment.slots.map(({ slot, submissions: assigned }) => (
                     <div key={slot.id} className="rounded border border-gray-300 p-3">
@@ -61,6 +60,7 @@ export default async function AuditionSlotsPage({ params }: { params: Promise<{ 
                     ))}
                 </div>
             ) : null}
+            <Link className="link" href={`/troupes/${id}/submissions`}>Back</Link>
         </section>
     )
 }
