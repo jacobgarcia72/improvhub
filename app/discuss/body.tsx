@@ -8,7 +8,12 @@ import NewPostForm from "./new-post-form";
 import PostCard from "./post-card";
 import { User } from "@/types";
 
-export default async function MessagesBody({ user, room, topic: topicId }: { user: User, room: string | null, topic: string | null }) {
+export default async function MessagesBody({ user, room, topic: topicId, targetPostId }: {
+    user: User,
+    room: string | null,
+    topic: string | null,
+    targetPostId?: string | null
+}) {
     if (!room) {
         return (
             <section>
@@ -31,7 +36,16 @@ export default async function MessagesBody({ user, room, topic: topicId }: { use
                 ): <Link href='/login'>Sign in to create post</Link>}
                 <div className="flex flex-col gap-2 items-center pb-6">
                     <Suspense fallback={<Loader caption="posts" />}>
-                        {posts.map((p) => <PostCard key={p.id} post={p} user={user} room={room} topic={topicId} />)}
+                        {posts.map((p) => (
+                            <PostCard
+                                key={p.id}
+                                post={p}
+                                user={user}
+                                room={room}
+                                topic={topicId}
+                                isTargeted={p.id === targetPostId}
+                            />
+                        ))}
                         {posts.length === 0 && <p className="text-mist-600 dark:text-mist-300">No posts found.</p>}
                     </Suspense>
                 </div>

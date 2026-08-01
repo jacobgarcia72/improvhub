@@ -1,6 +1,6 @@
 'use client';
 
-import { KeyboardEvent, MouseEvent, ReactNode, useState } from "react";
+import { KeyboardEvent, MouseEvent, ReactNode, useEffect, useRef, useState } from "react";
 
 const interactiveSelector = [
     "a",
@@ -18,13 +18,34 @@ function clickedInteractiveElement(target: EventTarget) {
     return target instanceof HTMLElement && target.closest(interactiveSelector);
 }
 
-export default function PostCardToggle({ avatar, children, collapsedComments, expandedComments }: {
+export default function PostCardToggle({ avatar, children, collapsedComments, expandedComments, isTargeted = false }: {
     avatar: ReactNode,
     children: ReactNode,
     collapsedComments: ReactNode,
-    expandedComments: ReactNode
+    expandedComments: ReactNode,
+    isTargeted?: boolean
 }) {
-    const [showComments, setShowComments] = useState(false);
+    const [showComments, setShowComments] = useState(isTargeted);
+    const [isFlashing, setIsFlashing] = useState(false);
+    const cardRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (!isTargeted) return;
+
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setShowComments(true);
+        setIsFlashing(true);
+
+        const animationFrame = window.requestAnimationFrame(() => {
+            cardRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+        });
+        const flashTimeout = window.setTimeout(() => setIsFlashing(false), 1600);
+
+        return () => {
+            window.cancelAnimationFrame(animationFrame);
+            window.clearTimeout(flashTimeout);
+        };
+    }, [isTargeted]);
 
     const toggleComments = () => {
         setShowComments((current) => !current);
@@ -44,7 +65,12 @@ export default function PostCardToggle({ avatar, children, collapsedComments, ex
     };
 
     return (
-        <div className="flex flex-row items-start w-full px-2">
+        <div
+            ref={cardRef}
+            className={`flex flex-row items-start w-full rounded px-2 py-1 transition-colors duration-700 ${
+                isFlashing ? "bg-yellow-200/60 dark:bg-yellow-700/35" : "bg-transparent"
+            }`}
+        >
             <div
                 aria-expanded={showComments}
                 className="cursor-pointer"

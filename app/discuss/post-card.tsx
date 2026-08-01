@@ -8,7 +8,13 @@ import Comments from "./comments";
 import PostCardToggle from "./post-card-toggle";
 import CommentCount from "./comment-count";
 
-export default async function PostCard({ post, user, room, topic }: { post: DiscussionPost, user: User, room: string, topic: string }) {
+export default async function PostCard({ post, user, room, topic, isTargeted = false }: {
+    post: DiscussionPost,
+    user: User,
+    room: string,
+    topic: string,
+    isTargeted?: boolean
+}) {
     const { post: body } = post;
     const poster = await getUser(post.creator);
     const comments = await getComments(room, topic, post.id);
@@ -21,6 +27,7 @@ export default async function PostCard({ post, user, room, topic }: { post: Disc
             ) : null}
             collapsedComments={<CommentCount count={comments.length} />}
             expandedComments={<Comments user={user} comments={comments} post={post} />}
+            isTargeted={isTargeted}
         >
             <div className="flex flex-row">
                 <p className="text-mist-900 dark:text-mist-100 grow-1"><span className="hover:underline text-blue-500 text-[0.9em]">

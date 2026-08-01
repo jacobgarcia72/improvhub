@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 };
 
 export default async function ChatPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
-    const { channel, topic } = await searchParams;
+    const { channel, topic, post } = await searchParams;
     const user = await getCurrentUser();
     if (!user) {
         redirect(`/login?reroute=discuss`);
@@ -32,7 +32,12 @@ export default async function ChatPage({ searchParams }: { searchParams: Promise
             <MessagesHeader chatRooms={chatRooms} theatre={theatre} />
         </Suspense>
         <Suspense fallback={<Loader />}>
-            <MessagesBody user={user} room={channel as string || null} topic={topic as string || null} />
+            <MessagesBody
+                user={user}
+                room={typeof channel === "string" ? channel : null}
+                topic={typeof topic === "string" ? topic : null}
+                targetPostId={typeof post === "string" ? post : null}
+            />
         </Suspense>
     </>
 }
