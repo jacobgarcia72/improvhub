@@ -57,6 +57,18 @@ export async function getPosts(room: string, topicId: string): Promise<Discussio
     return [...(data || []).map(camelCaseObject)];
 }
 
+export async function getLatestPost(room: string, topicId: string): Promise<DiscussionPost | null> {
+    const { data } = await supabaseAdmin
+        .from('posts')
+        .select('*')
+        .eq('room', room)
+        .eq('topic_id', topicId)
+        .order('date', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+    return data ? camelCaseObject(data) as DiscussionPost : null;
+}
+
 export async function getComments(room: string, topicId: string, postId: string): Promise<Comment[]> {
     const { data } = await supabaseAdmin
         .from('comments')
