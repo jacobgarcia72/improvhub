@@ -54,6 +54,7 @@ export default async function PublicSubmissionFormPage({
             <SubmissionFormView
                 form={form}
                 user={user}
+                ownerName={ownerName}
                 demographics={demographics}
                 existingSubmission={existingSubmission}
                 onSubmit={submitSubmissionForm.bind(null, form.id)}

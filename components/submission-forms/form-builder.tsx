@@ -18,10 +18,12 @@ type CustomQuestion = {
 export default function SubmissionFormBuilder({
     existingForm,
     ownerName,
+    type,
     onSubmit,
 }: {
     existingForm?: SubmissionForm | null;
     ownerName: string;
+    type: 'troupe' | 'show';
     onSubmit: (prevState: void | { message?: string }, formData: FormData) => Promise<{ message?: string } | void>;
 }) {
     const builtIns = existingForm?.questions.filter((question) => question.builtIn) || [];
@@ -100,9 +102,13 @@ export default function SubmissionFormBuilder({
                 <h2 className="font-semibold text-slate-700 dark:text-slate-300">Questions</h2>
                 {builtInSubmissionQuestions.map((question) => {
                     const selected = builtIns.find((existing) => existing.id === question.id);
+                    const questionText = question.label
+                        .replace('{name}', ownerName)
+                        .replace('{type}', type)
+                        .replace('{verb}', type === 'troupe' ? 'joining' : 'submitting for');
                     return (
                         <div key={question.id} className="flex flex-row flex-wrap gap-x-4 gap-y-1 items-center">
-                            <Checkbox name={`question-${question.id}`} label={question.label} defaultChecked={Boolean(selected)} />
+                            <Checkbox name={`question-${question.id}`} label={questionText} defaultChecked={Boolean(selected)} />
                             <Checkbox name={`required-${question.id}`} label="Required" defaultChecked={Boolean(selected?.required)} />
                         </div>
                     )

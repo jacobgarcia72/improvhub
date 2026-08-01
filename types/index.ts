@@ -245,8 +245,12 @@ export type Notification = {
 }
 
 export type SubmissionOwnerType = 'troupe' | 'show';
-export type SubmissionQuestionType = 'short_text' | 'long_text' | 'single_select' | 'multi_select';
+export type SubmissionQuestionType = 'short_text' | 'long_text' | 'single_select' | 'multi_select' | 'image';
 export type BuiltInSubmissionQuestion =
+    'why' |
+    'phone' |
+    'email' |
+    'headshot' |
     'pronouns' |
     'gender_identity' |
     'orientation' |

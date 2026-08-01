@@ -27,6 +27,7 @@ export default async function SubmissionFormPage({ params }: { params: Promise<{
             <SubmissionFormBuilder
                 ownerName={troupe.name}
                 existingForm={existingForm}
+                type="troupe"
                 onSubmit={saveTroupeSubmissionForm.bind(null, id)}
             />
         </section>

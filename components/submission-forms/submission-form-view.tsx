@@ -19,12 +19,14 @@ function getDefaultAnswer(questionId: string, user: User, demographics: Demograp
 export default function SubmissionFormView({
     form,
     user,
+    ownerName,
     demographics,
     existingSubmission,
     onSubmit,
 }: {
     form: SubmissionForm;
     user: User | null;
+    ownerName: string | null;
     demographics: Demographics | null;
     existingSubmission?: SubmissionFormSubmission | null;
     onSubmit: (prevState: void | { message?: string }, formData: FormData) => Promise<{ message?: string } | void>;
@@ -41,7 +43,12 @@ export default function SubmissionFormView({
             />}
             {form.questions.map((question) => {
                 const name = `answer-${question.id}`;
-                const label = `${question.label}${question.required ? ' *' : ''}`;
+                let label = question.label
+                    .replace('{name}', ownerName || `this ${form.ownerType}`)
+                    .replace('{type}', form.ownerType)
+                    .replace('{verb}', form.ownerType === 'troupe' ? 'joining' : 'submitting for');
+                if (label[label.length - 1].match(/[a-zA-Z0-9]/)) label += ':';
+                if (question.required) label += ' *';
                 const value = user ? getDefaultAnswer(question.id, user, demographics, existingSubmission) : '';
                 if (question.type === 'long_text') {
                     return <Text key={question.id} name={name} label={label} rows={4} value={value.replaceAll('<br>', '\n')} />
