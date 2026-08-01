@@ -1,5 +1,3 @@
-import ComingSoon from "@/components/coming-soon";
-
-export default function SubmissionFormLayout() {
-    return <ComingSoon />
+export default function SubmissionFormLayout({ children }: { children: React.ReactNode }) {
+    return children;
 }

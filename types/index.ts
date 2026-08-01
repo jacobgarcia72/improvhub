@@ -244,5 +244,63 @@ export type Notification = {
     data: string | null;
 }
 
+export type SubmissionOwnerType = 'troupe' | 'show';
+export type SubmissionQuestionType = 'short_text' | 'long_text' | 'single_select' | 'multi_select';
+export type BuiltInSubmissionQuestion =
+    'pronouns' |
+    'gender_identity' |
+    'orientation' |
+    'ethnicity' |
+    'experience' |
+    'conflicts' |
+    'anything_else';
+
+export interface SubmissionFormQuestion {
+    id: string;
+    label: string;
+    type: SubmissionQuestionType;
+    required?: boolean;
+    builtIn?: BuiltInSubmissionQuestion;
+    options?: string[];
+}
+
+export interface AuditionSlot {
+    id: string;
+    dateTime: string;
+}
+
+export interface SubmissionForm {
+    id: string;
+    ownerType: SubmissionOwnerType;
+    ownerId: string;
+    title: string;
+    description: string | null;
+    questions: SubmissionFormQuestion[];
+    requiresSignIn: boolean;
+    hasAudition: boolean;
+    auditionDatesTbd: boolean;
+    auditionSlots: AuditionSlot[];
+    createdBy: string;
+    updatedAt: string;
+}
+
+export interface SubmissionFormSubmission {
+    id: string;
+    formId: string;
+    userId: string | null;
+    contactEmail: string | null;
+    answers: { [questionId: string]: string | string[] };
+    auditionAvailability: string[];
+    submittedAt: string;
+}
+
+export interface Demographics {
+    userId: string;
+    genderIdentity: string | null;
+    orientation: string | null;
+    ethnicity: string | null;
+    updatedAt: string;
+}
+
 export type InputOptionObject = { id: string | number, text: string, image?: string };
 export type InputOption = string | InputOptionObject;

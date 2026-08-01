@@ -253,6 +253,48 @@ create table if not exists feedback (
   date text not null
 );
 
+create table if not exists demographics (
+  user_id text primary key references users(id) on delete cascade,
+  gender_identity text,
+  orientation text,
+  ethnicity text,
+  updated_at text not null
+);
+
+create table if not exists submission_forms (
+  id text primary key,
+  owner_type text not null,
+  owner_id text not null,
+  title text not null,
+  description text,
+  questions jsonb not null,
+  requires_sign_in boolean not null default true,
+  has_audition boolean not null,
+  audition_dates_tbd boolean not null,
+  audition_slots jsonb not null,
+  created_by text not null references users(id) on delete cascade,
+  updated_at text not null,
+  unique(owner_type, owner_id)
+);
+
+create table if not exists submission_form_submissions (
+  id text primary key,
+  form_id text not null references submission_forms(id) on delete cascade,
+  user_id text references users(id) on delete cascade,
+  contact_email text,
+  answers jsonb not null,
+  audition_availability text[] not null,
+  submitted_at text not null
+);
+
+create unique index if not exists submission_form_submissions_user_idx
+  on submission_form_submissions(form_id, user_id)
+  where user_id is not null;
+
+create unique index if not exists submission_form_submissions_email_idx
+  on submission_form_submissions(form_id, lower(contact_email))
+  where user_id is null and contact_email is not null;
+
 CREATE TABLE if not exists notifications (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   date timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
@@ -291,6 +333,7 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.classes TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.class_occurrences TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.comments TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.feedback TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.demographics TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.follows TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.friendships TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.jams TO service_role;
@@ -304,6 +347,8 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.rsvps TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.showing_cast TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.shows TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.show_occurrences TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.submission_forms TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.submission_form_submissions TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.theatres TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.topics TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.troupes TO service_role;

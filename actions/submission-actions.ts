@@ -1,0 +1,163 @@
+'use server';
+
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { getCurrentUser, getCurrentUserId } from "@/lib/users";
+import { getTroupe, getTroupeMembers } from "@/lib/troupes";
+import {
+    getSubmissionFormById,
+    saveDemographics,
+    saveSubmission,
+    saveSubmissionForm
+} from "@/lib/submission-forms";
+import { builtInSubmissionQuestions } from "@/lib/submission-question-options";
+import { AuditionSlot, Demographics, SubmissionFormQuestion, SubmissionOwnerType } from "@/types";
+
+function cleanLineBreaks(value: string): string {
+    return value.trim().replaceAll(/\r\n/g, '<br>').replaceAll(/\n/g, '<br>').replaceAll(/\r/g, '<br>');
+}
+
+async function canManageSubmissionOwner(ownerType: SubmissionOwnerType, ownerId: string, userId: string): Promise<boolean> {
+    if (ownerType === 'troupe') {
+        const troupe = await getTroupe(ownerId);
+        if (!troupe) return false;
+        const members = await getTroupeMembers(ownerId);
+        return members.some((member) => member.id === userId && member.confirmed && member.role !== 'coach');
+    }
+    return false;
+}
+
+function parseQuestions(formData: FormData): SubmissionFormQuestion[] {
+    const questions: SubmissionFormQuestion[] = [];
+    builtInSubmissionQuestions.forEach((question) => {
+        if (!formData.get(`question-${question.id}`)) return;
+        questions.push({
+            ...question,
+            required: Boolean(formData.get(`required-${question.id}`))
+        });
+    });
+
+    for (let i = 0; i < 8; i++) {
+        const label = (formData.get(`custom-question-${i}`) as string | null)?.trim();
+        if (!label) continue;
+        const type = (formData.get(`custom-question-type-${i}`) as SubmissionFormQuestion['type'] | null) || 'long_text';
+        const rawOptions = (formData.get(`custom-question-options-${i}`) as string | null) || '';
+        const options = rawOptions.split(/\r?\n|,/).map((option) => option.trim()).filter(Boolean);
+        questions.push({
+            id: `custom-${i}-${label.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'question'}`,
+            label,
+            type,
+            required: Boolean(formData.get(`custom-question-required-${i}`)),
+            options: ['single_select', 'multi_select'].includes(type) ? options : undefined
+        });
+    }
+    return questions;
+}
+
+function parseAuditionSlots(formData: FormData): AuditionSlot[] {
+    const slots: AuditionSlot[] = [];
+    for (let i = 0; i < 8; i++) {
+        const date = (formData.get(`audition-date-${i}`) as string | null)?.trim();
+        const time = (formData.get(`audition-time-${i}`) as string | null)?.trim();
+        if (!date || !time) continue;
+        slots.push({
+            id: `${date}-${time}`.replace(/[^a-zA-Z0-9]+/g, '-'),
+            dateTime: `${date} ${time}`
+        });
+    }
+    return slots;
+}
+
+export async function saveTroupeSubmissionForm(ownerId: string, prevState: void | { message?: string }, formData: FormData) {
+    const userId = await getCurrentUserId();
+    if (!userId) throw new Error('You must be logged in to continue');
+    if (!(await canManageSubmissionOwner('troupe', ownerId, userId))) throw new Error('You do not have permission to manage this form');
+
+    const title = (formData.get('title') as string | null)?.trim() || 'Troupe Submission Form';
+    const description = cleanLineBreaks((formData.get('description') as string | null) || '');
+    const questions = parseQuestions(formData);
+    if (!questions.length) return { message: 'Choose at least one question' };
+
+    const hasAudition = Boolean(formData.get('hasAudition'));
+    const auditionDatesTbd = hasAudition && Boolean(formData.get('auditionDatesTbd'));
+    const auditionSlots = hasAudition && !auditionDatesTbd ? parseAuditionSlots(formData) : [];
+    if (hasAudition && !auditionDatesTbd && !auditionSlots.length) {
+        return { message: 'Add at least one audition date or mark dates TBD' };
+    }
+
+    await saveSubmissionForm({
+        ownerType: 'troupe',
+        ownerId,
+        title,
+        description: description || null,
+        questions,
+        requiresSignIn: Boolean(formData.get('requiresSignIn')),
+        hasAudition,
+        auditionDatesTbd,
+        auditionSlots,
+        createdBy: userId,
+    });
+
+    revalidatePath(`/troupes/${ownerId}`, 'layout');
+    redirect(`/troupes/${ownerId}/submissions`);
+}
+
+export async function submitSubmissionForm(formId: string, prevState: void | { message?: string }, formData: FormData) {
+    const user = await getCurrentUser();
+
+    const form = await getSubmissionFormById(formId);
+    if (!form) return { message: 'This form no longer exists' };
+    if (form.requiresSignIn && !user) throw new Error('You must be logged in to continue');
+
+    const contactEmail = user
+        ? null
+        : ((formData.get('contactEmail') as string | null)?.trim().toLowerCase() || null);
+    if (!user && !contactEmail) return { message: 'Email address is required' };
+    if (contactEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail)) {
+        return { message: 'Enter a valid email address' };
+    }
+
+    const answers: { [questionId: string]: string | string[] } = {};
+    const demographicUpdates: Partial<Demographics> = {};
+
+    for (let i = 0; i < form.questions.length; i++) {
+        const question = form.questions[i];
+        const key = `answer-${question.id}`;
+        let answer: string | string[];
+        if (question.type === 'multi_select') {
+            answer = formData.getAll(key).map((value) => String(value).trim()).filter(Boolean);
+        } else {
+            answer = cleanLineBreaks((formData.get(key) as string | null) || '');
+        }
+        if (question.required && (!answer || (Array.isArray(answer) && !answer.length))) {
+            return { message: `${question.label} is required` };
+        }
+        answers[question.id] = answer;
+
+        if (question.builtIn === 'gender_identity') demographicUpdates.genderIdentity = Array.isArray(answer) ? answer.join(', ') : answer;
+        if (question.builtIn === 'orientation') demographicUpdates.orientation = Array.isArray(answer) ? answer.join(', ') : answer;
+        if (question.builtIn === 'ethnicity') demographicUpdates.ethnicity = Array.isArray(answer) ? answer.join(', ') : answer;
+    }
+
+    const auditionAvailability = form.hasAudition && !form.auditionDatesTbd
+        ? formData.getAll('auditionAvailability').map((value) => String(value))
+        : [];
+    if (form.hasAudition && !form.auditionDatesTbd && !auditionAvailability.length) {
+        return { message: 'Choose at least one audition date you can attend' };
+    }
+
+    if (Object.keys(demographicUpdates).length) {
+        if (user) await saveDemographics(user.id, demographicUpdates);
+    }
+
+    await saveSubmission({
+        formId: form.id,
+        userId: user?.id || null,
+        contactEmail,
+        answers,
+        auditionAvailability
+    });
+
+    revalidatePath(`/${form.ownerType}s/${form.ownerId}/submissions`);
+    redirect(`/submission-form/${form.ownerType}/${form.ownerId}?submitted=true`);
+}

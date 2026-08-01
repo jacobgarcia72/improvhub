@@ -8,6 +8,7 @@ import AvailableUsersSection from "../available-users-section";
 import UpcomingShows from "@/components/upcoming-shows";
 import { Suspense } from "react";
 import Loader from "@/components/loader";
+import { getSubmissionForm } from "@/lib/submission-forms";
 
 type Props = {
     params: Promise<{ id: string }>
@@ -21,6 +22,7 @@ export default async function TroupePage({ params }: Props) {
     );
     const followerCount = await getFollowCount(id, 'troupe');
     const troupe = await getTroupe(id);
+    const submissionForm = await getSubmissionForm('troupe', id);
 
     return <>
         {followerCount ? (
@@ -39,12 +41,9 @@ export default async function TroupePage({ params }: Props) {
                     <Link href={`/manage/troupe/${id}`}>
                         <Button caption="Manage Troupe Details" className="w-54 max-w-[45vw] px-0!" />
                     </Link>
-                    <div className="relative">
-                        <div className="absolute bg-slate-100 text-black border border-black/50 rounded px-2 -bottom-4 right-3 text-sm">Coming Soon</div>
-                        <Link href={`/create/submission-form/troupe/${id}`}>
-                            <Button caption="Submission Form" className="w-54 max-w-[45vw] px-0!" />
-                        </Link>
-                    </div>
+                    <Link href={`/troupes/${id}/submissions`}>
+                        <Button caption="Submissions" className="w-54 max-w-[45vw] px-0!" />
+                    </Link>
                 </div>
             </> : null}
             <Suspense fallback={<Loader caption="troupe members" />}>
@@ -57,5 +56,12 @@ export default async function TroupePage({ params }: Props) {
             {troupe?.lookingForMusician && <AvailableUsersSection role="musician" troupe={troupe} />}
             {troupe?.lookingForCoach && <AvailableUsersSection role="coach" troupe={troupe} />}
         </> : null}
+        {!isMemberNotCoach && submissionForm && troupe && (troupe.lookingForPlayers || troupe.lookingForMusician || troupe.lookingForCoach) ? (
+            <section className="flex flex-col items-center">
+                <Link href={`/submission-form/troupe/${id}`}>
+                    <Button caption="Submit Interest Form" />
+                </Link>
+            </section>
+        ) : null}
     </>
 }
