@@ -14,7 +14,7 @@ export default async function Comments({ comments, post, user }: {
         <div className="mb-0.5 pl-2 flex flex-col">
             {comments.map(async (c) => {
                 const commenter = await getUser(c.creator);
-                const name = commenter ? `${commenter.firstName} ${commenter.lastName[0]}` : null;
+                const name = commenter ? `${commenter.firstName} ${commenter.lastName}` : null;
                 return (
                     <div key={c.id} className="flex flex-row gap-1 mb-[6px] mt-[4px]">
                         {commenter ? <UserImage xsmall user={commenter} /> : null}
