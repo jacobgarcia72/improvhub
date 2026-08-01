@@ -8,6 +8,7 @@ import { supabaseAdmin } from './supabase-server';
 import slugify from 'slugify';
 import { camelCaseObject, getRandomNumberString, snakeCaseObject } from './helper-functions';
 import { revalidatePath } from 'next/cache';
+import { postNotification } from './notifications';
 
 export async function getChatRooms(userId: string): Promise<{
     theatres: InputOptionObject[],
@@ -55,6 +56,14 @@ export async function getPosts(room: string, topicId: string): Promise<Discussio
         .eq('topic_id', topicId)
         .order('date', { ascending: false });
     return [...(data || []).map(camelCaseObject)];
+}
+export async function getPost(postId: string): Promise<DiscussionPost | null> {
+    const { data } = await supabaseAdmin
+        .from('posts')
+        .select('*')
+        .eq('id', postId)
+        .maybeSingle();
+    return data ? camelCaseObject(data) as DiscussionPost : null;
 }
 
 export async function getLatestPost(room: string, topicId: string): Promise<DiscussionPost | null> {
@@ -152,6 +161,10 @@ export async function saveComment(userId: string, room: string, topicId: string,
             .from('comments')
             .insert(snakeCaseObject(newComment));
         if (error) throw (error);
+        const postCreator = (await getPost(postId))?.creator;
+        if (postCreator && postCreator !== userId) {
+            postNotification(userId, [postCreator], 'new_comment', `${room},${topicId},${postId}`);
+        }
         return { success: true, message: 'Success', id };
     } catch (error) {
         console.error(error);

@@ -233,7 +233,8 @@ export type NotificationType =
     'workshop_occurrence_cancelled' |
     'class_occurrence_cancelled' |
     'made_admin' |
-    'made_instructor';
+    'made_instructor' |
+    'new_comment';
 
 export type Notification = {
     id: string;

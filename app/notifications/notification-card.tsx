@@ -250,7 +250,23 @@ export default async function NotificationCard({ notification, userId, isNew }: 
                     </>} for <Link className="link" href={`/${pluralize(instructorEventType)}/${instructorEventId}`}>{instructorEvent.title}</Link>
                 </p>
             </Wrapper>
-            
+        case 'new_comment':
+            if (!data) return null;
+            const [room, topicId, postId] = data.split(',');
+            const commenter = await getUserAbbreviated(senderId);
+            return <Wrapper date={date} isNew={isNew} image={commenter?.image} imageLink={`/profile/${senderId}`} imageAlt={commenter?.name}>
+                <p>
+                    {commenter ? (
+                        <Link href={`/profile/${senderId}`} className="link">
+                            {commenter.name}
+                        </Link>
+                    ) : 'Someone'}
+                    &nbsp;commented on&nbsp;
+                    <Link href={`/discuss?channel=${room}&topic=${topicId}&post=${postId}`} className="link">
+                        your post
+                    </Link>
+                </p>
+            </Wrapper>
         default:
             break;
     }
