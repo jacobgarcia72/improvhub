@@ -138,16 +138,18 @@ export default function SubmissionFormBuilder({
                                 >
                                     <option value="short_text">Short answer</option>
                                     <option value="long_text">Long answer</option>
-                                    <option value="single_select">Choose one</option>
-                                    <option value="multi_select">Choose many</option>
+                                    <option value="single_select">Select one</option>
+                                    <option value="multi_select">Select multiple</option>
                                 </select>
                             </div>
-                            <Checkbox
-                                name={`custom-question-required-${i}`}
-                                label="Required"
-                                defaultChecked={question.required}
-                                onChange={(checked) => setCustomQuestions(customQuestions.map((item, index) => index === i ? { ...item, required: checked } : item))}
-                            />
+                            <div className="pb-1">
+                                <Checkbox
+                                    name={`custom-question-required-${i}`}
+                                    label="Required"
+                                    defaultChecked={question.required}
+                                    onChange={(checked) => setCustomQuestions(customQuestions.map((item, index) => index === i ? { ...item, required: checked } : item))}
+                                />
+                            </div>
                         </div>
                         {['single_select', 'multi_select'].includes(question.type) && (
                             <Text name={`custom-question-options-${i}`} label="Options" rows={3} value={question.options} />
