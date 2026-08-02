@@ -60,7 +60,7 @@ export default function SubmissionFormBuilder({
                 <Checkbox
                     name="requiresSignIn"
                     label="Only signed-in users can view and submit this form"
-                    defaultChecked={existingForm?.requiresSignIn !== false}
+                    defaultChecked={existingForm?.requiresSignIn || false}
                 />
             </div>
 

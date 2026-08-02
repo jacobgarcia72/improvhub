@@ -28,11 +28,11 @@ export default async function TroupeSubmissionsPage({ params }: { params: Promis
                 </div>
                 <div className="flex flex-row flex-wrap gap-2">
                     <Link href={`/create/submission-form/troupe/${id}`}>
-                        <Button caption={form ? "Edit Form" : "Create Form"} />
+                        <Button className="w-36" caption={form ? "Edit Form" : "Create Form"} />
                     </Link>
                     {form?.hasAudition && !form.auditionDatesTbd && (
                         <Link href={`/troupes/${id}/submissions/auditions`}>
-                            <Button caption="Audition Slots" />
+                            <Button className="w-36" caption="Audition Slots" />
                         </Link>
                     )}
                 </div>

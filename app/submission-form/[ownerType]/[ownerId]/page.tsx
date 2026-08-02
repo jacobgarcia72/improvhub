@@ -46,7 +46,7 @@ export default async function PublicSubmissionFormPage({
                 {ownerName && <p className="text-sm text-slate-600 dark:text-slate-300">{ownerName}</p>}
                 {submitted === 'true' && <p className="mt-2 text-green-700 dark:text-green-300">Submission received.</p>}
                 {form.description && (
-                    <div className="mt-3">
+                    <div className="mt-3 ml-2 text-slate-800 dark:text-slate-200">
                         {form.description.split('<br>').map((line, i) => <p key={i}>{line}</p>)}
                     </div>
                 )}
