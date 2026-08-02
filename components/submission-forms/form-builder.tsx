@@ -7,6 +7,7 @@ import Text from "@/components/form/text";
 import Checkbox from "@/components/form/checkbox";
 import { builtInSubmissionQuestions } from "@/lib/submission-question-options";
 import { SubmissionForm, SubmissionFormQuestion } from "@/types";
+import { appName } from "@/lib/app-info";
 
 type CustomQuestion = {
     label: string;
@@ -59,15 +60,13 @@ export default function SubmissionFormBuilder({
             <div className="rounded border border-gray-300 p-3">
                 <Checkbox
                     name="requiresSignIn"
-                    label="Only signed-in users can view and submit this form"
+                    label={`Only allow ${appName} users to view and submit this form`}
                     defaultChecked={existingForm?.requiresSignIn || false}
                 />
             </div>
 
-            <Text name="description" label="Intro Text" rows={4} value={existingForm?.description?.replaceAll('<br>', '\n') || ''} />
-
             <div className="flex flex-col gap-3 rounded border border-gray-300 p-3">
-                <Checkbox name="hasAudition" label="This form includes an audition" defaultChecked={hasAudition} onChange={setHasAudition} />
+                <Checkbox name="hasAudition" label="Include Auditions" defaultChecked={hasAudition} onChange={setHasAudition} />
                 {hasAudition && (
                     <>
                         <Checkbox name="auditionDatesTbd" label="Audition date(s) TBD" defaultChecked={datesTbd} onChange={setDatesTbd} />
@@ -98,6 +97,8 @@ export default function SubmissionFormBuilder({
                 )}
             </div>
 
+            <Text name="description" label="Form introduction" rows={4} value={existingForm?.description?.replaceAll('<br>', '\n') || ''} />
+
             <div className="flex flex-col gap-2 rounded border border-gray-300 p-3">
                 <h2 className="font-semibold text-slate-700 dark:text-slate-300">Questions</h2>
                 {builtInSubmissionQuestions.map((question) => {
@@ -109,7 +110,7 @@ export default function SubmissionFormBuilder({
                     return (
                         <div key={question.id} className="flex flex-row flex-wrap gap-x-4 gap-y-1 items-center">
                             <Checkbox name={`question-${question.id}`} label={questionText} defaultChecked={Boolean(selected)} />
-                            <Checkbox name={`required-${question.id}`} label="Required" defaultChecked={Boolean(selected?.required)} />
+                            {question.requiredOption ? <Checkbox name={`required-${question.id}`} label="Required" defaultChecked={Boolean(selected?.required)} /> : null}
                         </div>
                     )
                 })}

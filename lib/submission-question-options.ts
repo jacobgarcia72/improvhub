@@ -2,8 +2,8 @@ import { SubmissionFormQuestion } from "@/types";
 import { pronouns, genderIdentities, orientations, ethnicities } from "@/lib/demographics";
 
 export const builtInSubmissionQuestions: SubmissionFormQuestion[] = [
-    { id: 'email', label: 'Email address', type: 'short_text', builtIn: 'email' },
-    { id: 'phone', label: 'Phone number', type: 'short_text', builtIn: 'phone' },
+    { id: 'email', label: 'Email address', type: 'short_text', builtIn: 'email', requiredOption: true },
+    { id: 'phone', label: 'Phone number', type: 'short_text', builtIn: 'phone', requiredOption: true },
     { id: 'why', label: 'Why are you interested in {verb} {name}?', type: 'long_text', builtIn: 'why' },
     { id: 'experience', label: 'Please describe your improv experience', type: 'long_text', builtIn: 'experience' },
     { id: 'pronouns', label: 'Preferred pronouns', type: 'autocomplete', builtIn: 'pronouns' },

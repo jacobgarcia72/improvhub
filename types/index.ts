@@ -264,6 +264,7 @@ export interface SubmissionFormQuestion {
     label: string;
     type: SubmissionQuestionType;
     required?: boolean;
+    requiredOption?: boolean;
     builtIn?: BuiltInSubmissionQuestion;
     options?: string[];
 }
