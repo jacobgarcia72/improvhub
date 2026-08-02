@@ -6,6 +6,7 @@ import { Demographics, SubmissionForm, SubmissionFormSubmission, User } from "@/
 import { formatDateTimeForDisplay } from "@/lib/dates";
 import Autocomplete from "../form/autocomplete";
 import { autocompleteOptions } from "@/lib/submission-question-options";
+import { getEmail } from "@/lib/auth";
 
 function getDefaultAnswer(questionId: string, user: User, demographics: Demographics | null, existingSubmission?: SubmissionFormSubmission | null): string {
     const existing = existingSubmission?.answers[questionId];
@@ -20,7 +21,7 @@ function getDefaultAnswer(questionId: string, user: User, demographics: Demograp
     return '';
 }
 
-export default function SubmissionFormView({
+export default async function SubmissionFormView({
     form,
     user,
     ownerName,
@@ -35,6 +36,7 @@ export default function SubmissionFormView({
     existingSubmission?: SubmissionFormSubmission | null;
     onSubmit: (prevState: void | { message?: string }, formData: FormData) => Promise<{ message?: string } | void>;
 }) {
+    const email = user ? await getEmail() : '';
     return (
         <Form onSubmit={onSubmit} buttonCaption={existingSubmission ? "Update Submission" : "Submit"} className="w-full max-w-xl">
             {form.questions.map((question) => {
@@ -45,7 +47,14 @@ export default function SubmissionFormView({
                     .replace('{verb}', form.ownerType === 'troupe' ? 'joining' : 'submitting for');
                 if (label[label.length - 1].match(/[a-zA-Z0-9]/)) label += ':';
                 if (question.required) label += ' *';
-                const value = user ? getDefaultAnswer(question.id, user, demographics, existingSubmission) : '';
+                let value = '';
+                if (user) {
+                    if (question.id === 'email') {
+                        value = email;
+                    } else {
+                        value = getDefaultAnswer(question.id, user, demographics, existingSubmission);
+                    }
+                }
                 if (question.type === 'autocomplete') {
                     return <Autocomplete options={autocompleteOptions[question.id] || []} key={question.id} name={name} label={label} startingValue={value} required={question.required} />
                 }

@@ -3,6 +3,13 @@ import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "./supabase-ssr";
 import { supabaseAdmin } from "./supabase-server";
 
+export async function getEmail(): Promise<string> {
+    const supabase = await createSupabaseServerClient();
+    const { data: { user }, error } = await supabase.auth.getUser();
+    if (error) throw error;
+    return user?.email || '';
+}
+
 export async function verifyAuth() {
     const supabase = await createSupabaseServerClient();
     const { data: authData, error: authError } = await supabase.auth.getClaims();
