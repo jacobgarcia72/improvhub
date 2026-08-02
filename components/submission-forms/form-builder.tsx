@@ -311,7 +311,7 @@ export default function SubmissionFormBuilder({
                         <span className="grow text-sm text-slate-700 dark:text-slate-300">{getQuestionOrderLabel(orderItem)}</span>
                         <button
                             type="button"
-                            className="p-0! w-fit disabled:text-gray-400 text-slate-400 dark:text-mist-500 hover:text-mist-900 hover:dark:text-white"
+                            className="p-0! w-fit disabled:text-gray-400 text-slate-600 dark:text-mist-400 hover:text-indigo-500 hover:dark:text-white"
                             onClick={() => moveQuestion(activeIndex, -1)}
                             disabled={activeIndex === 0}
                         >
@@ -319,7 +319,7 @@ export default function SubmissionFormBuilder({
                         </button>
                         <button
                             type="button"
-                            className="p-0! w-fit disabled:text-gray-400 text-slate-400 dark:text-mist-500 hover:text-mist-900 hover:dark:text-white"
+                            className="p-0! w-fit disabled:text-gray-400 text-slate-600 dark:text-mist-400 hover:text-indigo-500 hover:dark:text-white"
                             onClick={() => moveQuestion(activeIndex, 1)}
                             disabled={activeIndex === activeOrderedQuestions.length - 1}
                         >
