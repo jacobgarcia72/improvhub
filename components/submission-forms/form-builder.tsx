@@ -27,12 +27,19 @@ function parseOptionInputs(options: string): string[] {
     return options.split(/\r?\n|,/).map((option) => option.trim()).filter(Boolean);
 }
 
+function sortAnythingElseLast(questions: QuestionOrderItem[]): QuestionOrderItem[] {
+    return [
+        ...questions.filter((question) => !(question.kind === 'builtIn' && question.id === 'anything_else')),
+        ...questions.filter((question) => question.kind === 'builtIn' && question.id === 'anything_else'),
+    ];
+}
+
 function getInitialQuestionOrder(existingForm?: SubmissionForm | null): QuestionOrderItem[] {
     if (!existingForm?.questions.length) {
-        return [
+        return sortAnythingElseLast([
             ...builtInSubmissionQuestions.map((question) => ({ kind: 'builtIn' as const, id: question.id })),
             { kind: 'custom', index: 0 },
-        ];
+        ]);
     }
 
     let customIndex = 0;
@@ -45,7 +52,7 @@ function getInitialQuestionOrder(existingForm?: SubmissionForm | null): Question
         .filter((question) => !orderedBuiltInIds.has(question.id))
         .map((question) => ({ kind: 'builtIn' as const, id: question.id }));
 
-    return [...orderedQuestions, ...unselectedBuiltIns];
+    return [...orderedQuestions, ...sortAnythingElseLast(unselectedBuiltIns)];
 }
 
 export default function SubmissionFormBuilder({
@@ -88,8 +95,13 @@ export default function SubmissionFormBuilder({
 
     const addCustomQuestion = () => {
         const nextIndex = customQuestions.length;
+        const nextQuestionOrder = [...questionOrder];
+        const anythingElseIndex = nextQuestionOrder.findIndex((orderItem) => orderItem.kind === 'builtIn' && orderItem.id === 'anything_else');
+        const insertionIndex = anythingElseIndex >= 0 ? anythingElseIndex : nextQuestionOrder.length;
+
         setCustomQuestions([...customQuestions, { label: '', type: 'long_text', required: false, options: '' }]);
-        setQuestionOrder([...questionOrder, { kind: 'custom', index: nextIndex }]);
+        nextQuestionOrder.splice(insertionIndex, 0, { kind: 'custom', index: nextIndex });
+        setQuestionOrder(nextQuestionOrder);
     };
     const addAuditionSlot = () => setAuditionSlots([...auditionSlots, { date: '', time: '' }]);
     const toggleBuiltInQuestion = (id: string, checked: boolean) => {
