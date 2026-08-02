@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Form from "@/components/form/form";
 import Input from "@/components/form/input";
+import InputList from "@/components/form/input-list";
 import Text from "@/components/form/text";
 import Checkbox from "@/components/form/checkbox";
 import { builtInSubmissionQuestions } from "@/lib/submission-question-options";
@@ -15,6 +16,10 @@ type CustomQuestion = {
     required: boolean;
     options: string;
 };
+
+function parseOptionInputs(options: string): string[] {
+    return options.split(/\r?\n|,/).map((option) => option.trim()).filter(Boolean);
+}
 
 export default function SubmissionFormBuilder({
     existingForm,
@@ -152,7 +157,12 @@ export default function SubmissionFormBuilder({
                             </div>
                         </div>
                         {['single_select', 'multi_select'].includes(question.type) && (
-                            <Text name={`custom-question-options-${i}`} label="Options" rows={3} value={question.options} />
+                            <InputList
+                                name={`custom-question-options-${i}`}
+                                label="Options"
+                                addLabel="Option"
+                                startingOptions={parseOptionInputs(question.options)}
+                            />
                         )}
                     </div>
                 ))}

@@ -17,6 +17,27 @@ function cleanLineBreaks(value: string): string {
     return value.trim().replaceAll(/\r\n/g, '<br>').replaceAll(/\n/g, '<br>').replaceAll(/\r/g, '<br>');
 }
 
+function parseOptionValues(values: string[]): string[] {
+    return values.flatMap((value) => value.split(/\r?\n|,/)).map((option) => option.trim()).filter(Boolean);
+}
+
+function parseCustomQuestionOptions(formData: FormData, questionIndex: number): string[] {
+    const indexedPrefix = `custom-question-options-${questionIndex}-`;
+    const indexedOptions = Array.from(formData.entries())
+        .filter(([key]) => key.startsWith(indexedPrefix))
+        .sort(([a], [b]) => {
+            const aIndex = Number(a.slice(indexedPrefix.length));
+            const bIndex = Number(b.slice(indexedPrefix.length));
+            return aIndex - bIndex;
+        })
+        .map(([, value]) => String(value));
+
+    if (indexedOptions.length) return parseOptionValues(indexedOptions);
+
+    const rawOptions = (formData.get(`custom-question-options-${questionIndex}`) as string | null) || '';
+    return parseOptionValues([rawOptions]);
+}
+
 async function canManageSubmissionOwner(ownerType: SubmissionOwnerType, ownerId: string, userId: string): Promise<boolean> {
     if (ownerType === 'troupe') {
         const troupe = await getTroupe(ownerId);
@@ -41,8 +62,7 @@ function parseQuestions(formData: FormData): SubmissionFormQuestion[] {
         const label = (formData.get(`custom-question-${i}`) as string | null)?.trim();
         if (!label) continue;
         const type = (formData.get(`custom-question-type-${i}`) as SubmissionFormQuestion['type'] | null) || 'long_text';
-        const rawOptions = (formData.get(`custom-question-options-${i}`) as string | null) || '';
-        const options = rawOptions.split(/\r?\n|,/).map((option) => option.trim()).filter(Boolean);
+        const options = parseCustomQuestionOptions(formData, i);
         questions.push({
             id: `custom-${i}-${label.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'question'}`,
             label,

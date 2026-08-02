@@ -66,7 +66,7 @@ export default async function SubmissionFormView({
                         <div key={question.id} className="flex flex-col">
                             <label htmlFor={name}>{label}</label>
                             <select name={name} id={name} defaultValue={value} required={question.required}>
-                                <option value="">Choose one</option>
+                                <option value="">Select option...</option>
                                 {(question.options || []).map((option) => <option key={option} value={option}>{option}</option>)}
                             </select>
                         </div>

@@ -53,7 +53,7 @@ export default function InputList({ name, options, label, addLabel, startingOpti
                             <Input
                                 name={`${name}-${i}`}
                                 placeholder={addLabel}
-                                value={typeof input.value === 'string' ? input.value : undefined}
+                                value={typeof input.value === 'string' ? input.value : ''}
                                 onChange={(value) => updateInput(value, i)}
                             />
                         )}
