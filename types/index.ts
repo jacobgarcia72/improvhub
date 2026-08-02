@@ -245,7 +245,7 @@ export type Notification = {
 }
 
 export type SubmissionOwnerType = 'troupe' | 'show';
-export type SubmissionQuestionType = 'short_text' | 'long_text' | 'single_select' | 'multi_select' | 'image';
+export type SubmissionQuestionType = 'short_text' | 'long_text' | 'single_select' | 'multi_select' | 'autocomplete';
 export type BuiltInSubmissionQuestion =
     'why' |
     'phone' |

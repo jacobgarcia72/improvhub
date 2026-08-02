@@ -4,6 +4,8 @@ import Text from "@/components/form/text";
 import Checkbox from "@/components/form/checkbox";
 import { Demographics, SubmissionForm, SubmissionFormSubmission, User } from "@/types";
 import { formatDateTimeForDisplay } from "@/lib/dates";
+import Autocomplete from "../form/autocomplete";
+import { autocompleteOptions } from "@/lib/submission-question-options";
 
 function getDefaultAnswer(questionId: string, user: User, demographics: Demographics | null, existingSubmission?: SubmissionFormSubmission | null): string {
     const existing = existingSubmission?.answers[questionId];
@@ -13,6 +15,8 @@ function getDefaultAnswer(questionId: string, user: User, demographics: Demograp
     if (questionId === 'gender_identity') return demographics?.genderIdentity || '';
     if (questionId === 'orientation') return demographics?.orientation || '';
     if (questionId === 'ethnicity') return demographics?.ethnicity || '';
+    // TODO: get user email
+    // if (questionId === 'email') return user.email || '';
     return '';
 }
 
@@ -33,14 +37,6 @@ export default function SubmissionFormView({
 }) {
     return (
         <Form onSubmit={onSubmit} buttonCaption={existingSubmission ? "Update Submission" : "Submit"} className="w-full max-w-xl">
-            {!user && <Input
-                name="contactEmail"
-                label="Email Address *"
-                type="email"
-                value={existingSubmission?.contactEmail || ''}
-                required
-                maxLength={180}
-            />}
             {form.questions.map((question) => {
                 const name = `answer-${question.id}`;
                 let label = question.label
@@ -50,6 +46,9 @@ export default function SubmissionFormView({
                 if (label[label.length - 1].match(/[a-zA-Z0-9]/)) label += ':';
                 if (question.required) label += ' *';
                 const value = user ? getDefaultAnswer(question.id, user, demographics, existingSubmission) : '';
+                if (question.type === 'autocomplete') {
+                    return <Autocomplete options={autocompleteOptions[question.id] || []} key={question.id} name={name} label={label} startingValue={value} required={question.required} />
+                }
                 if (question.type === 'long_text') {
                     return <Text key={question.id} name={name} label={label} rows={4} value={value.replaceAll('<br>', '\n')} />
                 }
