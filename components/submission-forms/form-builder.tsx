@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from "react";
+import { useState, type DragEvent } from "react";
 import Form from "@/components/form/form";
 import Input from "@/components/form/input";
 import InputList from "@/components/form/input-list";
@@ -9,6 +9,8 @@ import Checkbox from "@/components/form/checkbox";
 import { builtInSubmissionQuestions } from "@/lib/submission-question-options";
 import { SubmissionForm, SubmissionFormQuestion } from "@/types";
 import { appName } from "@/lib/app-info";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCaretDown, faCaretUp, faGripVertical } from "@fortawesome/free-solid-svg-icons";
 
 type CustomQuestion = {
     label: string;
@@ -17,8 +19,33 @@ type CustomQuestion = {
     options: string;
 };
 
+type QuestionOrderItem =
+    | { kind: 'builtIn'; id: string }
+    | { kind: 'custom'; index: number };
+
 function parseOptionInputs(options: string): string[] {
     return options.split(/\r?\n|,/).map((option) => option.trim()).filter(Boolean);
+}
+
+function getInitialQuestionOrder(existingForm?: SubmissionForm | null): QuestionOrderItem[] {
+    if (!existingForm?.questions.length) {
+        return [
+            ...builtInSubmissionQuestions.map((question) => ({ kind: 'builtIn' as const, id: question.id })),
+            { kind: 'custom', index: 0 },
+        ];
+    }
+
+    let customIndex = 0;
+    const orderedQuestions = existingForm.questions.map((question) => {
+        if (question.builtIn) return { kind: 'builtIn' as const, id: question.id };
+        return { kind: 'custom' as const, index: customIndex++ };
+    });
+    const orderedBuiltInIds = new Set(orderedQuestions.filter((question) => question.kind === 'builtIn').map((question) => question.id));
+    const unselectedBuiltIns = builtInSubmissionQuestions
+        .filter((question) => !orderedBuiltInIds.has(question.id))
+        .map((question) => ({ kind: 'builtIn' as const, id: question.id }));
+
+    return [...orderedQuestions, ...unselectedBuiltIns];
 }
 
 export default function SubmissionFormBuilder({
@@ -36,6 +63,9 @@ export default function SubmissionFormBuilder({
     const customExisting = existingForm?.questions.filter((question) => !question.builtIn) || [];
     const [hasAudition, setHasAudition] = useState(Boolean(existingForm?.hasAudition));
     const [datesTbd, setDatesTbd] = useState(Boolean(existingForm?.auditionDatesTbd));
+    const [selectedBuiltInIds, setSelectedBuiltInIds] = useState(builtIns.map((question) => question.id));
+    const [draggedQuestion, setDraggedQuestion] = useState<string | null>(null);
+    const [dragTargetQuestion, setDragTargetQuestion] = useState<string | null>(null);
     const [customQuestions, setCustomQuestions] = useState<CustomQuestion[]>(
         customExisting.length
             ? customExisting.map((question) => ({
@@ -46,6 +76,7 @@ export default function SubmissionFormBuilder({
             }))
             : [{ label: '', type: 'long_text', required: false, options: '' }]
     );
+    const [questionOrder, setQuestionOrder] = useState<QuestionOrderItem[]>(getInitialQuestionOrder(existingForm));
     const [auditionSlots, setAuditionSlots] = useState(
         existingForm?.auditionSlots.length
             ? existingForm.auditionSlots.map((slot) => {
@@ -55,8 +86,76 @@ export default function SubmissionFormBuilder({
             : [{ date: '', time: '' }]
     );
 
-    const addCustomQuestion = () => setCustomQuestions([...customQuestions, { label: '', type: 'long_text', required: false, options: '' }]);
+    const addCustomQuestion = () => {
+        const nextIndex = customQuestions.length;
+        setCustomQuestions([...customQuestions, { label: '', type: 'long_text', required: false, options: '' }]);
+        setQuestionOrder([...questionOrder, { kind: 'custom', index: nextIndex }]);
+    };
     const addAuditionSlot = () => setAuditionSlots([...auditionSlots, { date: '', time: '' }]);
+    const toggleBuiltInQuestion = (id: string, checked: boolean) => {
+        setSelectedBuiltInIds(checked ? [...selectedBuiltInIds, id] : selectedBuiltInIds.filter((selectedId) => selectedId !== id));
+    };
+    const moveQuestion = (activeIndex: number, direction: -1 | 1) => {
+        const activeQuestions = getActiveOrderedQuestions();
+        const nextActiveIndex = activeIndex + direction;
+        if (nextActiveIndex < 0 || nextActiveIndex >= activeQuestions.length) return;
+
+        const currentQuestion = activeQuestions[activeIndex];
+        const nextQuestion = activeQuestions[nextActiveIndex];
+        const currentOrderIndex = questionOrder.indexOf(currentQuestion);
+        const nextOrderIndex = questionOrder.indexOf(nextQuestion);
+        const nextOrder = [...questionOrder];
+        [nextOrder[currentOrderIndex], nextOrder[nextOrderIndex]] = [nextOrder[nextOrderIndex], nextOrder[currentOrderIndex]];
+        setQuestionOrder(nextOrder);
+    };
+    const moveQuestionTo = (draggedQuestionValue: string, targetQuestionValue: string) => {
+        if (draggedQuestionValue === targetQuestionValue) return;
+
+        const currentOrderIndex = questionOrder.findIndex((orderItem) => getQuestionOrderValue(orderItem) === draggedQuestionValue);
+        const targetOrderIndex = questionOrder.findIndex((orderItem) => getQuestionOrderValue(orderItem) === targetQuestionValue);
+        if (currentOrderIndex < 0 || targetOrderIndex < 0) return;
+
+        const nextOrder = [...questionOrder];
+        const [movedQuestion] = nextOrder.splice(currentOrderIndex, 1);
+        nextOrder.splice(targetOrderIndex, 0, movedQuestion);
+        setQuestionOrder(nextOrder);
+    };
+    const handleDragStart = (event: DragEvent<HTMLDivElement>, questionValue: string) => {
+        setDraggedQuestion(questionValue);
+        event.dataTransfer.effectAllowed = 'move';
+        event.dataTransfer.setData('text/plain', questionValue);
+    };
+    const handleDragOver = (event: DragEvent<HTMLDivElement>, questionValue: string) => {
+        event.preventDefault();
+        event.dataTransfer.dropEffect = 'move';
+        setDragTargetQuestion(questionValue);
+    };
+    const handleDrop = (event: DragEvent<HTMLDivElement>, questionValue: string) => {
+        event.preventDefault();
+        moveQuestionTo(event.dataTransfer.getData('text/plain') || draggedQuestion || '', questionValue);
+        setDraggedQuestion(null);
+        setDragTargetQuestion(null);
+    };
+    const handleDragEnd = () => {
+        setDraggedQuestion(null);
+        setDragTargetQuestion(null);
+    };
+    const getActiveOrderedQuestions = () => questionOrder.filter((orderItem) => {
+        if (orderItem.kind === 'builtIn') return selectedBuiltInIds.includes(orderItem.id);
+        return Boolean(customQuestions[orderItem.index]);
+    });
+    const activeOrderedQuestions = getActiveOrderedQuestions();
+    const getQuestionOrderValue = (orderItem: QuestionOrderItem) => (
+        orderItem.kind === 'builtIn' ? `builtIn:${orderItem.id}` : `custom:${orderItem.index}`
+    );
+    const getQuestionOrderLabel = (orderItem: QuestionOrderItem) => {
+        if (orderItem.kind === 'custom') return customQuestions[orderItem.index]?.label || `Custom Question ${orderItem.index + 1}`;
+        const question = builtInSubmissionQuestions.find((builtInQuestion) => builtInQuestion.id === orderItem.id);
+        return question?.label
+            .replace('{name}', ownerName)
+            .replace('{type}', type)
+            .replace('{verb}', type === 'troupe' ? 'joining' : 'submitting for') || orderItem.id;
+    };
 
     return (
         <Form onSubmit={onSubmit} buttonCaption="Save Form" className="w-full max-w-xl">
@@ -114,7 +213,12 @@ export default function SubmissionFormBuilder({
                         .replace('{verb}', type === 'troupe' ? 'joining' : 'submitting for');
                     return (
                         <div key={question.id} className="flex flex-row flex-wrap gap-x-4 gap-y-1 items-center">
-                            <Checkbox name={`question-${question.id}`} label={questionText} defaultChecked={Boolean(selected)} />
+                            <Checkbox
+                                name={`question-${question.id}`}
+                                label={questionText}
+                                defaultChecked={Boolean(selected)}
+                                onChange={(checked) => toggleBuiltInQuestion(question.id, checked)}
+                            />
                             {question.requiredOption ? <Checkbox name={`required-${question.id}`} label="Required" defaultChecked={Boolean(selected?.required)} /> : null}
                         </div>
                     )
@@ -169,6 +273,49 @@ export default function SubmissionFormBuilder({
                 {customQuestions.length < 8 && (
                     <button type="button" className="link w-fit px-2 py-1" onClick={addCustomQuestion}>Add Custom Question</button>
                 )}
+            </div>
+
+            <div className="flex flex-col gap-2 rounded border border-gray-300 p-3">
+                <h2 className="font-semibold text-slate-700 dark:text-slate-300">Question Order</h2>
+                {activeOrderedQuestions.map((orderItem, activeIndex) => {
+                    const questionValue = getQuestionOrderValue(orderItem);
+                    const isDragging = draggedQuestion === questionValue;
+                    const isDragTarget = dragTargetQuestion === questionValue && draggedQuestion !== questionValue;
+                    return (
+                    <div
+                        key={questionValue}
+                        className={`flex flex-row items-center gap-2 border-t border-gray-200 pt-2 pr-2 first:border-t-0 first:pt-0 ${isDragging ? 'opacity-50' : ''} ${isDragTarget ? 'bg-blue-50 dark:bg-slate-800' : ''}`}
+                        draggable
+                        onDragStart={(event) => handleDragStart(event, questionValue)}
+                        onDragOver={(event) => handleDragOver(event, questionValue)}
+                        onDragLeave={() => setDragTargetQuestion(null)}
+                        onDrop={(event) => handleDrop(event, questionValue)}
+                        onDragEnd={handleDragEnd}
+                    >
+                        <input type="hidden" name="question-order" value={questionValue} />
+                        <span className="cursor-move select-none text-sm text-slate-500 dark:text-slate-400" aria-hidden="true">
+                            <FontAwesomeIcon icon={faGripVertical} />
+                        </span>
+                        <span className="grow text-sm text-slate-700 dark:text-slate-300">{getQuestionOrderLabel(orderItem)}</span>
+                        <button
+                            type="button"
+                            className="p-0! w-fit disabled:text-gray-400 text-slate-400 dark:text-mist-500 hover:text-mist-900 hover:dark:text-white"
+                            onClick={() => moveQuestion(activeIndex, -1)}
+                            disabled={activeIndex === 0}
+                        >
+                            <FontAwesomeIcon icon={faCaretUp} />
+                        </button>
+                        <button
+                            type="button"
+                            className="p-0! w-fit disabled:text-gray-400 text-slate-400 dark:text-mist-500 hover:text-mist-900 hover:dark:text-white"
+                            onClick={() => moveQuestion(activeIndex, 1)}
+                            disabled={activeIndex === activeOrderedQuestions.length - 1}
+                        >
+                            <FontAwesomeIcon icon={faCaretDown} />
+                        </button>
+                    </div>
+                    )
+                })}
             </div>
         </Form>
     );

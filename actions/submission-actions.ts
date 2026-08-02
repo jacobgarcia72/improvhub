@@ -38,6 +38,32 @@ function parseCustomQuestionOptions(formData: FormData, questionIndex: number): 
     return parseOptionValues([rawOptions]);
 }
 
+function parseBuiltInQuestion(formData: FormData, questionId: string): SubmissionFormQuestion | null {
+    const question = builtInSubmissionQuestions.find((builtInQuestion) => builtInQuestion.id === questionId);
+    if (!question || !formData.get(`question-${question.id}`)) return null;
+
+    return {
+        ...question,
+        required: Boolean(formData.get(`required-${question.id}`))
+    };
+}
+
+function parseCustomQuestion(formData: FormData, questionIndex: number): SubmissionFormQuestion | null {
+    const label = (formData.get(`custom-question-${questionIndex}`) as string | null)?.trim();
+    if (!label) return null;
+
+    const type = (formData.get(`custom-question-type-${questionIndex}`) as SubmissionFormQuestion['type'] | null) || 'long_text';
+    const options = parseCustomQuestionOptions(formData, questionIndex);
+
+    return {
+        id: `custom-${questionIndex}-${label.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'question'}`,
+        label,
+        type,
+        required: Boolean(formData.get(`custom-question-required-${questionIndex}`)),
+        options: ['single_select', 'multi_select'].includes(type) ? options : undefined
+    };
+}
+
 async function canManageSubmissionOwner(ownerType: SubmissionOwnerType, ownerId: string, userId: string): Promise<boolean> {
     if (ownerType === 'troupe') {
         const troupe = await getTroupe(ownerId);
@@ -50,27 +76,40 @@ async function canManageSubmissionOwner(ownerType: SubmissionOwnerType, ownerId:
 
 function parseQuestions(formData: FormData): SubmissionFormQuestion[] {
     const questions: SubmissionFormQuestion[] = [];
+    const questionOrder = formData.getAll('question-order').map((value) => String(value));
+    const parsedBuiltIns = new Set<string>();
+    const parsedCustomQuestions = new Set<number>();
+
+    questionOrder.forEach((orderedQuestion) => {
+        const [kind, rawIdentifier] = orderedQuestion.split(':');
+        if (kind === 'builtIn') {
+            if (parsedBuiltIns.has(rawIdentifier)) return;
+            parsedBuiltIns.add(rawIdentifier);
+            const question = parseBuiltInQuestion(formData, rawIdentifier);
+            if (question) questions.push(question);
+        }
+
+        if (kind === 'custom') {
+            const questionIndex = Number(rawIdentifier);
+            if (!Number.isInteger(questionIndex) || parsedCustomQuestions.has(questionIndex)) return;
+            parsedCustomQuestions.add(questionIndex);
+            const question = parseCustomQuestion(formData, questionIndex);
+            if (question) questions.push(question);
+        }
+    });
+
     builtInSubmissionQuestions.forEach((question) => {
-        if (!formData.get(`question-${question.id}`)) return;
-        questions.push({
-            ...question,
-            required: Boolean(formData.get(`required-${question.id}`))
-        });
+        if (parsedBuiltIns.has(question.id)) return;
+        const parsedQuestion = parseBuiltInQuestion(formData, question.id);
+        if (parsedQuestion) questions.push(parsedQuestion);
     });
 
     for (let i = 0; i < 8; i++) {
-        const label = (formData.get(`custom-question-${i}`) as string | null)?.trim();
-        if (!label) continue;
-        const type = (formData.get(`custom-question-type-${i}`) as SubmissionFormQuestion['type'] | null) || 'long_text';
-        const options = parseCustomQuestionOptions(formData, i);
-        questions.push({
-            id: `custom-${i}-${label.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'question'}`,
-            label,
-            type,
-            required: Boolean(formData.get(`custom-question-required-${i}`)),
-            options: ['single_select', 'multi_select'].includes(type) ? options : undefined
-        });
+        if (parsedCustomQuestions.has(i)) continue;
+        const question = parseCustomQuestion(formData, i);
+        if (question) questions.push(question);
     }
+
     return questions;
 }
 
