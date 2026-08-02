@@ -78,8 +78,15 @@ export default async function SubmissionFormView({
                     return (
                         <div key={question.id} className="flex flex-col gap-1">
                             <p className="label">{label}</p>
-                            {(question.options || []).map((option) => (
-                                <Checkbox key={option} name={name} label={option} value={option} defaultChecked={values.includes(option)} />
+                            {(question.options || []).map((option, optionIndex) => (
+                                <Checkbox
+                                    key={option}
+                                    name={name}
+                                    id={`${name}-${optionIndex}`}
+                                    label={option}
+                                    value={option}
+                                    defaultChecked={values.includes(option)}
+                                />
                             ))}
                         </div>
                     )
@@ -95,6 +102,7 @@ export default async function SubmissionFormView({
                         <Checkbox
                             key={slot.id}
                             name="auditionAvailability"
+                            id={`auditionAvailability-${slot.id}`}
                             value={slot.id}
                             label={formatDateTimeForDisplay(slot.dateTime, true)}
                             defaultChecked={existingSubmission?.auditionAvailability.includes(slot.id)}
