@@ -9,6 +9,7 @@ import UpcomingShows from "@/components/upcoming-shows";
 import { Suspense } from "react";
 import Loader from "@/components/loader";
 import { getSubmissionForm } from "@/lib/submission-forms";
+import { isDateTimeInPast } from "@/lib/dates";
 
 type Props = {
     params: Promise<{ id: string }>
@@ -23,8 +24,15 @@ export default async function TroupePage({ params }: Props) {
     const followerCount = await getFollowCount(id, 'troupe');
     const troupe = await getTroupe(id);
     const submissionForm = await getSubmissionForm('troupe', id);
+    const hasOpenSubmissionForm = submissionForm && !isDateTimeInPast(submissionForm.closesAt);
 
     return <>
+        {hasOpenSubmissionForm ? <section className="flex flex-col items-center gap-2">
+            <h3>This troupe is {submissionForm.hasAudition ? 'holding auditions' : 'taking submissions'}!</h3>
+            <Link href={`/submission-form/troupe/${id}`}>
+                <Button caption="Submission Form" className="w-54 max-w-[45vw] px-0!" />
+            </Link>
+        </section> : null}
         {followerCount ? (
             <section>
                 <Link href={`/troupes/${id}/followers`} className="link ml-8">
@@ -33,17 +41,19 @@ export default async function TroupePage({ params }: Props) {
             </section>
         ) : null}
         <section>
-            {isMemberNotCoach ? <>
+            {isMemberNotCoach || hasOpenSubmissionForm ? <>
                 <div className="flex flex-row flex-wrap gap-2 justify-center mb-2">
-                    <Link href={`/troupes/${id}/manage-members`}>
-                        <Button caption="Manage Members" className="w-54 max-w-[45vw] px-0!" />
-                    </Link>
-                    <Link href={`/manage/troupe/${id}`}>
-                        <Button caption="Manage Troupe Details" className="w-54 max-w-[45vw] px-0!" />
-                    </Link>
-                    <Link href={`/troupes/${id}/submissions`}>
-                        <Button caption="Submissions" className="w-54 max-w-[45vw] px-0!" />
-                    </Link>
+                    {isMemberNotCoach ? <>
+                        <Link href={`/troupes/${id}/manage-members`}>
+                            <Button caption="Manage Members" className="w-54 max-w-[45vw] px-0!" />
+                        </Link>
+                        <Link href={`/manage/troupe/${id}`}>
+                            <Button caption="Manage Troupe Details" className="w-54 max-w-[45vw] px-0!" />
+                        </Link>
+                        <Link href={`/troupes/${id}/submissions`}>
+                            <Button caption="Submissions" className="w-54 max-w-[45vw] px-0!" />
+                        </Link>
+                    </> : null}
                 </div>
             </> : null}
             <Suspense fallback={<Loader caption="troupe members" />}>
@@ -56,12 +66,5 @@ export default async function TroupePage({ params }: Props) {
             {troupe?.lookingForMusician && <AvailableUsersSection role="musician" troupe={troupe} />}
             {troupe?.lookingForCoach && <AvailableUsersSection role="coach" troupe={troupe} />}
         </> : null}
-        {!isMemberNotCoach && submissionForm && troupe && (troupe.lookingForPlayers || troupe.lookingForMusician || troupe.lookingForCoach) ? (
-            <section className="flex flex-col items-center">
-                <Link href={`/submission-form/troupe/${id}`}>
-                    <Button caption="Submit Interest Form" />
-                </Link>
-            </section>
-        ) : null}
     </>
 }
