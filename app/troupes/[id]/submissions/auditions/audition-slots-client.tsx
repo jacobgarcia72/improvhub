@@ -4,14 +4,17 @@ import Button from "@/components/form/button";
 import { saveTroupeAuditionSlotAssignments } from "@/actions/submission-actions";
 import { AuditionSlot } from "@/types";
 import { formatDateTimeForDisplay } from "@/lib/dates";
+import { optimizeImage } from "@/lib/optimize-image";
 import { faCaretDown, faCaretRight } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 
 interface AuditionSubmission {
     id: string;
     name: string;
+    image?: string;
     href: string;
     auditionAvailability: string[];
     assignedAuditionSlotId: string | null;
@@ -169,6 +172,15 @@ export default function AuditionSlotsClient({
                         >
                             <FontAwesomeIcon icon={isExpanded ? faCaretDown : faCaretRight} />
                         </button>
+                        {submission.image ? (
+                            <Image
+                                src={optimizeImage(submission.image, 50, 50, 90, true, true)}
+                                alt={submission.name}
+                                width={25}
+                                height={25}
+                                className="rounded-full"
+                            />
+                        ) : null}
                         {submission.name}
                     </div>
                     {isExpanded && (

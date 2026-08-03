@@ -33,6 +33,9 @@ export default async function AuditionSlotsPage({ params }: { params: Promise<{ 
                 submissions={submissions.map((submission) => ({
                     id: submission.id,
                     name: getSubmitterName(submission),
+                    image: submission.userId
+                        ? users.find((user) => user?.id === submission.userId)?.image
+                        : undefined,
                     href: `/troupes/${id}/submissions/${submission.id}`,
                     auditionAvailability: submission.auditionAvailability,
                     assignedAuditionSlotId: submission.assignedAuditionSlotId
