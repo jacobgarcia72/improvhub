@@ -15,7 +15,9 @@ export default function InputList({ name, options, label, addLabel, startingOpti
     startingOptions?: InputOption[];
     minimumOne?: boolean;
 }) {
-    const startingInputs = startingOptions?.map((option, i) => ({ key: i, value: option })) || (minimumOne ? [{ key: 0, value: ''}] : []);
+    const startingInputs = startingOptions?.length
+        ? startingOptions.map((option, i) => ({ key: i, value: option }))
+        : (minimumOne ? [{ key: 0, value: ''}] : []);
     const nextKey = useRef(startingInputs.length);
     const [addedInputs, setAddedInputs] = useState<{ key: number, value: InputOption | null }[]>(startingInputs);
 
