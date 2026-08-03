@@ -93,7 +93,7 @@ export default function SubmissionFormBuilder({
                 required: Boolean(question.required),
                 options: question.options?.join('\n') || ''
             }))
-            : [{ label: '', type: 'long_text', required: false, options: '' }]
+            : [{ label: '', type: 'short_text', required: false, options: '' }]
     );
     const [questionOrder, setQuestionOrder] = useState<QuestionOrderItem[]>(getInitialQuestionOrder(existingForm));
     const nextAuditionSlotKey = useRef(existingForm?.auditionSlots.length || 1);
