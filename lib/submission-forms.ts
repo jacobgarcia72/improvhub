@@ -18,6 +18,7 @@ function parseSubmissionForm(row: Record<string, unknown>): SubmissionForm {
     parsed.requiresSignIn = parsed.requiresSignIn !== false;
     parsed.hasAudition = Boolean(parsed.hasAudition);
     parsed.auditionDatesTbd = Boolean(parsed.auditionDatesTbd);
+    parsed.closesAt = parsed.closesAt || null;
     return parsed;
 }
 

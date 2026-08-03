@@ -12,6 +12,7 @@ create table if not exists submission_forms (
   owner_id text not null,
   title text not null,
   description text,
+  closes_at text,
   questions jsonb not null,
   requires_sign_in boolean not null default true,
   has_audition boolean not null,

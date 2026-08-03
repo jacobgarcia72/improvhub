@@ -77,6 +77,7 @@ export default function SubmissionFormBuilder({
     const customExisting = existingForm?.questions.filter((question) => !question.builtIn) || [];
     const [hasAudition, setHasAudition] = useState(Boolean(existingForm?.hasAudition));
     const [datesTbd, setDatesTbd] = useState(Boolean(existingForm?.auditionDatesTbd));
+    const [hasCloseDate, setHasCloseDate] = useState(Boolean(existingForm?.closesAt));
     const [selectedBuiltInIds, setSelectedBuiltInIds] = useState(builtIns.map((question) => question.id));
     const [draggedQuestion, setDraggedQuestion] = useState<string | null>(null);
     const [dropIndex, setDropIndex] = useState<number | null>(null);
@@ -423,6 +424,24 @@ export default function SubmissionFormBuilder({
                         {dropIndex === activeOrderedQuestions.length && <div className="h-0.5 translate-y-[3px] bg-blue-500 dark:bg-mist-300" />}
                     </div>
                 </div>
+            </div>
+
+            <div className="flex flex-col gap-3 rounded border border-gray-300 p-3">
+                <Checkbox
+                    name="hasCloseDate"
+                    label={"Close form at specified date and time" + (hasCloseDate ? ':' : '')}
+                    defaultChecked={hasCloseDate}
+                    onChange={setHasCloseDate}
+                />
+                {hasCloseDate && (
+                    <Input
+                        name="closesAt"
+                        type="datetime-local"
+                        value={existingForm?.closesAt?.replace(' ', 'T') || ''}
+                        required
+                        maxLength={24}
+                    />
+                )}
             </div>
         </Form>
     );

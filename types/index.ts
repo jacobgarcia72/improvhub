@@ -280,6 +280,7 @@ export interface SubmissionForm {
     ownerId: string;
     title: string;
     description: string | null;
+    closesAt: string | null;
     questions: SubmissionFormQuestion[];
     requiresSignIn: boolean;
     hasAudition: boolean;

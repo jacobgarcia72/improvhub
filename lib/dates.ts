@@ -91,6 +91,12 @@ export const formatDateTimeForDisplay = (date: Date | string, includeYear?: bool
     return `${month} ${(day)}${includeYear || year !== new Date().getFullYear() ? `, ${year}` : ''}, ${time}`;
 }
 
+export const isDateTimeInPast = (dateTime?: string | null): boolean => {
+    if (!dateTime) return false;
+    const date = new Date(dateTime);
+    return !Number.isNaN(date.getTime()) && date.getTime() <= Date.now();
+}
+
 export const splitPastAndFutureDates = (dates: string[]): [string[], string[]] => {
     const today = new Date();
     return [dates.filter(date => new Date(date) < today), dates.filter(date => new Date(date) >= today)];

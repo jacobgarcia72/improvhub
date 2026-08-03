@@ -11,6 +11,7 @@ import {
     saveSubmissionForm
 } from "@/lib/submission-forms";
 import { builtInSubmissionQuestions } from "@/lib/submission-question-options";
+import { isDateTimeInPast } from "@/lib/dates";
 import { AuditionSlot, Demographics, SubmissionFormQuestion, SubmissionOwnerType } from "@/types";
 
 function cleanLineBreaks(value: string): string {
@@ -127,6 +128,18 @@ function parseAuditionSlots(formData: FormData): AuditionSlot[] {
     return slots;
 }
 
+function parseCloseDateTime(formData: FormData): string | null {
+    if (!formData.get('hasCloseDate')) return null;
+
+    const rawValue = (formData.get('closesAt') as string | null)?.trim();
+    if (!rawValue) return null;
+
+    const closeDateTime = rawValue.replace('T', ' ');
+    const closeDate = new Date(closeDateTime);
+    if (Number.isNaN(closeDate.getTime())) return null;
+    return closeDateTime;
+}
+
 export async function saveTroupeSubmissionForm(ownerId: string, prevState: void | { message?: string }, formData: FormData) {
     const userId = await getCurrentUserId();
     if (!userId) throw new Error('You must be logged in to continue');
@@ -134,6 +147,8 @@ export async function saveTroupeSubmissionForm(ownerId: string, prevState: void 
 
     const title = (formData.get('title') as string | null)?.trim() || 'Troupe Submission Form';
     const description = cleanLineBreaks((formData.get('description') as string | null) || '');
+    const closesAt = parseCloseDateTime(formData);
+    if (formData.get('hasCloseDate') && !closesAt) return { message: 'Enter a valid close date and time' };
     const questions = parseQuestions(formData);
     if (!questions.length) return { message: 'Choose at least one question' };
 
@@ -149,6 +164,7 @@ export async function saveTroupeSubmissionForm(ownerId: string, prevState: void 
         ownerId,
         title,
         description: description || null,
+        closesAt,
         questions,
         requiresSignIn: Boolean(formData.get('requiresSignIn')),
         hasAudition,
@@ -166,6 +182,7 @@ export async function submitSubmissionForm(formId: string, prevState: void | { m
 
     const form = await getSubmissionFormById(formId);
     if (!form) return { message: 'This form no longer exists' };
+    if (isDateTimeInPast(form.closesAt)) return { message: 'This form is closed and is no longer accepting submissions' };
     if (form.requiresSignIn && !user) throw new Error('You must be logged in to continue');
 
     const contactEmail = user
