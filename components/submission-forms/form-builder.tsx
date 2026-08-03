@@ -72,7 +72,7 @@ export default function SubmissionFormBuilder({
     const [datesTbd, setDatesTbd] = useState(Boolean(existingForm?.auditionDatesTbd));
     const [selectedBuiltInIds, setSelectedBuiltInIds] = useState(builtIns.map((question) => question.id));
     const [draggedQuestion, setDraggedQuestion] = useState<string | null>(null);
-    const [dragTargetQuestion, setDragTargetQuestion] = useState<string | null>(null);
+    const [dropIndex, setDropIndex] = useState<number | null>(null);
     const [customQuestions, setCustomQuestions] = useState<CustomQuestion[]>(
         customExisting.length
             ? customExisting.map((question) => ({
@@ -120,16 +120,31 @@ export default function SubmissionFormBuilder({
         [nextOrder[currentOrderIndex], nextOrder[nextOrderIndex]] = [nextOrder[nextOrderIndex], nextOrder[currentOrderIndex]];
         setQuestionOrder(nextOrder);
     };
-    const moveQuestionTo = (draggedQuestionValue: string, targetQuestionValue: string) => {
-        if (draggedQuestionValue === targetQuestionValue) return;
+    const moveQuestionTo = (draggedQuestionValue: string, targetActiveIndex: number) => {
+        const activeQuestions = getActiveOrderedQuestions();
+        const draggedActiveIndex = activeQuestions.findIndex((orderItem) => getQuestionOrderValue(orderItem) === draggedQuestionValue);
+        if (draggedActiveIndex < 0) return;
 
         const currentOrderIndex = questionOrder.findIndex((orderItem) => getQuestionOrderValue(orderItem) === draggedQuestionValue);
-        const targetOrderIndex = questionOrder.findIndex((orderItem) => getQuestionOrderValue(orderItem) === targetQuestionValue);
-        if (currentOrderIndex < 0 || targetOrderIndex < 0) return;
+        if (currentOrderIndex < 0) return;
 
+        const adjustedTargetActiveIndex = draggedActiveIndex < targetActiveIndex ? targetActiveIndex - 1 : targetActiveIndex;
+        const activeQuestionsAfterRemoval = activeQuestions.filter((orderItem) => getQuestionOrderValue(orderItem) !== draggedQuestionValue);
+        const targetQuestion = activeQuestionsAfterRemoval[adjustedTargetActiveIndex];
         const nextOrder = [...questionOrder];
         const [movedQuestion] = nextOrder.splice(currentOrderIndex, 1);
-        nextOrder.splice(targetOrderIndex, 0, movedQuestion);
+
+        if (targetQuestion) {
+            const targetOrderIndex = nextOrder.findIndex((orderItem) => getQuestionOrderValue(orderItem) === getQuestionOrderValue(targetQuestion));
+            nextOrder.splice(targetOrderIndex, 0, movedQuestion);
+        } else if (activeQuestionsAfterRemoval.length) {
+            const lastActiveQuestion = activeQuestionsAfterRemoval[activeQuestionsAfterRemoval.length - 1];
+            const lastActiveOrderIndex = nextOrder.findIndex((orderItem) => getQuestionOrderValue(orderItem) === getQuestionOrderValue(lastActiveQuestion));
+            nextOrder.splice(lastActiveOrderIndex + 1, 0, movedQuestion);
+        } else {
+            nextOrder.push(movedQuestion);
+        }
+
         setQuestionOrder(nextOrder);
     };
     const handleDragStart = (event: DragEvent<HTMLDivElement>, questionValue: string) => {
@@ -137,20 +152,26 @@ export default function SubmissionFormBuilder({
         event.dataTransfer.effectAllowed = 'move';
         event.dataTransfer.setData('text/plain', questionValue);
     };
-    const handleDragOver = (event: DragEvent<HTMLDivElement>, questionValue: string) => {
+    const handleDragOver = (event: DragEvent<HTMLDivElement>) => {
         event.preventDefault();
         event.dataTransfer.dropEffect = 'move';
-        setDragTargetQuestion(questionValue);
+
+        const rows = Array.from(event.currentTarget.querySelectorAll<HTMLElement>('[data-question-order-row]'));
+        const nextDropIndex = rows.findIndex((row) => {
+            const rowRect = row.getBoundingClientRect();
+            return event.clientY < rowRect.top + rowRect.height / 2;
+        });
+        setDropIndex(nextDropIndex === -1 ? rows.length : nextDropIndex);
     };
-    const handleDrop = (event: DragEvent<HTMLDivElement>, questionValue: string) => {
+    const handleDrop = (event: DragEvent<HTMLDivElement>) => {
         event.preventDefault();
-        moveQuestionTo(event.dataTransfer.getData('text/plain') || draggedQuestion || '', questionValue);
+        moveQuestionTo(event.dataTransfer.getData('text/plain') || draggedQuestion || '', dropIndex ?? activeOrderedQuestions.length);
         setDraggedQuestion(null);
-        setDragTargetQuestion(null);
+        setDropIndex(null);
     };
     const handleDragEnd = () => {
         setDraggedQuestion(null);
-        setDragTargetQuestion(null);
+        setDropIndex(null);
     };
     const getActiveOrderedQuestions = () => questionOrder.filter((orderItem) => {
         if (orderItem.kind === 'builtIn') return selectedBuiltInIds.includes(orderItem.id);
@@ -289,45 +310,51 @@ export default function SubmissionFormBuilder({
 
             <div className="flex flex-col gap-2 rounded border border-gray-300 p-3">
                 <h2 className="font-semibold text-slate-700 dark:text-slate-300">Question Order</h2>
-                {activeOrderedQuestions.map((orderItem, activeIndex) => {
-                    const questionValue = getQuestionOrderValue(orderItem);
-                    const isDragging = draggedQuestion === questionValue;
-                    const isDragTarget = dragTargetQuestion === questionValue && draggedQuestion !== questionValue;
-                    return (
-                    <div
-                        key={questionValue}
-                        className={`flex flex-row items-center gap-2 border-t border-gray-200 pt-2 pr-2 first:border-t-0 first:pt-0 ${isDragging ? 'opacity-50' : ''} ${isDragTarget ? 'bg-blue-50 dark:bg-slate-800' : ''}`}
-                        draggable
-                        onDragStart={(event) => handleDragStart(event, questionValue)}
-                        onDragOver={(event) => handleDragOver(event, questionValue)}
-                        onDragLeave={() => setDragTargetQuestion(null)}
-                        onDrop={(event) => handleDrop(event, questionValue)}
-                        onDragEnd={handleDragEnd}
-                    >
-                        <input type="hidden" name="question-order" value={questionValue} />
-                        <span className="cursor-move select-none text-sm text-slate-500 dark:text-slate-400" aria-hidden="true">
-                            <FontAwesomeIcon icon={faGripVertical} />
-                        </span>
-                        <span className="grow text-sm text-slate-700 dark:text-slate-300">{getQuestionOrderLabel(orderItem)}</span>
-                        <button
-                            type="button"
-                            className="p-0! w-fit disabled:text-gray-400 text-slate-600 dark:text-mist-400 hover:text-indigo-500 hover:dark:text-white"
-                            onClick={() => moveQuestion(activeIndex, -1)}
-                            disabled={activeIndex === 0}
-                        >
-                            <FontAwesomeIcon icon={faCaretUp} />
-                        </button>
-                        <button
-                            type="button"
-                            className="p-0! w-fit disabled:text-gray-400 text-slate-600 dark:text-mist-400 hover:text-indigo-500 hover:dark:text-white"
-                            onClick={() => moveQuestion(activeIndex, 1)}
-                            disabled={activeIndex === activeOrderedQuestions.length - 1}
-                        >
-                            <FontAwesomeIcon icon={faCaretDown} />
-                        </button>
+                <div onDragOver={handleDragOver} onDrop={handleDrop}>
+                    {activeOrderedQuestions.map((orderItem, activeIndex) => {
+                        const questionValue = getQuestionOrderValue(orderItem);
+                        const isDragging = draggedQuestion === questionValue;
+                        return (
+                        <div key={questionValue}>
+                            <div className="h-2">
+                                {dropIndex === activeIndex && <div className="h-0.5 translate-y-[3px] bg-blue-500 dark:bg-mist-300" />}
+                            </div>
+                            <div
+                                data-question-order-row
+                                className={`flex flex-row items-center gap-2 pr-2 ${isDragging ? 'opacity-50' : ''}`}
+                                draggable
+                                onDragStart={(event) => handleDragStart(event, questionValue)}
+                                onDragEnd={handleDragEnd}
+                            >
+                                <input type="hidden" name="question-order" value={questionValue} />
+                                <span className="cursor-move select-none text-sm text-slate-500 dark:text-slate-400" aria-hidden="true">
+                                    <FontAwesomeIcon icon={faGripVertical} />
+                                </span>
+                                <span className="grow text-sm text-slate-700 dark:text-slate-300">{getQuestionOrderLabel(orderItem)}</span>
+                                <button
+                                    type="button"
+                                    className="p-0! w-fit disabled:text-gray-400 text-slate-600 dark:text-mist-400 hover:text-indigo-500 hover:dark:text-white"
+                                    onClick={() => moveQuestion(activeIndex, -1)}
+                                    disabled={activeIndex === 0}
+                                >
+                                    <FontAwesomeIcon icon={faCaretUp} />
+                                </button>
+                                <button
+                                    type="button"
+                                    className="p-0! w-fit disabled:text-gray-400 text-slate-600 dark:text-mist-400 hover:text-indigo-500 hover:dark:text-white"
+                                    onClick={() => moveQuestion(activeIndex, 1)}
+                                    disabled={activeIndex === activeOrderedQuestions.length - 1}
+                                >
+                                    <FontAwesomeIcon icon={faCaretDown} />
+                                </button>
+                            </div>
+                        </div>
+                        )
+                    })}
+                    <div className="h-2">
+                        {dropIndex === activeOrderedQuestions.length && <div className="h-0.5 translate-y-[3px] bg-blue-500 dark:bg-mist-300" />}
                     </div>
-                    )
-                })}
+                </div>
             </div>
         </Form>
     );
