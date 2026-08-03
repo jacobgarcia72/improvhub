@@ -6,6 +6,7 @@ import Input from "@/components/form/input";
 import InputList from "@/components/form/input-list";
 import Text from "@/components/form/text";
 import Checkbox from "@/components/form/checkbox";
+import XButton from "@/components/form/x";
 import { builtInSubmissionQuestions } from "@/lib/submission-question-options";
 import { SubmissionForm, SubmissionFormQuestion } from "@/types";
 import { appName } from "@/lib/app-info";
@@ -17,6 +18,12 @@ type CustomQuestion = {
     type: SubmissionFormQuestion['type'];
     required: boolean;
     options: string;
+};
+
+type AuditionSlotInput = {
+    key: number;
+    date: string;
+    time: string;
 };
 
 type QuestionOrderItem =
@@ -86,13 +93,14 @@ export default function SubmissionFormBuilder({
             : [{ label: '', type: 'long_text', required: false, options: '' }]
     );
     const [questionOrder, setQuestionOrder] = useState<QuestionOrderItem[]>(getInitialQuestionOrder(existingForm));
-    const [auditionSlots, setAuditionSlots] = useState(
+    const nextAuditionSlotKey = useRef(existingForm?.auditionSlots.length || 1);
+    const [auditionSlots, setAuditionSlots] = useState<AuditionSlotInput[]>(
         existingForm?.auditionSlots.length
-            ? existingForm.auditionSlots.map((slot) => {
+            ? existingForm.auditionSlots.map((slot, index) => {
                 const [date, time] = slot.dateTime.split(' ');
-                return { date, time };
+                return { key: index, date, time };
             })
-            : [{ date: '', time: '' }]
+            : [{ key: 0, date: '', time: '' }]
     );
 
     useLayoutEffect(() => {
@@ -142,7 +150,14 @@ export default function SubmissionFormBuilder({
         nextQuestionOrder.splice(insertionIndex, 0, { kind: 'custom', index: nextIndex });
         setQuestionOrderWithAnimation(nextQuestionOrder);
     };
-    const addAuditionSlot = () => setAuditionSlots([...auditionSlots, { date: '', time: '' }]);
+    const addAuditionSlot = () => {
+        setAuditionSlots([...auditionSlots, { key: nextAuditionSlotKey.current, date: '', time: '' }]);
+        nextAuditionSlotKey.current++;
+    };
+    const removeAuditionSlot = (slotKey: number) => {
+        if (auditionSlots.length <= 1) return;
+        setAuditionSlots(auditionSlots.filter((slot) => slot.key !== slotKey));
+    };
     const toggleBuiltInQuestion = (id: string, checked: boolean) => {
         setSelectedBuiltInIds(checked ? [...selectedBuiltInIds, id] : selectedBuiltInIds.filter((selectedId) => selectedId !== id));
     };
@@ -247,23 +262,30 @@ export default function SubmissionFormBuilder({
                     <>
                         <Checkbox name="auditionDatesTbd" label="Audition date(s) TBD" defaultChecked={datesTbd} onChange={setDatesTbd} />
                         {!datesTbd && auditionSlots.map((slot, i) => (
-                            <div key={i} className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                <Input
-                                    name={`audition-date-${i}`}
-                                    label={`Audition Date ${i + 1}`}
-                                    type="date"
-                                    value={slot.date}
-                                    onChange={(value) => setAuditionSlots(auditionSlots.map((item, index) => index === i ? { ...item, date: value } : item))}
-                                    maxLength={20}
-                                />
-                                <Input
-                                    name={`audition-time-${i}`}
-                                    label="Time"
-                                    type="time"
-                                    value={slot.time}
-                                    onChange={(value) => setAuditionSlots(auditionSlots.map((item, index) => index === i ? { ...item, time: value } : item))}
-                                    maxLength={20}
-                                />
+                            <div key={slot.key} className="flex flex-row items-end gap-2">
+                                <div className="grid grow grid-cols-1 sm:grid-cols-2 gap-2">
+                                    <Input
+                                        name={`audition-date-${i}`}
+                                        label={`Audition Date ${i + 1}`}
+                                        type="date"
+                                        value={slot.date}
+                                        onChange={(value) => setAuditionSlots(auditionSlots.map((item, index) => index === i ? { ...item, date: value } : item))}
+                                        maxLength={20}
+                                    />
+                                    <Input
+                                        name={`audition-time-${i}`}
+                                        label="Time"
+                                        type="time"
+                                        value={slot.time}
+                                        onChange={(value) => setAuditionSlots(auditionSlots.map((item, index) => index === i ? { ...item, time: value } : item))}
+                                        maxLength={20}
+                                    />
+                                </div>
+                                {auditionSlots.length > 1 && (
+                                    <div className="pb-1">
+                                        <XButton onClick={() => removeAuditionSlot(slot.key)} />
+                                    </div>
+                                )}
                             </div>
                         ))}
                         {!datesTbd && auditionSlots.length < 8 && (
