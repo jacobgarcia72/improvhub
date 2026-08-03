@@ -67,11 +67,13 @@ export default function SubmissionFormBuilder({
     ownerName,
     type,
     onSubmit,
+    onCancel,
 }: {
     existingForm?: SubmissionForm | null;
     ownerName: string;
     type: 'troupe' | 'show';
     onSubmit: (prevState: void | { message?: string }, formData: FormData) => Promise<{ message?: string } | void>;
+    onCancel?: () => void;
 }) {
     const builtIns = existingForm?.questions.filter((question) => question.builtIn) || [];
     const customExisting = existingForm?.questions.filter((question) => !question.builtIn) || [];
@@ -246,7 +248,7 @@ export default function SubmissionFormBuilder({
     };
 
     return (
-        <Form onSubmit={onSubmit} buttonCaption="Save Form" className="w-full max-w-xl">
+        <Form onSubmit={onSubmit} cancel={onCancel} buttonCaption="Save Form" className="w-full max-w-xl">
             <Input name="title" label="Form Title" value={existingForm?.title || `${ownerName} Submission Form`} required maxLength={120} />
 
             <div className="rounded border border-gray-300 p-3">

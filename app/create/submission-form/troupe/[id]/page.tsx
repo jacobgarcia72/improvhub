@@ -3,7 +3,7 @@ import SubmissionFormBuilder from "@/components/submission-forms/form-builder";
 import { getSubmissionForm } from "@/lib/submission-forms";
 import { getTroupe, getTroupeMembers } from "@/lib/troupes";
 import { getCurrentUserId } from "@/lib/users";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 export default async function SubmissionFormPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
@@ -20,6 +20,10 @@ export default async function SubmissionFormPage({ params }: { params: Promise<{
     if (!canManage) notFound();
 
     const existingForm = await getSubmissionForm('troupe', id);
+    const onCancel = async () => {
+        'use server'
+        redirect(`/troupes/${id}/submissions`);
+    };
 
     return (
         <section className="medium-section">
@@ -29,6 +33,7 @@ export default async function SubmissionFormPage({ params }: { params: Promise<{
                 existingForm={existingForm}
                 type="troupe"
                 onSubmit={saveTroupeSubmissionForm.bind(null, id)}
+                onCancel={onCancel}
             />
         </section>
     )
