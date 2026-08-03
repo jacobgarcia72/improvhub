@@ -42,7 +42,7 @@ export default async function TroupeSubmissionsPage({ params }: { params: Promis
             ) : submissions.length === 0 ? (
                 <p className="text-mist-700 dark:text-mist:300 mb-6">No submissions yet.</p>
             ) : (
-                <div className="flex flex-col divide-y divide-gray-200">
+                <div className="flex flex-col divide-y divide-gray-200 mb-6">
                     {submissions.map((submission, i) => {
                         const submitter = submitters[i];
                         return (
@@ -58,11 +58,6 @@ export default async function TroupeSubmissionsPage({ params }: { params: Promis
                                         Submitted {formatDateTimeForDisplay(submission.submittedAt, true)}
                                     </p>
                                 </div>
-                                {form.hasAudition && !form.auditionDatesTbd && (
-                                    <p className="text-sm text-slate-600 dark:text-slate-300">
-                                        {submission.auditionAvailability.length} available
-                                    </p>
-                                )}
                             </div>
                         )
                     })}

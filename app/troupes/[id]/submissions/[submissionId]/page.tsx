@@ -4,6 +4,8 @@ import { getTroupe, getTroupeMembers } from "@/lib/troupes";
 import { getCurrentUserId, getUserAbbreviated } from "@/lib/users";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import Image from "next/image";
+import { optimizeImage } from "@/lib/optimize-image";
 
 function Answer({ value }: { value: string | string[] | undefined }) {
     if (Array.isArray(value)) return <p className={value.length ? '' : 'text-slate-500'}>{value.length ? value.join(', ') : 'No answer'}</p>;
@@ -24,14 +26,35 @@ export default async function SubmissionDetailsPage({ params }: { params: Promis
 
     const submitter = submission.userId ? await getUserAbbreviated(submission.userId) : null;
     const troupe = await getTroupe(id);
+
+    const submitterNameElement = <h1 className="text-xl mt-2">{submitter?.name || submission.contactEmail || 'Unknown submitter'}</h1>
     return (
-        <section className="medium-section">
+        <section className="px-10! sm:px-16!">
             <Link className="link text-sm" href={`/troupes/${id}/submissions`}>Back to submissions</Link>
-            <h1 className="text-xl mt-2">{submitter?.name || submission.contactEmail || 'Unknown submitter'}</h1>
-            <p className="text-sm text-slate-600 dark:text-slate-300 mb-4">
-                Submitted {formatDateTimeForDisplay(submission.submittedAt, true)}
-            </p>
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-row">
+                {submitter?.image ? (
+                    <Link href={`/profile/${submitter.id}`}>
+                        <Image
+                            src={optimizeImage(submitter.image, 100, 100, 100, true, false)}
+                            alt={submitter.name || 'Submitter profile image'}
+                            width={100}
+                            height={100}
+                            className="rounded mr-3 mt-2 mb-3 hover:scale-105 transition-transform duration-300"
+                        />
+                    </Link>
+                ) : null}
+                <div>
+                    {submission.userId ? (
+                        <Link className="link" href={`/profile/${submission.userId}`}>
+                            {submitterNameElement}
+                        </Link>
+                    ) : submitterNameElement}
+                    <p className="text-sm text-slate-600 dark:text-slate-300 mb-4">
+                        Submitted {formatDateTimeForDisplay(submission.submittedAt, true)}
+                    </p>
+                </div>
+            </div>
+            <div className="flex flex-col gap-4 mb-4">
                 {form.questions.map((question) => {
                     const questionText = question.label
                         .replace('{name}', troupe?.name || 'this troupe')
@@ -53,6 +76,7 @@ export default async function SubmissionDetailsPage({ params }: { params: Promis
                     </div>
                 )}
             </div>
+            <Link className="link text-sm" href={`/troupes/${id}/submissions`}>Back to submissions</Link>
         </section>
     )
 }
