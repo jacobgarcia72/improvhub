@@ -295,7 +295,7 @@ export default function SubmissionFormBuilder({
                 )}
             </div>
 
-            <Text name="description" label="Form introduction" rows={4} value={existingForm?.description?.replaceAll('<br>', '\n') || ''} />
+            <Text name="description" label="Form introduction" rows={6} value={existingForm?.description?.replaceAll('<br>', '\n') || ''} />
 
             <div className="flex flex-col gap-2 rounded border border-gray-300 p-3">
                 <h2 className="font-semibold text-slate-700 dark:text-slate-300">Questions</h2>
@@ -401,7 +401,7 @@ export default function SubmissionFormBuilder({
                                 <span className="grow text-sm text-slate-700 dark:text-slate-300">{getQuestionOrderLabel(orderItem)}</span>
                                 <button
                                     type="button"
-                                    className="p-0! w-fit disabled:text-gray-400 text-slate-600 dark:text-mist-400 hover:text-indigo-500 hover:dark:text-white"
+                                    className="p-0! w-fit disabled:text-gray-400 text-slate-600 dark:text-mist-400 hover:text-blue-500 hover:dark:text-white"
                                     onClick={() => moveQuestion(activeIndex, -1)}
                                     disabled={activeIndex === 0}
                                 >
@@ -409,7 +409,7 @@ export default function SubmissionFormBuilder({
                                 </button>
                                 <button
                                     type="button"
-                                    className="p-0! w-fit disabled:text-gray-400 text-slate-600 dark:text-mist-400 hover:text-indigo-500 hover:dark:text-white"
+                                    className="p-0! w-fit disabled:text-gray-400 text-slate-600 dark:text-mist-400 hover:text-blue-500 hover:dark:text-white"
                                     onClick={() => moveQuestion(activeIndex, 1)}
                                     disabled={activeIndex === activeOrderedQuestions.length - 1}
                                 >
