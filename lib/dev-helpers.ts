@@ -195,9 +195,9 @@ const generateTroupe = (users: User[]): [troupe: Troupe, members: { name: string
             });
     }
     const players = getRandomElements(users, rnd(10))
-        .map(({ name, id }) => ({
+        .map(({ name, id }, i) => ({
             name,
-            id: rnd() <= 80 ? id : null,
+            id: (i === 0 || rnd() <= 80) ? id : null,
             role: 'player' as Role
         }))
     let coaches: { name: string, id: string | null, role: Role }[] = [];
