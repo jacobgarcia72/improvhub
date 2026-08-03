@@ -120,7 +120,7 @@ export async function saveSubmission(submission: Omit<SubmissionFormSubmission, 
             ...submission,
             id,
             submittedAt: new Date().toISOString()
-        }), { onConflict: 'form_id,user_id' });
+        }), { onConflict: 'id' });
     if (error) throw error;
     return id;
 }
