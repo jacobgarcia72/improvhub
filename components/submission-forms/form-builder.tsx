@@ -363,6 +363,7 @@ export default function SubmissionFormBuilder({
                                 label="Options"
                                 addLabel="Option"
                                 startingOptions={parseOptionInputs(question.options)}
+                                minimumOne
                             />
                         )}
                     </div>

@@ -40,6 +40,10 @@ function parseCustomQuestionOptions(formData: FormData, questionIndex: number): 
     return parseOptionValues([rawOptions]);
 }
 
+function isSelectQuestion(type: SubmissionFormQuestion['type']): boolean {
+    return type === 'single_select' || type === 'multi_select';
+}
+
 function parseBuiltInQuestion(formData: FormData, questionId: string): SubmissionFormQuestion | null {
     const question = builtInSubmissionQuestions.find((builtInQuestion) => builtInQuestion.id === questionId);
     if (!question || !formData.get(`question-${question.id}`)) return null;
@@ -62,7 +66,7 @@ function parseCustomQuestion(formData: FormData, questionIndex: number): Submiss
         label,
         type,
         required: Boolean(formData.get(`custom-question-required-${questionIndex}`)),
-        options: ['single_select', 'multi_select'].includes(type) ? options : undefined
+        options: isSelectQuestion(type) ? options : undefined
     };
 }
 
@@ -115,6 +119,12 @@ function parseQuestions(formData: FormData): SubmissionFormQuestion[] {
     return questions;
 }
 
+function getQuestionValidationMessage(questions: SubmissionFormQuestion[]): string | null {
+    const questionWithoutOptions = questions.find((question) => isSelectQuestion(question.type) && !question.options?.length);
+    if (questionWithoutOptions) return `Add at least one option for "${questionWithoutOptions.label}"`;
+    return null;
+}
+
 function parseAuditionSlots(formData: FormData): AuditionSlot[] {
     const slots: AuditionSlot[] = [];
     for (let i = 0; i < 8; i++) {
@@ -152,6 +162,8 @@ export async function saveTroupeSubmissionForm(ownerId: string, prevState: void 
     if (formData.get('hasCloseDate') && !closesAt) return { message: 'Enter a valid close date and time' };
     const questions = parseQuestions(formData);
     if (!questions.length) return { message: 'Choose at least one question' };
+    const questionValidationMessage = getQuestionValidationMessage(questions);
+    if (questionValidationMessage) return { message: questionValidationMessage };
 
     const hasAudition = Boolean(formData.get('hasAudition'));
     const auditionDatesTbd = hasAudition && Boolean(formData.get('auditionDatesTbd'));

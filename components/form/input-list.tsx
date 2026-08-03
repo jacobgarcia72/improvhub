@@ -7,15 +7,16 @@ import Input from "./input";
 import XButton from "./x";
 import { InputOption } from "@/types";
 
-export default function InputList({ name, options, label, addLabel, startingOptions }: {
+export default function InputList({ name, options, label, addLabel, startingOptions, minimumOne }: {
     name: string;
     label?: string;
     addLabel?: string;
-    options?: InputOption[]
-    startingOptions?: InputOption[]
+    options?: InputOption[];
+    startingOptions?: InputOption[];
+    minimumOne?: boolean;
 }) {
-    const startingInputs = startingOptions?.map((option, i) => ({ key: i, value: option })) || [];
-    const nextKey = useRef(startingOptions?.length || 0);
+    const startingInputs = startingOptions?.map((option, i) => ({ key: i, value: option })) || (minimumOne ? [{ key: 0, value: ''}] : []);
+    const nextKey = useRef(startingInputs.length);
     const [addedInputs, setAddedInputs] = useState<{ key: number, value: InputOption | null }[]>(startingInputs);
 
     const updateInput = (value: InputOption, i: number) => {
@@ -48,6 +49,7 @@ export default function InputList({ name, options, label, addLabel, startingOpti
                                 placeholder={addLabel}
                                 onChange={(value) => updateInput(value, i)}
                                 startingValue={input.value || undefined}
+                                required={minimumOne && addedInputs.length === 1}
                             />
                         ) : (
                             <Input
@@ -55,9 +57,12 @@ export default function InputList({ name, options, label, addLabel, startingOpti
                                 placeholder={addLabel}
                                 value={typeof input.value === 'string' ? input.value : ''}
                                 onChange={(value) => updateInput(value, i)}
+                                required={minimumOne && addedInputs.length === 1}
                             />
                         )}
-                        <XButton onClick={() => removeInput(input.key)} />
+                        {(!minimumOne || addedInputs.length > 1) ? (
+                            <XButton onClick={() => removeInput(input.key)} />
+                        ) : null}
                     </div>
                 ))}
             </div>
