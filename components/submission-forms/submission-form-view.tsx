@@ -16,8 +16,6 @@ function getDefaultAnswer(questionId: string, user: User, demographics: Demograp
     if (questionId === 'gender_identity') return demographics?.genderIdentity || '';
     if (questionId === 'orientation') return demographics?.orientation || '';
     if (questionId === 'ethnicity') return demographics?.ethnicity || '';
-    // TODO: get user email
-    // if (questionId === 'email') return user.email || '';
     return '';
 }
 
