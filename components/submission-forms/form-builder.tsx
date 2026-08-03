@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type DragEvent } from "react";
+import { useLayoutEffect, useRef, useState, type DragEvent } from "react";
 import Form from "@/components/form/form";
 import Input from "@/components/form/input";
 import InputList from "@/components/form/input-list";
@@ -73,6 +73,8 @@ export default function SubmissionFormBuilder({
     const [selectedBuiltInIds, setSelectedBuiltInIds] = useState(builtIns.map((question) => question.id));
     const [draggedQuestion, setDraggedQuestion] = useState<string | null>(null);
     const [dropIndex, setDropIndex] = useState<number | null>(null);
+    const orderRowRefs = useRef(new Map<string, HTMLDivElement>());
+    const pendingAnimationPositions = useRef<Map<string, DOMRect> | null>(null);
     const [customQuestions, setCustomQuestions] = useState<CustomQuestion[]>(
         customExisting.length
             ? customExisting.map((question) => ({
@@ -93,6 +95,43 @@ export default function SubmissionFormBuilder({
             : [{ date: '', time: '' }]
     );
 
+    useLayoutEffect(() => {
+        const previousPositions = pendingAnimationPositions.current;
+        if (!previousPositions) return;
+
+        pendingAnimationPositions.current = null;
+        orderRowRefs.current.forEach((row, questionValue) => {
+            const previousPosition = previousPositions.get(questionValue);
+            if (!previousPosition) return;
+
+            const currentPosition = row.getBoundingClientRect();
+            const deltaY = previousPosition.top - currentPosition.top;
+            if (!deltaY) return;
+
+            row.animate(
+                [
+                    { transform: `translateY(${deltaY}px)` },
+                    { transform: 'translateY(0)' },
+                ],
+                {
+                    duration: 300,
+                    easing: 'cubic-bezier(0.2, 0, 0.2, 1)',
+                }
+            );
+        });
+    }, [questionOrder]);
+
+    const captureOrderRowPositions = () => {
+        const positions = new Map<string, DOMRect>();
+        orderRowRefs.current.forEach((row, questionValue) => {
+            positions.set(questionValue, row.getBoundingClientRect());
+        });
+        return positions;
+    };
+    const setQuestionOrderWithAnimation = (nextOrder: QuestionOrderItem[]) => {
+        pendingAnimationPositions.current = captureOrderRowPositions();
+        setQuestionOrder(nextOrder);
+    };
     const addCustomQuestion = () => {
         const nextIndex = customQuestions.length;
         const nextQuestionOrder = [...questionOrder];
@@ -101,7 +140,7 @@ export default function SubmissionFormBuilder({
 
         setCustomQuestions([...customQuestions, { label: '', type: 'long_text', required: false, options: '' }]);
         nextQuestionOrder.splice(insertionIndex, 0, { kind: 'custom', index: nextIndex });
-        setQuestionOrder(nextQuestionOrder);
+        setQuestionOrderWithAnimation(nextQuestionOrder);
     };
     const addAuditionSlot = () => setAuditionSlots([...auditionSlots, { date: '', time: '' }]);
     const toggleBuiltInQuestion = (id: string, checked: boolean) => {
@@ -118,7 +157,7 @@ export default function SubmissionFormBuilder({
         const nextOrderIndex = questionOrder.indexOf(nextQuestion);
         const nextOrder = [...questionOrder];
         [nextOrder[currentOrderIndex], nextOrder[nextOrderIndex]] = [nextOrder[nextOrderIndex], nextOrder[currentOrderIndex]];
-        setQuestionOrder(nextOrder);
+        setQuestionOrderWithAnimation(nextOrder);
     };
     const moveQuestionTo = (draggedQuestionValue: string, targetActiveIndex: number) => {
         const activeQuestions = getActiveOrderedQuestions();
@@ -145,7 +184,7 @@ export default function SubmissionFormBuilder({
             nextOrder.push(movedQuestion);
         }
 
-        setQuestionOrder(nextOrder);
+        setQuestionOrderWithAnimation(nextOrder);
     };
     const handleDragStart = (event: DragEvent<HTMLDivElement>, questionValue: string) => {
         setDraggedQuestion(questionValue);
@@ -321,6 +360,13 @@ export default function SubmissionFormBuilder({
                             </div>
                             <div
                                 data-question-order-row
+                                ref={(row) => {
+                                    if (row) {
+                                        orderRowRefs.current.set(questionValue, row);
+                                    } else {
+                                        orderRowRefs.current.delete(questionValue);
+                                    }
+                                }}
                                 className={`flex flex-row items-center gap-2 pr-2 ${isDragging ? 'opacity-50' : ''}`}
                                 draggable
                                 onDragStart={(event) => handleDragStart(event, questionValue)}
