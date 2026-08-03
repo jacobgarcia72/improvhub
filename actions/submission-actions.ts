@@ -6,6 +6,7 @@ import { getCurrentUser, getCurrentUserId } from "@/lib/users";
 import { getTroupe, getTroupeMembers } from "@/lib/troupes";
 import {
     getSubmissionFormById,
+    saveAuditionSlotAssignments,
     saveDemographics,
     saveSubmission,
     saveSubmissionForm
@@ -236,4 +237,36 @@ export async function submitSubmissionForm(formId: string, prevState: void | { m
 
     revalidatePath(`/${form.ownerType}s/${form.ownerId}/submissions`);
     redirect(`/submission-form/${form.ownerType}/${form.ownerId}?submitted=true`);
+}
+
+export async function saveTroupeAuditionSlotAssignments(
+    ownerId: string,
+    formId: string,
+    assignments: { submissionId: string, slotId: string | null }[]
+) {
+    const userId = await getCurrentUserId();
+    if (!userId) throw new Error('You must be logged in to continue');
+    if (!(await canManageSubmissionOwner('troupe', ownerId, userId))) {
+        throw new Error('You do not have permission to manage audition slots');
+    }
+
+    const form = await getSubmissionFormById(formId);
+    if (!form || form.ownerType !== 'troupe' || form.ownerId !== ownerId || !form.hasAudition || form.auditionDatesTbd) {
+        throw new Error('This audition form is no longer available');
+    }
+
+    const validSlotIds = new Set(form.auditionSlots.map((slot) => slot.id));
+    const normalizedAssignments = assignments.map((assignment) => {
+        if (assignment.slotId && !validSlotIds.has(assignment.slotId)) {
+            throw new Error('One or more audition slot assignments are invalid');
+        }
+        return {
+            submissionId: assignment.submissionId,
+            slotId: assignment.slotId
+        };
+    });
+
+    await saveAuditionSlotAssignments(form.id, normalizedAssignments);
+    revalidatePath(`/troupes/${ownerId}/submissions/auditions`);
+    revalidatePath(`/troupes/${ownerId}/submissions`);
 }

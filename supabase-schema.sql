@@ -285,6 +285,7 @@ create table if not exists submission_form_submissions (
   contact_email text,
   answers jsonb not null,
   audition_availability text[] not null,
+  assigned_audition_slot_id text,
   submitted_at text not null
 );
 

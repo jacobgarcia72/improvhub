@@ -297,6 +297,7 @@ export interface SubmissionFormSubmission {
     contactEmail: string | null;
     answers: { [questionId: string]: string | string[] };
     auditionAvailability: string[];
+    assignedAuditionSlotId: string | null;
     submittedAt: string;
 }
 

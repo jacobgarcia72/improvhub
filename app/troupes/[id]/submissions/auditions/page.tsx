@@ -1,8 +1,7 @@
 import { getSubmissionForm, getSubmissions } from "@/lib/submission-forms";
-import { assignSubmissionsToAuditionSlots } from "@/lib/submission-form-utils";
-import { formatDateTimeForDisplay } from "@/lib/dates";
 import { getTroupeMembers } from "@/lib/troupes";
 import { getCurrentUserId, getUserAbbreviated } from "@/lib/users";
+import AuditionSlotsClient from "./audition-slots-client";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -17,7 +16,6 @@ export default async function AuditionSlotsPage({ params }: { params: Promise<{ 
     if (!form || !form.hasAudition || form.auditionDatesTbd) notFound();
 
     const submissions = await getSubmissions(form.id);
-    const assignment = assignSubmissionsToAuditionSlots(form, submissions);
     const userIds = [...new Set(submissions.map((submission) => submission.userId).filter((uid) => uid !== null))];
     const users = await Promise.all(userIds.map((uid) => getUserAbbreviated(uid)));
     const getSubmitterName = (submission: { userId: string | null, contactEmail: string | null }) => {
@@ -28,38 +26,18 @@ export default async function AuditionSlotsPage({ params }: { params: Promise<{ 
     return (
         <section className="px-10! sm:px-16! flex flex-col gap-4">
             <h1 className="text-lg">Audition Slot Assignment</h1>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {assignment.slots.map(({ slot, submissions: assigned }) => (
-                    <div key={slot.id} className="rounded border border-gray-300 p-3">
-                        <h2 className="font-semibold text-slate-700 dark:text-slate-300">
-                            {formatDateTimeForDisplay(slot.dateTime, true)}
-                        </h2>
-                        {assigned.length ? assigned.map((submission) => (
-                            <Link
-                                key={submission.id}
-                                className="link block"
-                                href={`/troupes/${id}/submissions/${submission.id}`}
-                            >
-                                {getSubmitterName(submission)}
-                            </Link>
-                        )) : <p className="text-sm text-slate-500">No one assigned.</p>}
-                    </div>
-                ))}
-            </div>
-            {assignment.unassigned.length ? (
-                <div className="mt-5">
-                    <h2 className="font-semibold text-slate-700 dark:text-slate-300">Unassigned</h2>
-                    {assignment.unassigned.map((submission) => (
-                        <Link
-                            key={submission.id}
-                            className="link block"
-                            href={`/troupes/${id}/submissions/${submission.id}`}
-                        >
-                            {getSubmitterName(submission)}
-                        </Link>
-                    ))}
-                </div>
-            ) : null}
+            <AuditionSlotsClient
+                troupeId={id}
+                formId={form.id}
+                slots={form.auditionSlots}
+                submissions={submissions.map((submission) => ({
+                    id: submission.id,
+                    name: getSubmitterName(submission),
+                    href: `/troupes/${id}/submissions/${submission.id}`,
+                    auditionAvailability: submission.auditionAvailability,
+                    assignedAuditionSlotId: submission.assignedAuditionSlotId
+                }))}
+            />
             <Link className="link" href={`/troupes/${id}/submissions`}>Back</Link>
         </section>
     )

@@ -26,6 +26,7 @@ function parseSubmission(row: Record<string, unknown>): SubmissionFormSubmission
     const parsed = camelCaseObject(row) as SubmissionFormSubmission;
     parsed.answers = parsed.answers || {};
     parsed.auditionAvailability = parsed.auditionAvailability || [];
+    parsed.assignedAuditionSlotId = parsed.assignedAuditionSlotId || null;
     return parsed;
 }
 
@@ -107,7 +108,7 @@ export async function getSubmissions(formId: string): Promise<SubmissionFormSubm
     return (data || []).map(parseSubmission);
 }
 
-export async function saveSubmission(submission: Omit<SubmissionFormSubmission, 'id' | 'submittedAt'>): Promise<string> {
+export async function saveSubmission(submission: Omit<SubmissionFormSubmission, 'id' | 'submittedAt' | 'assignedAuditionSlotId'>): Promise<string> {
     const existing = submission.userId
         ? await getSubmission(submission.formId, submission.userId)
         : submission.contactEmail
@@ -115,15 +116,45 @@ export async function saveSubmission(submission: Omit<SubmissionFormSubmission, 
             : null;
     const submitterKey = submission.userId || submission.contactEmail?.replace(/[^a-zA-Z0-9]+/g, '-') || 'anonymous';
     const id = existing?.id || `${submission.formId}-${submitterKey}-${getRandomNumberString(6)}`;
+    const assignedAuditionSlotId = existing?.assignedAuditionSlotId && submission.auditionAvailability.includes(existing.assignedAuditionSlotId)
+        ? existing.assignedAuditionSlotId
+        : null;
     const { error } = await supabaseAdmin
         .from('submission_form_submissions')
         .upsert(snakeCaseObject({
             ...submission,
             id,
+            assignedAuditionSlotId,
             submittedAt: new Date().toISOString()
         }), { onConflict: 'id' });
     if (error) throw error;
     return id;
+}
+
+export async function saveAuditionSlotAssignments(
+    formId: string,
+    assignments: { submissionId: string, slotId: string | null }[]
+): Promise<void> {
+    const submissions = await getSubmissions(formId);
+    const submissionsById = new Map(submissions.map((submission) => [submission.id, submission]));
+    const validAssignments = assignments.filter((assignment) => submissionsById.has(assignment.submissionId));
+
+    validAssignments.forEach((assignment) => {
+        const submission = submissionsById.get(assignment.submissionId);
+        if (assignment.slotId && !submission?.auditionAvailability.includes(assignment.slotId)) {
+            throw new Error('Submitters can only be assigned to slots they marked as available');
+        }
+    });
+
+    await Promise.all(validAssignments
+        .map(async (assignment) => {
+            const { error } = await supabaseAdmin
+                .from('submission_form_submissions')
+                .update({ assigned_audition_slot_id: assignment.slotId })
+                .eq('id', assignment.submissionId)
+                .eq('form_id', formId);
+            if (error) throw error;
+        }));
 }
 
 export async function getDemographics(userId: string): Promise<Demographics | null> {
