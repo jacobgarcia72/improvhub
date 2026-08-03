@@ -149,7 +149,7 @@ export default function SubmissionFormBuilder({
         const anythingElseIndex = nextQuestionOrder.findIndex((orderItem) => orderItem.kind === 'builtIn' && orderItem.id === 'anything_else');
         const insertionIndex = anythingElseIndex >= 0 ? anythingElseIndex : nextQuestionOrder.length;
 
-        setCustomQuestions([...customQuestions, { label: '', type: 'long_text', required: false, options: '' }]);
+        setCustomQuestions([...customQuestions, { label: '', type: 'short_text', required: false, options: '' }]);
         nextQuestionOrder.splice(insertionIndex, 0, { kind: 'custom', index: nextIndex });
         setQuestionOrderWithAnimation(nextQuestionOrder);
     };
