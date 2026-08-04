@@ -2,9 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { getCurrentUser, getCurrentUserId } from "@/lib/users";
+import { getCurrentUser, getCurrentUserId, getFollows } from "@/lib/users";
 import { getTroupe, getTroupeMembers } from "@/lib/troupes";
 import {
+    getSubmissionForm,
     getSubmissionFormById,
     saveAuditionSlotAssignments,
     saveDemographics,
@@ -14,6 +15,8 @@ import {
 import { builtInSubmissionQuestions } from "@/lib/submission-question-options";
 import { isDateTimeInPast } from "@/lib/dates";
 import { AuditionSlot, Demographics, SubmissionFormQuestion, SubmissionOwnerType } from "@/types";
+import { createNewsFeedItem } from "@/lib/news";
+import { postNotification } from "@/lib/notifications";
 
 function cleanLineBreaks(value: string): string {
     return value.trim().replaceAll(/\r\n/g, '<br>').replaceAll(/\n/g, '<br>').replaceAll(/\r/g, '<br>');
@@ -155,6 +158,7 @@ export async function saveTroupeSubmissionForm(ownerId: string, prevState: void 
     const userId = await getCurrentUserId();
     if (!userId) throw new Error('You must be logged in to continue');
     if (!(await canManageSubmissionOwner('troupe', ownerId, userId))) throw new Error('You do not have permission to manage this form');
+    const existingForm = await getSubmissionForm('troupe', ownerId);
 
     const title = (formData.get('title') as string | null)?.trim() || 'Troupe Submission Form';
     const description = cleanLineBreaks((formData.get('description') as string | null) || '');
@@ -172,7 +176,7 @@ export async function saveTroupeSubmissionForm(ownerId: string, prevState: void 
         return { message: 'Add at least one audition date or mark dates TBD' };
     }
 
-    await saveSubmissionForm({
+    const formId = await saveSubmissionForm({
         ownerType: 'troupe',
         ownerId,
         title,
@@ -186,7 +190,19 @@ export async function saveTroupeSubmissionForm(ownerId: string, prevState: void 
         createdBy: userId,
     });
 
+    if (!existingForm) {
+        const followers = await getFollows(ownerId, 'troupe');
+        const recipients = followers
+            .map((follower) => follower.id)
+            .filter((followerId) => followerId !== userId);
+        await createNewsFeedItem('troupe', ownerId, 'new_submission_form', formId);
+        if (recipients.length) {
+            await postNotification(ownerId, recipients, 'new_submission_form', formId);
+        }
+    }
+
     revalidatePath(`/troupes/${ownerId}`, 'layout');
+    revalidatePath('/feed');
     redirect(`/troupes/${ownerId}/submissions`);
 }
 

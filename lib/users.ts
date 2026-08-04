@@ -182,6 +182,7 @@ export async function getFollows(followId: string, type: Followee): Promise<{ na
         .eq('type', type);
     if (!followerData) return [];
     const userIds = followerData.map((row: { user_id: any; }) => row.user_id)
+    if (!userIds.length) return [];
     const { data } = await supabaseAdmin
         .from('users')
         .select('first_name, last_name, id, image')

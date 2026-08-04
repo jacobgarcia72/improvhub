@@ -10,6 +10,7 @@ import TroupeRequestButtons from "./troupe-request-buttons";
 import { getVerbFromRole, pluralize } from "@/lib/helper-functions";
 import { getEvent, getShow } from "@/lib/shows";
 import { formatDateTimeForDisplay } from "@/lib/dates";
+import { getSubmissionFormById } from "@/lib/submission-forms";
 
 function Wrapper({ children, date, image, imageLink, imageAlt, isNew }: { children: React.ReactNode, date: string, image?: string | null, imageLink?: string, imageAlt?: string, isNew: boolean }) {
     return (
@@ -264,6 +265,23 @@ export default async function NotificationCard({ notification, userId, isNew }: 
                     &nbsp;commented on&nbsp;
                     <Link href={`/discuss?channel=${room}&topic=${topicId}&post=${postId}`} className="link">
                         your post
+                    </Link>
+                </p>
+            </Wrapper>
+        case 'new_submission_form':
+            if (!data) return null;
+            const submissionForm = await getSubmissionFormById(data);
+            if (!submissionForm || submissionForm.ownerType !== 'troupe') return null;
+            const submissionTroupe = await getTroupe(submissionForm.ownerId);
+            if (!submissionTroupe) return null;
+            return <Wrapper date={date} isNew={isNew} image={submissionTroupe.image} imageLink={`/troupes/${submissionTroupe.id}`} imageAlt={submissionTroupe.name}>
+                <p>
+                    <Link href={`/troupes/${submissionTroupe.id}`} className="link">
+                        {submissionTroupe.name}
+                    </Link>
+                    &nbsp;is {submissionForm.hasAudition ? 'holding auditions' : 'taking submissions'} for new members!&nbsp;
+                    <Link href={`/submission-form/troupe/${submissionTroupe.id}`} className="link">
+                        View submission form
                     </Link>
                 </p>
             </Wrapper>

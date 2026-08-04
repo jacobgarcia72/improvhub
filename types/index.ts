@@ -184,6 +184,7 @@ export type NewsType = (
     'going_to_class' | 
     'new_troupe' | 
     'joined_troupe' |
+    'new_submission_form' |
     `instructor_for_jam` |
     `instructor_for_workshop` |
     `instructor_for_class`
@@ -234,6 +235,7 @@ export type NotificationType =
     'class_occurrence_cancelled' |
     'made_admin' |
     'made_instructor' |
+    'new_submission_form' |
     'new_comment';
 
 export type Notification = {

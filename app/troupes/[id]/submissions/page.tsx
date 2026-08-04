@@ -38,9 +38,9 @@ export default async function TroupeSubmissionsPage({ params }: { params: Promis
                 </div>
             </div>
             {!form ? (
-                <p className="text-mist-700 dark:text-mist:300 mb-6">No submission form has been created yet.</p>
+                <p className="text-mist-700 dark:text-mist-400 mb-6">No submission form has been created yet.</p>
             ) : submissions.length === 0 ? (
-                <p className="text-mist-700 dark:text-mist:300 mb-6">No submissions yet.</p>
+                <p className="text-mist-700 dark:text-mist-400 mb-6">No submissions yet.</p>
             ) : (
                 <div className="flex flex-col divide-y divide-gray-200 mb-6">
                     {submissions.map((submission, i) => {

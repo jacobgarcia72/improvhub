@@ -15,6 +15,7 @@ import { protectRoute } from "@/lib/auth";
 import { EventType } from "@/types";
 import { Suspense } from "react";
 import Loader from "@/components/loader";
+import { getSubmissionFormById } from "@/lib/submission-forms";
 
 export const metadata: Metadata = {
     title: `News Feed | ${appName}`
@@ -121,6 +122,14 @@ export default async function FeedPage() {
                             if (!troupeMember || !troupeJoined) return null;
                             content = <p><Link className="link" href={`/profile/${troupeMember.id}`}>{troupeMember.name}</Link>{otherData === 'coach' ? ' is coaching ' : ' has joined the troupe, '}<Link className="link" href={`/troupes/${troupeJoined.id}`}>{troupeJoined.name}</Link>{otherData === 'musician' ? ' as a musical accompanist' : ''}.</p>
                             image = troupeMember.image || troupeJoined.image;
+                            break;
+                        case 'new_submission_form':
+                            const submissionForm = await getSubmissionFormById(newsItemId);
+                            if (!submissionForm || submissionForm.ownerType !== 'troupe') return null;
+                            const submissionTroupe = await getTroupe(submissionForm.ownerId);
+                            if (!submissionTroupe) return null;
+                            content = <p><Link className="link" href={`/troupes/${submissionTroupe.id}`}>{submissionTroupe.name}</Link> is {submissionForm.hasAudition ? 'holding auditions' : 'taking submissions'} for new members! <Link className="link" href={`/submission-form/troupe/${submissionTroupe.id}`}>View submission form</Link></p>
+                            image = submissionTroupe.image;
                             break;
                         default:
                             return;
