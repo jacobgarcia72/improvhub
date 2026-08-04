@@ -93,7 +93,7 @@ export default function SubmissionFormBuilder({
                 required: Boolean(question.required),
                 options: question.options?.join('\n') || ''
             }))
-            : [{ label: '', type: 'short_text', required: false, options: '' }]
+            : []
     );
     const [questionOrder, setQuestionOrder] = useState<QuestionOrderItem[]>(getInitialQuestionOrder(existingForm));
     const nextAuditionSlotKey = useRef(existingForm?.auditionSlots.length || 1);
@@ -372,62 +372,63 @@ export default function SubmissionFormBuilder({
                     <button type="button" className="link w-fit px-2 py-1" onClick={addCustomQuestion}>Add Custom Question</button>
                 )}
             </div>
-
-            <div className="flex flex-col gap-2 rounded border border-gray-300 p-3">
-                <h2 className="font-semibold text-slate-700 dark:text-slate-300">Question Order</h2>
-                <div onDragOver={handleDragOver} onDrop={handleDrop}>
-                    {activeOrderedQuestions.map((orderItem, activeIndex) => {
-                        const questionValue = getQuestionOrderValue(orderItem);
-                        const isDragging = draggedQuestion === questionValue;
-                        return (
-                        <div key={questionValue}>
-                            <div className="h-2">
-                                {dropIndex === activeIndex && <div className="h-0.5 translate-y-[3px] bg-blue-500 dark:bg-mist-300" />}
-                            </div>
-                            <div
-                                data-question-order-row
-                                ref={(row) => {
-                                    if (row) {
-                                        orderRowRefs.current.set(questionValue, row);
-                                    } else {
-                                        orderRowRefs.current.delete(questionValue);
-                                    }
-                                }}
-                                className={`flex flex-row items-center gap-2 pr-2 ${isDragging ? 'opacity-50' : ''}`}
-                                draggable
-                                onDragStart={(event) => handleDragStart(event, questionValue)}
-                                onDragEnd={handleDragEnd}
-                            >
-                                <input type="hidden" name="question-order" value={questionValue} />
-                                <span className="cursor-move select-none text-sm text-slate-500 dark:text-slate-400" aria-hidden="true">
-                                    <FontAwesomeIcon icon={faGripVertical} />
-                                </span>
-                                <span className="grow text-sm text-slate-700 dark:text-slate-300">{getQuestionOrderLabel(orderItem)}</span>
-                                <button
-                                    type="button"
-                                    className="p-0! w-fit disabled:text-gray-400 text-slate-600 dark:text-mist-400 hover:text-blue-500 hover:dark:text-white"
-                                    onClick={() => moveQuestion(activeIndex, -1)}
-                                    disabled={activeIndex === 0}
+            {activeOrderedQuestions.length > 1 ? <>
+                <div className="flex flex-col gap-2 rounded border border-gray-300 p-3">
+                    <h2 className="font-semibold text-slate-700 dark:text-slate-300">Question Order</h2>
+                    <div onDragOver={handleDragOver} onDrop={handleDrop}>
+                        {activeOrderedQuestions.map((orderItem, activeIndex) => {
+                            const questionValue = getQuestionOrderValue(orderItem);
+                            const isDragging = draggedQuestion === questionValue;
+                            return (
+                            <div key={questionValue}>
+                                <div className="h-2">
+                                    {dropIndex === activeIndex && <div className="h-0.5 translate-y-[3px] bg-blue-500 dark:bg-mist-300" />}
+                                </div>
+                                <div
+                                    data-question-order-row
+                                    ref={(row) => {
+                                        if (row) {
+                                            orderRowRefs.current.set(questionValue, row);
+                                        } else {
+                                            orderRowRefs.current.delete(questionValue);
+                                        }
+                                    }}
+                                    className={`flex flex-row items-center gap-2 pr-2 ${isDragging ? 'opacity-50' : ''}`}
+                                    draggable
+                                    onDragStart={(event) => handleDragStart(event, questionValue)}
+                                    onDragEnd={handleDragEnd}
                                 >
-                                    <FontAwesomeIcon icon={faCaretUp} />
-                                </button>
-                                <button
-                                    type="button"
-                                    className="p-0! w-fit disabled:text-gray-400 text-slate-600 dark:text-mist-400 hover:text-blue-500 hover:dark:text-white"
-                                    onClick={() => moveQuestion(activeIndex, 1)}
-                                    disabled={activeIndex === activeOrderedQuestions.length - 1}
-                                >
-                                    <FontAwesomeIcon icon={faCaretDown} />
-                                </button>
+                                    <input type="hidden" name="question-order" value={questionValue} />
+                                    <span className="cursor-move select-none text-sm text-slate-500 dark:text-slate-400" aria-hidden="true">
+                                        <FontAwesomeIcon icon={faGripVertical} />
+                                    </span>
+                                    <span className="grow text-sm text-slate-700 dark:text-slate-300">{getQuestionOrderLabel(orderItem)}</span>
+                                    <button
+                                        type="button"
+                                        className="p-0! w-fit disabled:text-gray-400 text-slate-600 dark:text-mist-400 hover:text-blue-500 hover:dark:text-white"
+                                        onClick={() => moveQuestion(activeIndex, -1)}
+                                        disabled={activeIndex === 0}
+                                    >
+                                        <FontAwesomeIcon icon={faCaretUp} />
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="p-0! w-fit disabled:text-gray-400 text-slate-600 dark:text-mist-400 hover:text-blue-500 hover:dark:text-white"
+                                        onClick={() => moveQuestion(activeIndex, 1)}
+                                        disabled={activeIndex === activeOrderedQuestions.length - 1}
+                                    >
+                                        <FontAwesomeIcon icon={faCaretDown} />
+                                    </button>
+                                </div>
                             </div>
+                            )
+                        })}
+                        <div className="h-2">
+                            {dropIndex === activeOrderedQuestions.length && <div className="h-0.5 translate-y-[3px] bg-blue-500 dark:bg-mist-300" />}
                         </div>
-                        )
-                    })}
-                    <div className="h-2">
-                        {dropIndex === activeOrderedQuestions.length && <div className="h-0.5 translate-y-[3px] bg-blue-500 dark:bg-mist-300" />}
                     </div>
                 </div>
-            </div>
+            </> : null}
 
             <div className="flex flex-col gap-3 rounded border border-gray-300 p-3">
                 <Checkbox
