@@ -44,7 +44,6 @@ export default async function SubmissionFormView({
                     .replace('{type}', form.ownerType)
                     .replace('{verb}', form.ownerType === 'troupe' ? 'joining' : 'submitting for');
                 if (label[label.length - 1].match(/[a-zA-Z0-9]/)) label += ':';
-                if (question.required) label += ' *';
                 let value = '';
                 if (user) {
                     if (question.id === 'email') {
@@ -102,7 +101,7 @@ export default async function SubmissionFormView({
                             name="auditionAvailability"
                             id={`auditionAvailability-${slot.id}`}
                             value={slot.id}
-                            label={formatDateTimeForDisplay(slot.dateTime, true)}
+                            label={formatDateTimeForDisplay(slot.dateTime, false, true)}
                             defaultChecked={existingSubmission?.auditionAvailability.includes(slot.id)}
                         />
                     ))}

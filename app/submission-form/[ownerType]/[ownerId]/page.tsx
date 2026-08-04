@@ -51,27 +51,33 @@ export default async function PublicSubmissionFormPage({
                         {formIsClosed ? 'Closed' : 'Closes'} {formatDateTimeForDisplay(form.closesAt, true)}
                     </p>
                 )}
-                {submitted === 'true' && <p className="mt-2 text-green-700 dark:text-green-300">Submission received.</p>}
-                {form.description && (
-                    <div className="mt-3 ml-2 text-slate-800 dark:text-slate-200">
-                        {form.description.split('<br>').map((line, i) => <p key={i}>{line}</p>)}
-                    </div>
-                )}
+                {submitted === 'true' ? <>
+                    <p className="my-5 text-green-700 dark:text-green-300">Submission received!</p>
+
+                </> : <>
+                    {form.description && (
+                        <div className="flex flex-col gap-2 mt-3 ml-2 text-slate-800 dark:text-slate-200">
+                            {form.description.split('<br>').map((line, i) => <p key={i}>{line}</p>)}
+                        </div>
+                    )}
+                </>}
             </div>
-            {formIsClosed ? (
-                <p className="rounded border border-gray-300 p-3 text-slate-700 dark:text-slate-300">
-                    This form is closed and is no longer accepting submissions.
-                </p>
-            ) : (
-                <SubmissionFormView
-                    form={form}
-                    user={user}
-                    ownerName={ownerName}
-                    demographics={demographics}
-                    existingSubmission={existingSubmission}
-                    onSubmit={submitSubmissionForm.bind(null, form.id)}
-                />
-            )}
+            {!submitted && <>
+                {formIsClosed ? (
+                    <p className="rounded border border-gray-300 p-3 text-slate-700 dark:text-slate-300">
+                        This form is closed and is no longer accepting submissions.
+                    </p>
+                ) : (
+                    <SubmissionFormView
+                        form={form}
+                        user={user}
+                        ownerName={ownerName}
+                        demographics={demographics}
+                        existingSubmission={existingSubmission}
+                        onSubmit={submitSubmissionForm.bind(null, form.id)}
+                    />
+                )}
+            </>}
             {ownerType === 'troupe' && (
                 <div className="mt-4">
                     <Link className="link text-sm" href={`/troupes/${ownerId}`}>Back to troupe</Link>
