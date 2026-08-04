@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { getCurrentUser, getCurrentUserId, getFollows } from "@/lib/users";
 import { getTroupe, getTroupeMembers } from "@/lib/troupes";
 import {
+    deleteSubmissionFormData,
     getSubmissionForm,
     getSubmissionFormById,
     saveAuditionSlotAssignments,
@@ -154,11 +155,14 @@ function parseCloseDateTime(formData: FormData): string | null {
     return closeDateTime;
 }
 
-export async function saveTroupeSubmissionForm(ownerId: string, prevState: void | { message?: string }, formData: FormData) {
+export async function saveTroupeSubmissionForm(ownerId: string, replaceClosedForm: boolean, prevState: void | { message?: string }, formData: FormData) {
     const userId = await getCurrentUserId();
     if (!userId) throw new Error('You must be logged in to continue');
     if (!(await canManageSubmissionOwner('troupe', ownerId, userId))) throw new Error('You do not have permission to manage this form');
     const existingForm = await getSubmissionForm('troupe', ownerId);
+    if (replaceClosedForm && existingForm && !isDateTimeInPast(existingForm.closesAt)) {
+        return { message: 'This form is still open. Close it before creating a new form.' };
+    }
 
     const title = (formData.get('title') as string | null)?.trim() || 'Troupe Submission Form';
     const description = cleanLineBreaks((formData.get('description') as string | null) || '');
@@ -176,6 +180,10 @@ export async function saveTroupeSubmissionForm(ownerId: string, prevState: void 
         return { message: 'Add at least one audition date or mark dates TBD' };
     }
 
+    if (replaceClosedForm && existingForm) {
+        await deleteSubmissionFormData(existingForm.id);
+    }
+
     const formId = await saveSubmissionForm({
         ownerType: 'troupe',
         ownerId,
@@ -190,7 +198,7 @@ export async function saveTroupeSubmissionForm(ownerId: string, prevState: void 
         createdBy: userId,
     });
 
-    if (!existingForm) {
+    if (!existingForm || replaceClosedForm) {
         const followers = await getFollows(ownerId, 'troupe');
         const recipients = followers
             .map((follower) => follower.id)

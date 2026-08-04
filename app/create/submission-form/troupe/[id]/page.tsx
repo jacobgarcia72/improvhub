@@ -1,12 +1,20 @@
 import { saveTroupeSubmissionForm } from "@/actions/submission-actions";
 import SubmissionFormBuilder from "@/components/submission-forms/form-builder";
+import { isDateTimeInPast } from "@/lib/dates";
 import { getSubmissionForm } from "@/lib/submission-forms";
 import { getTroupe, getTroupeMembers } from "@/lib/troupes";
 import { getCurrentUserId } from "@/lib/users";
 import { notFound, redirect } from "next/navigation";
 
-export default async function SubmissionFormPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function SubmissionFormPage({
+    params,
+    searchParams,
+}: {
+    params: Promise<{ id: string }>;
+    searchParams: Promise<{ new?: string }>;
+}) {
     const { id } = await params;
+    const { new: newForm } = await searchParams;
     const troupe = await getTroupe(id);
     if (!troupe) notFound();
 
@@ -20,6 +28,7 @@ export default async function SubmissionFormPage({ params }: { params: Promise<{
     if (!canManage) notFound();
 
     const existingForm = await getSubmissionForm('troupe', id);
+    const replaceClosedForm = newForm === 'true' && Boolean(existingForm) && isDateTimeInPast(existingForm?.closesAt);
     const onCancel = async () => {
         'use server'
         redirect(`/troupes/${id}/submissions`);
@@ -30,9 +39,9 @@ export default async function SubmissionFormPage({ params }: { params: Promise<{
             <h1 className="text-xl mb-3">Submission Form</h1>
             <SubmissionFormBuilder
                 ownerName={troupe.name}
-                existingForm={existingForm}
+                existingForm={replaceClosedForm ? null : existingForm}
                 type="troupe"
-                onSubmit={saveTroupeSubmissionForm.bind(null, id)}
+                onSubmit={saveTroupeSubmissionForm.bind(null, id, replaceClosedForm)}
                 onCancel={onCancel}
             />
         </section>

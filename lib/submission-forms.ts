@@ -66,6 +66,35 @@ export async function saveSubmissionForm(form: Omit<SubmissionForm, 'id' | 'upda
     return id;
 }
 
+export async function deleteSubmissionFormData(formId: string): Promise<void> {
+    const { error: newsError } = await supabaseAdmin
+        .from('news')
+        .delete()
+        .eq('news_type', 'new_submission_form')
+        .eq('news_item_id', formId);
+    if (newsError) throw newsError;
+
+    const { error: formNotificationError } = await supabaseAdmin
+        .from('notifications')
+        .delete()
+        .eq('type', 'new_submission_form')
+        .eq('data', formId);
+    if (formNotificationError) throw formNotificationError;
+
+    const { error: submissionNotificationError } = await supabaseAdmin
+        .from('notifications')
+        .delete()
+        .eq('type', 'new_submission')
+        .like('data', `${formId},%`);
+    if (submissionNotificationError) throw submissionNotificationError;
+
+    const { error: formError } = await supabaseAdmin
+        .from('submission_forms')
+        .delete()
+        .eq('id', formId);
+    if (formError) throw formError;
+}
+
 export async function getSubmission(formId: string, userId: string): Promise<SubmissionFormSubmission | null> {
     const { data, error } = await supabaseAdmin
         .from('submission_form_submissions')

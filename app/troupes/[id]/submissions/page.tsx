@@ -1,6 +1,6 @@
 import Button from "@/components/form/button";
 import { getSubmissionForm, getSubmissions } from "@/lib/submission-forms";
-import { formatDateTimeForDisplay } from "@/lib/dates";
+import { formatDateTimeForDisplay, isDateTimeInPast } from "@/lib/dates";
 import { getTroupeMembers } from "@/lib/troupes";
 import { getCurrentUserId, getUserAbbreviated } from "@/lib/users";
 import Link from "next/link";
@@ -14,6 +14,7 @@ export default async function TroupeSubmissionsPage({ params }: { params: Promis
     if (!canManage) notFound();
 
     const form = await getSubmissionForm('troupe', id);
+    const formIsClosed = isDateTimeInPast(form?.closesAt);
     const submissions = form ? await getSubmissions(form.id) : [];
     const submitters = await Promise.all(submissions.map((submission) => (
         submission.userId ? getUserAbbreviated(submission.userId) : Promise.resolve(null)
@@ -30,6 +31,11 @@ export default async function TroupeSubmissionsPage({ params }: { params: Promis
                     <Link href={`/create/submission-form/troupe/${id}`}>
                         <Button className="w-36" caption={form ? "Edit Form" : "Create Form"} />
                     </Link>
+                    {formIsClosed && (
+                        <Link href={`/create/submission-form/troupe/${id}?new=true`}>
+                            <Button className="w-36 red" caption="New Form" />
+                        </Link>
+                    )}
                     {form?.hasAudition && !form.auditionDatesTbd && (
                         <Link href={`/troupes/${id}/submissions/auditions`}>
                             <Button className="w-36" caption="Audition Slots" />
