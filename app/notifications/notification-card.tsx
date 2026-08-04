@@ -10,7 +10,7 @@ import TroupeRequestButtons from "./troupe-request-buttons";
 import { getVerbFromRole, pluralize } from "@/lib/helper-functions";
 import { getEvent, getShow } from "@/lib/shows";
 import { formatDateTimeForDisplay } from "@/lib/dates";
-import { getSubmissionFormById } from "@/lib/submission-forms";
+import { getSubmissionById, getSubmissionFormById } from "@/lib/submission-forms";
 
 function Wrapper({ children, date, image, imageLink, imageAlt, isNew }: { children: React.ReactNode, date: string, image?: string | null, imageLink?: string, imageAlt?: string, isNew: boolean }) {
     return (
@@ -25,9 +25,9 @@ function Wrapper({ children, date, image, imageLink, imageAlt, isNew }: { childr
                         />
                     </Link> : null}
                 </div>
-                <div className="w-full">
+                <div className="w-full leading-snug">
                     {children}
-                    <p className="ml-1 text-xs text-mist-500">{formatDateTimeForDisplay(date)}</p>
+                    <p className="ml-1 mt-1 text-xs text-mist-500">{formatDateTimeForDisplay(date)}</p>
                 </div>
             </div>
         </div>
@@ -282,6 +282,38 @@ export default async function NotificationCard({ notification, userId, isNew }: 
                     &nbsp;is {submissionForm.hasAudition ? 'holding auditions' : 'taking submissions'}&nbsp;for new members!&nbsp;
                     <Link href={`/submission-form/troupe/${submissionTroupe.id}`} className="link">
                         View submission form
+                    </Link>
+                </p>
+            </Wrapper>
+        case 'new_submission':
+            if (!data) return null;
+            const [submittedFormId, submissionId] = data.split(',');
+            const submittedForm = await getSubmissionFormById(submittedFormId);
+            const submission = submissionId ? await getSubmissionById(submissionId) : null;
+            if (!submittedForm || submittedForm.ownerType !== 'troupe' || !submission) return null;
+            const submittedTroupe = await getTroupe(submittedForm.ownerId);
+            if (!submittedTroupe) return null;
+            const submitter = submission.userId ? await getUserAbbreviated(submission.userId) : null;
+            return <Wrapper
+                date={date}
+                isNew={isNew}
+                image={submitter?.image || submittedTroupe.image}
+                imageLink={submitter ? `/profile/${submitter.id}` : `/troupes/${submittedTroupe.id}`}
+                imageAlt={submitter?.name || submittedTroupe.name}
+            >
+                <p>
+                    {submitter ? (
+                        <Link href={`/profile/${submitter.id}`} className="link">
+                            {submitter.name}
+                        </Link>
+                    ) : submission.contactEmail || 'Someone'}
+                    &nbsp;filled out&nbsp;
+                    <Link href={`/troupes/${submittedTroupe.id}`} className="link">
+                        {submittedTroupe.name}
+                    </Link>
+                    &apos;s submission form.&nbsp;
+                    <Link href={`/troupes/${submittedTroupe.id}/submissions/${submission.id}`} className="link">
+                        View submission
                     </Link>
                 </p>
             </Wrapper>

@@ -255,13 +255,23 @@ export async function submitSubmissionForm(formId: string, prevState: void | { m
         if (user) await saveDemographics(user.id, demographicUpdates);
     }
 
-    await saveSubmission({
+    const submissionId = await saveSubmission({
         formId: form.id,
         userId: user?.id || null,
         contactEmail,
         answers,
         auditionAvailability
     });
+
+    if (form.ownerType === 'troupe') {
+        const members = await getTroupeMembers(form.ownerId);
+        const recipients = members
+            .filter((member) => member.confirmed && member.id && member.id !== user?.id)
+            .map((member) => member.id as string);
+        if (recipients.length) {
+            await postNotification(user?.id || form.ownerId, recipients, 'new_submission', `${form.id},${submissionId}`);
+        }
+    }
 
     revalidatePath(`/${form.ownerType}s/${form.ownerId}/submissions`);
     redirect(`/submission-form/${form.ownerType}/${form.ownerId}?submitted=true`);

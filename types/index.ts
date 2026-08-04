@@ -235,6 +235,7 @@ export type NotificationType =
     'class_occurrence_cancelled' |
     'made_admin' |
     'made_instructor' |
+    'new_submission' |
     'new_submission_form' |
     'new_comment';
 
