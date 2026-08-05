@@ -1,13 +1,21 @@
 import Button from "@/components/form/button";
 import { getSubmissionForm, getSubmissions } from "@/lib/submission-forms";
 import { formatDateTimeForDisplay, isDateTimeInPast } from "@/lib/dates";
-import { getTroupeMembers } from "@/lib/troupes";
-import { getCurrentUserId, getUserAbbreviated } from "@/lib/users";
+import { getTroupe, getTroupeMembers } from "@/lib/troupes";
+import { getCurrentUserId, getUser } from "@/lib/users";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import Image from "next/image";
+import { optimizeImage } from "@/lib/optimize-image";
+import Initials from "@/components/initials";
+import AddToTroupe from "./add-to-troupe";
 
 export default async function TroupeSubmissionsPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
+
+    const troupe = await getTroupe(id);
+    if (!troupe) notFound();
+
     const userId = await getCurrentUserId();
     const members = await getTroupeMembers(id);
     const canManage = userId && members.some((member) => member.id === userId && member.confirmed && member.role !== 'coach');
@@ -17,7 +25,7 @@ export default async function TroupeSubmissionsPage({ params }: { params: Promis
     const formIsClosed = isDateTimeInPast(form?.closesAt);
     const submissions = form ? await getSubmissions(form.id) : [];
     const submitters = await Promise.all(submissions.map((submission) => (
-        submission.userId ? getUserAbbreviated(submission.userId) : Promise.resolve(null)
+        submission.userId ? getUser(submission.userId) : Promise.resolve(null)
     )));
 
     return (
@@ -52,17 +60,48 @@ export default async function TroupeSubmissionsPage({ params }: { params: Promis
                     {submissions.map((submission, i) => {
                         const submitter = submitters[i];
                         return (
-                            <div key={submission.id} className="py-3 flex flex-row flex-wrap justify-between gap-2">
-                                <div>
-                                    <Link className="link font-semibold" href={`/troupes/${id}/submissions/${submission.id}`}>
-                                        {submitter?.name || submission.contactEmail || 'Unknown submitter'}
+                            <div key={submission.id} className="py-3 flex flex-row flex-wrap justify-start items-start gap-2">
+                                {submitter?.id ? (
+                                    <Link href={`/profile/${submitter.id}`}>
+                                        <div className="hover:scale-105 transition-all duration-300">
+                                            {submitter?.image ? (
+                                                <Image src={optimizeImage(submitter.image, 100, 100, 100, true)} alt={submitter.name || 'Submitter'} width={50} height={50} className="rounded" />
+                                            ) : (
+                                                <Initials firstName={submitter.firstName} lastName={submitter.lastName} width={50} />
+                                            )}
+                                        </div>
                                     </Link>
+                                ) : null}
+                                <div>
+                                    {submitter?.name || submission.contactEmail || 'Unknown submitter'}
+                                    <p className="text-xs text-slate-600 dark:text-slate-300">
+                                        Submitted {formatDateTimeForDisplay(submission.submittedAt, true)}
+                                    </p>
                                     {submission.contactEmail && !submission.userId && (
                                         <p className="text-sm text-slate-600 dark:text-slate-300">{submission.contactEmail}</p>
                                     )}
-                                    <p className="text-sm text-slate-600 dark:text-slate-300">
-                                        Submitted {formatDateTimeForDisplay(submission.submittedAt, true)}
-                                    </p>
+                                    <div className="flex flex-row flex-wrap gap-4 text-sm">
+                                        <Link className="link font-semibold" href={`/troupes/${id}/submissions/${submission.id}`}>
+                                            View Submission
+                                        </Link>
+                                        {submitter?.id ? (
+                                            <AddToTroupe
+                                                userId={submitter.id}
+                                                userFirstName={submitter.firstName}
+                                                userLastName={submitter.lastName}
+                                                currentUserId={userId}
+                                                pronouns={submitter.pronouns}
+                                                troupeId={id}
+                                                troupeName={troupe.name}
+                                                isInTroupe={members.some(({ id, role }) => id === submitter.id && role === 'player')}
+                                            />
+                                        ) : null}
+                                        {submission.contactEmail ? (
+                                            <a href={`mailto:${submission.contactEmail}`} className="link font-semibold">
+                                                Email:&nbsp;{submission.contactEmail}
+                                            </a>
+                                        ) : null}
+                                    </div>
                                 </div>
                             </div>
                         )

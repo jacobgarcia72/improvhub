@@ -5,7 +5,7 @@ import { Troupe, Role, TroupeMember, User } from "@/types";
 import { supabaseAdmin } from './supabase-server';
 import { getCitiesWithinRange } from "./location";
 import { camelCaseObject, getRandomElements, removeLeadingArticles, snakeCaseObject } from "./helper-functions";
-import { getCurrentUser, getCurrentUserId } from "./users";
+import { getCurrentUser, getCurrentUserId, getUserName } from "./users";
 import { destroyImage } from "./cloudinary";
 import { revalidatePath } from "next/cache";
 import { createNewsFeedItem } from "./news";
@@ -397,6 +397,26 @@ export async function updateTroupe(troupeId: string, updates: Partial<Troupe>, m
     }
 
     return true;
+}
+
+export async function addTroupeMember(troupeId: string, newMemberId: string, newMemberName?: string, newMemberRole?: Role, addedBy?: string, notify = true): Promise<void> {
+    const addedById = addedBy || await getCurrentUserId();
+    if (!addedById) throw new Error('You must be logged in to add a member');
+    const name = newMemberName || await getUserName(newMemberId);
+    if (!name) throw new Error('Could not find name for new member');
+    const role = newMemberRole || 'player';
+    await supabaseAdmin
+        .from('troupe_members')
+        .insert({
+            troupe: troupeId,
+            name,
+            id: newMemberId,
+            role,
+            date_added: new Date().toISOString(),
+            added_by: addedById,
+            confirmed: false
+        });
+    if (notify) postNotification(addedById, [newMemberId], 'added_to_troupe', `${troupeId},${role}`);
 }
 
 export async function updateTroupeDetails(troupeId: string, updates: Partial<Troupe>): Promise<boolean> {

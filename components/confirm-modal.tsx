@@ -18,12 +18,12 @@ export default function ConfirmModal({ open, title, description, onConfirm, onCa
     if (!open) return null;
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
-            <div className="absolute inset-0 bg-black opacity-80" onClick={() => {
+            <div className="absolute inset-0 bg-black opacity-90" onClick={() => {
                 if (!disabled) onCancel();
             }}></div>
-            <Border className="relative rounded shadow-lg w-11/12 max-w-md p-6">
-                {title ? <h3 className="mb-2">{title}</h3> : null}
-                {description ? <p className="text-sm text-gray-700 dark:text-gray-400 mb-4">{description}</p> : null}
+            <Border className="bg-white/80! dark:bg-black/80! relative rounded shadow-lg w-11/12 max-w-md p-6">
+                {title ? <h3 className="mb-4 text-[1.1em] font-medium">{title}</h3> : null}
+                {description ? <p className="text-sm text-gray-900 dark:text-gray-200 mb-5">{description}</p> : null}
                 <div className="flex justify-end">
                     <Button disabled={disabled} style="link" onClick={onCancel} caption={cancelLabel} />
                     <Button
