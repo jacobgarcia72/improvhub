@@ -77,22 +77,21 @@ export default async function TroupeSubmissionsPage({ params }: { params: Promis
                                     <p className="text-xs text-slate-600 dark:text-slate-300">
                                         Submitted {formatDateTimeForDisplay(submission.submittedAt, true)}
                                     </p>
-                                    <div className="flex flex-row flex-wrap gap-4 text-sm">
+                                    <div className="flex flex-row flex-wrap gap-x-5 text-sm">
                                         <Link className="link font-semibold" href={`/troupes/${id}/submissions/${submission.id}`}>
                                             View Submission
                                         </Link>
-                                        {submitter?.id ? (
-                                            <AddToTroupe
-                                                userId={submitter.id}
-                                                userFirstName={submitter.firstName}
-                                                userLastName={submitter.lastName}
-                                                currentUserId={userId}
-                                                pronouns={submitter.pronouns}
-                                                troupeId={id}
-                                                troupeName={troupe.name}
-                                                isInTroupe={members.some(({ id, role }) => id === submitter.id && role === 'player')}
-                                            />
-                                        ) : null}
+                                        <AddToTroupe
+                                            userId={submitter?.id}
+                                            userFirstName={submitter?.firstName}
+                                            userLastName={submitter?.lastName}
+                                            userFullName={submitter?.name || (typeof submission.answers.name === 'string' ? submission.answers.name : undefined)}
+                                            currentUserId={userId}
+                                            pronouns={submitter?.pronouns}
+                                            troupeId={id}
+                                            troupeName={troupe.name}
+                                            isInTroupe={members.some(({ id, role, name }) => (submitter?.id ? id === submitter.id : submitter?.name === name) && role === 'player')}
+                                        />
                                         {submission.contactEmail ? (
                                             <a href={`mailto:${submission.contactEmail}`} className="link font-semibold">
                                                 Email:&nbsp;{submission.contactEmail}

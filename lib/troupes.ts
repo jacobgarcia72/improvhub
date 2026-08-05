@@ -399,10 +399,10 @@ export async function updateTroupe(troupeId: string, updates: Partial<Troupe>, m
     return true;
 }
 
-export async function addTroupeMember(troupeId: string, newMemberId: string, newMemberName?: string, newMemberRole?: Role, addedBy?: string, notify = true): Promise<void> {
+export async function addTroupeMember(troupeId: string, newMemberId: string | null, newMemberName?: string, newMemberRole?: Role, addedBy?: string, notify = true): Promise<void> {
     const addedById = addedBy || await getCurrentUserId();
     if (!addedById) throw new Error('You must be logged in to add a member');
-    const name = newMemberName || await getUserName(newMemberId);
+    const name = newMemberName || (newMemberId ? await getUserName(newMemberId) : '');
     if (!name) throw new Error('Could not find name for new member');
     const role = newMemberRole || 'player';
     await supabaseAdmin
@@ -416,7 +416,8 @@ export async function addTroupeMember(troupeId: string, newMemberId: string, new
             added_by: addedById,
             confirmed: false
         });
-    if (notify) postNotification(addedById, [newMemberId], 'added_to_troupe', `${troupeId},${role}`);
+    if (notify && newMemberId) postNotification(addedById, [newMemberId], 'added_to_troupe', `${troupeId},${role}`);
+    revalidatePath(`/troupes/${troupeId}`, 'layout');
 }
 
 export async function updateTroupeDetails(troupeId: string, updates: Partial<Troupe>): Promise<boolean> {
