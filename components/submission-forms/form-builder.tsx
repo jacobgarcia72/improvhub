@@ -309,14 +309,15 @@ export default function SubmissionFormBuilder({
                         .replace('{type}', type)
                         .replace('{verb}', type === 'troupe' ? 'joining' : 'submitting for');
                     return (
-                        <div key={question.id} className="flex flex-row flex-wrap gap-x-4 gap-y-1 items-center">
+                        <div key={question.id} className="flex flex-row flex-wrap gap-x-4 items-center">
                             <Checkbox
                                 name={`question-${question.id}`}
                                 label={questionText}
-                                defaultChecked={Boolean(selected)}
+                                defaultChecked={question.defaultSelected || Boolean(selected)}
+                                readOnly={question.id === 'name'}
                                 onChange={(checked) => toggleBuiltInQuestion(question.id, checked)}
                             />
-                            {question.requiredOption ? <Checkbox name={`required-${question.id}`} label="Required" defaultChecked={Boolean(selected?.required)} /> : null}
+                            {question.requiredOption ? <Checkbox readOnly={question.id === 'name'} name={`required-${question.id}`} label="Required" defaultChecked={question.requiredByDefault || Boolean(selected?.required)} /> : null}
                         </div>
                     )
                 })}

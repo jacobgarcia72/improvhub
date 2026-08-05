@@ -13,6 +13,7 @@ function getDefaultAnswer(questionId: string, user: User, demographics: Demograp
     if (Array.isArray(existing)) return existing.join(', ');
     if (existing) return existing;
     if (questionId === 'pronouns') return user.pronouns || '';
+    if (questionId === 'name') return user.name || (user.firstName && user.lastName && `${user.firstName} ${user.lastName}`) || '';
     if (questionId === 'gender_identity') return demographics?.genderIdentity || '';
     if (questionId === 'orientation') return demographics?.orientation || '';
     if (questionId === 'ethnicity') return demographics?.ethnicity || '';
@@ -100,7 +101,7 @@ export default async function SubmissionFormView({
                         </div>
                     )
                 }
-                return <Input key={question.id} name={name} label={label} value={value} required={question.required} maxLength={180} />
+                return <Input readOnly={question.builtIn === 'name' && Boolean(user && value)} key={question.id} name={name} label={label} value={value} required={question.required} maxLength={180} />
             })}
             {form.hasAudition && (
                 <div className="flex flex-col gap-2 rounded border border-gray-300 p-3">

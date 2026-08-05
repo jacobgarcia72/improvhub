@@ -73,7 +73,7 @@ export default async function TroupeSubmissionsPage({ params }: { params: Promis
                                     </Link>
                                 ) : null}
                                 <div>
-                                    {submitter?.name || submission.contactEmail || 'Unknown submitter'}
+                                    {submitter?.name || submission.answers.name || submission.contactEmail || 'Unknown submitter'}
                                     <p className="text-xs text-slate-600 dark:text-slate-300">
                                         Submitted {formatDateTimeForDisplay(submission.submittedAt, true)}
                                     </p>

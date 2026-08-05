@@ -27,7 +27,7 @@ export default async function SubmissionDetailsPage({ params }: { params: Promis
     const submitter = submission.userId ? await getUserAbbreviated(submission.userId) : null;
     const troupe = await getTroupe(id);
 
-    const submitterNameElement = <h1 className="text-xl mt-2">{submitter?.name || submission.contactEmail || 'Unknown submitter'}</h1>
+    const submitterNameElement = <h1 className="text-xl mt-2">{submitter?.name || submission.answers.name || submission.contactEmail || 'Unknown submitter'}</h1>
     return (
         <section className="px-10! sm:px-16!">
             <Link className="link text-sm" href={`/troupes/${id}/submissions`}>Back to submissions</Link>
@@ -43,12 +43,19 @@ export default async function SubmissionDetailsPage({ params }: { params: Promis
                         />
                     </Link>
                 ) : null}
-                <div>
+                <div className="flex flex-col">
                     {submission.userId ? (
                         <Link className="link" href={`/profile/${submission.userId}`}>
                             {submitterNameElement}
                         </Link>
-                    ) : submitterNameElement}
+                    ) : (
+                        <>
+                            {submitterNameElement}
+                            {submission.contactEmail ? (
+                                <a href={`mailto:${submission.contactEmail}`} className="link text-sm mt-[-2px] mb-1">{submission.contactEmail}</a>
+                            ) : null}
+                        </>
+                    )}
                     <p className="text-sm text-slate-600 dark:text-slate-300 mb-4">
                         Submitted {formatDateTimeForDisplay(submission.submittedAt, true)}
                     </p>
@@ -56,6 +63,7 @@ export default async function SubmissionDetailsPage({ params }: { params: Promis
             </div>
             <div className="flex flex-col gap-4 mb-4">
                 {form.questions.map((question) => {
+                    if (question.builtIn === 'name') return null;
                     const questionText = question.label
                         .replace('{name}', troupe?.name || 'this troupe')
                         .replace('{type}', 'troupe')

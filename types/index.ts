@@ -250,9 +250,10 @@ export type Notification = {
 export type SubmissionOwnerType = 'troupe' | 'show';
 export type SubmissionQuestionType = 'short_text' | 'long_text' | 'single_select' | 'multi_select' | 'autocomplete';
 export type BuiltInSubmissionQuestion =
-    'why' |
-    'phone' |
+    'name' |
     'email' |
+    'phone' |
+    'why' |
     'headshot' |
     'pronouns' |
     'gender_identity' |
@@ -267,7 +268,9 @@ export interface SubmissionFormQuestion {
     label: string;
     type: SubmissionQuestionType;
     required?: boolean;
+    requiredByDefault?: boolean;
     requiredOption?: boolean;
+    defaultSelected?: boolean;
     builtIn?: BuiltInSubmissionQuestion;
     options?: string[];
 }

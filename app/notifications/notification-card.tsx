@@ -306,7 +306,7 @@ export default async function NotificationCard({ notification, userId, isNew }: 
                         <Link href={`/profile/${submitter.id}`} className="link">
                             {submitter.name}
                         </Link>
-                    ) : submission.contactEmail || 'Someone'}
+                    ) : submission.answers.name || submission.contactEmail || 'Someone'}
                     &nbsp;filled out&nbsp;
                     <Link href={`/troupes/${submittedTroupe.id}`} className="link">
                         {submittedTroupe.name}

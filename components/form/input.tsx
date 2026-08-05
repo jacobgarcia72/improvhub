@@ -15,6 +15,7 @@ interface InputProps {
     onBlur?: (value: string) => void,
     maxLength?: number,
     disabled?: boolean;
+    readOnly?: boolean;
     min?: number;
     max?: number;
     autocomplete?: boolean;
@@ -38,6 +39,7 @@ export default function Input({
     max,
     autocomplete = true,
     image,
+    readOnly
 }: InputProps) {
     let inputLabel = label;
     if (label && required) inputLabel += ' *';
@@ -70,6 +72,7 @@ export default function Input({
                 min={min}
                 max={max}
                 autoComplete={autocomplete ? 'on' : 'new-text'}
+                readOnly={readOnly}
             />
         </div>
     )
