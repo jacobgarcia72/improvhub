@@ -27,6 +27,7 @@ export default async function TroupeSubmissionsPage({ params }: { params: Promis
     const submitters = await Promise.all(submissions.map((submission) => (
         submission.userId ? getUser(submission.userId) : Promise.resolve(null)
     )));
+    console.log({members, submitters})
 
     return (
         <section className="px-10! sm:px-16!">
@@ -59,6 +60,13 @@ export default async function TroupeSubmissionsPage({ params }: { params: Promis
                 <div className="flex flex-col divide-y divide-gray-200 mb-6">
                     {submissions.map((submission, i) => {
                         const submitter = submitters[i];
+                        let hasBeenAdded = false;
+                        if (submitter?.id) {
+                            hasBeenAdded = members.some(({ id, role }) => (id === submitter.id) && (role === 'player'));
+                        } else {
+                            const submittedName = submission.answers.name;
+                            hasBeenAdded = members.some(({ name, role }) => (name === submittedName) && (role === 'player'));
+                        }
                         return (
                             <div key={submission.id} className="py-3 flex flex-row flex-wrap justify-start items-start gap-2">
                                 {submitter?.id ? (
@@ -90,7 +98,7 @@ export default async function TroupeSubmissionsPage({ params }: { params: Promis
                                             pronouns={submitter?.pronouns}
                                             troupeId={id}
                                             troupeName={troupe.name}
-                                            isInTroupe={members.some(({ id, role, name }) => (submitter?.id ? id === submitter.id : submitter?.name === name) && role === 'player')}
+                                            isInTroupe={hasBeenAdded}
                                         />
                                         {submission.contactEmail ? (
                                             <a href={`mailto:${submission.contactEmail}`} className="link font-semibold">
