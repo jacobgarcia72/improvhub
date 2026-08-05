@@ -15,7 +15,9 @@ export default function AddToTroupe({ userId, userFullName, userFirstName, userL
         <ConfirmModal
             open={openModal}
             title={`Add ${userFirstName || userFullName} to ${troupeName}?`}
-            description={userId ? `${userFirstName || userFullName} will receive a notification asking ${pronouns ? getPronounForm(pronouns, 1) : 'them'} to confirm ${pronouns ? getPronounForm(pronouns, 2) : 'their'} membership in ${troupeName}.` : ''}
+            description={userId ? (
+                `${userFirstName || userFullName} will receive a notification asking ${pronouns ? getPronounForm(pronouns, 1) : 'them'} to confirm ${pronouns ? getPronounForm(pronouns, 2) : 'their'} membership in ${troupeName}.`
+            ) : `${userFullName}'s name will be added to ${troupeName}'s page`}
             onCancel={() => setOpenModal(false)}
             onConfirm={async () => {
                 setPending(true);
