@@ -120,7 +120,7 @@ export default async function FeedPage() {
                             const troupeMember = await getUserAbbreviated(followId);
                             const troupeJoined = await getTroupe(newsItemId);
                             if (!troupeMember || !troupeJoined) return null;
-                            content = <p><Link className="link" href={`/profile/${troupeMember.id}`}>{troupeMember.name}</Link>{otherData === 'coach' ? ' is coaching ' : ' has joined the troupe, '}<Link className="link" href={`/troupes/${troupeJoined.id}`}>{troupeJoined.name}</Link>{otherData === 'musician' ? ' as a musical accompanist' : ''}.</p>
+                            content = <p><Link className="link" href={`/profile/${troupeMember.id}`}>{troupeMember.name}</Link>{otherData === 'coach' ? ' is coaching ' : ' has joined '}<Link className="link" href={`/troupes/${troupeJoined.id}`}>{troupeJoined.name}</Link>{otherData === 'musician' ? ' as a musical accompanist' : ''}.</p>
                             image = troupeMember.image || troupeJoined.image;
                             break;
                         case 'new_submission_form':
