@@ -45,7 +45,6 @@ function getInitialQuestionOrder(existingForm?: SubmissionForm | null): Question
     if (!existingForm?.questions.length) {
         return sortAnythingElseLast([
             ...builtInSubmissionQuestions.map((question) => ({ kind: 'builtIn' as const, id: question.id })),
-            { kind: 'custom', index: 0 },
         ]);
     }
 
@@ -60,6 +59,12 @@ function getInitialQuestionOrder(existingForm?: SubmissionForm | null): Question
         .map((question) => ({ kind: 'builtIn' as const, id: question.id }));
 
     return [...orderedQuestions, ...sortAnythingElseLast(unselectedBuiltIns)];
+}
+
+function getInitialSelectedBuiltInIds(existingForm?: SubmissionForm | null): string[] {
+    return builtInSubmissionQuestions
+        .filter((question) => question.defaultSelected || existingForm?.questions.some((existingQuestion) => existingQuestion.id === question.id && existingQuestion.builtIn))
+        .map((question) => question.id);
 }
 
 export default function SubmissionFormBuilder({
@@ -80,7 +85,7 @@ export default function SubmissionFormBuilder({
     const [hasAudition, setHasAudition] = useState(Boolean(existingForm?.hasAudition));
     const [datesTbd, setDatesTbd] = useState(Boolean(existingForm?.auditionDatesTbd));
     const [hasCloseDate, setHasCloseDate] = useState(Boolean(existingForm?.closesAt));
-    const [selectedBuiltInIds, setSelectedBuiltInIds] = useState(builtIns.map((question) => question.id));
+    const [selectedBuiltInIds, setSelectedBuiltInIds] = useState(getInitialSelectedBuiltInIds(existingForm));
     const [draggedQuestion, setDraggedQuestion] = useState<string | null>(null);
     const [dropIndex, setDropIndex] = useState<number | null>(null);
     const orderRowRefs = useRef(new Map<string, HTMLDivElement>());
@@ -150,7 +155,9 @@ export default function SubmissionFormBuilder({
         const insertionIndex = anythingElseIndex >= 0 ? anythingElseIndex : nextQuestionOrder.length;
 
         setCustomQuestions([...customQuestions, { label: '', type: 'short_text', required: false, options: '' }]);
-        nextQuestionOrder.splice(insertionIndex, 0, { kind: 'custom', index: nextIndex });
+        if (!nextQuestionOrder.some((orderItem) => orderItem.kind === 'custom' && orderItem.index === nextIndex)) {
+            nextQuestionOrder.splice(insertionIndex, 0, { kind: 'custom', index: nextIndex });
+        }
         setQuestionOrderWithAnimation(nextQuestionOrder);
     };
     const addAuditionSlot = () => {
@@ -230,9 +237,10 @@ export default function SubmissionFormBuilder({
         setDraggedQuestion(null);
         setDropIndex(null);
     };
+    const customQuestionHasLabel = (question?: CustomQuestion) => Boolean(question?.label.trim());
     const getActiveOrderedQuestions = () => questionOrder.filter((orderItem) => {
         if (orderItem.kind === 'builtIn') return selectedBuiltInIds.includes(orderItem.id);
-        return Boolean(customQuestions[orderItem.index]);
+        return customQuestionHasLabel(customQuestions[orderItem.index]);
     });
     const activeOrderedQuestions = getActiveOrderedQuestions();
     const getQuestionOrderValue = (orderItem: QuestionOrderItem) => (
