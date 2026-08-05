@@ -9,6 +9,7 @@ import Image from "next/image";
 import { optimizeImage } from "@/lib/optimize-image";
 import Initials from "@/components/initials";
 import AddToTroupe from "./add-to-troupe";
+import CopyFormLink from "./copy-form-link";
 
 export default async function TroupeSubmissionsPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
@@ -27,14 +28,18 @@ export default async function TroupeSubmissionsPage({ params }: { params: Promis
     const submitters = await Promise.all(submissions.map((submission) => (
         submission.userId ? getUser(submission.userId) : Promise.resolve(null)
     )));
-    console.log({members, submitters})
 
     return (
         <section className="px-10! sm:px-16!">
             <div className="flex flex-row flex-wrap justify-between gap-2 mb-4">
                 <div>
                     <h1 className="text-lg">Submissions</h1>
-                    {form && <Link className="link text-sm" href={`/submission-form/troupe/${id}`}>View Submission Form</Link>}
+                    {form && (
+                        <div className="flex flex-col items-start gap-1">
+                            <Link className="link text-sm" href={`/submission-form/troupe/${id}`}>View Submission Form</Link>
+                            <CopyFormLink href={`/submission-form/troupe/${id}`} />
+                        </div>
+                    )}
                 </div>
                 <div className="flex flex-row flex-wrap gap-2">
                     <Link href={`/create/submission-form/troupe/${id}`}>
