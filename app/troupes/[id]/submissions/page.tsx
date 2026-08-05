@@ -77,9 +77,6 @@ export default async function TroupeSubmissionsPage({ params }: { params: Promis
                                     <p className="text-xs text-slate-600 dark:text-slate-300">
                                         Submitted {formatDateTimeForDisplay(submission.submittedAt, true)}
                                     </p>
-                                    {submission.contactEmail && !submission.userId && (
-                                        <p className="text-sm text-slate-600 dark:text-slate-300">{submission.contactEmail}</p>
-                                    )}
                                     <div className="flex flex-row flex-wrap gap-4 text-sm">
                                         <Link className="link font-semibold" href={`/troupes/${id}/submissions/${submission.id}`}>
                                             View Submission

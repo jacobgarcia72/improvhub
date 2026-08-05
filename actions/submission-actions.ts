@@ -222,9 +222,7 @@ export async function submitSubmissionForm(formId: string, prevState: void | { m
     if (isDateTimeInPast(form.closesAt)) return { message: 'This form is closed and is no longer accepting submissions' };
     if (form.requiresSignIn && !user) throw new Error('You must be logged in to continue');
 
-    const contactEmail = user
-        ? null
-        : ((formData.get('contactEmail') as string | null)?.trim().toLowerCase() || null);
+    const contactEmail = (formData.get('answer-email') as string | null)?.trim().toLowerCase() || null;
     if (!user && !contactEmail) return { message: 'Email address is required' };
     if (contactEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail)) {
         return { message: 'Enter a valid email address' };
@@ -255,9 +253,6 @@ export async function submitSubmissionForm(formId: string, prevState: void | { m
     const auditionAvailability = form.hasAudition && !form.auditionDatesTbd
         ? formData.getAll('auditionAvailability').map((value) => String(value))
         : [];
-    if (form.hasAudition && !form.auditionDatesTbd && !auditionAvailability.length) {
-        return { message: 'Choose at least one audition date you can attend' };
-    }
 
     if (Object.keys(demographicUpdates).length) {
         if (user) await saveDemographics(user.id, demographicUpdates);

@@ -35,9 +35,21 @@ export default async function SubmissionFormView({
     onSubmit: (prevState: void | { message?: string }, formData: FormData) => Promise<{ message?: string } | void>;
 }) {
     const email = user ? await getEmail() : '';
+    const formQuestions = [...form.questions];
+    if (!user) {
+        // non-signed-in users MUST provide an email address
+        const emailQuestion = formQuestions.find(q => q.id === 'email');
+        if (emailQuestion) {
+            emailQuestion.required = true;
+        } else {
+            formQuestions.unshift(
+                { id: 'email', label: 'Email address', type: 'short_text', builtIn: 'email', required: true }
+            )
+        }
+    }
     return (
         <Form onSubmit={onSubmit} buttonCaption={existingSubmission ? "Update Submission" : "Submit"} className="w-full max-w-xl">
-            {form.questions.map((question) => {
+            {formQuestions.map((question) => {
                 const name = `answer-${question.id}`;
                 let label = question.label
                     .replace('{name}', ownerName || `this ${form.ownerType}`)
