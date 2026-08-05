@@ -7,9 +7,10 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import { optimizeImage } from "@/lib/optimize-image";
 
-function Answer({ value }: { value: string | string[] | undefined }) {
+function Answer({ value, isEmail }: { value: string | string[] | undefined, isEmail?: boolean }) {
     if (Array.isArray(value)) return <p className={value.length ? '' : 'text-slate-500'}>{value.length ? value.join(', ') : 'No answer'}</p>;
     if (!value) return <p className="text-slate-500">No answer</p>;
+    if (isEmail) return <p><a className="link" href={`mailto:${value}`}>{value || ' '}</a></p>
     return <>{value.split('<br>').map((line, i) => <p key={i}>{line || ' '}</p>)}</>
 }
 
@@ -71,7 +72,7 @@ export default async function SubmissionDetailsPage({ params }: { params: Promis
                     return (
                         <div key={question.id}>
                             <h2 className="font-semibold text-slate-700 dark:text-slate-300">{questionText}</h2>
-                            <Answer value={submission.answers[question.id]} />
+                            <Answer isEmail={question.id === 'email'} value={submission.answers[question.id]} />
                         </div>
                 )})}
                 {form.hasAudition && !form.auditionDatesTbd && (
