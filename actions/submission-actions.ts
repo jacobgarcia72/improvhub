@@ -111,10 +111,8 @@ function parseQuestions(formData: FormData): SubmissionFormQuestion[] {
     builtInSubmissionQuestions.forEach((question) => {
         if (parsedBuiltIns.has(question.id)) return;
         const parsedQuestion = parseBuiltInQuestion(formData, question.id);
-        console.log({ parsedQuestion, id: question.id })
         if (parsedQuestion) questions.push(parsedQuestion);
     });
-    console.log(Object.fromEntries(formData.entries()))
     for (let i = 0; i < 8; i++) {
         if (parsedCustomQuestions.has(i)) continue;
         const question = parseCustomQuestion(formData, i);

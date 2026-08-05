@@ -1,6 +1,7 @@
 import { revalidatePath } from "next/cache";
 import { Notification, NotificationType } from "@/types";
 import { supabaseAdmin } from "./supabase-server";
+import { isDev } from "./app-info";
 
 export const getNotifications = async (uid: string): Promise<{ lastChecked: string | null, notifitactions: Notification[]}> => {
     const { data: checkedData } = await supabaseAdmin
@@ -50,7 +51,7 @@ export const getNumberOfNotifications = async (uid: string): Promise<number> => 
 }
 
 export const postNotification = async (sender: string, recipients: string[], type: NotificationType, data?: string | null): Promise<string | null> => {
-    console.log({recipients})
+    if (isDev) console.log({recipients})
     const { data: users, error: usersError } = await supabaseAdmin
         .from('users')
         .select('uid')
@@ -60,7 +61,7 @@ export const postNotification = async (sender: string, recipients: string[], typ
         .map((user: { uid: string | null }) => user.uid)
         .filter((uid: string | null): uid is string => Boolean(uid));
     if (!uids.length) return null;
-    console.log(`NOTIFYING ${type}:`, uids);
+    if (isDev) console.log(`NOTIFYING ${type}:`, uids);
 
     const { data: res, error: notificationError } = await supabaseAdmin
         .from('notifications')
