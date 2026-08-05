@@ -28,7 +28,7 @@ export const getPronounForm = (pronouns: string = 'they', pronounFormIndex: numb
         fae: ['fae', 'faer', 'faer', 'faers']
     }
     let key = 'they';
-    const givenPronoun = pronouns.split(/\W+/)[0].toLowerCase();
+    const givenPronoun = pronouns ? pronouns.split(/\W+/)[0].toLowerCase() : 'they';
     if (Object.keys(pronounForms).includes(givenPronoun)) {
         key = givenPronoun;
     }
