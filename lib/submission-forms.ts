@@ -7,6 +7,7 @@ import {
     SubmissionFormQuestion,
     SubmissionFormSubmission,
     SubmissionOwnerType,
+    Troupe,
 } from "@/types";
 import { supabaseAdmin } from "./supabase-server";
 import { camelCaseObject, getRandomNumberString, snakeCaseObject } from "./helper-functions";
@@ -50,6 +51,87 @@ export async function getSubmissionFormById(id: string): Promise<SubmissionForm 
         .maybeSingle();
     if (error) throw error;
     return data ? parseSubmissionForm(data) : null;
+}
+
+export type UserAudition = {
+    form: SubmissionForm;
+    troupe: Pick<Troupe, 'id' | 'name' | 'image' | 'city' | 'state'> | null;
+    submission: SubmissionFormSubmission | null;
+    relationships: ('auditioner' | 'troupe_member')[];
+}
+
+export async function getUserAuditions(userId: string): Promise<UserAudition[]> {
+    const { data: userSubmissionRows, error: userSubmissionsError } = await supabaseAdmin
+        .from('submission_form_submissions')
+        .select('*')
+        .eq('user_id', userId);
+    if (userSubmissionsError) throw userSubmissionsError;
+
+    const userSubmissions = ((userSubmissionRows || []) as Record<string, unknown>[]).map(parseSubmission);
+    const submittedFormIds = [...new Set(userSubmissions.map((submission) => submission.formId))];
+    const userSubmissionsByFormId = new Map(userSubmissions.map((submission) => [submission.formId, submission]));
+
+    const { data: membershipRows, error: membershipsError } = await supabaseAdmin
+        .from('troupe_members')
+        .select('troupe')
+        .eq('id', userId)
+        .eq('confirmed', true);
+    if (membershipsError) throw membershipsError;
+
+    const memberTroupeIds = [...new Set(((membershipRows || []) as { troupe: string }[]).map((membership) => membership.troupe))];
+    const auditionFormsById = new Map<string, SubmissionForm>();
+
+    if (submittedFormIds.length) {
+        const { data, error } = await supabaseAdmin
+            .from('submission_forms')
+            .select('*')
+            .in('id', submittedFormIds)
+            .eq('has_audition', true);
+        if (error) throw error;
+        ((data || []) as Record<string, unknown>[]).map(parseSubmissionForm).forEach((form) => auditionFormsById.set(form.id, form));
+    }
+
+    if (memberTroupeIds.length) {
+        const { data, error } = await supabaseAdmin
+            .from('submission_forms')
+            .select('*')
+            .eq('owner_type', 'troupe')
+            .in('owner_id', memberTroupeIds)
+            .eq('has_audition', true);
+        if (error) throw error;
+        ((data || []) as Record<string, unknown>[]).map(parseSubmissionForm).forEach((form) => auditionFormsById.set(form.id, form));
+    }
+
+    const forms = [...auditionFormsById.values()];
+    const troupeIds = [...new Set(forms
+        .filter((form) => form.ownerType === 'troupe')
+        .map((form) => form.ownerId))];
+    const troupesById = new Map<string, Pick<Troupe, 'id' | 'name' | 'image' | 'city' | 'state'>>();
+
+    if (troupeIds.length) {
+        const { data, error } = await supabaseAdmin
+            .from('troupes')
+            .select('id, name, image, city, state')
+            .in('id', troupeIds);
+        if (error) throw error;
+        ((data || []) as Record<string, unknown>[]).forEach((troupe) => {
+            troupesById.set(String(troupe.id), camelCaseObject(troupe) as Pick<Troupe, 'id' | 'name' | 'image' | 'city' | 'state'>);
+        });
+    }
+
+    return forms.map((form) => {
+        const relationships: UserAudition['relationships'] = [];
+        const submission = userSubmissionsByFormId.get(form.id) || null;
+        if (submission) relationships.push('auditioner');
+        if (form.ownerType === 'troupe' && memberTroupeIds.includes(form.ownerId)) relationships.push('troupe_member');
+
+        return {
+            form,
+            troupe: form.ownerType === 'troupe' ? troupesById.get(form.ownerId) || null : null,
+            submission,
+            relationships
+        };
+    });
 }
 
 export async function saveSubmissionForm(form: Omit<SubmissionForm, 'id' | 'updatedAt'> & { id?: string }): Promise<string> {
