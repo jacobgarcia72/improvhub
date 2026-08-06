@@ -96,13 +96,13 @@ export default async function TroupeLayout({ params, children }: Props) {
                     {!isMember && (
                         <div className="flex flex-row flex-wrap gap-2 pt-2 px-7">
                             {currentUser?.openToJoinTroupe && troupe.lookingForPlayers ? (
-                                <div className="bg-slate-100 rounded border border-gray-700 py-0.5 px-2">Looking for Players!</div>
+                                <div className="bg-slate-100 dark:bg-slate-800 rounded border border-gray-700 py-0.5 px-2">Looking for Players!</div>
                             ) : null}
                             {currentUser?.openToAccompanyTroupe && troupe.lookingForMusician ? (
-                                <div className="bg-slate-100 rounded border border-gray-700 py-0.5 px-2">Looking for Musician!</div>
+                                <div className="bg-slate-100 dark:bg-slate-800 rounded border border-gray-700 py-0.5 px-2">Looking for Musician!</div>
                             ) : null}
                             {currentUser?.openToCoachTroupe && troupe.lookingForCoach ? (
-                                <div className="bg-slate-100 rounded border border-gray-700 py-0.5 px-2">Looking for Coach!</div>
+                                <div className="bg-slate-100 dark:bg-slate-800 rounded border border-gray-700 py-0.5 px-2">Looking for Coach!</div>
                             ) : null}
                         </div>
                     )}
