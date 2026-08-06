@@ -237,6 +237,7 @@ export type NotificationType =
     'made_instructor' |
     'new_submission' |
     'new_submission_form' |
+    'audition_slot_assigned' |
     'new_comment';
 
 export type Notification = {

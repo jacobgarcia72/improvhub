@@ -10,6 +10,7 @@ import {
 } from "@/types";
 import { supabaseAdmin } from "./supabase-server";
 import { camelCaseObject, getRandomNumberString, snakeCaseObject } from "./helper-functions";
+import { postNotification } from "./notifications";
 
 function parseSubmissionForm(row: Record<string, unknown>): SubmissionForm {
     const parsed = camelCaseObject(row) as SubmissionForm;
@@ -164,6 +165,8 @@ export async function saveAuditionSlotAssignments(
     formId: string,
     assignments: { submissionId: string, slotId: string | null }[]
 ): Promise<void> {
+    const form = await getSubmissionFormById(formId);
+    if (!form) throw new Error('This audition form is no longer available');
     const submissions = await getSubmissions(formId);
     const submissionsById = new Map(submissions.map((submission) => [submission.id, submission]));
     const validAssignments = assignments.filter((assignment) => submissionsById.has(assignment.submissionId));
@@ -184,6 +187,25 @@ export async function saveAuditionSlotAssignments(
                 .eq('form_id', formId);
             if (error) throw error;
         }));
+
+    const assignmentsToNotify = validAssignments.filter((assignment) => {
+        const submission = submissionsById.get(assignment.submissionId);
+        return Boolean(
+            assignment.slotId
+            && submission?.userId
+            && submission.assignedAuditionSlotId !== assignment.slotId
+        );
+    });
+
+    await Promise.all(assignmentsToNotify.map((assignment) => {
+        const submission = submissionsById.get(assignment.submissionId);
+        return postNotification(
+            form.ownerId,
+            [submission?.userId as string],
+            'audition_slot_assigned',
+            `${formId},${assignment.submissionId},${assignment.slotId}`
+        );
+    }));
 }
 
 export async function getDemographics(userId: string): Promise<Demographics | null> {

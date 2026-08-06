@@ -82,14 +82,14 @@ export const formatDateForDisplay = (date: Date | string): string => {
     return `${weekday}, ${month} ${(day)}${year !== new Date().getFullYear() ? `, ${year}` : ''}`;
 }
 
-export const formatDateTimeForDisplay = (date: Date | string, includeYear?: boolean, includeWeekday?: boolean): string => {
+export const formatDateTimeForDisplay = (date: Date | string, includeYear?: boolean, includeWeekday?: boolean, spellOutAt?: boolean): string => {
     const dateObject = typeof date === 'string' ? new Date(date) : date;
     const month = dateObject.toLocaleString('default', { month: 'long' });
     const day = dateObject.getDate();
     const year = dateObject.getFullYear();
     const weekday = weekdays[dateObject.getDay()];
     const time = dateObject.toLocaleTimeString([], { hour:'numeric', minute: '2-digit' });
-    return `${includeWeekday ? `${weekday}, ` : ''}${month} ${(day)}${includeYear || year !== new Date().getFullYear() ? `, ${year}` : ''}, ${time}`;
+    return `${includeWeekday ? `${weekday}, ` : ''}${month} ${(day)}${includeYear || year !== new Date().getFullYear() ? `, ${year}` : ''}${spellOutAt ? ' at ' : ', '}${time}`;
 }
 
 export const isDateTimeInPast = (dateTime?: string | null): boolean => {

@@ -314,6 +314,28 @@ export default async function NotificationCard({ notification, userId, isNew }: 
                     &apos;s submission form.&nbsp;<Link href={`/troupes/${submittedTroupe.id}/submissions/${submission.id}`} className="link">View submission</Link>
                 </p>
             </Wrapper>
+        case 'audition_slot_assigned':
+            if (!data) return null;
+            const [auditionFormId, auditionSubmissionId, auditionSlotId] = data.split(',');
+            const auditionForm = await getSubmissionFormById(auditionFormId);
+            const auditionSubmission = auditionSubmissionId ? await getSubmissionById(auditionSubmissionId) : null;
+            if (!auditionForm || auditionForm.ownerType !== 'troupe' || auditionSubmission?.userId !== userId) return null;
+            const auditionTroupe = await getTroupe(auditionForm.ownerId);
+            const auditionSlot = auditionForm.auditionSlots.find((slot) => slot.id === auditionSlotId);
+            if (!auditionTroupe || !auditionSlot) return null;
+            return <Wrapper
+                date={date}
+                isNew={isNew}
+                image={auditionTroupe.image}
+                imageLink={`/troupes/${auditionTroupe.id}`}
+                imageAlt={auditionTroupe.name}
+            >
+                <p>
+                    You&apos;ve been assigned an audition time for <Link href={`/troupes/${auditionTroupe.id}`} className="link">
+                        {auditionTroupe.name}
+                    </Link>! Your audition will take place on {formatDateTimeForDisplay(auditionSlot.dateTime, false, true, true)}.
+                </p>
+            </Wrapper>
         default:
             break;
     }
