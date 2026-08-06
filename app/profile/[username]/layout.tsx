@@ -7,6 +7,7 @@ import UserOptions from "./user-options";
 import FriendsButton from "@/components/friends-button";
 import { appName } from '@/lib/app-info';
 import { Metadata } from 'next';
+import CoverPhoto from "@/components/cover-photo";
 
 export async function generateMetadata(
     { params }: {
@@ -59,6 +60,11 @@ export default async function UserProfilePage({ params, children }: { params: Pr
     return (
         <>
             <LayoutCard className="relative">
+                {user.coverImage ? (
+                    <div className="-mb-14">
+                        <CoverPhoto full src={user.coverImage} alt={`${user.firstName} ${user.lastName} cover photo`} />
+                    </div>
+                ) : null}
                 {!isCurrentUser && <div className="absolute right-5 top-3">
                     <FriendsButton
                         yourId={currentUserId}

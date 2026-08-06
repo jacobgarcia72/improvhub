@@ -19,9 +19,10 @@ export default function UserOptions({ user, userRoles }: {
 }) {
     const [makeChanges, setMakeChanges] = useState(false);
     const [updateImage, setUpdateImage] = useState(false);
+    const [updateCoverImage, setUpdateCoverImage] = useState(false);
     
     const handleSubmit = async (prevState: void | { message?: string }, formData: FormData) => {
-        await updateUserInfo(prevState, formData, updateImage);
+        await updateUserInfo(prevState, formData, updateImage, updateCoverImage);
         setMakeChanges(false);
     }
     
@@ -39,6 +40,12 @@ export default function UserOptions({ user, userRoles }: {
                         onChange={() => setUpdateImage(true)}
                         name="image"
                         square
+                    />
+                    <ImagePicker
+                        currentImage={user.coverImage}
+                        label="Cover Photo"
+                        onChange={() => setUpdateCoverImage(true)}
+                        name="coverImage"
                     />
                 </div>
                 <div className="grid gap-4 sm:grid-cols-3">

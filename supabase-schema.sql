@@ -13,6 +13,7 @@ create table if not exists users (
   state text,
   website text,
   image text,
+  cover_image text,
   open_to_join_troupe boolean,
   open_to_accompany_troupe boolean,
   open_to_coach_troupe boolean

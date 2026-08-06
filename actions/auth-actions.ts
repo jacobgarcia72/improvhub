@@ -290,7 +290,7 @@ export async function logout() {
     redirect('/login');
 }
 
-export async function updateUserInfo(prevState: void | { message?: string }, formData: FormData, updateImage: boolean) {
+export async function updateUserInfo(prevState: void | { message?: string }, formData: FormData, updateImage: boolean, updateCoverImage = false) {
     const firstName = (formData.get('firstName') as string).trim();
     const lastName = (formData.get('lastName') as string).trim();
 
@@ -311,6 +311,19 @@ export async function updateUserInfo(prevState: void | { message?: string }, for
                 userUpdates.image = await uploadImage(imageFile, 'users');
             } catch {
                 throw new Error('Image upload failed');
+            }
+        }
+    }
+    if (updateCoverImage) {
+        const coverImageFile = formData.get('coverImage') as File;
+        if (coverImageFile && coverImageFile.size) {
+            if (coverImageFile.size > 5 * 1024 * 1024) {
+                return { message: 'Cover photo file size exceeds 5MB limit' };
+            }
+            try {
+                userUpdates.coverImage = await uploadImage(coverImageFile, 'users');
+            } catch {
+                throw new Error('Cover photo upload failed');
             }
         }
     }

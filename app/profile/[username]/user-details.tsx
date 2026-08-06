@@ -10,7 +10,7 @@ export default function UserDetails({ user, userRoles }: {
 }) {
     const initials = user.firstName[0] + user.lastName[0];
     const displayName = `${user.firstName} ${user.lastName}`;
-    return <div className="flex flex-row">
+    return <div className="flex flex-row items-end">
         <div className="pl-4">
             {user.image ? (
                 <Image loading="eager" className="object-cover rounded-xl w-32 h-32"
@@ -21,8 +21,8 @@ export default function UserDetails({ user, userRoles }: {
                 </div>
             )}
         </div>
-        <div className="pl-3 pb-1 flex flex-col justify-end text-mist-800 dark:text-mist-200">
-            <h1 className="text-2xl font-light">{displayName}{user.pronouns && <span className="text-sm">&nbsp;&nbsp;({user.pronouns})</span>}</h1>
+        <div className="bg-(--section) rounded-lg pl-3 py-1 flex flex-col justify-end text-mist-800 dark:text-mist-200">
+            <h1 className="text-xl xs:text-2xl font-light">{displayName}{user.pronouns && <span className="text-sm">&nbsp;&nbsp;({user.pronouns})</span>}</h1>
             {userRoles ? <h2 className="pl-1 flex flex-row font-light text-mist-700 dark:text-mist-300">{Object.keys(userRoles).filter((role) => userRoles[role]).map((r) => r === 'player' ? 'improviser' : r).map(capitalize).join(`\u2002\u2022\u2002`)}</h2> : null}
         </div>
     </div>

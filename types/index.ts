@@ -123,6 +123,7 @@ export interface User {
     state?: string;
     website?: string;
     image?: string;
+    coverImage?: string;
     openToJoinTroupe?: boolean;
     openToAccompanyTroupe?: boolean;
     openToCoachTroupe?: boolean;

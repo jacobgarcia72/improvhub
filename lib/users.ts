@@ -142,13 +142,16 @@ export async function updateUser(updates: { [key: string]: any }, userRoles?: { 
     const user = (await verifyAuth()).user;
     if (!user) return;
     let oldImage = '';
+    let oldCoverImage = '';
     if (updates.image && user.image) oldImage = user.image;
+    if (updates.coverImage && user.coverImage) oldCoverImage = user.coverImage;
     const { error } = await supabaseAdmin
         .from('users')
         .update(snakeCaseObject(updates))
         .eq('id', user.id);
     if (error) throw error;
     if (oldImage) destroyImage(oldImage);
+    if (oldCoverImage) destroyImage(oldCoverImage);
     if (userRoles) {
         const { error: deleteRoleError } = await supabaseAdmin
             .from('user_roles')
@@ -366,6 +369,7 @@ export async function saveUser(user: User, uid: string, userRoles?: { [role: str
             state: user.state,
             website: user.website,
             image: user.image,
+            cover_image: user.coverImage,
             open_to_join_troupe: user.openToJoinTroupe,
             open_to_accompany_troupe: user.openToAccompanyTroupe,
             open_to_coach_troupe: user.openToJoinTroupe
@@ -382,6 +386,9 @@ export async function saveUser(user: User, uid: string, userRoles?: { [role: str
 export async function deleteUser(user: User): Promise<void> {
     if (user.image) {
         await destroyImage(user.image);
+    }
+    if (user.coverImage) {
+        await destroyImage(user.coverImage);
     }
     // Delete Supabase Auth user
     if (user.uid) {
