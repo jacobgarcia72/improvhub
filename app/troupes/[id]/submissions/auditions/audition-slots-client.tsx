@@ -146,7 +146,7 @@ export default function AuditionSlotsClient({
                 const nextSaved = Object.fromEntries(payload.map((assignment) => [assignment.submissionId, assignment.slotId]));
                 setSavedAssignments(nextSaved);
                 setAssignments(nextSaved);
-                setMessage('Audition slots saved.');
+                setMessage('Audition times submitted.');
                 router.refresh();
             } catch (error) {
                 setMessage(error instanceof Error ? error.message : 'Could not save audition slots.');
@@ -210,8 +210,8 @@ export default function AuditionSlotsClient({
         <div className="flex flex-col gap-4">
             <div className="flex flex-row flex-wrap gap-2">
                 <Button className="px-3 py-1" caption="Auto Assign" onClick={autoAssign} disabled={isPending || submissions.every((submission) => assignments[submission.id])} />
-                <Button className="px-3 py-1" caption={isPending ? "Saving..." : "Save"} onClick={saveChanges} disabled={isPending || !dirty} />
-                <Button className="px-3 py-1" caption="Cancel" onClick={cancelChanges} disabled={isPending || !dirty} />
+                <Button className="px-3 py-1" caption={isPending ? "Submitting..." : "Submit and Notify"} onClick={saveChanges} disabled={isPending || !dirty} />
+                <Button className="px-3 py-1" caption="Undo Changes" onClick={cancelChanges} disabled={isPending || !dirty} />
             </div>
             {message && <p className="text-sm text-slate-600 dark:text-slate-300">{message}</p>}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
