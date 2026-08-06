@@ -334,6 +334,29 @@ export async function updateUserInfo(prevState: void | { message?: string }, for
     await updateUser(userUpdates, userRoles);
     revalidatePath(`/profile`, 'layout');
 }
+
+async function updateUserImageField(formData: FormData, inputName: string, fieldName: 'image' | 'coverImage', label: string) {
+    const imageFile = formData.get(inputName) as File;
+    if (!imageFile || !imageFile.size) return;
+    if (imageFile.size > 5 * 1024 * 1024) {
+        return { message: `${label} file size exceeds 5MB limit` };
+    }
+    try {
+        const imageUrl = await uploadImage(imageFile, 'users');
+        await updateUser({ [fieldName]: imageUrl });
+        revalidatePath(`/profile`, 'layout');
+    } catch {
+        throw new Error(`${label} upload failed`);
+    }
+}
+
+export async function updateUserProfileImage(formData: FormData) {
+    return updateUserImageField(formData, 'image', 'image', 'Profile picture');
+}
+
+export async function updateUserCoverImage(formData: FormData) {
+    return updateUserImageField(formData, 'coverImage', 'coverImage', 'Cover photo');
+}
 export async function updateUserPassword(prevState: void | { message?: string }, formData: FormData) {
     const currentPassword = formData.get('currentPassword') as string;
     const newPassword = formData.get('newPassword') as string;
