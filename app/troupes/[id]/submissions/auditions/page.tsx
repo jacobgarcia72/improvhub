@@ -4,6 +4,7 @@ import { getCurrentUserId, getUserAbbreviated } from "@/lib/users";
 import AuditionSlotsClient from "./audition-slots-client";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { SubmissionFormSubmission } from "@/types";
 
 export default async function AuditionSlotsPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
@@ -18,8 +19,8 @@ export default async function AuditionSlotsPage({ params }: { params: Promise<{ 
     const submissions = await getSubmissions(form.id);
     const userIds = [...new Set(submissions.map((submission) => submission.userId).filter((uid) => uid !== null))];
     const users = await Promise.all(userIds.map((uid) => getUserAbbreviated(uid)));
-    const getSubmitterName = (submission: { userId: string | null, contactEmail: string | null }) => {
-        if (!submission.userId) return submission.contactEmail || 'Unknown submitter';
+    const getSubmitterName = (submission: SubmissionFormSubmission) => {
+        if (!submission.userId) return submission.answers.name as string || submission.contactEmail || 'Unknown submitter';
         return users.find((user) => user?.id === submission.userId)?.name || submission.userId;
     };
 
