@@ -18,7 +18,7 @@ export default function CommunityDetails({ user }: { user: User }) {
                 if (!res.ok) return;
                 const foundTheatre: Theatre | null = await res.json();
                 const input: InputOption = foundTheatre ? ({ text: foundTheatre.name, id: foundTheatre.id, image: foundTheatre.image }) : t;
-                ts.push(input);
+                if (input) ts.push(input);
             }
             setTheatres(ts);
         }

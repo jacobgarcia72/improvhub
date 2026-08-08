@@ -17,7 +17,7 @@ export default function CoverPhoto({ src, alt, photoCredit, full }: {src: string
             />
         </div> : null}
         <div className="flex flex-col items-center content-center">
-            <Image src={optimizeImage(src, 1000, null, 90)}
+            <Image src={optimizeImage(src, 1000, null, 100)}
                 onClick={() => setFullscreen(true)}
                 alt={alt}
                 width={600}

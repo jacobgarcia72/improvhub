@@ -429,7 +429,8 @@ function getTheatresFromInputs(formData: FormData): string[] {
             break;
         }
         const theatreId = data[`${key}-id`] as string | undefined;
-        addedTheatres.push(theatreId || theatreName);
+        const theatre = theatreId || theatreName;
+        if (theatre) addedTheatres.push(theatreId || theatreName);
     }
     return [...new Set(checkedTheatres.concat(addedTheatres))];
 }

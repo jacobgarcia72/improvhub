@@ -46,8 +46,8 @@ export const genderIdentities = [
 ];
 
 export const orientations = [
-    'Straight',
-    'Gay',
+    'Straight / Heterosexual',
+    'Gay / Homosexual',
     'Lesbian',
     'Bisexual',
     'Pansexual',
