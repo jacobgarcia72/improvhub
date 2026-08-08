@@ -5,14 +5,16 @@ import { formatDateTimeForDisplay } from "@/lib/dates";
 import { removeCastMember } from "@/lib/shows";
 import { Role } from "@/types";
 import { useState } from "react";
+import TroupeCastConfirmationButtons from "@/components/troupe-cast-confirmation-buttons";
 
-export default function CastRoleBanner({ role, roleId, showId, dateTime, showTitle, troupeName }: {
+export default function CastRoleBanner({ role, roleId, showId, dateTime, showTitle, troupeName, troupeConfirmed }: {
     role: Role | 'troupe',
     roleId: string | null,
     showTitle: string,
     showId: string,
     dateTime: string,
     troupeName?: string,
+    troupeConfirmed?: boolean | null,
 }) {
     const [openModal, setOpenModal] = useState<boolean>(false);
 
@@ -38,9 +40,19 @@ export default function CastRoleBanner({ role, roleId, showId, dateTime, showTit
             cancelLabel="Cancel"
         />
         <div className="flex flex-row flex-wrap gap-1 justify-between items-center py-2 px-6 min-h-[58px] my-2 bg-lime-500/30 rounded border border-green-800">
-            <p>{role === 'troupe' ? (
-                `${troupeName} is playing in this show`
-            ) : `You are in this show as a ${role}`}</p>
+            <div>
+                <p>{role === 'troupe' ? (
+                    `${troupeName} is playing in this show`
+                ) : `You are in this show as a ${role}`}</p>
+                {role === 'troupe' ? (
+                    <TroupeCastConfirmationButtons
+                        troupeId={roleId}
+                        showId={showId}
+                        dateTime={dateTime}
+                        initialConfirmed={troupeConfirmed ?? null}
+                    />
+                ) : null}
+            </div>
             <div className="flex justify-end grow-1">
                 <Button
                     caption={role === 'troupe' ? (

@@ -11,8 +11,10 @@ import { revalidatePath } from 'next/cache';
 import { dateMatchesRecurringSchedule, getStartOfToday, normalizeDateTime } from './dates';
 import { getTroupeMembers, getTroupesByUser } from './troupes';
 import { createNewsFeedItem, deleteNewsFeedItem } from './news';
-import { getFriendIds, getFriends } from './users';
+import { getCurrentUserId, getFriendIds, getFriends } from './users';
 import { postNotification } from './notifications';
+
+export type TroupeCastConfirmationFilter = 'any' | 'confirmed' | 'not_declined';
 
 export async function getEvent(id: string, type: EventType): Promise<Event | null> {
     const { data, error } = await supabaseAdmin
@@ -147,21 +149,60 @@ export async function getShowsLookingForRole(role: Role | 'troupe', user: User):
     return res;
 }
 
-export async function getUpcomingShowsByCastMember(userId: string, roles: (Role | 'troupe')[] = ['player', 'musician', 'tech', 'director'], includeUsersTroupes = false): Promise<{ show: Event, dateTimes: string[] }[]> {
-    let troupes: string[] = [];
-    if (includeUsersTroupes) {
-        troupes = (await getTroupesByUser(userId)).map((troupe) => troupe.id);
+export async function getUpcomingShowsByCastMember(
+    userId: string,
+    roles: (Role | 'troupe')[] = ['player', 'musician', 'tech', 'director'],
+    includeUsersTroupes = false,
+    troupeConfirmationFilter: TroupeCastConfirmationFilter = 'any'
+): Promise<{ show: Event, dateTimes: string[] }[]> {
+    const castRows: { show_id: string; date_time: string }[] = [];
+    const userRoles = roles.filter((role) => role !== 'troupe');
+    if (userRoles.length) {
+        const { data, error } = await supabaseAdmin
+            .from('showing_cast')
+            .select('show_id, date_time')
+            .eq('id', userId)
+            .in('role', userRoles)
+            .gte('date_time', getStartOfToday());
+        if (error) throw error;
+        castRows.push(...(data || []));
     }
-    const { data } = await supabaseAdmin
-        .from('showing_cast')
-        .select('show_id, date_time')
-        .or(`and(id.eq.${userId},role.in.(${roles.join(',')})),and(id.in.(${troupes.join(',')}),role.eq.troupe)`)
-        .gte('date_time', getStartOfToday());
+
+    const shouldFetchTroupeCast = includeUsersTroupes || roles.includes('troupe');
+    if (shouldFetchTroupeCast) {
+        const troupes = includeUsersTroupes
+            ? (await getTroupesByUser(userId)).map((troupe) => troupe.id)
+            : [userId];
+        if (troupes.length) {
+            const { data, error } = await supabaseAdmin
+                .from('showing_cast')
+                .select('show_id, date_time, id')
+                .in('id', troupes)
+                .eq('role', 'troupe')
+                .gte('date_time', getStartOfToday());
+            if (error) throw error;
+            const troupeRows = data || [];
+            if (troupeConfirmationFilter === 'any' || !includeUsersTroupes) {
+                castRows.push(...troupeRows);
+            } else {
+                const confirmations = await getTroupeCastConfirmationsForUser(userId, troupeRows.map((row: any) => ({
+                    troupeId: row.id,
+                    showId: row.show_id,
+                    dateTime: normalizeDateTime(row.date_time)
+                })));
+                castRows.push(...troupeRows.filter((row: any) => {
+                    const confirmed = confirmations.get(getTroupeCastConfirmationKey(row.id, row.show_id, normalizeDateTime(row.date_time)));
+                    if (troupeConfirmationFilter === 'confirmed') return confirmed === true;
+                    return confirmed !== false;
+                }));
+            }
+        }
+    }
 
     const showDates: { [showId: string]: string[] } = { };
     const showIds: string[] = [];
 
-    (data || []).forEach(({ show_id, date_time }: { show_id: string; date_time: string }) => {
+    castRows.forEach(({ show_id, date_time }: { show_id: string; date_time: string }) => {
         if (!showDates[show_id]) {
             showDates[show_id] = [];
             showIds.push(show_id);
@@ -182,6 +223,84 @@ export async function getUpcomingShowsByCastMember(userId: string, roles: (Role 
         }
     }
     return res;
+}
+
+function getTroupeCastConfirmationKey(troupeId: string, showId: string, dateTime: string): string {
+    return `${troupeId}|${showId}|${dateTime}`;
+}
+
+async function getTroupeCastConfirmationsForUser(
+    userId: string,
+    castRows: { troupeId: string; showId: string; dateTime: string }[]
+): Promise<Map<string, boolean | null>> {
+    if (!castRows.length) return new Map();
+    const { data, error } = await supabaseAdmin
+        .from('troupe_cast_confirmations')
+        .select('troupe_id, show_id, date_time, confirmed')
+        .eq('user_id', userId);
+    if (error) throw error;
+    const neededKeys = new Set(castRows.map(({ troupeId, showId, dateTime }) => (
+        getTroupeCastConfirmationKey(troupeId, showId, dateTime)
+    )));
+    const confirmations = new Map<string, boolean | null>();
+    (data || []).forEach((row: any) => {
+        const key = getTroupeCastConfirmationKey(row.troupe_id, row.show_id, normalizeDateTime(row.date_time));
+        if (neededKeys.has(key)) confirmations.set(key, row.confirmed);
+    });
+    return confirmations;
+}
+
+export async function getTroupeCastConfirmation(
+    userId: string,
+    troupeId: string,
+    showId: string,
+    dateTime: string
+): Promise<boolean | null> {
+    const normalizedDateTime = dateTime.replaceAll('%20', ' ').replaceAll('%3A', ':');
+    const { data, error } = await supabaseAdmin
+        .from('troupe_cast_confirmations')
+        .select('confirmed')
+        .eq('user_id', userId)
+        .eq('troupe_id', troupeId)
+        .eq('show_id', showId)
+        .eq('date_time', normalizedDateTime)
+        .maybeSingle();
+    if (error) throw error;
+    return data?.confirmed ?? null;
+}
+
+export async function setTroupeCastConfirmation(
+    troupeId: string,
+    showId: string,
+    dateTime: string,
+    confirmed: boolean | null
+): Promise<void> {
+    const userId = await getCurrentUserId();
+    if (!userId) throw new Error('You must be signed in to confirm show availability');
+    const normalizedDateTime = dateTime.replaceAll('%20', ' ').replaceAll('%3A', ':');
+    const troupes = (await getTroupesByUser(userId)).map((troupe) => troupe.id);
+    if (!troupes.includes(troupeId)) throw new Error('You must be a member of this troupe to confirm show availability');
+    const cast = await getShowCast(showId, normalizedDateTime);
+    if (!cast.some((member) => member.id === troupeId && member.role === 'troupe')) {
+        throw new Error('This troupe is not cast in that show');
+    }
+    const { error } = await supabaseAdmin
+        .from('troupe_cast_confirmations')
+        .upsert({
+            user_id: userId,
+            troupe_id: troupeId,
+            show_id: showId,
+            date_time: normalizedDateTime,
+            confirmed,
+            updated_at: new Date().toISOString()
+        }, {
+            onConflict: 'user_id,troupe_id,show_id,date_time'
+        });
+    if (error) throw error;
+    revalidatePath(`/shows/${showId}/${normalizedDateTime}`, 'layout');
+    revalidatePath('/shows');
+    revalidatePath(`/profile/${userId}`, 'layout');
+    revalidatePath('/notifications');
 }
 
 export async function getUpcomingEventsByTheatre(theatre: Theatre, type: EventType = 'show'): Promise<{ event: Event, dateTimes: string[] }[]> {

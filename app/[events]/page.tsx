@@ -74,7 +74,7 @@ export default async function EventsPage({ params }: { params: Promise<{ events:
             </Suspense>
             {type === 'show' && <>
                 <Suspense fallback={<Loader />}>
-                    {userId ? <UpcomingShows includeTroupes label="Shows I'm In" id={userId} /> : null}
+                    {userId ? <UpcomingShows includeTroupes label="Shows I'm In" id={userId} troupeConfirmationFilter="not_declined" /> : null}
                 </Suspense>
             </>}
             <Suspense fallback={<Loader />}>

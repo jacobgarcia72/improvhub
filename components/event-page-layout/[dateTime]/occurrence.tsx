@@ -1,4 +1,4 @@
-import { getFriendsRsvpCount, getRsvpCount, getRsvpStatus, getShowCast } from "@/lib/shows";
+import { getFriendsRsvpCount, getRsvpCount, getRsvpStatus, getShowCast, getTroupeCastConfirmation } from "@/lib/shows";
 import { getCurrentUserId } from "@/lib/users";
 import CastingTools from "./casting-tools";
 import CastList from "@/components/cast-list";
@@ -26,11 +26,19 @@ export default async function Occurrence({ id, dateTime, parentEvent, isASeries,
     const userRoles = (type === 'show' && userId) ? (
         showCast.filter((c) => c.id === userId).map((c) => c.role)
     ) : null;
-    let userTroupes: Troupe[] = [];
+    let userTroupes: { troupe: Troupe, confirmed: Awaited<ReturnType<typeof getTroupeCastConfirmation>> }[] = [];
     if (type === 'show' && userId) {
         const troupes = await getTroupesByUser(userId);
         const troupeIds = troupes.map((troupe) => troupe.id);
-        userTroupes = showCast.filter((c) => c.id && c.role === 'troupe' && troupeIds.includes(c.id)).map((c) => troupes.find((t) => t.id === c.id)).filter((t) => t !== undefined);
+        userTroupes = (await Promise.all(showCast
+            .filter((c) => c.id && c.role === 'troupe' && troupeIds.includes(c.id))
+            .map(async (c) => {
+                const troupe = troupes.find((t) => t.id === c.id);
+                if (!troupe || !c.id) return null;
+                const confirmed = await getTroupeCastConfirmation(userId, c.id, id, eventDate);
+                return { troupe, confirmed };
+            })
+        )).filter((t) => t !== null);
     }
     const isDirector = userRoles?.includes('director');
 
@@ -55,7 +63,7 @@ export default async function Occurrence({ id, dateTime, parentEvent, isASeries,
                     key={role}
                 />
             )) : null}
-            {userTroupes?.length ? userTroupes.map((troupe) => (
+            {userTroupes?.length ? userTroupes.map(({ troupe, confirmed }) => (
                 <CastRoleBanner
                     troupeName={troupe.name}
                     showTitle={parentEvent.title}
@@ -63,6 +71,7 @@ export default async function Occurrence({ id, dateTime, parentEvent, isASeries,
                     showId={id}
                     dateTime={dateTime}
                     role='troupe'
+                    troupeConfirmed={confirmed}
                     key={troupe.id}
                 />
             )) : null}

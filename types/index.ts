@@ -90,7 +90,6 @@ export interface Troupe {
 }
 
 export type Role = 'player' | 'coach' | 'musician' | 'director' | 'tech';
-
 export interface CastMember {
     name: string;
     id: string | null;
@@ -107,6 +106,14 @@ export interface TroupeMember extends CastMember {
 export interface ShowCastMember extends CastMember {
     showId: string;
     dateTime: string;
+}
+
+export interface TroupeCastConfirmation {
+    userId: string;
+    troupeId: string;
+    showId: string;
+    dateTime: string;
+    confirmed: boolean | null;
 }
 
 export interface User {

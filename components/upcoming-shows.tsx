@@ -1,11 +1,11 @@
-import { getUpcomingShowsByCastMember } from "@/lib/shows";
+import { getUpcomingShowsByCastMember, TroupeCastConfirmationFilter } from "@/lib/shows";
 import { Event, Role } from "@/types";
 import MiniCard from "@/components/mini-card";
 import { Suspense } from "react";
 import Loader from "./loader";
 
-export default async function UpcomingShows({ id, label = "Upcoming Shows", limit, roles, includeTroupes }: { id: string, label?: string, limit?: number, roles?: (Role | 'troupe')[], includeTroupes?: boolean }) {
-    const showsUserIsIn = id ? await getUpcomingShowsByCastMember(id, roles, includeTroupes) : [];
+export default async function UpcomingShows({ id, label = "Upcoming Shows", limit, roles, includeTroupes, troupeConfirmationFilter = 'any' }: { id: string, label?: string, limit?: number, roles?: (Role | 'troupe')[], includeTroupes?: boolean, troupeConfirmationFilter?: TroupeCastConfirmationFilter }) {
+    const showsUserIsIn = id ? await getUpcomingShowsByCastMember(id, roles, includeTroupes, troupeConfirmationFilter) : [];
     let showsByDate: { dateTime: string, show: Event }[] = [];
     showsUserIsIn?.forEach(({ show, dateTimes }) => {
         dateTimes.forEach((dateTime) => {

@@ -8,9 +8,10 @@ import { getTroupe, getTroupeMembership } from "@/lib/troupes";
 import { getPronounForm } from "@/lib/demographics";
 import TroupeRequestButtons from "./troupe-request-buttons";
 import { getVerbFromRole, pluralize } from "@/lib/helper-functions";
-import { getEvent, getShow } from "@/lib/shows";
+import { getEvent, getShow, getTroupeCastConfirmation } from "@/lib/shows";
 import { formatDateTimeForDisplay } from "@/lib/dates";
 import { getSubmissionById, getSubmissionFormById } from "@/lib/submission-forms";
+import TroupeCastConfirmationButtons from "@/components/troupe-cast-confirmation-buttons";
 
 function Wrapper({ children, date, image, imageLink, imageAlt, isNew }: { children: React.ReactNode, date: string, image?: string | null, imageLink?: string, imageAlt?: string, isNew: boolean }) {
     return (
@@ -158,6 +159,7 @@ export default async function NotificationCard({ notification, userId, isNew }: 
             if (role3 === 'troupe') {
                 const troupe = await getTroupe(troupeId3);
                 if (!troupe) return null;
+                const confirmed = await getTroupeCastConfirmation(userId, troupe.id, show.id, showDateTime);
                 return (
                     <Wrapper date={date} isNew={isNew} image={show.image || troupe.image} imageLink={show.image ? `/shows/${senderId}` : `/troupes/${troupe.id}`} imageAlt={show.image ? show.title : troupe.name}>
                         <p>
@@ -168,6 +170,12 @@ export default async function NotificationCard({ notification, userId, isNew }: 
                                 {show.title}
                             </Link> on {formatDateTimeForDisplay(showDateTime)}
                         </p>
+                        <TroupeCastConfirmationButtons
+                            troupeId={troupe.id}
+                            showId={show.id}
+                            dateTime={showDateTime}
+                            initialConfirmed={confirmed}
+                        />
                     </Wrapper>
                 )
             } else {
