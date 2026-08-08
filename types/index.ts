@@ -295,10 +295,13 @@ export interface SubmissionForm {
     ownerId: string;
     title: string;
     description: string | null;
+    whatLookingFor: string | null;
     closesAt: string | null;
     questions: SubmissionFormQuestion[];
     requiresSignIn: boolean;
     hasAudition: boolean;
+    aboutAudition: string | null;
+    auditionLocation: string | null;
     auditionDatesTbd: boolean;
     auditionSlots: AuditionSlot[];
     createdBy: string;

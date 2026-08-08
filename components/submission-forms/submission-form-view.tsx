@@ -104,8 +104,8 @@ export default async function SubmissionFormView({
                 return <Input readOnly={question.builtIn === 'name' && Boolean(user && value)} key={question.id} name={name} label={label} value={value} required={question.required} maxLength={180} />
             })}
             {form.hasAudition && (
-                <div className="flex flex-col gap-2 rounded border border-gray-300 p-3">
-                    <h2 className="font-semibold text-slate-700 dark:text-slate-300">Audition Availability</h2>
+                <div className="flex flex-col gap-2 rounded border border-gray-300 pt-2 pb-4 px-6">
+                    <h2 className="font-medium text-slate-800 dark:text-slate-100">Audition Availability</h2>
                     {form.auditionDatesTbd ? (
                         <p className="text-sm text-slate-600 dark:text-slate-300">Audition date(s) are TBD.</p>
                     ) : form.auditionSlots.map((slot) => (

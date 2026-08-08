@@ -165,6 +165,7 @@ export async function saveTroupeSubmissionForm(ownerId: string, replaceClosedFor
 
     const title = (formData.get('title') as string | null)?.trim() || 'Troupe Submission Form';
     const description = cleanLineBreaks((formData.get('description') as string | null) || '');
+    const whatLookingFor = cleanLineBreaks((formData.get('whatLookingFor') as string | null) || '');
     const closesAt = parseCloseDateTime(formData);
     if (formData.get('hasCloseDate') && !closesAt) return { message: 'Enter a valid close date and time' };
     const questions = parseQuestions(formData);
@@ -173,6 +174,8 @@ export async function saveTroupeSubmissionForm(ownerId: string, replaceClosedFor
     if (questionValidationMessage) return { message: questionValidationMessage };
 
     const hasAudition = Boolean(formData.get('hasAudition'));
+    const aboutAudition = hasAudition ? cleanLineBreaks((formData.get('aboutAudition') as string | null) || '') : '';
+    const auditionLocation = hasAudition ? (formData.get('auditionLocation') as string | null)?.trim() || '' : '';
     const auditionDatesTbd = hasAudition && Boolean(formData.get('auditionDatesTbd'));
     const auditionSlots = hasAudition && !auditionDatesTbd ? parseAuditionSlots(formData) : [];
     if (hasAudition && !auditionDatesTbd && !auditionSlots.length) {
@@ -188,10 +191,13 @@ export async function saveTroupeSubmissionForm(ownerId: string, replaceClosedFor
         ownerId,
         title,
         description: description || null,
+        whatLookingFor: whatLookingFor || null,
         closesAt,
         questions,
         requiresSignIn: Boolean(formData.get('requiresSignIn')),
         hasAudition,
+        aboutAudition: aboutAudition || null,
+        auditionLocation: auditionLocation || null,
         auditionDatesTbd,
         auditionSlots,
         createdBy: userId,

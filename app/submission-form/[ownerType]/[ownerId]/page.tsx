@@ -14,6 +14,10 @@ async function getOwnerName(ownerType: SubmissionOwnerType, ownerId: string): Pr
     return null;
 }
 
+function ParagraphBlock({ text }: { text: string }) {
+    return text.split('<br>').map((line, i) => <p key={i}>{line}</p>);
+}
+
 export default async function PublicSubmissionFormPage({
     params,
     searchParams,
@@ -57,7 +61,25 @@ export default async function PublicSubmissionFormPage({
                 </> : <>
                     {form.description && (
                         <div className="flex flex-col gap-2 mt-3 ml-2 text-slate-800 dark:text-slate-200">
-                            {form.description.split('<br>').map((line, i) => <p key={i}>{line}</p>)}
+                            <ParagraphBlock text={form.description} />
+                        </div>
+                    )}
+                    {form.whatLookingFor && (
+                        <div className="flex flex-col gap-2 mt-4 ml-2 text-slate-800 dark:text-slate-200">
+                            <h2 className="font-medium text-slate-800 dark:text-slate-100">What we&apos;re looking for:</h2>
+                            <ParagraphBlock text={form.whatLookingFor} />
+                        </div>
+                    )}
+                    {form.aboutAudition && (
+                        <div className="flex flex-col gap-2 mt-4 ml-2 text-slate-800 dark:text-slate-200">
+                            <h2 className="font-medium text-slate-800 dark:text-slate-100">About the audition:</h2>
+                            <ParagraphBlock text={form.aboutAudition} />
+                        </div>
+                    )}
+                    {form.auditionLocation && (
+                        <div className="flex flex-col gap-2 mt-4 ml-2 text-slate-800 dark:text-slate-200">
+                            <h2 className="font-medium text-slate-800 dark:text-slate-100">Audition location:</h2>
+                            <p>{form.auditionLocation}</p>
                         </div>
                     )}
                 </>}

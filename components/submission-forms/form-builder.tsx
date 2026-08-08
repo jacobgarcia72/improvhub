@@ -1,14 +1,15 @@
 'use client';
 
-import { useLayoutEffect, useRef, useState, type DragEvent } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type DragEvent } from "react";
 import Form from "@/components/form/form";
 import Input from "@/components/form/input";
 import InputList from "@/components/form/input-list";
 import Text from "@/components/form/text";
 import Checkbox from "@/components/form/checkbox";
+import Autocomplete from "@/components/form/autocomplete";
 import XButton from "@/components/form/x";
 import { builtInSubmissionQuestions } from "@/lib/submission-question-options";
-import { SubmissionForm, SubmissionFormQuestion } from "@/types";
+import { InputOptionObject, SubmissionForm, SubmissionFormQuestion } from "@/types";
 import { appName } from "@/lib/app-info";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCaretDown, faCaretUp, faGripVertical } from "@fortawesome/free-solid-svg-icons";
@@ -84,6 +85,7 @@ export default function SubmissionFormBuilder({
     const customExisting = existingForm?.questions.filter((question) => !question.builtIn) || [];
     const [hasAudition, setHasAudition] = useState(Boolean(existingForm?.hasAudition));
     const [datesTbd, setDatesTbd] = useState(Boolean(existingForm?.auditionDatesTbd));
+    const [theatres, setTheatres] = useState<InputOptionObject[]>([]);
     const [hasCloseDate, setHasCloseDate] = useState(Boolean(existingForm?.closesAt));
     const [selectedBuiltInIds, setSelectedBuiltInIds] = useState(getInitialSelectedBuiltInIds(existingForm));
     const [draggedQuestion, setDraggedQuestion] = useState<string | null>(null);
@@ -110,6 +112,16 @@ export default function SubmissionFormBuilder({
             })
             : [{ key: 0, date: '', time: '' }]
     );
+
+    useEffect(() => {
+        const fetchTheatres = async () => {
+            const res = await fetch('/api/theatres');
+            if (!res.ok) return;
+            const options: InputOptionObject[] = await res.json();
+            setTheatres(options);
+        };
+        fetchTheatres();
+    }, []);
 
     useLayoutEffect(() => {
         const previousPositions = pendingAnimationPositions.current;
@@ -307,6 +319,20 @@ export default function SubmissionFormBuilder({
             </div>
 
             <Text name="description" label="Form introduction" rows={6} value={existingForm?.description?.replaceAll('<br>', '\n') || ''} />
+            <Text name="whatLookingFor" label="What we're looking for:" rows={5} value={existingForm?.whatLookingFor?.replaceAll('<br>', '\n') || ''} />
+
+            {hasAudition && (
+                <>
+                    <Text name="aboutAudition" label="About the audition:" rows={5} value={existingForm?.aboutAudition?.replaceAll('<br>', '\n') || ''} />
+                    <Autocomplete
+                        name="auditionLocation"
+                        label="Audition location"
+                        options={theatres}
+                        startingValue={existingForm?.auditionLocation || undefined}
+                        maxLength={180}
+                    />
+                </>
+            )}
 
             <div className="flex flex-col gap-2 rounded border border-gray-300 p-3">
                 <h2 className="font-semibold text-slate-700 dark:text-slate-300">Questions</h2>
