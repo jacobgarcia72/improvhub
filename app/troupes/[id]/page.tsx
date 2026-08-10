@@ -42,7 +42,7 @@ export default async function TroupePage({ params }: Props) {
             ) : <>
                 <h3>This troupe is {submissionForm.hasAudition ? 'holding auditions' : 'taking submissions'}!</h3>
                 <Link href={`/submission-form/troupe/${id}`}>
-                    <Button caption="Submission Form" className="w-54 max-w-[45vw] px-0!" />
+                    <Button style="link" caption="Go to Submission Form" />
                 </Link>
             </>}
         </section> : null}
@@ -58,13 +58,13 @@ export default async function TroupePage({ params }: Props) {
                 <div className="flex flex-row flex-wrap gap-2 justify-center mb-2">
                     {isMemberNotCoach ? <>
                         <Link href={`/troupes/${id}/manage-members`}>
-                            <Button caption="Manage Members" className="w-54 max-w-[45vw] px-0!" />
+                            <Button caption="Manage Members" className="text-sm w-36 max-w-[45vw] px-0!" />
                         </Link>
                         <Link href={`/manage/troupe/${id}`}>
-                            <Button caption="Manage Troupe Details" className="w-54 max-w-[45vw] px-0!" />
+                            <Button caption="Troupe Details" className="text-sm w-36 max-w-[45vw] px-0!" />
                         </Link>
                         <Link href={`/troupes/${id}/submissions`}>
-                            <Button caption="Submissions" className="w-54 max-w-[45vw] px-0!" />
+                            <Button caption="Submissions" className="text-sm w-36 max-w-[45vw] px-0!" />
                         </Link>
                     </> : null}
                 </div>
