@@ -13,7 +13,7 @@ export default function SupportPage() {
         <section className="medium-section">
             <p>Hello, Friend!</p><br />
             <p>I am a one-man development team creating {appName} as a passion project for my love of improv.</p><br />
-            <p>I&apos;m a real person, not an AI. I worked as a full-stack engineer for 5 years before long COVID made me unable to work full-time. I&apos;m now using my skills to build tools to help the improv community.</p><br />
+            <p>I worked as a full-stack engineer for 5 years before long COVID made me unable to work full-time. I&apos;m now using my skills to build tools to help the improv community.</p><br />
             <p>Your support is greatly appreciated and will allow me to spend more time building up and maintaining this site.</p><br />
             <p>Here are a couple of links you can use to send me financial support:</p><br />
             <SupportLinks /><br />
