@@ -117,3 +117,11 @@ export async function updateTheatre(theatre: Theatre): Promise<string> {
     if (error) console.error(error);
     return theatre.id;
 }
+
+export async function deleteTheatre(theatreId: string): Promise<void> {
+  const { error } = await supabaseAdmin
+    .from('theatres')
+    .delete()
+    .eq('id', theatreId);
+  if (error) throw error;
+}

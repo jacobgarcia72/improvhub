@@ -1,4 +1,4 @@
-import { getTheatre } from '@/lib/theatres';
+import { deleteTheatre, getTheatre } from '@/lib/theatres';
 import { NextResponse } from 'next/server';
 
 export async function GET(req: Request) {
@@ -13,3 +13,17 @@ export async function GET(req: Request) {
         return NextResponse.json([], { status: 500 });
     }
 }
+
+export async function DELETE(req: Request) {
+    const url = new URL(req.url);
+    const idParam = url.searchParams.get('id') as string;
+    try {
+        const theatre = await deleteTheatre(idParam);
+        return NextResponse.json(theatre, { status: 200 });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+        console.error('Failed to delete theatre:', error);
+        return NextResponse.json([], { status: 500 });
+    }
+}
+

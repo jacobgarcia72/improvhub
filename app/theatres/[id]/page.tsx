@@ -10,6 +10,7 @@ import EventResults from "@/app/search/event-results";
 import { isDev } from "@/lib/app-info";
 import { faMessage } from "@fortawesome/free-regular-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import DeleteTheatre from "./delete-theatre";
 
 export default async function TheatreDetailsPage({ params }: {
     params: Promise<{ id: string }>
@@ -62,6 +63,9 @@ export default async function TheatreDetailsPage({ params }: {
                 <h3 className="ml-8 mb-2">Upcoming Events:</h3>
                 <EventResults showTheatre={false} limit={14} theatre={id} />
             </section>
+            {canManage ? (
+                <DeleteTheatre theatreId={theatre.id} theatreName={theatre.name} />
+            ) : null}
         </Suspense>
     );
 }
