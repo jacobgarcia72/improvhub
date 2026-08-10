@@ -1,7 +1,7 @@
 'use server';
 
 import { Comment, DiscussionPost, InputOptionObject, Topic } from '@/types';
-import { getTroupesByUser } from './troupes';
+import { getTroupeMembers, getTroupesByUser } from './troupes';
 import { getTheatre } from './theatres';
 import { getUser } from './users';
 import { supabaseAdmin } from './supabase-server';
@@ -138,6 +138,12 @@ export async function savePost(userId: string, room: string, topicId: string, po
             .from('posts')
             .insert(snakeCaseObject(newPost));
         if (error) throw (error);
+        if (room.startsWith('troupe')) {
+            const troupeId = room.replace('troupe-', '');
+            const members = await getTroupeMembers(troupeId, false);
+            const userToNotify = members.map((m) => m.id).filter((memberId) => (memberId !== userId)).filter((memberId) => memberId !== null);
+            if (userToNotify.length) postNotification(userId, userToNotify, 'new_post_in_troupe_channel', `${room},${topicId},${id}`);
+        }
         return { success: true, message: 'Success', id };
     } catch (error) {
         console.error(error);

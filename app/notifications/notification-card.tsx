@@ -276,6 +276,29 @@ export default async function NotificationCard({ notification, userId, isNew }: 
                     </Link>
                 </p>
             </Wrapper>
+        case 'new_post_in_troupe_channel':
+            if (!data) return null;
+            const [room2, topicId2, postId2] = data.split(',');
+            const troupeId4 = room2.replace('troupe-', '');
+            const troupe4 = await getTroupe(troupeId4);
+            const commenter2 = await getUserAbbreviated(senderId);
+            return <Wrapper date={date} isNew={isNew} image={commenter2?.image} imageLink={`/profile/${senderId}`} imageAlt={commenter2?.name}>
+                <p>
+                    {commenter2 ? (
+                        <Link href={`/profile/${senderId}`} className="link">
+                            {commenter2.name}
+                        </Link>
+                    ) : 'Someone'}
+                    &nbsp;posted a&nbsp;<Link href={`/discuss?channel=${room2}&topic=${topicId2}&post=${postId2}`} className="link">
+                        new message
+                    </Link>&nbsp;in&nbsp;
+                    {troupe4 ? (
+                        <Link href={`/troupes/${troupeId4}`} className="link">
+                            {troupe4.name}
+                        </Link>
+                    ) : 'your troupe'}&apos;s channel
+                </p>
+            </Wrapper>
         case 'new_submission_form':
             if (!data) return null;
             const submissionForm = await getSubmissionFormById(data);

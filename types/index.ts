@@ -246,7 +246,8 @@ export type NotificationType =
     'new_submission' |
     'new_submission_form' |
     'audition_slot_assigned' |
-    'new_comment';
+    'new_comment' |
+    'new_post_in_troupe_channel';
 
 export type Notification = {
     id: string;
