@@ -3,7 +3,9 @@ import { Notification, NotificationType } from "@/types";
 import { supabaseAdmin } from "./supabase-server";
 import { isDev } from "./app-info";
 
-export const getNotifications = async (uid: string): Promise<{ lastChecked: string | null, notifitactions: Notification[]}> => {
+export const getNotifications = async (uid: string, limit = 25): Promise<{ lastChecked: string | null, notifitactions: Notification[], hasMore: boolean }> => {
+    const normalizedLimit = Math.max(1, limit);
+    const fetchLimit = normalizedLimit + 1;
     const { data: checkedData } = await supabaseAdmin
         .from('notification_checks')
         .select('date')
@@ -23,15 +25,20 @@ export const getNotifications = async (uid: string): Promise<{ lastChecked: stri
         .select('notification_id')
         .eq('user_id', uid);
     if (notifIdsError) throw notifIdsError;
-    if (!notifIds?.length) return { lastChecked, notifitactions: [] };
+    if (!notifIds?.length) return { lastChecked, notifitactions: [], hasMore: false };
     const { data, error } = await supabaseAdmin
         .from('notifications')
         .select('*')
         .in('id', notifIds.map(({ notification_id }: { notification_id: string }) => notification_id))
         .order('date', { ascending: false })
-        .limit(100)
+        .limit(fetchLimit)
     if (error) throw error;
-    return { lastChecked, notifitactions: data || [] as Notification[] };
+    const notifitactions = (data || []) as Notification[];
+    return {
+        lastChecked,
+        notifitactions: notifitactions.slice(0, normalizedLimit),
+        hasMore: notifitactions.length > normalizedLimit,
+    };
 }
 
 export const getNumberOfNotifications = async (uid: string): Promise<number> => {
