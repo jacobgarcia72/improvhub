@@ -14,12 +14,14 @@ export default async function SearchResults({ params }: { params: {
     location?: string;
     miles?: string;
     for?: 'theatres' | 'shows' | 'jams' | 'troupes' | 'classes' | 'workshops' | 'coaches' | 'musicians';
+    limit?: string;
 }}) {
     const eventTypes = [...allEventTypes.map((type) => pluralize(type)), 'all'];
     const theatre = params?.theatre?.trim();
     const location = params?.location?.trim();
     const miles = params?.miles?.trim();
     const searchFor = params?.for;
+    const limit = Number.parseInt(params?.limit || '', 10);
     let zipcode = '';
     let state = '';
     let city = '';
@@ -91,6 +93,8 @@ export default async function SearchResults({ params }: { params: {
                     state={state}
                     zipcode={zipcode}
                     miles={Number(miles)}
+                    limit={Number.isNaN(limit) ? undefined : limit}
+                    searchParams={params}
                 />
             ) : <>
                 {hasNoResults && <p className="text-gray-500 mt-4">No results found.</p>}

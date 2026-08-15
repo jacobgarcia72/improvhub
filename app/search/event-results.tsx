@@ -3,8 +3,26 @@ import { arrangeEventsByDate, pluralize, singularize } from '@/lib/helper-functi
 import { getOccurrencesForEvents, getEventsByTheatre, getEventsInRange } from '@/lib/shows';
 import { allEventTypes, Event, EventOccurrence, EventType } from '@/types';
 import ItemCard from './item-card';
+import Link from 'next/link';
+import Button from '@/components/form/button';
 
-export default async function EventResults({ showTheatre = true, eventType = 'all', city, state, theatre, zipcode, miles, limit }: {
+const DEFAULT_LIMIT = 30;
+
+const getLimit = (limit?: number) => {
+    if (!limit || limit < DEFAULT_LIMIT) return DEFAULT_LIMIT;
+    return Math.ceil(limit / DEFAULT_LIMIT) * DEFAULT_LIMIT;
+}
+
+const getLoadMoreHref = (params: { [key: string]: string | undefined }, nextLimit: number) => {
+    const nextParams = new URLSearchParams();
+    Object.entries(params).forEach(([key, value]) => {
+        if (value) nextParams.set(key, value);
+    });
+    nextParams.set('limit', nextLimit.toString());
+    return `/search?${nextParams.toString()}`;
+}
+
+export default async function EventResults({ showTheatre = true, eventType = 'all', city, state, theatre, zipcode, miles, limit, searchParams = {} }: {
     eventType?: string;
     city?: string;
     state?: string;
@@ -13,7 +31,9 @@ export default async function EventResults({ showTheatre = true, eventType = 'al
     miles?: number;
     limit?: number;
     showTheatre?: boolean;
+    searchParams?: { [key: string]: string | undefined };
 }) {
+    const normalizedLimit = getLimit(limit);
     const handleSearchParams = async () => {
         const type = eventType === 'all' ? 'all' : singularize(eventType) as EventType;
         let events: Event[] = [];
@@ -31,11 +51,17 @@ export default async function EventResults({ showTheatre = true, eventType = 'al
         } else {
             eventDates = await getOccurrencesForEvents(events.map(({ id }) => id), type);
         }
-        return await arrangeEventsByDate(eventDates, events, undefined, limit);
+        return await arrangeEventsByDate(eventDates, events, undefined, normalizedLimit + 1);
     }
 
     const hasActiveQuery = Boolean(theatre || zipcode || (city && state));
-    const results = await handleSearchParams();
+    const allResults = await handleSearchParams();
+    const resultDates = allResults ? Object.keys(allResults) : [];
+    const visibleDates = resultDates.slice(0, normalizedLimit);
+    const hasMore = resultDates.length > normalizedLimit;
+    const results = allResults && visibleDates.length ? Object.fromEntries(
+        visibleDates.map((date) => [date, allResults[date]])
+    ) : null;
     const hasNoResults = hasActiveQuery && !results;
 
     return (
@@ -51,6 +77,13 @@ export default async function EventResults({ showTheatre = true, eventType = 'al
                     </div>
                 </div>
             ))}
+            {hasMore ? (
+                <div className="mt-4 mb-2 flex w-full justify-center">
+                    <Link href={getLoadMoreHref(searchParams, normalizedLimit + DEFAULT_LIMIT)} scroll={false}>
+                        <Button caption="Load More" style="link" />
+                    </Link>
+                </div>
+            ) : null}
         </>
     )
 }
