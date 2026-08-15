@@ -1,5 +1,5 @@
 import TheatreForm from "@/components/form/theatre-form";
-import { getTheatre } from "@/lib/theatres";
+import { canManageTheatre, getTheatre } from "@/lib/theatres";
 import { getCurrentUserId } from "@/lib/users";
 import { notFound } from "next/navigation";
 import { appName } from '@/lib/app-info';
@@ -34,9 +34,7 @@ export default async function ManageTheatre({ params }: Props) {
     if (!theatre) notFound();
 
     const userId = await getCurrentUserId();
-    const canManage = userId && (
-        !theatre.admins?.length || theatre.admins.includes(userId)
-    );
+    const canManage = canManageTheatre(theatre, userId);
     if (!canManage) notFound();
 
     return (

@@ -10,8 +10,10 @@ import { destroyImage, uploadImage } from '@/lib/cloudinary';
 import { getTroupe, getTroupeMembers, leaveTroupe as leaveTroupeRecord, saveTroupe, updateTroupe as updateTroupeRecord, updateTroupeDetails as updateTroupeDetailsRecord } from '@/lib/troupes';
 import { getCurrentUserId, updateUser } from "@/lib/users";
 import { revalidatePath } from 'next/cache';
-import { getTheatre, saveTheatre, updateTheatre } from '@/lib/theatres';
+import { canManageTheatre, getTheatre, saveTheatre, updateTheatre, updateTheatreAdmins } from '@/lib/theatres';
 import { saveFeedback } from '@/lib/feedback';
+import { approveTheatreClaim, getSiteAdminIds, isSiteAdmin, rejectTheatreClaim, submitTheatreClaim } from '@/lib/admins';
+import { postNotification } from '@/lib/notifications';
 
 export async function postEvent(type: EventType, existingEvent: Event | null = null, prevState: void | { message?: string }, formData: FormData) {
     const currentUser = await getCurrentUserId();
@@ -439,6 +441,11 @@ export async function postTheatre(existingTheatre: Theatre | null, prevState: vo
     const userId = await getCurrentUserId();
     if (!userId) throw new Error('You must be logged in to continue');
 
+    const currentTheatre = existingTheatre ? await getTheatre(existingTheatre.id) : null;
+    if (existingTheatre && (!currentTheatre || !canManageTheatre(currentTheatre, userId))) {
+        throw new Error('You must be a theatre admin to update it');
+    }
+
     const data = Object.fromEntries(formData.entries());
 
     const name = (data.name as string)?.trim() || null;
@@ -484,8 +491,75 @@ export async function postTheatre(existingTheatre: Theatre | null, prevState: vo
         website
     }
 
-    const theatreId = existingTheatre ? await updateTheatre(theatre) : await saveTheatre(theatre, userId);
+    const theatreId = currentTheatre ? await updateTheatre(theatre) : await saveTheatre(theatre, userId);
     redirect(`/theatres/${theatreId}`);
+}
+
+export async function postTheatreClaim(theatreId: string, prevState: void | { message?: string }, formData: FormData) {
+    const userId = await getCurrentUserId();
+    if (!userId) return { message: 'You must be logged in to claim this theatre' };
+
+    const proof = (formData.get('proof') as string)?.trim();
+    if (!proof || proof.length < 20) {
+        return { message: 'Please include a short note explaining your connection to the theatre.' };
+    }
+
+    const theatre = await getTheatre(theatreId);
+    if (!theatre) throw new Error('Cannot find record of theatre');
+    if (theatre.admins?.length) {
+        return { message: 'This theatre already has an admin.' };
+    }
+
+    await submitTheatreClaim(theatreId, userId, proof);
+    const siteAdminIds = (await getSiteAdminIds()).filter((adminId) => adminId !== userId);
+    if (siteAdminIds.length) {
+        await postNotification(userId, siteAdminIds, 'theatre_claim_submitted', theatreId);
+    }
+    revalidatePath('/admin/review-theatre-claims');
+    redirect(`/theatres/${theatreId}/claim?submitted=true`);
+}
+
+export async function postTheatreAdmins(theatreId: string, prevState: void | { message?: string }, formData: FormData) {
+    const userId = await getCurrentUserId();
+    if (!userId) throw new Error('You must be logged in to continue');
+
+    const data = Object.fromEntries(formData.entries());
+    const admins = Object.keys(data)
+        .filter((key) => (
+            (key.split('-')[0] === 'admin') &&
+            (key.split('-')[2] !== 'id') &&
+            Boolean((data[key] as string).trim())
+        ))
+        .map((key) => (data[`${key}-id`] as string)?.trim())
+        .filter((admin): admin is string => Boolean(admin));
+    if (!admins.length) return { message: 'Theatre must have at least one admin' };
+
+    await updateTheatreAdmins(theatreId, admins, userId);
+    revalidatePath(`/theatres/${theatreId}`, 'layout');
+    redirect(`/theatres/${theatreId}`);
+}
+
+export async function approveTheatreClaimAction(formData: FormData) {
+    const userId = await getCurrentUserId();
+    if (!await isSiteAdmin(userId)) throw new Error('You must be an admin to review theatre claims');
+
+    const claimId = (formData.get('claimId') as string)?.trim();
+    if (!claimId) throw new Error('Claim id is required');
+
+    const theatreId = await approveTheatreClaim(claimId, userId as string);
+    revalidatePath('/admin/review-theatre-claims');
+    if (theatreId) revalidatePath(`/theatres/${theatreId}`, 'layout');
+}
+
+export async function rejectTheatreClaimAction(formData: FormData) {
+    const userId = await getCurrentUserId();
+    if (!await isSiteAdmin(userId)) throw new Error('You must be an admin to review theatre claims');
+
+    const claimId = (formData.get('claimId') as string)?.trim();
+    if (!claimId) throw new Error('Claim id is required');
+
+    await rejectTheatreClaim(claimId, userId as string);
+    revalidatePath('/admin/review-theatre-claims');
 }
 
 export async function submitFeedback(prevState: void | { message?: string }, formData: FormData) {

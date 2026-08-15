@@ -34,6 +34,11 @@ create table if not exists user_roles (
   coach boolean
 );
 
+create table if not exists admins (
+  user_id text primary key references users(id) on delete cascade,
+  created_at timestamptz not null default now()
+);
+
 create table if not exists theatres (
   id text primary key,
   name text not null,
@@ -44,8 +49,98 @@ create table if not exists theatres (
   website text,
   image text,
   creator_id text,
-  admins text[]
+  admins text[] default '{}'
 );
+
+create table if not exists theatre_claims (
+  id uuid primary key default gen_random_uuid(),
+  theatre_id text not null references theatres(id) on delete cascade,
+  claimant_id text not null references users(id) on delete cascade,
+  proof text not null,
+  status text not null default 'pending',
+  claimed_at timestamptz not null default now(),
+  reviewed_by text references users(id) on delete set null,
+  reviewed_at timestamptz,
+  constraint theatre_claims_status_check check (status in ('pending', 'approved', 'rejected'))
+);
+
+create index if not exists theatre_claims_theatre_id_idx
+on theatre_claims(theatre_id);
+
+create index if not exists theatre_claims_status_idx
+on theatre_claims(status);
+
+create unique index if not exists theatre_claims_pending_claimant_idx
+on theatre_claims(theatre_id, claimant_id)
+where status = 'pending';
+
+create or replace function approve_theatre_claim(
+  p_claim_id uuid,
+  p_reviewer_id text
+)
+returns theatre_claims
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  claim_record theatre_claims;
+  updated_count integer;
+begin
+  if not exists (select 1 from admins where user_id = p_reviewer_id) then
+    raise exception 'Reviewer is not an admin';
+  end if;
+
+  select *
+  into claim_record
+  from theatre_claims
+  where id = p_claim_id
+    and status = 'pending'
+  for update;
+
+  if not found then
+    return null;
+  end if;
+
+  update theatres
+  set
+    admins = array[claim_record.claimant_id],
+    creator_id = coalesce(creator_id, claim_record.claimant_id)
+  where id = claim_record.theatre_id
+    and coalesce(cardinality(admins), 0) = 0;
+
+  get diagnostics updated_count = row_count;
+
+  if updated_count = 0 then
+    update theatre_claims
+    set
+      status = 'rejected',
+      reviewed_by = p_reviewer_id,
+      reviewed_at = now()
+    where id = claim_record.id;
+    return null;
+  end if;
+
+  update theatre_claims
+  set
+    status = 'approved',
+    reviewed_by = p_reviewer_id,
+    reviewed_at = now()
+  where id = claim_record.id
+  returning * into claim_record;
+
+  update theatre_claims
+  set
+    status = 'rejected',
+    reviewed_by = p_reviewer_id,
+    reviewed_at = now()
+  where theatre_id = claim_record.theatre_id
+    and status = 'pending'
+    and id <> claim_record.id;
+
+  return claim_record;
+end;
+$$;
 
 create table if not exists shows (
   id text primary key,
@@ -346,6 +441,7 @@ USING ( auth.uid() = user_id );
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.sessions TO service_role;
 
 -- Grant privileges on other tables your app writes to
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.admins TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.classes TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.class_occurrences TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.comments TO service_role;
@@ -367,6 +463,7 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.show_occurrences TO service
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.submission_forms TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.submission_form_submissions TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.theatres TO service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.theatre_claims TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.topics TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.troupe_cast_confirmations TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.troupes TO service_role;
@@ -379,3 +476,4 @@ GRANT SELECT ON TABLE public.notification_ids TO authenticated;
 
 -- Grant sequence privileges for auto-incrementing IDs (if used)
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO service_role;
+GRANT EXECUTE ON FUNCTION public.approve_theatre_claim(uuid, text) TO service_role;

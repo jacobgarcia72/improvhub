@@ -1,6 +1,6 @@
 import Loader from "@/components/loader";
 import { pluralize } from "@/lib/helper-functions";
-import { canDeleteTheatre, getTheatre } from "@/lib/theatres";
+import { canDeleteTheatre, canManageTheatre, getTheatre } from "@/lib/theatres";
 import { getCurrentUserId, getFollowCount } from "@/lib/users";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -29,9 +29,8 @@ export default async function TheatreDetailsPage({ params }: {
     }
 
     const userId = await getCurrentUserId();
-    const canManage = userId && (
-        !theatre.admins?.length || theatre.admins.includes(userId)
-    );
+    const hasAdmins = Boolean(theatre.admins?.length);
+    const canManage = canManageTheatre(theatre, userId);
     const canDelete = canDeleteTheatre(theatre, userId);
     const followerCount = userId ? await getFollowCount(id, 'theatre') : null;
     return (
@@ -55,9 +54,21 @@ export default async function TheatreDetailsPage({ params }: {
                     {website && <a className="link" target="_blank" href={website}>{website}</a>}
                 </div>
                 {canManage ? (
-                    <Link href={`/manage/theatre/${id}`}>
-                        <Button caption="Edit Theatre" className="w-54 mt-3 ml-5" />
-                    </Link>
+                    <div className="mt-3 ml-5 flex flex-row flex-wrap gap-2">
+                        <Link href={`/manage/theatre/${id}`}>
+                            <Button caption="Edit Theatre" className="w-54" />
+                        </Link>
+                        {hasAdmins ? (
+                            <Link href={`/theatres/${id}/admins`}>
+                                <Button caption="Manage Admins" className="w-54" />
+                            </Link>
+                        ) : null}
+                        {!hasAdmins ? (
+                            <Link href={userId ? `/theatres/${id}/claim` : `/login?reroute=theatres%2F${id}%2Fclaim`}>
+                                <Button caption="Claim Theatre" className="w-54" />
+                            </Link>
+                        ) : null}
+                    </div>
                 ): null}
             </section>
             <section>

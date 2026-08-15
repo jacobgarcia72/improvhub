@@ -5,6 +5,7 @@ import { camelCaseObject, removeLeadingArticles } from "./helper-functions";
 import slugify from 'slugify';
 import { createNewsFeedItem } from "./news";
 import { theatres as mockDataTheatres } from "./mock-data";
+import { postNotification } from "./notifications";
 
 export const populateTheatresInDb = async () => {
   for (let i = 0; i < mockDataTheatres.length; i++) {
@@ -93,6 +94,7 @@ export async function saveTheatre(theatre: Theatre, userId: string): Promise<str
             zipcode: theatre.zipcode,
             website: theatre.website,
             creator_id: userId,
+            admins: [],
         });
     if (theatreInsertError) {
       console.error(theatreInsertError);
@@ -119,9 +121,38 @@ export async function updateTheatre(theatre: Theatre): Promise<string> {
     return theatre.id;
 }
 
+export function canManageTheatre(theatre: Theatre, userId: string | null): boolean {
+  if (!userId) return false;
+  return !theatre.admins?.length || theatre.admins.includes(userId);
+}
+
 export function canDeleteTheatre(theatre: Theatre, userId: string | null): boolean {
   if (!userId) return false;
   return theatre.creatorId === userId || Boolean(theatre.admins?.includes(userId));
+}
+
+export async function updateTheatreAdmins(theatreId: string, admins: string[], userId: string): Promise<void> {
+  const theatre = await getTheatre(theatreId);
+  if (!theatre) throw new Error('Cannot find record of theatre');
+  if (!theatre.admins?.includes(userId)) {
+    throw new Error('You must be a theatre admin to update admins');
+  }
+  if (!admins.length) {
+    throw new Error('Theatre must have at least one admin');
+  }
+
+  const currentAdmins = theatre.admins || [];
+  const uniqueAdmins = [...new Set(admins)];
+  const { error } = await supabaseAdmin
+    .from('theatres')
+    .update({ admins: uniqueAdmins })
+    .eq('id', theatreId);
+  if (error) throw error;
+
+  const newAdmins = uniqueAdmins.filter((admin) => !currentAdmins.includes(admin) && admin !== userId);
+  if (newAdmins.length) {
+    await postNotification(userId, newAdmins, 'made_admin', `theatre,${theatreId}`);
+  }
 }
 
 export async function deleteTheatre(theatreId: string): Promise<void> {

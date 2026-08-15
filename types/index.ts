@@ -13,6 +13,19 @@ export interface Theatre {
     admins?: string[];
 }
 
+export type TheatreClaimStatus = 'pending' | 'approved' | 'rejected';
+
+export interface TheatreClaim {
+    id: string;
+    theatreId: string;
+    claimantId: string;
+    proof: string;
+    status: TheatreClaimStatus;
+    claimedAt: string;
+    reviewedBy?: string | null;
+    reviewedAt?: string | null;
+}
+
 export type Candence = '1' | '2' | '3' | '4' | '5' | '13' | '24' |'135' | '12345' | 'last';
 
 export const CadenceText: { [cadence: string]: string } = {
@@ -244,6 +257,7 @@ export type NotificationType =
     'class_occurrence_cancelled' |
     'made_admin' |
     'made_instructor' |
+    'theatre_claim_submitted' |
     'new_submission' |
     'new_submission_form' |
     'audition_slot_assigned' |

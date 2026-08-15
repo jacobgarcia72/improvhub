@@ -12,6 +12,7 @@ import { getEvent, getShow, getTroupeCastConfirmation } from "@/lib/shows";
 import { formatDateTimeForDisplay } from "@/lib/dates";
 import { getSubmissionById, getSubmissionFormById } from "@/lib/submission-forms";
 import TroupeCastConfirmationButtons from "@/components/troupe-cast-confirmation-buttons";
+import { getTheatre } from "@/lib/theatres";
 
 function Wrapper({ children, date, image, imageLink, imageAlt, isNew }: { children: React.ReactNode, date: string, image?: string | null, imageLink?: string, imageAlt?: string, isNew: boolean }) {
     return (
@@ -240,23 +241,55 @@ export default async function NotificationCard({ notification, userId, isNew }: 
         case 'made_instructor':
         case 'made_admin':
             if (!data) return null;
-            const [instructorEventType, instructorEventId] = data.split(',');
-            const instructorAddedBy = await getUserAbbreviated(senderId);
-            const instructorEvent = await getEvent(instructorEventId, instructorEventType as EventType);
+            const [adminPageType, adminPageId] = data.split(',');
+            const adminAddedById = await getUserAbbreviated(senderId);
+            if (adminPageType === 'theatre') {
+                const theatre = await getTheatre(adminPageId);
+                if (!theatre) return null;
+                return <Wrapper date={date} isNew={isNew} image={theatre.image || adminAddedById?.image} imageLink={theatre.image ? `/theatres/${adminPageId}` : `/profile/${senderId}`} imageAlt={theatre.image ? theatre.name : adminAddedById?.name}>
+                    <p>
+                        {adminAddedById ? <>
+                            <Link href={`/profile/${senderId}`} className="link">
+                                {adminAddedById.name}
+                            </Link> added you as an admin
+                        </> : <>
+                            You&apos;ve been added as an admin
+                        </>} for <Link className="link" href={`/theatres/${adminPageId}`}>{theatre.name}</Link>
+                    </p>
+                </Wrapper>
+            }
+            const instructorEvent = await getEvent(adminPageId, adminPageType as EventType);
             if (!instructorEvent) return null;
             let instructorTitle = 'an admin';
             if (type === 'made_instructor') {
-                instructorTitle = instructorEventType === 'jam' ? 'a host' : 'an instructor';
+                instructorTitle = adminPageType === 'jam' ? 'a host' : 'an instructor';
             }
-            return <Wrapper date={date} isNew={isNew} image={instructorEvent.image || instructorAddedBy?.image} imageLink={instructorEvent.image ? `/${pluralize(instructorEventType)}/${instructorEventId}` : `/profile/${senderId}`} imageAlt={instructorEvent.image ? instructorEvent.title : instructorAddedBy?.name}>
+            return <Wrapper date={date} isNew={isNew} image={instructorEvent.image || adminAddedById?.image} imageLink={instructorEvent.image ? `/${pluralize(adminPageType)}/${adminPageId}` : `/profile/${senderId}`} imageAlt={instructorEvent.image ? instructorEvent.title : adminAddedById?.name}>
                 <p>
-                    {instructorAddedBy ? <>
+                    {adminAddedById ? <>
                         <Link href={`/profile/${senderId}`} className="link">
-                            {instructorAddedBy.name}
+                            {adminAddedById.name}
                         </Link> added you as {instructorTitle}
                     </> : <>
                         You&apos;ve been added  as {instructorTitle}
-                    </>} for <Link className="link" href={`/${pluralize(instructorEventType)}/${instructorEventId}`}>{instructorEvent.title}</Link>
+                    </>} for <Link className="link" href={`/${pluralize(adminPageType)}/${adminPageId}`}>{instructorEvent.title}</Link>
+                </p>
+            </Wrapper>
+        case 'theatre_claim_submitted':
+            if (!data) return null;
+            const claimTheatre = await getTheatre(data);
+            const claimSender = await getUserAbbreviated(senderId);
+            return <Wrapper date={date} isNew={isNew} image={claimTheatre?.image || claimSender?.image} imageLink="/admin/review-theatre-claims" imageAlt={claimTheatre?.name || claimSender?.name}>
+                <p>
+                    {claimSender ? (
+                        <Link href={`/profile/${senderId}`} className="link">
+                            {claimSender.name}
+                        </Link>
+                    ) : 'Someone'} submitted a claim for {claimTheatre ? (
+                        <Link href={`/theatres/${claimTheatre.id}`} className="link">
+                            {claimTheatre.name}
+                        </Link>
+                    ) : 'a theatre'}. <Link href="/admin/review-theatre-claims" className="link">Review claims</Link>
                 </p>
             </Wrapper>
         case 'new_comment':
