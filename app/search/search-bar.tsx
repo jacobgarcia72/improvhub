@@ -5,10 +5,11 @@ import DistanceSelect from "@/components/form/distance-select";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import TheatreSearchBar from "./theatre-search-bar";
 import { formatDate } from "@/lib/dates";
+import { Theatre } from "@/types";
 
 const eventSearchTypes = ['all', 'classes', 'jams', 'shows', 'workshops'];
 
-export default function SearchBar() {
+export default function SearchBar({ theatres: userTheatres }: { theatres?: (Theatre | string)[] }) {
     const searchTypes = ['theatre', 'location', 'miles'];
     const searchParams = useSearchParams();
     const pathname = usePathname();
@@ -16,12 +17,16 @@ export default function SearchBar() {
     const params = new URLSearchParams(searchParams);
     const searchFor = searchParams.get('for');
 
-    const theatre = searchParams.get('theatre')?.trim() || '';
+    const theatreValues = searchParams.getAll('theatre').map((value) => value.trim()).filter(Boolean);
+    const theatre = theatreValues[0] || '';
     const location = searchParams.get('location')?.trim() || '';
     const miles = searchParams.get('miles')?.trim() || '';
     const startDate = searchParams.get('startDate')?.trim() || formatDate(new Date());
     const showStartDate = searchFor ? eventSearchTypes.includes(searchFor) : false;
+    const userTheatreValues = userTheatres?.map((t) => typeof t === 'string' ? t : t.id) || [];
     const [searchBy, setSearchBy] = useState(() => {
+        if (theatreValues.length > 1 && theatreValues.every((value) => userTheatreValues.includes(value))) return 'my-theatres';
+        if (theatreValues.length === 1 && userTheatreValues.includes(theatreValues[0])) return theatreValues[0];
         if (theatre) return 'theatre';
         if (location) return 'location';
         return ''
@@ -37,9 +42,14 @@ export default function SearchBar() {
         }
     }
 
-    const handleSearch = (type: string, term: string) => {
+    const handleSearch = (type: string, term: string | string[]) => {
         params.delete('limit');
-        if (term) {
+        if (Array.isArray(term)) {
+            params.delete(type);
+            term.forEach((value) => {
+                if (value) params.append(type, value);
+            });
+        } else if (term) {
             params.set(type, term);
         } else {
             params.delete(type);
@@ -96,15 +106,27 @@ export default function SearchBar() {
                     value={searchBy}
                     className="w-full border border-gray-300 rounded px-3 py-2"
                     onChange={(e) => {
-                        setSearchBy(e.currentTarget.value);
+                        const value = e.currentTarget.value;
+                        setSearchBy(value);
                         searchTypes.forEach((type) => params.delete(type))
                         params.delete('limit');
+                        if (value === 'my-theatres') {
+                            userTheatreValues.forEach((theatre) => params.append('theatre', theatre));
+                        } else if (value && !searchTypes.includes(value)) {
+                            params.set('theatre', value);
+                        }
                         replace(`${pathname}?${params.toString()}`);
                     }}
                 >
                     <option value=""></option>
                     <option value="location">Location</option>
                     <option value="theatre">Theatre Name</option>
+                    {userTheatres?.length ? <>
+                        {userTheatres.length > 1 ? (
+                            <option value="my-theatres">My Theatres</option>
+                        ) : null}
+                        {userTheatres.map((t, i) => <option key={i} value={typeof t === 'string' ? t : t.id}>{typeof t === 'string' ? t : t.name}</option>)}
+                    </> : null}
                 </select>
             </div>
             {SearchParams()}

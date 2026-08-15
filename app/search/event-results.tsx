@@ -7,16 +7,31 @@ import Link from 'next/link';
 import Button from '@/components/form/button';
 
 const DEFAULT_LIMIT = 30;
+type SearchParamValue = string | string[] | undefined;
 
 const getLimit = (limit?: number) => {
     if (!limit || limit < DEFAULT_LIMIT) return DEFAULT_LIMIT;
     return Math.ceil(limit / DEFAULT_LIMIT) * DEFAULT_LIMIT;
 }
 
-const getLoadMoreHref = (params: { [key: string]: string | undefined }, nextLimit: number) => {
+const getSearchParamValues = (value: SearchParamValue): string[] => (
+    (Array.isArray(value) ? value : [value]).filter(Boolean).map((item) => item!.trim()).filter(Boolean)
+);
+
+const uniqueEvents = (events: Event[]): Event[] => {
+    const seen = new Set<string>();
+    return events.filter((event) => {
+        const key = `${event.type || ''}:${event.id}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+    });
+}
+
+const getLoadMoreHref = (params: { [key: string]: SearchParamValue }, nextLimit: number) => {
     const nextParams = new URLSearchParams();
     Object.entries(params).forEach(([key, value]) => {
-        if (value) nextParams.set(key, value);
+        getSearchParamValues(value).forEach((item) => nextParams.append(key, item));
     });
     nextParams.set('limit', nextLimit.toString());
     return `/search?${nextParams.toString()}`;
@@ -26,21 +41,22 @@ export default async function EventResults({ showTheatre = true, eventType = 'al
     eventType?: string;
     city?: string;
     state?: string;
-    theatre?: string;
+    theatre?: string | string[];
     zipcode?: string;
     miles?: number;
     limit?: number;
     startDate?: string;
     showTheatre?: boolean;
-    searchParams?: { [key: string]: string | undefined };
+    searchParams?: { [key: string]: SearchParamValue };
 }) {
     const normalizedLimit = getLimit(limit);
     const normalizedStartDate = startDate && /^\d{4}-\d{2}-\d{2}$/.test(startDate) ? startDate : undefined;
+    const theatreValues = getSearchParamValues(theatre);
     const handleSearchParams = async () => {
         const type = eventType === 'all' ? 'all' : singularize(eventType) as EventType;
         let events: Event[] = [];
-        if (theatre) {
-            events = await getEventsByTheatre(theatre, type);
+        if (theatreValues.length) {
+            events = uniqueEvents((await Promise.all(theatreValues.map((theatre) => getEventsByTheatre(theatre, type)))).flat());
         } else if (zipcode || (city && state)) {
             events = await getEventsInRange(zipcode || `${city} ${state}`, miles || 0, type);
         }
@@ -56,7 +72,7 @@ export default async function EventResults({ showTheatre = true, eventType = 'al
         return await arrangeEventsByDate(eventDates, events, normalizedStartDate, normalizedLimit + 1);
     }
 
-    const hasActiveQuery = Boolean(theatre || zipcode || (city && state));
+    const hasActiveQuery = Boolean(theatreValues.length || zipcode || (city && state));
     const allResults = await handleSearchParams();
     const resultDates = allResults ? Object.keys(allResults) : [];
     const visibleDates = resultDates.slice(0, normalizedLimit);

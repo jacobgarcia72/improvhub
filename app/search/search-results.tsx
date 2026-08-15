@@ -12,23 +12,37 @@ import Link from 'next/link';
 import Button from '@/components/form/button';
 
 const CARD_RESULTS_PAGE_SIZE = 24;
+type SearchParamValue = string | string[] | undefined;
 
 const getCardResultsLimit = (limit?: number) => {
     if (!limit || limit < CARD_RESULTS_PAGE_SIZE) return CARD_RESULTS_PAGE_SIZE;
     return Math.ceil(limit / CARD_RESULTS_PAGE_SIZE) * CARD_RESULTS_PAGE_SIZE;
 }
 
-const getLoadMoreHref = (params: { [key: string]: string | undefined }, nextLimit: number) => {
+const getSearchParamValues = (value: SearchParamValue): string[] => (
+    (Array.isArray(value) ? value : [value]).filter(Boolean).map((item) => item!.trim()).filter(Boolean)
+);
+
+const uniqueById = <T extends { id: string }>(items: T[]): T[] => {
+    const seen = new Set<string>();
+    return items.filter((item) => {
+        if (seen.has(item.id)) return false;
+        seen.add(item.id);
+        return true;
+    });
+}
+
+const getLoadMoreHref = (params: { [key: string]: SearchParamValue }, nextLimit: number) => {
     const nextParams = new URLSearchParams();
     Object.entries(params).forEach(([key, value]) => {
-        if (value) nextParams.set(key, value);
+        getSearchParamValues(value).forEach((item) => nextParams.append(key, item));
     });
     nextParams.set('limit', nextLimit.toString());
     return `/search?${nextParams.toString()}`;
 }
 
 export default async function SearchResults({ params }: { params: {
-    theatre?: string;
+    theatre?: string | string[];
     location?: string;
     miles?: string;
     for?: 'theatres' | 'shows' | 'jams' | 'troupes' | 'classes' | 'workshops' | 'coaches' | 'musicians';
@@ -36,7 +50,8 @@ export default async function SearchResults({ params }: { params: {
     startDate?: string;
 }}) {
     const eventTypes = [...allEventTypes.map((type) => pluralize(type)), 'all'];
-    const theatre = params?.theatre?.trim();
+    const theatreValues = getSearchParamValues(params?.theatre);
+    const theatre = theatreValues[0];
     const location = params?.location?.trim();
     const miles = params?.miles?.trim();
     const searchFor = params?.for;
@@ -59,13 +74,12 @@ export default async function SearchResults({ params }: { params: {
     }
     const theatres = await getAllTheatres();
 
-    const getAvailableUsersByTheatre = async (role: Role, theatre: string): Promise<User[]> => {
-        const theatreDetails = await getTheatre(theatre);
-        const searchTerms = [
-            theatre,
-            theatreDetails?.id,
-            theatreDetails?.name,
-        ].filter(Boolean).map((term) => term!.toLowerCase());
+    const getAvailableUsersByTheatres = async (role: Role, theatres: string[]): Promise<User[]> => {
+        const theatreDetails = await Promise.all(theatres.map(getTheatre));
+        const theatreDetailTerms = theatreDetails.flatMap((theatre) => (
+            theatre ? [theatre.id, theatre.name] : []
+        ));
+        const searchTerms = theatres.concat(theatreDetailTerms).map((term) => term.toLowerCase());
 
         return shuffle((await getAvailableUsersByRole(role)).filter((user) => (
             user.theatres?.some((userTheatre) => {
@@ -80,16 +94,17 @@ export default async function SearchResults({ params }: { params: {
     const handleSearchParams = async () => {
         const radius = Number(miles);
         if (searchFor === 'theatres') {
+            if (theatreValues.length > 1) return await Promise.all(theatreValues.map(getTheatre));
             if (theatre) return await Promise.all(filterArrayBySearchTerm(theatres, theatre, cardResultsLimit + 1).map(async (res) => await getTheatre(typeof res === 'string' ? res : res.id.toString())));
             if (city && state) return await getTheatresByCity(city, state, radius);
             if (state) return await getTheatresByState(state);
             if (zipcode) return await getTheatresByZipcode(zipcode, radius || 1);
         } else if (searchFor === 'troupes') {
-            if (theatre) return shuffle(await getTroupesByTheatre(theatre) as Troupe[]);
+            if (theatreValues.length) return shuffle(uniqueById((await Promise.all(theatreValues.map(getTroupesByTheatre))).flat() as Troupe[]));
             if (zipcode || (city && state)) return shuffle(await getTroupesInRange(zipcode || `${city} ${state}`, radius || 0) as Troupe[]);
         } else if (searchFor === 'coaches' || searchFor === 'musicians') {
             const role = searchFor === 'coaches' ? 'coach' : 'musician';
-            if (theatre) return getAvailableUsersByTheatre(role, theatre);
+            if (theatreValues.length) return getAvailableUsersByTheatres(role, theatreValues);
             if (city && state) return shuffle(await getAvailableUsersByRoleInRange(role, `${city} ${state}`, radius || 0));
             if (zipcode) return shuffle(await getAvailableUsersByRoleInRange(role, zipcode, radius || 1));
             if (state) return shuffle((await getAvailableUsersByRole(role)).filter((user) => user.state?.toLowerCase() === state.toLowerCase()));
@@ -111,7 +126,7 @@ export default async function SearchResults({ params }: { params: {
             {searchFor && eventTypes.includes(searchFor) ? (
                 <EventResults
                     eventType={searchFor}
-                    theatre={theatre}
+                    theatre={theatreValues.length > 1 ? theatreValues : theatre}
                     city={city}
                     state={state}
                     zipcode={zipcode}
