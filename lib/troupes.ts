@@ -10,6 +10,7 @@ import { destroyImage } from "./cloudinary";
 import { revalidatePath } from "next/cache";
 import { createNewsFeedItem } from "./news";
 import { postNotification } from "./notifications";
+import { getTheatre } from "./theatres";
 
 export async function getTroupe(id: string): Promise<Troupe | null> {
     const { data, error } = await supabaseAdmin
@@ -33,13 +34,34 @@ export async function getAllTroupes(): Promise<{ name: string, id: string, image
     }));
 }
 
-export async function getTroupesByTheatre(theatre: string) {
+const normalizeTheatreSearchTerm = (value: string) => removeLeadingArticles(value).trim().toLowerCase();
+
+export async function getTroupesByTheatre(theatreString: string): Promise<Troupe[]> {
+    const theatre = await getTheatre(theatreString);
+    const searchTerms = [
+        theatreString,
+        theatre?.id,
+        theatre?.name,
+        theatre?.name ? removeLeadingArticles(theatre.name) : undefined,
+    ].filter(Boolean).map((term) => normalizeTheatreSearchTerm(term as string));
+    const uniqueSearchTerms = [...new Set(searchTerms)].filter(Boolean);
+
     const { data, error } = await supabaseAdmin
         .from('troupes')
         .select('*')
-        .contains('theatres', [theatre]);
+        .not('theatres', 'is', null);
     if (error) throw error;
-    return (data || []).map(camelCaseObject);
+
+    return (data || [])
+        .filter((troupe: any) => {
+            const troupeTheatres = (troupe.theatres || []).map((theatre: string) => normalizeTheatreSearchTerm(theatre));
+            return uniqueSearchTerms.some((searchTerm) =>
+                troupeTheatres.some((troupeTheatre: string) =>
+                    troupeTheatre.includes(searchTerm) || searchTerm.includes(troupeTheatre)
+                )
+            );
+        })
+        .map(camelCaseObject) as Troupe[];
 }
 
 export async function getOpenTroupes(user: User, role: Role): Promise<Troupe[]> {

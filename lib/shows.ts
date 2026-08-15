@@ -13,8 +13,30 @@ import { getTroupeMembers, getTroupesByUser } from './troupes';
 import { createNewsFeedItem, deleteNewsFeedItem } from './news';
 import { getCurrentUserId, getFriendIds, getFriends } from './users';
 import { postNotification } from './notifications';
+import { getTheatre } from './theatres';
 
 export type TroupeCastConfirmationFilter = 'any' | 'confirmed' | 'not_declined';
+
+const normalizeTheatreSearchTerm = (value: string) => removeLeadingArticles(value).trim().toLowerCase();
+
+const getTheatreSearchTerms = async (theatreString: string): Promise<string[]> => {
+    const theatre = await getTheatre(theatreString);
+    const terms = [
+        theatreString,
+        theatre?.id,
+        theatre?.name,
+        theatre?.name ? removeLeadingArticles(theatre.name) : undefined,
+    ].filter(Boolean).map((term) => normalizeTheatreSearchTerm(term as string));
+    return [...new Set(terms)].filter(Boolean);
+}
+
+const matchesTheatreSearch = (eventTheatre: string | null | undefined, searchTerms: string[]): boolean => {
+    if (!eventTheatre || !searchTerms.length) return false;
+    const normalizedEventTheatre = normalizeTheatreSearchTerm(eventTheatre);
+    return searchTerms.some((searchTerm) =>
+        normalizedEventTheatre.includes(searchTerm) || searchTerm.includes(normalizedEventTheatre)
+    );
+}
 
 export async function getEvent(id: string, type: EventType): Promise<Event | null> {
     const { data, error } = await supabaseAdmin
@@ -415,13 +437,18 @@ export async function getShowCast(showId: string, dateTime: string): Promise<Sho
 }
 
 export async function getEventsByTheatre(theatre: string, type: EventTypeFilter): Promise<Event[]> {
+    const searchTerms = await getTheatreSearchTerms(theatre);
+    if (!searchTerms.length) return [];
+
     if (type === 'all') {
         const eventResults = await Promise.all(allEventTypes.map(async (eventType) => {
             const { data } = await supabaseAdmin
                 .from(pluralize(eventType))
                 .select('*')
-                .ilike('theatre', theatre);
-            return (data || []).map((row: any) => ({ ...row, type: eventType }));
+                .not('theatre', 'is', null);
+            return (data || [])
+                .filter((row: any) => matchesTheatreSearch(row.theatre, searchTerms))
+                .map((row: any) => ({ ...row, type: eventType }));
         }));
         return eventResults.flat().map(camelCaseObject) as Event[];
     }
@@ -429,8 +456,10 @@ export async function getEventsByTheatre(theatre: string, type: EventTypeFilter)
     const { data } = await supabaseAdmin
         .from(pluralize(type))
         .select('*')
-        .ilike('theatre', theatre);
-    return (data || []).map(camelCaseObject) as Event[];
+        .not('theatre', 'is', null);
+    return (data || [])
+        .filter((event: any) => matchesTheatreSearch(event.theatre, searchTerms))
+        .map(camelCaseObject) as Event[];
 }
 
 export async function getEventsInRange(cityOrZipcode: string, miles: number, type: EventTypeFilter): Promise<Event[]> {
