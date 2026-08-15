@@ -159,7 +159,7 @@ export default async function FeedPage({ searchParams }: { searchParams: Promise
             </Suspense>
             {newsFeedData.hasMore ? (
                 <div className="mt-4 mb-2 flex justify-center">
-                    <Link href={`/feed?limit=${limit + PAGE_SIZE}`}>
+                    <Link href={`/feed?limit=${limit + PAGE_SIZE}`} scroll={false}>
                         <Button caption="Load More" style="link" />
                     </Link>
                 </div>

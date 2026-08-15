@@ -46,7 +46,7 @@ export default async function NotificationsPage({ searchParams }: { searchParams
             ))}
             {notificationData?.hasMore ? (
                 <div className="mt-4 mb-2 flex justify-center">
-                    <Link href={`/notifications?limit=${limit + PAGE_SIZE}&lastChecked=${encodeURIComponent(lastChecked)}`}>
+                    <Link href={`/notifications?limit=${limit + PAGE_SIZE}&lastChecked=${encodeURIComponent(lastChecked)}`} scroll={false}>
                         <Button caption="Load More" style="link" />
                     </Link>
                 </div>
