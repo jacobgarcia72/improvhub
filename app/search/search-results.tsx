@@ -8,6 +8,24 @@ import ItemCard from './item-card';
 import { Suspense } from 'react';
 import Loader from '@/components/loader';
 import { getAvailableUsersByRole, getAvailableUsersByRoleInRange, getCurrentUserId } from '@/lib/users';
+import Link from 'next/link';
+import Button from '@/components/form/button';
+
+const CARD_RESULTS_PAGE_SIZE = 24;
+
+const getCardResultsLimit = (limit?: number) => {
+    if (!limit || limit < CARD_RESULTS_PAGE_SIZE) return CARD_RESULTS_PAGE_SIZE;
+    return Math.ceil(limit / CARD_RESULTS_PAGE_SIZE) * CARD_RESULTS_PAGE_SIZE;
+}
+
+const getLoadMoreHref = (params: { [key: string]: string | undefined }, nextLimit: number) => {
+    const nextParams = new URLSearchParams();
+    Object.entries(params).forEach(([key, value]) => {
+        if (value) nextParams.set(key, value);
+    });
+    nextParams.set('limit', nextLimit.toString());
+    return `/search?${nextParams.toString()}`;
+}
 
 export default async function SearchResults({ params }: { params: {
     theatre?: string;
@@ -22,6 +40,7 @@ export default async function SearchResults({ params }: { params: {
     const miles = params?.miles?.trim();
     const searchFor = params?.for;
     const limit = Number.parseInt(params?.limit || '', 10);
+    const cardResultsLimit = getCardResultsLimit(Number.isNaN(limit) ? undefined : limit);
     let zipcode = '';
     let state = '';
     let city = '';
@@ -59,7 +78,7 @@ export default async function SearchResults({ params }: { params: {
     const handleSearchParams = async () => {
         const radius = Number(miles);
         if (searchFor === 'theatres') {
-            if (theatre) return await Promise.all(filterArrayBySearchTerm(theatres, theatre, 24).map(async (res) => await getTheatre(typeof res === 'string' ? res : res.id.toString())));
+            if (theatre) return await Promise.all(filterArrayBySearchTerm(theatres, theatre, cardResultsLimit + 1).map(async (res) => await getTheatre(typeof res === 'string' ? res : res.id.toString())));
             if (city && state) return await getTheatresByCity(city, state, radius);
             if (state) return await getTheatresByState(state);
             if (zipcode) return await getTheatresByZipcode(zipcode, radius || 1);
@@ -77,8 +96,10 @@ export default async function SearchResults({ params }: { params: {
     }
 
     const hasActiveQuery = Boolean(theatre || state || zipcode || (city && state));
-    const results = (await handleSearchParams()).filter(Boolean);
-    const hasNoResults = hasActiveQuery && results?.length === 0;
+    const allResults = (await handleSearchParams()).filter(Boolean);
+    const visibleResults = allResults.slice(0, cardResultsLimit);
+    const hasMoreResults = allResults.length > cardResultsLimit;
+    const hasNoResults = hasActiveQuery && allResults.length === 0;
 
     const userId = await getCurrentUserId();
 
@@ -98,9 +119,16 @@ export default async function SearchResults({ params }: { params: {
                 />
             ) : <>
                 {hasNoResults && <p className="text-gray-500 mt-4">No results found.</p>}
-                {results?.map((result, i) => result ? (
+                {visibleResults?.map((result, i) => result ? (
                     <ItemCard key={i} item={result} type={searchFor || ''} userId={userId || null} />
                 ) : null)}
+                {hasMoreResults ? (
+                    <div className="mt-4 mb-2 flex w-full justify-center">
+                        <Link href={getLoadMoreHref(params, cardResultsLimit + CARD_RESULTS_PAGE_SIZE)} scroll={false}>
+                            <Button caption="Load More" style="link" />
+                        </Link>
+                    </div>
+                ) : null}
             </>}
             </Suspense>
         </section>

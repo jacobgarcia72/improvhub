@@ -24,6 +24,7 @@ export default function SearchBar() {
 
     const handleSearchFor = (searchFor: string) => {
         replace(pathname);
+        params.delete('limit');
         if (searchFor) {
             params.set('for', searchFor);
             replace(`${pathname}?${params.toString()}`);
@@ -31,6 +32,7 @@ export default function SearchBar() {
     }
 
     const handleSearch = (type: string, term: string) => {
+        params.delete('limit');
         if (term) {
             params.set(type, term);
         } else {
@@ -90,6 +92,7 @@ export default function SearchBar() {
                     onChange={(e) => {
                         setSearchBy(e.currentTarget.value);
                         searchTypes.forEach((type) => params.delete(type))
+                        params.delete('limit');
                         replace(`${pathname}?${params.toString()}`);
                     }}
                 >
