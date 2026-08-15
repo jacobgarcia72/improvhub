@@ -3,7 +3,7 @@ import FollowButton from "@/components/follow-button";
 import { optimizeImage } from "@/lib/optimize-image";
 import { formatTime } from "@/lib/dates";
 import { getFollowing } from "@/lib/users";
-import { Event, Troupe, Theatre } from "@/types";
+import { Event, Troupe, Theatre, User } from "@/types";
 import Image from "next/image";
 import Link from "next/link";
 import { getTheatre } from "@/lib/theatres";
@@ -11,14 +11,15 @@ import { getTheatre } from "@/lib/theatres";
 export default async function ItemCard({
     item, type, time, date, userId, showTheatre = true
 } : {
-    item: Event | Troupe | Theatre | Partial<Theatre>, type: string, time?: string, date?: string, userId?: string | null, showTheatre?: boolean
+    item: Event | Troupe | Theatre | User | Partial<Theatre>, type: string, time?: string, date?: string, userId?: string | null, showTheatre?: boolean
 }) {
     const theatre = ('theatre' in item && item.theatre) ? await getTheatre(item.theatre) : null;
     const image = (
         item.image && optimizeImage(item.image, 600, 600, 100, true)
     ) || theatre?.image;
-    const name = 'name' in item ? item.name : 'title' in item ? item.title : '';
-    let link = `/${type}/${item.id}`;
+    let name = 'name' in item ? item.name : 'title' in item ? item.title : '';
+    if (!name && 'firstName' in item) name = `${item.firstName}${item.lastName ? ` ${item.lastName}` : ''}`;
+    let link = ['coaches', 'musicians'].includes(type) ? `/profile/${item.id}` : `/${type}/${item.id}`;
     if (date && time) link += `/${date}%20${time}`;
 
     let following = false;
@@ -56,6 +57,9 @@ export default async function ItemCard({
                         ) : null}
                         {'description' in item && item.description ? (
                             <p>{item.description.replaceAll('<br>', '\n')}</p>
+                        ) : null}
+                        {'bio' in item && item.bio ? (
+                            <p>{item.bio.replaceAll('<br>', '\n')}</p>
                         ) : null}
                         {'address' in item && item.address ? (
                             <p>{item.address}</p>

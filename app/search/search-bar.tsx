@@ -72,7 +72,9 @@ export default function SearchBar() {
                     <option value=""></option>
                     <option value="all">All Events</option>
                     <option value="classes">Classes</option>
+                    <option value="coaches">Coaches</option>
                     <option value="jams">Jams</option>
+                    <option value="musicians">Musicians</option>
                     <option value="shows">Shows</option>
                     {/* <option value="performers">Performers</option> */}
                     <option value="troupes">Troupes</option>

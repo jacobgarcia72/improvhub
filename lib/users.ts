@@ -1,13 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use server';
 
-import { AbbrevUser, Followee, Friendship, User } from "@/types";
+import { AbbrevUser, Followee, Friendship, Role, User } from "@/types";
 import { supabaseAdmin } from "./supabase-server";
 import { destroySession, verifyAuth } from "./auth";
 import { revalidatePath } from "next/cache";
 import { camelCaseObject, snakeCaseObject } from "./helper-functions";
 import { destroyImage } from "./cloudinary";
 import { deleteNotification, postNotification } from "./notifications";
+import { getCitiesWithinRange } from "./location";
 
 export async function getUIDFromUserId(userId: string): Promise<string | null> {
     const { data } = await supabaseAdmin
@@ -114,6 +115,62 @@ export async function getAllUsersAbbreviated(): Promise<AbbrevUser[]> {
         id: user.id,
         image: user.image || undefined
     }));
+}
+
+const openToFieldByRole: Partial<Record<Role, string>> = {
+    coach: 'open_to_coach_troupe',
+    musician: 'open_to_accompany_troupe',
+};
+
+export async function getAvailableUsersByRole(role: Role): Promise<User[]> {
+    const openToField = openToFieldByRole[role];
+    if (!openToField) return [];
+
+    const { data: roleData, error: roleError } = await supabaseAdmin
+        .from('user_roles')
+        .select('user_id')
+        .eq(role, true);
+    if (roleError) throw roleError;
+
+    const userIds = (roleData || []).map((row: { user_id: string }) => row.user_id);
+    if (!userIds.length) return [];
+
+    const { data, error } = await supabaseAdmin
+        .from('users')
+        .select('*')
+        .in('id', userIds)
+        .eq(openToField, true);
+    if (error) throw error;
+
+    return (data || []).map((row: { [key: string]: any; }) => camelCaseObject({
+        ...row,
+        name: `${row.first_name} ${row.last_name || ''}`.trim()
+    })) as User[];
+}
+
+export async function getAvailableCoaches(): Promise<User[]> {
+    return getAvailableUsersByRole('coach');
+}
+
+export async function getAvailableMusicians(): Promise<User[]> {
+    return getAvailableUsersByRole('musician');
+}
+
+export async function getAvailableCoachesInRange(cityOrZipcode: string, miles: number): Promise<User[]> {
+    return getAvailableUsersByRoleInRange('coach', cityOrZipcode, miles);
+}
+
+export async function getAvailableMusiciansInRange(cityOrZipcode: string, miles: number): Promise<User[]> {
+    return getAvailableUsersByRoleInRange('musician', cityOrZipcode, miles);
+}
+
+export async function getAvailableUsersByRoleInRange(role: Role, cityOrZipcode: string, miles: number): Promise<User[]> {
+    const citiesInRange = getCitiesWithinRange(cityOrZipcode, miles);
+    if (!citiesInRange.length) return [];
+
+    return (await getAvailableUsersByRole(role)).filter((user) => (
+        user.city && user.state && citiesInRange.includes(`${user.city} ${user.state}`)
+    ));
 }
 
 export async function searchUsers(searchCriteria: Partial<User>): Promise<User[]> {

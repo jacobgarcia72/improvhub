@@ -2,18 +2,18 @@ import EventResults from './event-results';
 import { filterArrayBySearchTerm, matchPattern, pluralize, shuffle } from '@/lib/helper-functions';
 import { separateCityAndState } from '@/lib/location';
 import { getAllTheatres, getTheatre, getTheatresByCity, getTheatresByState, getTheatresByZipcode } from '@/lib/theatres';
-import { allEventTypes, Troupe } from '@/types';
+import { allEventTypes, Role, Troupe, User } from '@/types';
 import { getTroupesByTheatre, getTroupesInRange } from '@/lib/troupes';
 import ItemCard from './item-card';
 import { Suspense } from 'react';
 import Loader from '@/components/loader';
-import { getCurrentUserId } from '@/lib/users';
+import { getAvailableUsersByRole, getAvailableUsersByRoleInRange, getCurrentUserId } from '@/lib/users';
 
 export default async function SearchResults({ params }: { params: {
     theatre?: string;
     location?: string;
     miles?: string;
-    for?: 'theatres' | 'shows' | 'jams' | 'troupes' | 'classes' | 'workshops';
+    for?: 'theatres' | 'shows' | 'jams' | 'troupes' | 'classes' | 'workshops' | 'coaches' | 'musicians';
 }}) {
     const eventTypes = [...allEventTypes.map((type) => pluralize(type)), 'all'];
     const theatre = params?.theatre?.trim();
@@ -36,6 +36,24 @@ export default async function SearchResults({ params }: { params: {
     }
     const theatres = await getAllTheatres();
 
+    const getAvailableUsersByTheatre = async (role: Role, theatre: string): Promise<User[]> => {
+        const theatreDetails = await getTheatre(theatre);
+        const searchTerms = [
+            theatre,
+            theatreDetails?.id,
+            theatreDetails?.name,
+        ].filter(Boolean).map((term) => term!.toLowerCase());
+
+        return shuffle((await getAvailableUsersByRole(role)).filter((user) => (
+            user.theatres?.some((userTheatre) => {
+                const normalizedTheatre = userTheatre.toLowerCase();
+                return searchTerms.some((term) => (
+                    normalizedTheatre.includes(term) || term.includes(normalizedTheatre)
+                ));
+            })
+        )));
+    }
+
     const handleSearchParams = async () => {
         const radius = Number(miles);
         if (searchFor === 'theatres') {
@@ -46,11 +64,17 @@ export default async function SearchResults({ params }: { params: {
         } else if (searchFor === 'troupes') {
             if (theatre) return shuffle(await getTroupesByTheatre(theatre) as Troupe[]);
             if (zipcode || (city && state)) return shuffle(await getTroupesInRange(zipcode || `${city} ${state}`, radius || 0) as Troupe[]);
+        } else if (searchFor === 'coaches' || searchFor === 'musicians') {
+            const role = searchFor === 'coaches' ? 'coach' : 'musician';
+            if (theatre) return getAvailableUsersByTheatre(role, theatre);
+            if (city && state) return shuffle(await getAvailableUsersByRoleInRange(role, `${city} ${state}`, radius || 0));
+            if (zipcode) return shuffle(await getAvailableUsersByRoleInRange(role, zipcode, radius || 1));
+            if (state) return shuffle((await getAvailableUsersByRole(role)).filter((user) => user.state?.toLowerCase() === state.toLowerCase()));
         }
         return [];
     }
 
-    const hasActiveQuery = Boolean(theatre || state || zipcode);
+    const hasActiveQuery = Boolean(theatre || state || zipcode || (city && state));
     const results = (await handleSearchParams()).filter(Boolean);
     const hasNoResults = hasActiveQuery && results?.length === 0;
 
