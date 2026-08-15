@@ -1,5 +1,5 @@
 import { Event, InputOption, Role, Showing } from "@/types";
-import { addDays, formatDate, getWeekdayOccurence, isLastOfMonth } from "./dates";
+import { addDays, formatDate, getWeekdayOccurence, isLastOfMonth, newDate } from "./dates";
 import { isAState, separateCityAndState } from "./location";
 import { getEventOccurrence } from "./shows";
 
@@ -113,7 +113,7 @@ export const removeLeadingArticles = (text: string): string => {
 }
 
 export const arrangeEventsByDate = async (showings: Showing[], shows: Event[], startingDate?: string, limit: number = 30, maxDaysSearched = 365): Promise<{ [date: string]: { time: string, event: Event }[] } | null> => {
-    const date = startingDate ? new Date(startingDate) : new Date();
+    const date = startingDate ? newDate(startingDate) : new Date();
     const res: { [date: string]: { time: string, event: Event }[] } = { };
     let daysSearched = 0;
     while (Object.keys(res).length < limit && daysSearched < maxDaysSearched) {

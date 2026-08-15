@@ -4,6 +4,9 @@ import { useState } from "react";
 import DistanceSelect from "@/components/form/distance-select";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import TheatreSearchBar from "./theatre-search-bar";
+import { formatDate } from "@/lib/dates";
+
+const eventSearchTypes = ['all', 'classes', 'jams', 'shows', 'workshops'];
 
 export default function SearchBar() {
     const searchTypes = ['theatre', 'location', 'miles'];
@@ -16,6 +19,8 @@ export default function SearchBar() {
     const theatre = searchParams.get('theatre')?.trim() || '';
     const location = searchParams.get('location')?.trim() || '';
     const miles = searchParams.get('miles')?.trim() || '';
+    const startDate = searchParams.get('startDate')?.trim() || formatDate(new Date());
+    const showStartDate = searchFor ? eventSearchTypes.includes(searchFor) : false;
     const [searchBy, setSearchBy] = useState(() => {
         if (theatre) return 'theatre';
         if (location) return 'location';
@@ -27,6 +32,7 @@ export default function SearchBar() {
         params.delete('limit');
         if (searchFor) {
             params.set('for', searchFor);
+            if (!eventSearchTypes.includes(searchFor)) params.delete('startDate');
             replace(`${pathname}?${params.toString()}`);
         }
     }
@@ -102,6 +108,18 @@ export default function SearchBar() {
                 </select>
             </div>
             {SearchParams()}
+            {showStartDate ? (
+                <div className="flex-1 min-w-[120px] max-w-[200px]">
+                    <label htmlFor="startDate">Start Date</label>
+                    <input
+                        id="startDate"
+                        type="date"
+                        value={startDate}
+                        className="w-full border border-gray-300 rounded px-3 py-2"
+                        onChange={(e) => handleSearch('startDate', e.currentTarget.value)}
+                    />
+                </div>
+            ) : null}
         </section>
     )
 }

@@ -22,7 +22,7 @@ const getLoadMoreHref = (params: { [key: string]: string | undefined }, nextLimi
     return `/search?${nextParams.toString()}`;
 }
 
-export default async function EventResults({ showTheatre = true, eventType = 'all', city, state, theatre, zipcode, miles, limit, searchParams = {} }: {
+export default async function EventResults({ showTheatre = true, eventType = 'all', city, state, theatre, zipcode, miles, limit, startDate, searchParams = {} }: {
     eventType?: string;
     city?: string;
     state?: string;
@@ -30,10 +30,12 @@ export default async function EventResults({ showTheatre = true, eventType = 'al
     zipcode?: string;
     miles?: number;
     limit?: number;
+    startDate?: string;
     showTheatre?: boolean;
     searchParams?: { [key: string]: string | undefined };
 }) {
     const normalizedLimit = getLimit(limit);
+    const normalizedStartDate = startDate && /^\d{4}-\d{2}-\d{2}$/.test(startDate) ? startDate : undefined;
     const handleSearchParams = async () => {
         const type = eventType === 'all' ? 'all' : singularize(eventType) as EventType;
         let events: Event[] = [];
@@ -51,7 +53,7 @@ export default async function EventResults({ showTheatre = true, eventType = 'al
         } else {
             eventDates = await getOccurrencesForEvents(events.map(({ id }) => id), type);
         }
-        return await arrangeEventsByDate(eventDates, events, undefined, normalizedLimit + 1);
+        return await arrangeEventsByDate(eventDates, events, normalizedStartDate, normalizedLimit + 1);
     }
 
     const hasActiveQuery = Boolean(theatre || zipcode || (city && state));

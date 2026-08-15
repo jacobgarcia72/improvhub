@@ -33,12 +33,14 @@ export default async function SearchResults({ params }: { params: {
     miles?: string;
     for?: 'theatres' | 'shows' | 'jams' | 'troupes' | 'classes' | 'workshops' | 'coaches' | 'musicians';
     limit?: string;
+    startDate?: string;
 }}) {
     const eventTypes = [...allEventTypes.map((type) => pluralize(type)), 'all'];
     const theatre = params?.theatre?.trim();
     const location = params?.location?.trim();
     const miles = params?.miles?.trim();
     const searchFor = params?.for;
+    const startDate = params?.startDate?.trim();
     const limit = Number.parseInt(params?.limit || '', 10);
     const cardResultsLimit = getCardResultsLimit(Number.isNaN(limit) ? undefined : limit);
     let zipcode = '';
@@ -115,6 +117,7 @@ export default async function SearchResults({ params }: { params: {
                     zipcode={zipcode}
                     miles={Number(miles)}
                     limit={Number.isNaN(limit) ? undefined : limit}
+                    startDate={startDate}
                     searchParams={params}
                 />
             ) : <>

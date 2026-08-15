@@ -59,7 +59,7 @@ export default function DistanceSelect({ onUpdate, startingLocation, startingMil
     };
 
     return (
-        <form className="flex items-end justify-end gap-2 w-[358px]">
+        <form className="flex items-end justify-end gap-2 w-[348px]">
             <Input
                 name="location"
                 value={location}
@@ -68,7 +68,7 @@ export default function DistanceSelect({ onUpdate, startingLocation, startingMil
                     handleUpdate('location', value);
                 }}
                 label="City and State or ZIP Code"
-                className="w-[200px]"
+                className="w-[190px]"
             />
             <Input
                 name="miles"
