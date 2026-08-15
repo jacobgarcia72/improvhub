@@ -112,7 +112,7 @@ export const removeLeadingArticles = (text: string): string => {
     return result;
 }
 
-export const arrangeEventsByDate = async (showings: Showing[], shows: Event[], startingDate?: string, limit: number = 30, maxDaysSearched = 365): Promise<{ [date: string]: { time: string, event: Event }[] } | null> => {
+export const arrangeEventsByDate = async (showings: Showing[], shows: Event[], startingDate?: string, limit: number = 15, maxDaysSearched = 365): Promise<{ [date: string]: { time: string, event: Event }[] } | null> => {
     const date = startingDate ? newDate(startingDate) : new Date();
     const res: { [date: string]: { time: string, event: Event }[] } = { };
     let daysSearched = 0;

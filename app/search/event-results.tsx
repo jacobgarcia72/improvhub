@@ -6,12 +6,12 @@ import ItemCard from './item-card';
 import Link from 'next/link';
 import Button from '@/components/form/button';
 
-const DEFAULT_LIMIT = 30;
+const DEFAULT_LIMIT = 15;
 type SearchParamValue = string | string[] | undefined;
 
 const getLimit = (limit?: number) => {
-    if (!limit || limit < DEFAULT_LIMIT) return DEFAULT_LIMIT;
-    return Math.ceil(limit / DEFAULT_LIMIT) * DEFAULT_LIMIT;
+    if (!limit || limit < 1) return DEFAULT_LIMIT;
+    return limit;
 }
 
 const getSearchParamValues = (value: SearchParamValue): string[] => (
@@ -28,16 +28,16 @@ const uniqueEvents = (events: Event[]): Event[] => {
     });
 }
 
-const getLoadMoreHref = (params: { [key: string]: SearchParamValue }, nextLimit: number) => {
+const getLoadMoreHref = (params: { [key: string]: SearchParamValue }, nextLimit: number, resultsPath: string) => {
     const nextParams = new URLSearchParams();
     Object.entries(params).forEach(([key, value]) => {
         getSearchParamValues(value).forEach((item) => nextParams.append(key, item));
     });
     nextParams.set('limit', nextLimit.toString());
-    return `/search?${nextParams.toString()}`;
+    return `${resultsPath}?${nextParams.toString()}`;
 }
 
-export default async function EventResults({ showTheatre = true, eventType = 'all', city, state, theatre, zipcode, miles, limit, startDate, searchParams = {} }: {
+export default async function EventResults({ showTheatre = true, eventType = 'all', city, state, theatre, zipcode, miles, limit, startDate, searchParams = {}, resultsPath = '/search' }: {
     eventType?: string;
     city?: string;
     state?: string;
@@ -48,6 +48,7 @@ export default async function EventResults({ showTheatre = true, eventType = 'al
     startDate?: string;
     showTheatre?: boolean;
     searchParams?: { [key: string]: SearchParamValue };
+    resultsPath?: string;
 }) {
     const normalizedLimit = getLimit(limit);
     const normalizedStartDate = startDate && /^\d{4}-\d{2}-\d{2}$/.test(startDate) ? startDate : undefined;
@@ -97,7 +98,7 @@ export default async function EventResults({ showTheatre = true, eventType = 'al
             ))}
             {hasMore ? (
                 <div className="mt-4 mb-2 flex w-full justify-center">
-                    <Link href={getLoadMoreHref(searchParams, normalizedLimit + DEFAULT_LIMIT)} scroll={false}>
+                    <Link href={getLoadMoreHref(searchParams, normalizedLimit + DEFAULT_LIMIT, resultsPath)} scroll={false}>
                         <Button caption="Load More" style="link" />
                     </Link>
                 </div>

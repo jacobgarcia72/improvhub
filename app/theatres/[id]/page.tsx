@@ -12,10 +12,16 @@ import { faMessage } from "@fortawesome/free-regular-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import DeleteTheatre from "./delete-theatre";
 
-export default async function TheatreDetailsPage({ params }: {
-    params: Promise<{ id: string }>
+const DEFAULT_EVENT_DAYS = 5;
+
+export default async function TheatreDetailsPage({ params, searchParams }: {
+    params: Promise<{ id: string }>;
+    searchParams: Promise<{ limit?: string }>;
 }) {
     const { id } = await params;
+    const query = await searchParams;
+    const limit = Number(query.limit);
+    const eventDays = Number.isNaN(limit) || limit < 1 ? DEFAULT_EVENT_DAYS : limit;
     const theatre = await getTheatre(id);
 
     if (!theatre) notFound();
@@ -73,7 +79,13 @@ export default async function TheatreDetailsPage({ params }: {
             </section>
             <section>
                 <h3 className="ml-8 mb-2">Upcoming Events:</h3>
-                <EventResults showTheatre={false} limit={14} theatre={id} />
+                <EventResults
+                    showTheatre={false}
+                    limit={eventDays}
+                    theatre={id}
+                    searchParams={query}
+                    resultsPath={`/theatres/${id}`}
+                />
             </section>
             {canDelete ? (
                 <DeleteTheatre theatreId={theatre.id} theatreName={theatre.name} />
