@@ -4,7 +4,9 @@ import { camelCaseObject, snakeCaseObject } from "./helper-functions";
 import { getFriendIds, getUser } from "./users";
 import { getTroupesByUser } from "./troupes";
 
-export const getNewsFeedItems = async (userId: string): Promise<NewsFeedItem[]> => {
+export const getNewsFeedItems = async (userId: string, limit = 25): Promise<{ newsFeedItems: NewsFeedItem[], hasMore: boolean }> => {
+    const normalizedLimit = Math.max(1, limit);
+    const fetchLimit = normalizedLimit + 1;
     const { data } = await supabaseAdmin
         .from('follows')
         .select('*')
@@ -43,17 +45,22 @@ export const getNewsFeedItems = async (userId: string): Promise<NewsFeedItem[]> 
         followQueries.push(`and(follow_type.eq.city,follow_id.ilike.${`${city} ${state}`})`);
     }
     if (!followQueries.length) {
-        return [];
+        return { newsFeedItems: [], hasMore: false };
     }
     const { data: newsData } = await supabaseAdmin
         .from('news')
         .select('*')
         .or(followQueries.join(','))
         .order('date', { ascending: false })
-        .limit(100)
+        .limit(fetchLimit)
 
-    return (newsData || []) 
+    const newsFeedItems = (newsData || [])
         .map(camelCaseObject) as NewsFeedItem[];
+
+    return {
+        newsFeedItems: newsFeedItems.slice(0, normalizedLimit),
+        hasMore: newsFeedItems.length > normalizedLimit,
+    };
 }
 
 export const createNewsFeedItem = async (followType: Followee | 'city' | 'friend', followId: string, newsType: NewsType, newsItemId: string, newsItemDate?: string | null, otherData?: string | null): Promise<void> => {

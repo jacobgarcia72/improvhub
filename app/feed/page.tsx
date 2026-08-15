@@ -16,16 +16,28 @@ import { EventType } from "@/types";
 import { Suspense } from "react";
 import Loader from "@/components/loader";
 import { getSubmissionFormById } from "@/lib/submission-forms";
+import Button from "@/components/form/button";
 
 export const metadata: Metadata = {
     title: `News Feed | ${appName}`
 };
 
-export default async function FeedPage() {
+const PAGE_SIZE = 25;
+
+const getLimit = (limitParam?: string) => {
+    const limit = Number.parseInt(limitParam || '', 10);
+    if (Number.isNaN(limit) || limit < PAGE_SIZE) return PAGE_SIZE;
+    return Math.ceil(limit / PAGE_SIZE) * PAGE_SIZE;
+}
+
+export default async function FeedPage({ searchParams }: { searchParams: Promise<{ limit?: string }> }) {
     await protectRoute();
     const userId = await getCurrentUserId();
     if (!userId) notFound();
-    const newsFeedItems = await getNewsFeedItems(userId);
+    const params = await searchParams;
+    const limit = getLimit(params.limit);
+    const newsFeedData = await getNewsFeedItems(userId, limit);
+    const newsFeedItems = newsFeedData.newsFeedItems;
     const getImage = (url? :string | null) => {
         if (!url) return null;
         return (
@@ -145,6 +157,13 @@ export default async function FeedPage() {
                     )
                 }))}
             </Suspense>
+            {newsFeedData.hasMore ? (
+                <div className="mt-4 mb-2 flex justify-center">
+                    <Link href={`/feed?limit=${limit + PAGE_SIZE}`}>
+                        <Button caption="Load More" style="link" />
+                    </Link>
+                </div>
+            ) : null}
         </section>
     )
 }
