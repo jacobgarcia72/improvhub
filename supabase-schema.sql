@@ -43,6 +43,7 @@ create table if not exists theatres (
   zipcode text not null,
   website text,
   image text,
+  creator_id text,
   admins text[]
 );
 

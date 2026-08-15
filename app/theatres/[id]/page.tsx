@@ -1,6 +1,6 @@
 import Loader from "@/components/loader";
 import { pluralize } from "@/lib/helper-functions";
-import { getTheatre } from "@/lib/theatres";
+import { canDeleteTheatre, getTheatre } from "@/lib/theatres";
 import { getCurrentUserId, getFollowCount } from "@/lib/users";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -32,6 +32,7 @@ export default async function TheatreDetailsPage({ params }: {
     const canManage = userId && (
         !theatre.admins?.length || theatre.admins.includes(userId)
     );
+    const canDelete = canDeleteTheatre(theatre, userId);
     const followerCount = userId ? await getFollowCount(id, 'theatre') : null;
     return (
         <Suspense fallback={<Loader />}>
@@ -63,7 +64,7 @@ export default async function TheatreDetailsPage({ params }: {
                 <h3 className="ml-8 mb-2">Upcoming Events:</h3>
                 <EventResults showTheatre={false} limit={14} theatre={id} />
             </section>
-            {canManage ? (
+            {canDelete ? (
                 <DeleteTheatre theatreId={theatre.id} theatreName={theatre.name} />
             ) : null}
         </Suspense>

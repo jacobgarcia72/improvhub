@@ -9,6 +9,7 @@ export interface Theatre {
     zipcode: string;
     website?: string;
     image?: string;
+    creatorId?: string | null;
     admins?: string[];
 }
 

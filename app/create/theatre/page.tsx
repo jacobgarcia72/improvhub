@@ -5,5 +5,5 @@ import { notFound } from "next/navigation";
 export default async function CreateTheatrePage() {
     const userId = await getCurrentUserId();
     if (!userId) notFound();
-    return <TheatreForm userId={userId} />
+    return <TheatreForm />
 }

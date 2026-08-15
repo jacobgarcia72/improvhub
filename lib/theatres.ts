@@ -92,6 +92,7 @@ export async function saveTheatre(theatre: Theatre, userId: string): Promise<str
             state: theatre.state,
             zipcode: theatre.zipcode,
             website: theatre.website,
+            creator_id: userId,
         });
     if (theatreInsertError) {
       console.error(theatreInsertError);
@@ -116,6 +117,11 @@ export async function updateTheatre(theatre: Theatre): Promise<string> {
         .eq('id', theatre.id);
     if (error) console.error(error);
     return theatre.id;
+}
+
+export function canDeleteTheatre(theatre: Theatre, userId: string | null): boolean {
+  if (!userId) return false;
+  return theatre.creatorId === userId || Boolean(theatre.admins?.includes(userId));
 }
 
 export async function deleteTheatre(theatreId: string): Promise<void> {

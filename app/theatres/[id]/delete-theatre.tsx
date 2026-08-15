@@ -15,7 +15,8 @@ export default function DeleteTheatre({ theatreId, theatreName }: {
     const handleConfirm = async () => {
         try {
             setPending(true);
-            await fetch(`/api/theatre?id=${encodeURIComponent(theatreId)}`, { method: 'DELETE' });
+            const res = await fetch(`/api/theatre?id=${encodeURIComponent(theatreId)}`, { method: 'DELETE' });
+            if (!res.ok) throw new Error('Failed to delete theatre');
             setOpenModal(false);
             router.push(`/theatres/`, { scroll: true });
         } catch (e) {

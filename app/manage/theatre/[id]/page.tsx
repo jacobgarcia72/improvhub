@@ -40,6 +40,6 @@ export default async function ManageTheatre({ params }: Props) {
     if (!canManage) notFound();
 
     return (
-        <TheatreForm theatre={theatre} userId={userId} />
+        <TheatreForm theatre={theatre} />
     )
 }

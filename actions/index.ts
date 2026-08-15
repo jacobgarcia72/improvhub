@@ -435,7 +435,10 @@ function getTheatresFromInputs(formData: FormData): string[] {
     return [...new Set(checkedTheatres.concat(addedTheatres))];
 }
 
-export async function postTheatre(existingTheatre: Theatre | null, userId: string, prevState: void | { message?: string }, formData: FormData) {
+export async function postTheatre(existingTheatre: Theatre | null, prevState: void | { message?: string }, formData: FormData) {
+    const userId = await getCurrentUserId();
+    if (!userId) throw new Error('You must be logged in to continue');
+
     const data = Object.fromEntries(formData.entries());
 
     const name = (data.name as string)?.trim() || null;
