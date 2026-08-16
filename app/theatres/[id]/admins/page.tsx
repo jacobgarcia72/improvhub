@@ -20,7 +20,7 @@ export default async function TheatreAdminsPage({ params }: {
     }
 
     return (
-        <section className="medium-section">
+        <section className="px-6">
             <h3 className="mt-3 mb-3 font-semibold text-sm">Theatre Admins</h3>
             <AdminsInputs
                 currentAdmins={theatre.admins || []}
