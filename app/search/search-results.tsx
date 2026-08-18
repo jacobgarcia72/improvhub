@@ -121,7 +121,7 @@ export default async function SearchResults({ params }: { params: {
     const userId = await getCurrentUserId();
 
     return (
-        <section className="max-w-[1280px]! flex flex-row flex-wrap px-4 pb-4 justify-evenly min-h-[calc(100vh-220px)]">
+        <div className="flex flex-row flex-wrap px-4 pb-4 justify-evenly">
             <Suspense fallback={<Loader caption='results' />}>
             {searchFor && eventTypes.includes(searchFor) ? (
                 <EventResults
@@ -149,6 +149,6 @@ export default async function SearchResults({ params }: { params: {
                 ) : null}
             </>}
             </Suspense>
-        </section>
+        </div>
     )
 }

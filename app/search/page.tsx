@@ -17,7 +17,9 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
     return (
         <>
             <SearchBar theatres={theatres} />
-            <SearchResults params={params} />
+            <section className="max-w-[1280px]! min-h-[calc(100vh-220px)]">
+                <SearchResults params={params} />
+            </section>
         </>
     )
 }
