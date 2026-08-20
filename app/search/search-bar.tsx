@@ -125,7 +125,7 @@ export default function SearchBar({ theatres: userTheatres }: { theatres?: (Thea
                         {userTheatres.length > 1 ? (
                             <option value="my-theatres">My Theatres</option>
                         ) : null}
-                        {userTheatres.map((t, i) => <option key={i} value={typeof t === 'string' ? t : t.id}>{typeof t === 'string' ? t : t.name}</option>)}
+                        {searchFor === 'theatres' ? null : userTheatres.map((t, i) => <option key={i} value={typeof t === 'string' ? t : t.id}>{typeof t === 'string' ? t : t.name}</option>)}
                     </> : null}
                 </select>
             </div>
