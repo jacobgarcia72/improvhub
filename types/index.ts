@@ -8,6 +8,7 @@ export interface Theatre {
     state: string;
     zipcode: string;
     website?: string;
+    codeOfConduct?: string;
     image?: string;
     creatorId?: string | null;
     admins?: string[];

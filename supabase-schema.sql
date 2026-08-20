@@ -47,6 +47,7 @@ create table if not exists theatres (
   state text not null,
   zipcode text not null,
   website text,
+  code_of_conduct text,
   image text,
   creator_id text,
   admins text[] default '{}'

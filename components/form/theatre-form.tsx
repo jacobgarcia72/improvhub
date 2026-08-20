@@ -55,6 +55,11 @@ export default async function TheatreForm({
                     value={theatre?.website}
                     type="url"
                 />
+                <Input label="Link to Code of Conduct"
+                    name="codeOfConduct"
+                    value={theatre?.codeOfConduct}
+                    type="url"
+                />
             </Form>
         </section>
     )

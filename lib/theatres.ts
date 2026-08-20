@@ -93,6 +93,7 @@ export async function saveTheatre(theatre: Theatre, userId: string): Promise<str
             state: theatre.state,
             zipcode: theatre.zipcode,
             website: theatre.website,
+            code_of_conduct: theatre.codeOfConduct,
             creator_id: userId,
             admins: [],
         });
@@ -115,6 +116,7 @@ export async function updateTheatre(theatre: Theatre): Promise<string> {
             state: theatre.state,
             zipcode: theatre.zipcode,
             website: theatre.website,
+            code_of_conduct: theatre.codeOfConduct,
         })
         .eq('id', theatre.id);
     if (error) console.error(error);

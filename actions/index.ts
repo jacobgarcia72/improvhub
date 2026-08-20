@@ -463,6 +463,7 @@ export async function postTheatre(existingTheatre: Theatre | null, prevState: vo
 
     const address = (data.address as string).trim() || undefined;
     const website = (data.website as string).trim() || undefined;
+    const codeOfConduct = (data.codeOfConduct as string).trim() || undefined;
     
     const imageFile = data.image as File;
     let imageUrl = existingTheatre?.image || '';
@@ -488,7 +489,8 @@ export async function postTheatre(existingTheatre: Theatre | null, prevState: vo
         city,
         state,
         zipcode,
-        website
+        website,
+        codeOfConduct
     }
 
     const theatreId = currentTheatre ? await updateTheatre(theatre) : await saveTheatre(theatre, userId);

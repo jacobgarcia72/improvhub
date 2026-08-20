@@ -26,7 +26,7 @@ export default async function TheatreDetailsPage({ params, searchParams }: {
 
     if (!theatre) notFound();
 
-    const { city, state, address, zipcode, website } = theatre;
+    const { city, state, address, zipcode, website, codeOfConduct } = theatre;
     let location = city || '';
     if (state) location = city ? `${city} ${state}` : state;
     if (zipcode) {
@@ -57,7 +57,10 @@ export default async function TheatreDetailsPage({ params, searchParams }: {
                         {address ? <p className="text-slate-700 dark:text-slate-300">{address}</p> : null}
                         {location ? <p className="text-slate-700 dark:text-slate-300">{location}</p> : null}
                     </div>
-                    {website && <a className="link" target="_blank" href={website}>{website}</a>}
+                    {website && <a className="link" target="_blank" href={website}>{`Website (${website})`}</a>}
+                    {codeOfConduct && <>
+                        <a className="link" target="_blank" href={codeOfConduct}>Code of Conduct</a>
+                    </>}
                 </div>
                 {canManage ? (
                     <div className="mt-3 ml-5 flex flex-row flex-wrap gap-2">
