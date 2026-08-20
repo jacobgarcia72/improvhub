@@ -30,15 +30,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: appName,
     description,
-    siteName: appName,
-    images: [
-      {
-        url: '/icons/favicon.png',
-        width: 500,
-        height: 500,
-        alt: appName,
-      },
-    ],
+    siteName: appName
   },
   icons: {
     icon: "/icons/favicon.png"
