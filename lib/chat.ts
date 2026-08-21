@@ -2,7 +2,7 @@
 
 import { Comment, DiscussionPost, InputOptionObject, Topic } from '@/types';
 import { getTroupeMembers, getTroupesByUser } from './troupes';
-import { getTheatre } from './theatres';
+// import { getTheatre } from './theatres';
 import { getUser } from './users';
 import { supabaseAdmin } from './supabase-server';
 import slugify from 'slugify';
