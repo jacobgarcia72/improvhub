@@ -6,22 +6,28 @@ import { getTheatre } from './theatres';
 import { getUser } from './users';
 import { supabaseAdmin } from './supabase-server';
 import slugify from 'slugify';
-import { camelCaseObject, getRandomNumberString, snakeCaseObject } from './helper-functions';
+import { camelCaseObject, capitalize, getRandomNumberString, snakeCaseObject } from './helper-functions';
 import { revalidatePath } from 'next/cache';
 import { postNotification } from './notifications';
 
 export async function getChatRooms(userId: string): Promise<{
     theatres: InputOptionObject[],
-    troupes: InputOptionObject[]
+    troupes: InputOptionObject[],
+    city?: InputOptionObject
 }> {
-    const theatreStrings = (await getUser(userId))?.theatres || [];
+    const user = await getUser(userId);
+    const theatreStrings = user?.theatres || [];
     const theatres = (await Promise.all(theatreStrings.map(getTheatre))).filter((t) => t !== null);
     const theatreChatRooms = theatres.map(({ id, name, image }) => ({ id: `theatre-${id}`, text: name, image }));
+    const city = user?.city;
+    const state = user?.state;
+    const cityChatRoom = (city && state) ? { id: `city-${slugify(`${city} ${state}`, { lower: true, trim: true, strict: true })}`, text: `${capitalize(city)} ${state.toUpperCase()}` } : undefined;
     const troupes = await getTroupesByUser(userId);
     const troupeChatRooms = troupes.map(({ id, name, image }) => ({ id: `troupe-${id}`, text: name, image: image || undefined }));
     return ({
         theatres: theatreChatRooms,
-        troupes: troupeChatRooms
+        troupes: troupeChatRooms,
+        city: cityChatRoom
     });
 }
 

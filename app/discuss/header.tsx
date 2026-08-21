@@ -4,7 +4,8 @@ import { InputOptionObject, Theatre } from "@/types";
 export default function MessagesHeader({ chatRooms, theatre }: {
     chatRooms: {
         theatres: InputOptionObject[],
-        troupes: InputOptionObject[]
+        troupes: InputOptionObject[],
+        city?: InputOptionObject
     },
     theatre?: Theatre | null
 }) {

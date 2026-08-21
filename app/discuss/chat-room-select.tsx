@@ -1,6 +1,8 @@
 'use client'
 import { optimizeImage } from "@/lib/optimize-image";
 import { InputOptionObject, Theatre } from "@/types";
+import { faCity } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -8,7 +10,8 @@ import { useEffect, useState } from "react";
 export default function ChatRoomSelect({ chatRooms, onSelect, theatre }: {
     chatRooms: {
         theatres: InputOptionObject[],
-        troupes: InputOptionObject[]
+        troupes: InputOptionObject[],
+        city?: InputOptionObject
     },
     onSelect?: (id: string | null) => void,
     theatre?: Theatre | null
@@ -19,7 +22,7 @@ export default function ChatRoomSelect({ chatRooms, onSelect, theatre }: {
     const params = new URLSearchParams(searchParams);
     const room = searchParams.get('channel');
 
-    const { troupes, theatres } = chatRooms;
+    const { troupes, theatres, city } = chatRooms;
     const [isOpen, setIsOpen] = useState(false);
 
     const globalChatRoom = { text: 'Global', id: 'global', image: '/icons/globe.png' };
@@ -42,16 +45,21 @@ export default function ChatRoomSelect({ chatRooms, onSelect, theatre }: {
     const getChatRoomObject = (id: string): InputOptionObject | null => {
         if (id === 'global') return globalChatRoom;
         if (id.startsWith('troupe')) return troupes.find(t => t.id === id) || null;
+        if (city && id === city.id) return city;
         if (id.startsWith('theatre')) return theatres.find(t => t.id === id) || theatre && ({ id: theatre.id, text: theatre.name, image: theatre.image}) || null;
         return null;
     }
 
-    const displayNameAndImage = ({ image, text }: InputOptionObject) => {
+    const displayNameAndImage = ({ image, text, id }: InputOptionObject) => {
+        let imageNode: React.ReactNode = null;
+        if (image) {
+            imageNode = <Image className="rounded-full" src={optimizeImage(image, 50, 50, 90, true, true)} alt={text} width={25} height={25} />
+        } else if (id.toString().startsWith('city-')) {
+            imageNode = <FontAwesomeIcon className="p-[2px] text-mist-600 dark:text-mist-400" icon={faCity} />
+        }
         return <>
-            {image ? (
-                <Image className="rounded-full" src={optimizeImage(image, 50, 50, 90, true, true)} alt={text} width={25} height={25} />
-            ) : null}
-            <span className={`whitespace-nowrap ${image ? '' : 'pl-10'}`}>{text}</span>
+            {imageNode}
+            <span className={`whitespace-nowrap ${imageNode ? '' : 'pl-[33px]'}`}>{text}</span>
         </>
     }
 
@@ -73,6 +81,7 @@ export default function ChatRoomSelect({ chatRooms, onSelect, theatre }: {
                 ></div>
                 <div className="max-h-72 overflow-y-auto overflow-x-hidden z-50 dropdown bg-white/90 dark:bg-black/90 border-gray-300 border-1 rounded absolute top-9.5 w-86 max-w-[90vw] flex flex-col">
                     {ChatRoomOption(globalChatRoom)}
+                    {city ? ChatRoomOption(city) : null}
                     {theatres.map(ChatRoomOption)}
                     {troupes.map(ChatRoomOption)}
                 </div>
