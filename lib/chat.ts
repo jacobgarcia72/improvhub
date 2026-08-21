@@ -16,16 +16,16 @@ export async function getChatRooms(userId: string): Promise<{
     city?: InputOptionObject
 }> {
     const user = await getUser(userId);
-    const theatreStrings = user?.theatres || [];
-    const theatres = (await Promise.all(theatreStrings.map(getTheatre))).filter((t) => t !== null);
-    const theatreChatRooms = theatres.map(({ id, name, image }) => ({ id: `theatre-${id}`, text: name, image }));
+    // const theatreStrings = user?.theatres || [];
+    // const theatres = (await Promise.all(theatreStrings.map(getTheatre))).filter((t) => t !== null);
+    // const theatreChatRooms = theatres.map(({ id, name, image }) => ({ id: `theatre-${id}`, text: name, image }));
     const city = user?.city;
     const state = user?.state;
     const cityChatRoom = (city && state) ? { id: `city-${slugify(`${city} ${state}`, { lower: true, trim: true, strict: true })}`, text: `${capitalize(city)} ${state.toUpperCase()}` } : undefined;
     const troupes = await getTroupesByUser(userId);
     const troupeChatRooms = troupes.map(({ id, name, image }) => ({ id: `troupe-${id}`, text: name, image: image || undefined }));
     return ({
-        theatres: theatreChatRooms,
+        theatres: [], //theatreChatRooms,
         troupes: troupeChatRooms,
         city: cityChatRoom
     });
