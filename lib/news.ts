@@ -3,6 +3,7 @@ import { supabaseAdmin } from "./supabase-server";
 import { camelCaseObject, snakeCaseObject } from "./helper-functions";
 import { getFriendIds, getUser } from "./users";
 import { getTroupesByUser } from "./troupes";
+import { revalidatePath } from "next/cache";
 
 export const getNewsFeedItems = async (userId: string, limit = 25): Promise<{ newsFeedItems: NewsFeedItem[], hasMore: boolean }> => {
     const normalizedLimit = Math.max(1, limit);
@@ -68,6 +69,7 @@ export const createNewsFeedItem = async (followType: Followee | 'city' | 'friend
     await supabaseAdmin
         .from('news')
         .insert(snakeCaseObject(newsFeedItem));
+    revalidatePath('/feed');
 }
 
 export const deleteNewsFeedItem = async (followType: Followee | 'city' | 'friend', followId: string, newsType: NewsType, newsItemId: string, newsItemDate?: string | null, otherData?: string | null): Promise<void> => {
@@ -80,4 +82,5 @@ export const deleteNewsFeedItem = async (followType: Followee | 'city' | 'friend
         .eq('news_item_id', newsItemId)
         .eq('news_item_date', newsItemDate || null)
         .eq('other_data', otherData || null);
+    revalidatePath('/feed');
 }

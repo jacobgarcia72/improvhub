@@ -6,6 +6,7 @@ import slugify from 'slugify';
 import { createNewsFeedItem } from "./news";
 import { theatres as mockDataTheatres } from "./mock-data";
 import { postNotification } from "./notifications";
+import { revalidatePath } from "next/cache";
 
 export const populateTheatresInDb = async () => {
   for (let i = 0; i < mockDataTheatres.length; i++) {
@@ -102,6 +103,7 @@ export async function saveTheatre(theatre: Theatre, userId: string): Promise<str
     } else if (theatre.city && theatre.state) {
       createNewsFeedItem('city', `${theatre.city} ${theatre.state}`, 'new_theatre', theatre.id, null, userId);
     }
+    revalidatePath(`/theatres/${theatre.id}`, 'layout');
     return theatre.id;
 }
 
@@ -120,6 +122,7 @@ export async function updateTheatre(theatre: Theatre): Promise<string> {
         })
         .eq('id', theatre.id);
     if (error) console.error(error);
+    revalidatePath(`/theatres/${theatre.id}`, 'layout');
     return theatre.id;
 }
 
@@ -155,6 +158,7 @@ export async function updateTheatreAdmins(theatreId: string, admins: string[], u
   if (newAdmins.length) {
     await postNotification(userId, newAdmins, 'made_admin', `theatre,${theatreId}`);
   }
+  revalidatePath(`/theatres/${theatre.id}`, 'layout');
 }
 
 export async function deleteTheatre(theatreId: string): Promise<void> {
